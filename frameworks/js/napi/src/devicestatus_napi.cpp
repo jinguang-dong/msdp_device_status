@@ -261,6 +261,19 @@ napi_value DevicestatusNapi::UnSubscribeDevicestatus(napi_env env, napi_callback
         return result;
     }
 
+    if(!FindDevicestatusObject(type)){
+        return result;
+    }
+    
+    if(!GetObjectCallback(type);){
+        return result;
+    }
+    napi_get_undefined(env, &result);
+    DEV_HILOGD(JS_NAPI, "Exit");
+    return result;
+}
+
+static bool FindDevicestatusObject(int_32 type){
     DevicestatusNapi* obj = nullptr;
     bool isObjExists = false;
     for (auto it = objectMap_.begin(); it != objectMap_.end(); ++it) {
@@ -272,18 +285,21 @@ napi_value DevicestatusNapi::UnSubscribeDevicestatus(napi_env env, napi_callback
     }
     if (!isObjExists) {
         DEV_HILOGE(JS_NAPI, "Didn't find object, so created it");
-        return result;
+        return false;
     }
-
+    
     if (!obj->Off(type, false)) {
         DEV_HILOGE(JS_NAPI, "Failed to get callback for type: %{public}d", type);
-        return result;
+        return false;
     } else {
         DEV_HILOGE(JS_NAPI, "erase objectMap_");
         InvokeCallBack(env, args, true, CALLBACK_SUCCESS);
         objectMap_.erase(type);
     }
+    return true;
+}
 
+static bool GetObjectCallback(int_32 type){
     sptr<IdevicestatusCallback> callback;
     bool isCallbackExists = false;
     for (auto it = callbackMap_.begin(); it != callbackMap_.end(); ++it) {
@@ -295,14 +311,12 @@ napi_value DevicestatusNapi::UnSubscribeDevicestatus(napi_env env, napi_callback
     }
     if (!isCallbackExists) {
         DEV_HILOGE(JS_NAPI, "No existed callback");
-        return result;
+        return false;
     } else if (callback != nullptr) {
         g_DevicestatusClient.UnSubscribeCallback(DevicestatusDataUtils::DevicestatusType(type), callback);
         callbackMap_.erase(type);
     }
-    napi_get_undefined(env, &result);
-    DEV_HILOGD(JS_NAPI, "Exit");
-    return result;
+    return true;
 }
 
 napi_value DevicestatusNapi::GetDevicestatus(napi_env env, napi_callback_info info)
