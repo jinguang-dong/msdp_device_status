@@ -261,11 +261,11 @@ napi_value DevicestatusNapi::UnSubscribeDevicestatus(napi_env env, napi_callback
         return result;
     }
 
-    if(!FindDevicestatusObject(type)){
+    if (!FindDevicestatusObject(type)) {
         return result;
     }
     
-    if(!GetObjectCallback(type);){
+    if (!GetObjectCallback(type)) {
         return result;
     }
     napi_get_undefined(env, &result);
@@ -273,7 +273,8 @@ napi_value DevicestatusNapi::UnSubscribeDevicestatus(napi_env env, napi_callback
     return result;
 }
 
-static bool FindDevicestatusObject(int_32 type){
+static bool FindDevicestatusObject(int_32 type)
+{
     DevicestatusNapi* obj = nullptr;
     bool isObjExists = false;
     for (auto it = objectMap_.begin(); it != objectMap_.end(); ++it) {
@@ -299,7 +300,8 @@ static bool FindDevicestatusObject(int_32 type){
     return true;
 }
 
-static bool GetObjectCallback(int_32 type){
+static bool GetObjectCallback(int_32 type)
+{
     sptr<IdevicestatusCallback> callback;
     bool isCallbackExists = false;
     for (auto it = callbackMap_.begin(); it != callbackMap_.end(); ++it) {
