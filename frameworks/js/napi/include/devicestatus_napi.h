@@ -41,6 +41,8 @@ public:
     static napi_value Init(napi_env env, napi_value exports);
     static napi_value SubscribeDevicestatus(napi_env env, napi_callback_info info);
     static napi_value UnSubscribeDevicestatus(napi_env env, napi_callback_info info);
+    static bool FindDevicestatusObject(int_32 type);
+    static bool GetObjectCallback(int_32 type);
     static napi_value GetDevicestatus(napi_env env, napi_callback_info info);
     static napi_value EnumDevicestatusTypeConstructor(napi_env env, napi_callback_info info);
     static napi_value CreateEnumDevicestatusType(napi_env env, napi_value exports);
