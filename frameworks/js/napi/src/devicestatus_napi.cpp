@@ -109,7 +109,7 @@ napi_value DevicestatusNapi::CreateInstanceForResponse(napi_env env, int32_t val
         DEV_HILOGE(JS_NAPI, "napi new reference failed");
         return nullptr;
     }
-    callBackStatus = napi_unwrap(env, instance, reinterpret_cast<void **>&entity);
+    callBackStatus = napi_unwrap(env, instance, reinterpret_cast<void **>(&entity));
     if (callBackStatus != napi_ok || entity == nullptr) {
         DEV_HILOGE(JS_NAPI, "%{public}s: cannot unwrap entity from instance", __func__);
         return nullptr;
