@@ -63,11 +63,11 @@ void DevicestatusService::OnStop()
     }
     ready_ = false;
 
-    if (!devicestatusManager_) {
-        devicestatusManager_->UnloadAlgorithm(false);
-        DEV_HILOGI(SERVICE, "unload algorithm library");
+    if (devicestatusManager_ == nullptr) {
+        return;
     }
-
+    devicestatusManager_->UnloadAlgorithm(false);
+    DEV_HILOGI(SERVICE, "unload algorithm library");
     DEV_HILOGI(SERVICE, "Exit");
 }
 
