@@ -30,6 +30,9 @@ DevicestatusEvent::~DevicestatusEvent()
 {
     for (auto iter = eventMap_.begin(); iter != eventMap_.end(); iter++) {
         auto listener = iter->second;
+        if (listener->handlerRef == nullptr){
+            DEV_HILOGE(JS_NAPI, "listener->handlerRef is nullptr");
+        }
         napi_delete_reference(env_, listener->handlerRef);
     }
     eventMap_.clear();
@@ -56,11 +59,23 @@ bool DevicestatusEvent::On(const int32_t& eventType, napi_value handler, bool is
         }
     }
     auto listener = std::make_shared<DevicestatusEventListener>();
+    if (listener->eventType == nullptr){
+        DEV_HILOGE(JS_NAPI, "listener->eventType is nullptr");
+        return false;
+    }
     listener->eventType = eventType;
     napi_create_reference(env_, handler, 1, &listener->handlerRef);
     if (isOnce) {
+        if (eventOnceMap_[eventType] == nullptr){
+            DEV_HILOGE(JS_NAPI, "eventOnceMap_[eventType] is nullptr");
+            return false;
+        }
         eventOnceMap_[eventType] = listener;
     } else {
+        if (eventMap_[eventType] == nullptr){
+            DEV_HILOGE(JS_NAPI, "eventMap_[eventType] is nullptr");
+            return false;     
+        }
         eventMap_[eventType] = listener;
     }
     return true;
@@ -93,6 +108,10 @@ bool DevicestatusEvent::Off(const int32_t& eventType, bool isOnce)
     }
 
     auto listener = iter->second;
+    if (listener->handlerRef == nullptr){
+        DEV_HILOGE(JS_NAPI, "listener->handlerRef is nullptr");
+        return false;    
+    }
     napi_delete_reference(env_, listener->handlerRef);
     if (isOnce) {
         eventOnceMap_.erase(eventType);
@@ -137,6 +156,10 @@ void DevicestatusEvent::OnEvent(const int32_t& eventType, size_t argc, const int
         return;
     }
     napi_value handler = nullptr;
+    if (listener->handlerRef == nullptr){
+        DEV_HILOGE(JS_NAPI, "listener->handlerRef is nullptr");
+        return;    
+    }
     status = napi_get_reference_value(env_, listener->handlerRef, &handler);
     if (status != napi_ok) {
         DEV_HILOGE(JS_NAPI, \
