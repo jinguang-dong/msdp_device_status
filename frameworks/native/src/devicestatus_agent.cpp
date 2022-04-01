@@ -31,10 +31,6 @@ void DeviceStatusAgent::DeviceStatusAgentCallback::OnDevicestatusChanged(
         DEV_HILOGE(SERVICE, "agent is nullptr");
         return;
     }
-    if (agentEvent_ == nullptr) {
-        DEV_HILOGE(SERVICE, "agentEvent_ is nullptr");
-        return;
-    }
     agent->agentEvent_->OnEventResult(devicestatusData);
 }
 
