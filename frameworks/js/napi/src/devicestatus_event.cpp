@@ -32,7 +32,7 @@ DevicestatusEvent::~DevicestatusEvent()
         auto listener = iter->second;
         if (listener == nullptr) {
             DEV_HILOGE(JS_NAPI, "listener is nullptr");
-            return;  
+            return;
         }
         napi_delete_reference(env_, listener->handlerRef);
     }
@@ -62,7 +62,7 @@ bool DevicestatusEvent::On(const int32_t& eventType, napi_value handler, bool is
     auto listener = std::make_shared<DevicestatusEventListener>();
     if (listener == nullptr) {
         DEV_HILOGE(JS_NAPI, "listener is nullptr");
-        return false;  
+        return false;
     }
     listener->eventType = eventType;
     napi_create_reference(env_, handler, 1, &listener->handlerRef);
@@ -100,11 +100,11 @@ bool DevicestatusEvent::Off(const int32_t& eventType, bool isOnce)
         }
     }
 
+    auto listener = iter->second;
     if (listener == nullptr) {
         DEV_HILOGE(JS_NAPI, "listener is nullptr");
-        return false;  
+        return false;
     }
-    auto listener = iter->second;
     napi_delete_reference(env_, listener->handlerRef);
     if (isOnce) {
         eventOnceMap_.erase(eventType);
@@ -151,7 +151,7 @@ void DevicestatusEvent::OnEvent(const int32_t& eventType, size_t argc, const int
     napi_value handler = nullptr;
     if (listener == nullptr) {
         DEV_HILOGE(JS_NAPI, "listener is nullptr");
-        return;  
+        return;
     }
     status = napi_get_reference_value(env_, listener->handlerRef, &handler);
     if (status != napi_ok) {
