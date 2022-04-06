@@ -140,6 +140,10 @@ void DevicestatusNapi::InvokeCallBack(napi_env env, napi_value *args, bool voidP
     napi_ref callbackSuccess = nullptr;
     napi_value ret;
     napi_set_named_property(env, indexObj, "devicestatusValue", successIndex);
+    if (args == nullptr) {
+        DEV_HILOGD(JS_NAPI, "args is nullptr");
+        return;
+    }
     napi_create_reference(env, args[ARG_1], 1, &callbackSuccess);
     napi_get_reference_value(env, callbackSuccess, &callback);
     napi_call_function(env, nullptr, callback, 1, &indexObj, &ret);
@@ -203,6 +207,10 @@ napi_value DevicestatusNapi::SubscribeDevicestatus(napi_env env, napi_callback_i
         objectMap_.insert(std::pair<int32_t, DevicestatusNapi*>(type, obj));
     }
 
+    if (obj == nullptr) {
+        DEV_HILOGE(JS_NAPI, "obj is nullptr");
+        return result;
+    }
     if (!obj->On(type, args[ARG_1], false)) {
         DEV_HILOGE(JS_NAPI, "type: %{public}d already exists", type);
         return result;
@@ -275,6 +283,10 @@ napi_value DevicestatusNapi::UnSubscribeDevicestatus(napi_env env, napi_callback
         return result;
     }
 
+    if (obj == nullptr) {
+        DEV_HILOGE(JS_NAPI, "obj is nullptr");
+        return result;
+    }
     if (!obj->Off(type, false)) {
         DEV_HILOGE(JS_NAPI, "Failed to get callback for type: %{public}d", type);
         return result;
