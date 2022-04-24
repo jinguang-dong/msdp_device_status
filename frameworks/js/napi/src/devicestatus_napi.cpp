@@ -62,7 +62,7 @@ DevicestatusNapi* DevicestatusNapi::GetDevicestatusNapi(int32_t type)
     for (auto it = objectMap_.begin(); it != objectMap_.end(); ++it) {
         if (it->first == type) {
             isExists = true;
-            obj = (DevicestatusNapi*)(it->second);
+            obj = reinterpret_cast<DevicestatusNapi*>(it->second);
             DEV_HILOGD(JS_NAPI, "Found object");
             break;
         }
@@ -109,7 +109,7 @@ napi_value DevicestatusNapi::CreateInstanceForResponse(napi_env env, int32_t val
         DEV_HILOGE(JS_NAPI, "napi new reference failed");
         return nullptr;
     }
-    callBackStatus = napi_unwrap(env, instance, (void **)&entity);
+    callBackStatus = napi_unwrap(env, instance, reinterpret_cast<void **>(&entity));
     if (callBackStatus != napi_ok || entity == nullptr) {
         DEV_HILOGE(JS_NAPI, "%{public}s: cannot unwrap entity from instance", __func__);
         return nullptr;
@@ -196,7 +196,7 @@ napi_value DevicestatusNapi::SubscribeDevicestatus(napi_env env, napi_callback_i
             [](napi_env env, void *data, void *hint) {
                 (void)env;
                 (void)hint;
-                DevicestatusNapi *devicestatus = (DevicestatusNapi *)data;
+                DevicestatusNapi *devicestatus = reinterpret_cast<DevicestatusNapi *>(data);
                 delete devicestatus;
             },
             nullptr, &(obj->callbackRef_));
@@ -270,7 +270,7 @@ napi_value DevicestatusNapi::UnSubscribeDevicestatus(napi_env env, napi_callback
     for (auto it = objectMap_.begin(); it != objectMap_.end(); ++it) {
         if (it->first == type) {
             isObjExists = true;
-            obj = (DevicestatusNapi*)(it->second);
+            obj = reinterpret_cast<DevicestatusNapi*>(it->second);
             DEV_HILOGD(JS_NAPI, "Found object");
         }
     }
@@ -347,7 +347,7 @@ napi_value DevicestatusNapi::GetDevicestatus(napi_env env, napi_callback_info in
         [](napi_env env, void *data, void *hint) {
             (void)env;
             (void)hint;
-            DevicestatusNapi *devicestatus = (DevicestatusNapi *)data;
+            DevicestatusNapi *devicestatus = reinterpret_cast<DevicestatusNapi *>(data);
             delete devicestatus;
         },
         nullptr, &(obj->callbackRef_));
@@ -566,7 +566,7 @@ static napi_module g_module = {
     .nm_filename = "devicestatus",
     .nm_register_func = DevicestatusInit,
     .nm_modname = "devicestatus",
-    .nm_priv = ((void *)0),
+    .nm_priv = reinterpret_cast<void *>(0),
     .reserved = {0}
 };
 

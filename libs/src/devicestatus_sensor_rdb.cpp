@@ -245,7 +245,7 @@ void DevicestatusSensorRdb::HandleHallSensorEvent(SensorEvent *event)
     DEV_HILOGI(SERVICE, "HandleHallSensorEvent sensorTypeId: %{public}d, version: %{public}d, mode: %{public}d",
         event->sensorTypeId, event->version, event->mode);
     DevicestatusDataUtils::DevicestatusData data;
-    float *tmpData = (float *)(event->data);
+    float *tmpData = reinterpret_cast<float *>(event->data);
     int32_t hallData = (int32_t)(*tmpData);
     if (event->sensorTypeId == SENSOR_TYPE_ID_HALL) {
         DEV_HILOGI(SERVICE, "HandleHallSensorEvent sensor_data: %{public}d", hallData);
