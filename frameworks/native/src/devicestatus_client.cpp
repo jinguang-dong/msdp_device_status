@@ -101,7 +101,10 @@ void DevicestatusClient::SubscribeCallback(const DevicestatusDataUtils::Devicest
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
         return;
     }
-    devicestatusProxy_->Subscribe(type, callback);
+    if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
+        devicestatusProxy_->Subscribe(type, callback);
+    }
+    return;
     DEV_HILOGD(INNERKIT, "Exit");
 }
 
@@ -114,7 +117,10 @@ void DevicestatusClient::UnSubscribeCallback(const DevicestatusDataUtils::Device
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
         return;
     }
-    devicestatusProxy_->UnSubscribe(type, callback);
+    if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
+        devicestatusProxy_->UnSubscribe(type, callback);
+    }
+    return;
     DEV_HILOGD(INNERKIT, "Exit");
 }
 
@@ -131,7 +137,9 @@ DevicestatusDataUtils::DevicestatusData DevicestatusClient::GetDevicestatusData(
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
         return devicestatusData;
     }
-    devicestatusData = devicestatusProxy_->GetCache(type);
+    if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
+        devicestatusData = devicestatusProxy_->GetCache(type);
+    }
     DEV_HILOGD(INNERKIT, "Exit");
     return devicestatusData;
 }
