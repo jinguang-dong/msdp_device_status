@@ -53,13 +53,13 @@ void DevicestatusDumper::DumpDevicestatusCurrentStatus(int32_t fd,
         dprintf(fd, "No device status available\n");
     }
     int32_t num = 0;
-    for (int32_t i = 0; i < datas.size(); i++) {
-        if (datas[i].value == DevicestatusDataUtils::VALUE_INVALID) {
+    for (auto it = datas.begin(); it != datas.end(); ++it) {
+        if (it->value == DevicestatusDataUtils::VALUE_INVALID) {
             continue;
         }
         num ++;
         dprintf(fd, "Device status Type is %s , current type state is %s .\n",
-            GetStatusType(datas[i].type).c_str(), GetDeviceState(datas[i].value).c_str());
+            GetStatusType(it->type).c_str(), GetDeviceState(it->value).c_str());
     }
     if (num == 0) {
         dprintf(fd, "No device status available\n");
@@ -123,7 +123,7 @@ void DevicestatusDumper::DumpCurrentTime(int32_t fd) const
     timespec curTime = { 0, 0 };
     clock_gettime(CLOCK_REALTIME, &curTime);
     struct tm *timeinfo = localtime(&(curTime.tv_sec));
-    if (tm == nullptr) {
+    if (timeinfo == nullptr) {
         DEV_HILOGI(SERVICE, "DumpCurrentTime get localtime failed");
         return;
     }
