@@ -15,12 +15,15 @@
 
 #include "devicestatus_service.h"
 
+#include <vector>
 #include <ipc_skeleton.h>
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
+#include "string_ex.h"
 #include "system_ability_definition.h"
 #include "devicestatus_permission.h"
 #include "devicestatus_common.h"
+#include "devicestatus_dumper.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -34,6 +37,11 @@ DevicestatusService::DevicestatusService() : SystemAbility(MSDP_DEVICESTATUS_SER
 }
 
 DevicestatusService::~DevicestatusService() {}
+
+void DevicestatusService::OnDump()
+{
+    DEV_HILOGI(SERVICE, "OnDump");
+}
 
 void DevicestatusService::OnStart()
 {
@@ -70,6 +78,46 @@ void DevicestatusService::OnStop()
     devicestatusManager_->UnloadAlgorithm(false);
     DEV_HILOGI(SERVICE, "unload algorithm library exit");
 }
+
+int DevicestatusService::Dump(int fd, const std::vector<std::u16string>& args)
+{
+    DEV_HILOGI(SERVICE, "dump DeviceStatusServiceInfo");
+    DevicestatusDumper &deviceStatusDumper = DevicestatusDumper::GetInstance();
+
+    std::vector<std::string> params;
+    for (auto& arg : args) {
+        params.emplace_back(Str16ToStr8(arg));
+    }
+
+    std::string dumpInfo;
+    if (params.empty()) {
+        deviceStatusDumper.DumpIllegalArgsInfo(fd);
+    }
+
+    if (params[0] == ARG_DUMP_HELP) {
+        deviceStatusDumper.DumpHelpInfo(fd);
+    } else if (params[0] == ARG_DUMP_DEVICESTATUS_SUBSCRIBER) {
+        if (devicestatusManager_ == nullptr) {
+            DEV_HILOGI(SERVICE, "Dump func is nullptr");
+            return ERR_NG;
+        }
+        deviceStatusDumper.DumpDevicestatusSubscriber(fd, devicestatusManager_->GetListenerMap());
+    } else if (params[0] == ARG_DUMP_DEVICESTATUS_CURRENT_STATE) {
+        DevicestatusDataUtils::DevicestatusType type;
+        std::vector<DevicestatusDataUtils::DevicestatusData> datas;
+        for(type = DevicestatusDataUtils::TYPE_HIGH_STILL;
+            type <= DevicestatusDataUtils::TYPE_LID_OPEN;
+            type = (DevicestatusDataUtils::DevicestatusType)(type+1)) {
+            DevicestatusDataUtils::DevicestatusData data = GetCache(type);
+            datas.emplace_back(data);
+        }
+        deviceStatusDumper.DumpDevicestatusCurrentStatus(fd, datas);
+    } else {
+        deviceStatusDumper.DumpIllegalArgsInfo(fd);
+    }
+    return ERR_OK;
+}
+
 
 bool DevicestatusService::Init()
 {

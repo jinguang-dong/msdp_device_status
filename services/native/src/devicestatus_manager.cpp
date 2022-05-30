@@ -273,5 +273,15 @@ int32_t DevicestatusManager::UnloadAlgorithm(bool bCreate)
 
     return ERR_OK;
 }
+
+std::map<DevicestatusDataUtils::DevicestatusType, int32_t> DevicestatusManager::GetListenerMap()
+{
+    DEV_HILOGI(SERVICE, "Enter");
+    std::map<DevicestatusDataUtils::DevicestatusType, int32_t> map;
+    for (auto it = listenerMap_.begin(); it != listenerMap_.end(); ++it) {
+        map.insert(std::make_pair(it->first, it->second.size()));
+    }
+    return map;
+}
 } // namespace Msdp
 } // namespace OHOS

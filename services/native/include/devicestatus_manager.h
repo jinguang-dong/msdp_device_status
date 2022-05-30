@@ -58,6 +58,7 @@ public:
     int32_t MsdpDataCallback(const DevicestatusDataUtils::DevicestatusData& data);
     int32_t LoadAlgorithm(bool bCreate);
     int32_t UnloadAlgorithm(bool bCreate);
+    std::map<DevicestatusDataUtils::DevicestatusType, int32_t> GetListenerMap();
 
 private:
     struct classcomp {
