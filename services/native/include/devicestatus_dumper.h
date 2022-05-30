@@ -26,7 +26,6 @@
 
 namespace OHOS {
 namespace Msdp {
-
 const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_DEVICESTATUS_SUBSCRIBER = "-s";
 const std::string ARG_DUMP_DEVICESTATUS_CURRENT_STATE = "-c";
@@ -49,6 +48,6 @@ private:
     std::string GetStatusType(const DevicestatusDataUtils::DevicestatusType &type) const;
     std::string GetDeviceState(const DevicestatusDataUtils::DevicestatusValue &type) const;
 };
-}
-}
+} // namespace Msdp
+} // namespace OHOS
 #endif // DEVICESTATUS_DUMPER_H

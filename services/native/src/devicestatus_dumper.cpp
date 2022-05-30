@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "devicestatus_dumper.h"
 
 #include <cinttypes>
@@ -32,7 +31,6 @@ namespace Msdp {
 namespace {
     constexpr uint32_t MS_NS = 1000000;
 }
-
 void DevicestatusDumper::DumpDevicestatusSubscriber(int32_t fd,
     const std::map<DevicestatusDataUtils::DevicestatusType, int32_t> &listenerMap) const
 {
@@ -134,5 +132,5 @@ void DevicestatusDumper::DumpHelpInfo(int32_t fd) const
     dprintf(fd, "      -s: dump the device_status subscribers\n");
     dprintf(fd, "      -c: dump the device_status current device status\n");
 }
-}
-}
+} // namespace Msdp
+} // namespace OHOS
