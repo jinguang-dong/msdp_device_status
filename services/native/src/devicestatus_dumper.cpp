@@ -69,20 +69,23 @@ void DevicestatusDumper::DumpDevicestatusCurrentStatus(int32_t fd,
 std::string DevicestatusDumper::GetDeviceState(const DevicestatusDataUtils::DevicestatusValue &value) const
 {
     std::string valueString;
-    switch (value)
-    {
-    case DevicestatusDataUtils::VALUE_ENTER:
-        valueString = "enter";
-        break;
-    case DevicestatusDataUtils::VALUE_EXIT:
-        valueString = "exit";
-        break;
-    case DevicestatusDataUtils::VALUE_INVALID:
-        valueString = "invalid";
-        break;
-    default:
-        valueString = "unknown";
-        break;
+    switch (value) {
+        case DevicestatusDataUtils::VALUE_ENTER: {
+            valueString = "enter";
+            break;
+        }
+        case DevicestatusDataUtils::VALUE_EXIT: {
+            valueString = "exit";
+            break;
+        }
+        case DevicestatusDataUtils::VALUE_INVALID: {
+            valueString = "invalid";
+            break;
+        }
+        default: {
+            valueString = "unknown";
+            break;
+        }
     }
     return valueString;
 }
@@ -90,23 +93,27 @@ std::string DevicestatusDumper::GetDeviceState(const DevicestatusDataUtils::Devi
 std::string DevicestatusDumper::GetStatusType(const DevicestatusDataUtils::DevicestatusType &type) const
 {
     std::string typeString;
-    switch (type)
-    {
-    case DevicestatusDataUtils::TYPE_HIGH_STILL:
-        typeString = "high still";
-        break;
-    case DevicestatusDataUtils::TYPE_FINE_STILL:
-        typeString = "fine still";
-        break;
-    case DevicestatusDataUtils::TYPE_CAR_BLUETOOTH:
-        typeString = "car bluetooth";
-        break;
-    case DevicestatusDataUtils::TYPE_LID_OPEN:
-        typeString = "lid open";
-        break;
-    default:
-        typeString = "unknown";
-        break;
+    switch (type) {
+        case DevicestatusDataUtils::TYPE_HIGH_STILL: {
+            typeString = "high still";
+            break;
+        }
+        case DevicestatusDataUtils::TYPE_FINE_STILL: {
+            typeString = "fine still";
+            break;
+        }
+        case DevicestatusDataUtils::TYPE_CAR_BLUETOOTH: {
+            typeString = "car bluetooth";
+            break;
+        }
+        case DevicestatusDataUtils::TYPE_LID_OPEN: {
+            typeString = "lid open";
+            break;
+        }
+        default: {
+            typeString = "unknown";
+            break;
+        }
     }
     return typeString;
 }
@@ -116,6 +123,10 @@ void DevicestatusDumper::DumpCurrentTime(int32_t fd) const
     timespec curTime = { 0, 0 };
     clock_gettime(CLOCK_REALTIME, &curTime);
     struct tm *timeinfo = localtime(&(curTime.tv_sec));
+    if (tm == nullptr) {
+        DEV_HILOGI(SERVICE, "DumpCurrentTime get localtime failed");
+        return;
+    }
     dprintf(fd, "Current time: %02d:%02d:%02d.%03d\n", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec,
             int32_t { (curTime.tv_nsec / MS_NS) });
 }

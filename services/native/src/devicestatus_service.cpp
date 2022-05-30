@@ -105,7 +105,7 @@ int DevicestatusService::Dump(int fd, const std::vector<std::u16string>& args)
     } else if (params[0] == ARG_DUMP_DEVICESTATUS_CURRENT_STATE) {
         DevicestatusDataUtils::DevicestatusType type;
         std::vector<DevicestatusDataUtils::DevicestatusData> datas;
-        for(type = DevicestatusDataUtils::TYPE_HIGH_STILL;
+        for (type = DevicestatusDataUtils::TYPE_HIGH_STILL;
             type <= DevicestatusDataUtils::TYPE_LID_OPEN;
             type = (DevicestatusDataUtils::DevicestatusType)(type+1)) {
             DevicestatusDataUtils::DevicestatusData data = GetCache(type);

@@ -41,7 +41,8 @@ public:
     void DumpIllegalArgsInfo(int32_t fd) const;
     void DumpDevicestatusSubscriber(int32_t fd, const std::map<DevicestatusDataUtils::DevicestatusType,
         int32_t> &listenerMap) const;
-    void DumpDevicestatusCurrentStatus(int32_t fd, const std::vector<DevicestatusDataUtils::DevicestatusData> &datas) const;
+    void DumpDevicestatusCurrentStatus(int32_t fd,
+        const std::vector<DevicestatusDataUtils::DevicestatusData> &datas) const;
 private:
     DISALLOW_COPY_AND_MOVE(DevicestatusDumper);
     void DumpCurrentTime(int32_t fd) const;
