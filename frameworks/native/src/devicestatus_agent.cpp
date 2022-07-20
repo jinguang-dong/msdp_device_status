@@ -15,8 +15,13 @@
 
 #include "devicestatus_agent.h"
 
-#include "devicestatus_common.h"
 #include "devicestatus_client.h"
+#include "devicestatus_hilog_wrapper.h"
+#include "errors.h"
+#include "idevicestatus_callback.h"
+#include "memory"
+#include "new"
+#include "refbase.h"
 
 namespace OHOS {
 namespace Msdp {

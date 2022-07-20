@@ -16,25 +16,15 @@
 #ifndef DEVICESTATUS_MSDP_CLIENT_IMPL_H
 #define DEVICESTATUS_MSDP_CLIENT_IMPL_H
 
-#include <string>
-#include <memory>
-#include <mutex>
-#include <vector>
-#include <thread>
-#include <map>
 #include <errors.h>
+#include <stdint.h>
+#include <map>
+#include <mutex>
 
-#include "rdb_store.h"
-#include "rdb_helper.h"
-#include "rdb_open_callback.h"
-#include "rdb_store_config.h"
-#include "values_bucket.h"
-#include "result_set.h"
 #include "devicestatus_data_utils.h"
-#include "devicestatus_delayed_sp_singleton.h"
-#include "devicestatus_dumper.h"
 #include "devicestatus_msdp_interface.h"
 #include "devicestatus_sensor_interface.h"
+#include "functional"
 
 namespace OHOS {
 namespace Msdp {

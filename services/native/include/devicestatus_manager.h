@@ -16,16 +16,21 @@
 #ifndef DEVICESTATUS_MANAGER_H
 #define DEVICESTATUS_MANAGER_H
 
-#include <set>
+#include <stdint.h>
 #include <map>
+#include <set>
 
-#include "sensor_if.h"
+#include "__functional_base"
+#include "__mutex_base"
+#include "access_token.h"
 #include "devicestatus_data_utils.h"
-#include "idevicestatus_algorithm.h"
-#include "idevicestatus_callback.h"
-#include "devicestatus_common.h"
+#include "devicestatus_hilog_wrapper.h"
 #include "devicestatus_msdp_client_impl.h"
-#include "accesstoken_kit.h"
+#include "idevicestatus_callback.h"
+#include "iosfwd"
+#include "iremote_object.h"
+#include "memory"
+#include "refbase.h"
 
 namespace OHOS {
 namespace Msdp {

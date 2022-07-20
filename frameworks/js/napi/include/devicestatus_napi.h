@@ -16,13 +16,16 @@
 #ifndef DEVICESTATUS_NAPI_H
 #define DEVICESTATUS_NAPI_H
 
+#include <stdint.h>
 #include <map>
 
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
 #include "devicestatus_callback_stub.h"
 #include "devicestatus_data_utils.h"
 #include "devicestatus_event.h"
+#include "idevicestatus_callback.h"
+#include "iosfwd"
+#include "js_native_api_types.h"
+#include "refbase.h"
 
 namespace OHOS {
 namespace Msdp {

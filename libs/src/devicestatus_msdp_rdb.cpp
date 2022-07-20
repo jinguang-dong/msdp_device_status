@@ -15,14 +15,22 @@
 
 #include "devicestatus_msdp_rdb.h"
 
-#include <string>
 #include <cerrno>
 #include <sys/epoll.h>
 #include <sys/timerfd.h>
 #include <unistd.h>
-#include <linux/netlink.h>
+#include <string>
 
-#include "devicestatus_common.h"
+#include "abs_predicates.h"
+#include "bits/fcntl.h"
+#include "devicestatus_hilog_wrapper.h"
+#include "fcntl.h"
+#include "iosfwd"
+#include "map"
+#include "memory"
+#include "new"
+#include "thread"
+#include "utility"
 
 using namespace OHOS::NativeRdb;
 namespace OHOS {

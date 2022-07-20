@@ -15,19 +15,24 @@
 
 #include "devicestatus_dumper.h"
 
-#include <cinttypes>
-#include <csignal>
-#include <cstring>
 #include <getopt.h>
-#include <iomanip>
+#include <cstring>
 #include <map>
-#include <sstream>
 
+#include "accesstoken_kit.h"
+#include "devicestatus_hilog_wrapper.h"
+#include "hap_token_info.h"
+#include "memory"
+#include "native_token_info.h"
+#include "new"
+#include "queue"
+#include "refbase.h"
 #include "securec.h"
-#include "string_ex.h"
-#include "unique_fd.h"
-
-#include "devicestatus_common.h"
+#include "set"
+#include "string"
+#include "unistd.h"
+#include "utility"
+#include "vector"
 
 namespace OHOS {
 namespace Msdp {
