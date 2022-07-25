@@ -18,7 +18,11 @@
 #include <message_parcel.h>
 
 #include "devicestatus_common.h"
-#include "devicestatus_callback_proxy.h"
+#include "devicestatus_errors.h"
+#include "devicestatus_hilog_wrapper.h"
+#include "errors.h"
+#include "ipc_object_stub.h"
+#include "string"
 
 namespace OHOS {
 namespace Msdp {

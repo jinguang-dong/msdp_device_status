@@ -16,24 +16,21 @@
 #ifndef DEVICESTATUS_SENSOR_RDB_H
 #define DEVICESTATUS_SENSOR_RDB_H
 
-#include <string>
-#include <memory>
-#include <vector>
-#include <thread>
-#include <mutex>
-#include <map>
 #include <errors.h>
+#include <stdint.h>
+#include <map>
+#include <memory>
 
-#include "rdb_store.h"
-#include "rdb_helper.h"
-#include "rdb_open_callback.h"
-#include "rdb_store_config.h"
-#include "values_bucket.h"
-#include "result_set.h"
-#include "sensor_agent.h"
-#include "sensor_agent_type.h"
+#include "__functional_base"
+#include "__mutex_base"
+#include "cstdint"
 #include "devicestatus_data_utils.h"
 #include "devicestatus_sensor_interface.h"
+#include "functional"
+#include "rdb_open_callback.h"
+#include "rdb_store.h"
+#include "result_set.h"
+#include "sensor_agent_type.h"
 
 namespace OHOS {
 namespace Msdp {

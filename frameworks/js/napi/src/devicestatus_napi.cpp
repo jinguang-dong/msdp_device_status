@@ -15,8 +15,19 @@
 
 #include "devicestatus_napi.h"
 
-#include "devicestatus_common.h"
+#include "__functional_base"
+#include "cstdint"
 #include "devicestatus_client.h"
+#include "devicestatus_hilog_wrapper.h"
+#include "errors.h"
+#include "js_native_api.h"
+#include "map"
+#include "napi/native_common.h"
+#include "new"
+#include "node_api.h"
+#include "string"
+#include "utility"
+#include "vector"
 
 using namespace OHOS::Msdp;
 using namespace OHOS;

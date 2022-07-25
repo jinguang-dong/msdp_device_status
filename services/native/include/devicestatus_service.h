@@ -16,16 +16,19 @@
 #ifndef DEVICESTATUS_SERVICE_H
 #define DEVICESTATUS_SERVICE_H
 
-#include <memory>
-#include <iremote_object.h>
 #include <system_ability.h>
+#include <memory>
 
+#include "devicestatus_data_utils.h"
+#include "devicestatus_delayed_sp_singleton.h"
+#include "devicestatus_manager.h"
+#include "devicestatus_msdp_client_impl.h"
 #include "devicestatus_srv_stub.h"
 #include "idevicestatus_callback.h"
-#include "devicestatus_data_utils.h"
-#include "devicestatus_dumper.h"
-#include "devicestatus_manager.h"
-#include "devicestatus_delayed_sp_singleton.h"
+#include "iosfwd"
+#include "refbase.h"
+#include "string"
+#include "vector"
 
 namespace OHOS {
 namespace Msdp {

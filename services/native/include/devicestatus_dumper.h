@@ -17,18 +17,22 @@
 #define DEVICESTATUS_DUMPER_H
 
 #include <refbase.h>
+#include <singleton.h>
+#include <stdint.h>
 #include <map>
 #include <memory>
-#include <mutex>
 #include <queue>
 #include <set>
-#include <singleton.h>
 #include <string>
 #include <vector>
 
-#include "accesstoken_kit.h"
+#include "__functional_base"
+#include "__mutex_base"
+#include "access_token.h"
 #include "devicestatus_data_utils.h"
 #include "idevicestatus_callback.h"
+#include "iosfwd"
+#include "nocopyable.h"
 
 namespace OHOS {
 namespace Msdp {

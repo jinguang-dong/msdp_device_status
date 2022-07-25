@@ -18,8 +18,12 @@
 
 #include <iremote_stub.h>
 #include <nocopyable.h>
+#include <stdint.h>
 
 #include "idevicestatus.h"
+#include "message_option.h"
+#include "message_parcel.h"
+#include "refbase.h"
 
 namespace OHOS {
 namespace Msdp {

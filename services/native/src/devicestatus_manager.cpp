@@ -15,6 +15,20 @@
 
 #include "devicestatus_manager.h"
 
+#include "__tree"
+#include "accesstoken_kit.h"
+#include "devicestatus_common.h"
+#include "functional"
+#include "hap_token_info.h"
+#include "hilog/log_cpp.h"
+#include "map"
+#include "native_token_info.h"
+#include "new"
+#include "set"
+#include "string"
+#include "type_traits"
+#include "utility"
+
 namespace OHOS {
 namespace Msdp {
 using namespace OHOS::HiviewDFX;
