@@ -40,7 +40,6 @@ ohos_unittest("test_devicestatus_service") {
     "${aafwk_kits_path}/appkit:appkit_native",
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_service_path}:devicestatus_service",
-    "//drivers/peripheral/sensor/hal:hdi_sensor",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
