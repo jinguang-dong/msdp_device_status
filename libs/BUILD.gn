@@ -26,7 +26,6 @@ config("devicestatus_srv_public_config") {
     "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/rdb/include/",
     "${aafwk_kits_path}/ability/native/include/",
     "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/appdatafwk/include/",
-    "//base/sensors/sensor/interfaces/native/include/",
   ]
 }
 
@@ -42,7 +41,6 @@ ohos_shared_library("devicestatus_sensorhdi") {
 
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
-    "//drivers/peripheral/sensor/hal:hdi_sensor",
     "//utils/native/base:utils",
   ]
 
@@ -71,7 +69,6 @@ ohos_shared_library("devicestatus_msdp") {
 
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
-    "//drivers/peripheral/sensor/hal:hdi_sensor",
     "//utils/native/base:utils",
   ]
 
