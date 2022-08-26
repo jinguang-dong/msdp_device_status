@@ -1,0 +1,89 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#import("//base/msdp/motion/motion.gni")
+import("//base/msdp/device_status/device_status.gni")
+
+config("motion_private_config") {
+  include_dirs = [ "//utils/system/safwk/native/include" ]
+}
+
+config("motion_srv_public_config") {
+  include_dirs = [
+    "include",
+    "interface",
+    "//third_party/cJSON",
+    "include/algorithm",
+    "include/datahub",
+    "${device_status_interfaces_path}/innerkits/include",
+    "//foundation/distributedhardware/device_manager/interfaces/inner_kits/native_cpp/include/",
+    "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb/include/",
+    "//foundation/aafwk/standard/frameworks/kits/ability/native/include/",
+    "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_appdatafwk/include/",
+    "//foundation/multimodalinput/input/util/common/include",
+    "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
+    "//out/rk3568/innerkits/ohos-arm/sensor/sensor_interface_native/include/",
+    "//base/sensors/sensor/interfaces/native/include/",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/",
+
+  ]
+}
+
+deps_ex = [
+  "ability_base:base",
+  "hiviewdfx_hilog_native:libhilog",
+  "ipc:ipc_core",
+  "safwk:system_ability_fwk",
+  "samgr:samgr_proxy",
+  #"permission_standard:libpermissionsdk_standard",
+  "relational_store:native_rdb",
+  "input:libmmi-client",
+  "sensor:sensor_interface_native",
+  "c_utils:utils",
+  "relational_store:native_appdatafwk",
+
+
+]
+
+ohos_shared_library("motion_algorithm") {
+  sources = [
+    "src/motion_gesture_manager.cpp",
+    "src/algorithm/motion_gesture.cpp",
+    "src/datahub/point_event_callback.cpp",
+    "src/datahub/sensor_data_callback.cpp",
+    "src/algorithm/motion_flip.cpp",
+    "src/algorithm/motion_rotate.cpp",
+    "src/algorithm/motion_shake.cpp",
+    "src/algorithm/motion_pocket.cpp",
+    "src/algorithm/motion_pickup.cpp",
+    "src/algorithm/motion_near_ear.cpp",
+  ]
+
+  configs = [
+    "${device_status_utils_path}:devicestatus_utils_config",
+    ":motion_private_config",
+  ]
+
+  public_configs = [ ":motion_srv_public_config" ]
+
+  deps = [
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "//utils/native/base:utils",
+    "//drivers/peripheral/sensor/hal:hdi_sensor",
+    "//third_party/cJSON:cjson_static",
+    "//foundation/multimodalinput/input/util:libmmi-util",
+  ]
+
+  external_deps = deps_ex
+  part_name = "${device_status_part_name}"
+}
