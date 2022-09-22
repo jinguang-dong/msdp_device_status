@@ -17,6 +17,11 @@
 
 #include "devicestatus_common.h"
 
+#include <uv.h>
+#include <map>
+#include "napi/native_api.h"
+#include "napi/native_node_api.h"
+#include <js_native_api.h>
 using namespace OHOS::Msdp;
 
 DevicestatusEvent::DevicestatusEvent(napi_env env, napi_value thisVar)
@@ -166,6 +171,8 @@ void DevicestatusEvent::OnEvent(const int32_t& eventType, size_t argc, const int
     jsResponse.devicestatusValue_ = value;
 
     napi_value tmpValue;
+    // napi_create_int32(env_,eventType,&tmpValue);
+    // napi_set_named_property(env_,result,"type",tmpValue);
     napi_create_int32(env_, jsResponse.devicestatusValue_, &tmpValue);
     napi_set_named_property(env_, result, "devicestatusValue", tmpValue);
 
