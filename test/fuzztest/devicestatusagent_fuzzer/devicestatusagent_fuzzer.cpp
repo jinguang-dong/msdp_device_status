@@ -38,7 +38,7 @@ void DevicestatusAgentFuzzer::TestSubscribeAgentEvent(const uint8_t* data)
     std::cout << "TestSubscribeAgentEvent: Enter " << std::endl;
 
     agent_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent_);
 
