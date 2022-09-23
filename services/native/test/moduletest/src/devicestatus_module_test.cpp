@@ -49,12 +49,14 @@ void DevicestatusModuleTest::DevicestatusModuleTestCallback::OnDevicestatusChang
 HWTEST_F (DevicestatusModuleTest, DevicestatusCallbackTest, TestSize.Level0)
 {
     DevicestatusDataUtils::DevicestatusType type = DevicestatusDataUtils::DevicestatusType::TYPE_VERTICAL_POSITION;
+    DevicestatusDataUtils::DevicestatusActivityEvent event = DevicestatusDataUtils::DevicestatusActivityEvent::EVENT_INVALID;
+    DevicestatusDataUtils::DevicestatusReportLatencyNs latency = DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID;
     auto& devicestatusClient = DevicestatusClient::GetInstance();
     sptr<IdevicestatusCallback> cb = new DevicestatusModuleTestCallback();
     GTEST_LOG_(INFO) << "Start register";
-    devicestatusClient.SubscribeCallback(type, cb);
+    devicestatusClient.SubscribeCallback(type,event,latency, cb);
     GTEST_LOG_(INFO) << "Cancell register";
-    devicestatusClient.UnSubscribeCallback(type, cb);
+    devicestatusClient.UnSubscribeCallback(type,event, cb);
 }
 
 /**
