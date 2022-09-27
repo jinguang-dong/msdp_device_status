@@ -64,5 +64,66 @@ group("moduletest") {
   testonly = true
   deps = []
 
-  deps += [ ":test_devicestatus_module" ]
+  deps += [ 
+    ":test_devicestatus_module" ,
+    ":test_motion_module",]
 }
+
+import("//base/msdp/device_status/motion.gni")
+import("//build/test.gni")
+
+module_output_path = "${motion_part_name}/motionsrv"
+
+# config("module_private_config") {
+#   visibility = [ ":*" ]
+
+#   include_dirs = [
+#     "include",
+#     "//utils/system/safwk/native/include",
+#     "//commonlibrary/c_utils/base/include",
+#     "//foundation/distributeddatamgr/distributeddatamgr/frameworks/innerkitsimpl/rdb/include"
+#   ]
+# }
+
+ohos_moduletest("test_motion_module") {
+  module_out_path = module_output_path
+
+  sources = [ "src/motion_module_test.cpp" ]
+
+  configs = [
+    "${motion_utils_path}:motion_utils_config",
+    ":module_private_config",
+  ]
+
+  deps = [
+    "${motion_interfaces_path}/innerkits:motion_client",
+    "${motion_service_path}:motion_service",
+    "//third_party/googletest:gtest_main",
+    "//foundation/ability/ability_runtime/frameworks/native/appkit:appkit_native",
+    "//drivers/peripheral/sensor/hal:hdi_sensor",
+
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "eventhandler:libeventhandler",
+    "common_event_service:cesfwk_innerkits",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "c_utils:utils"
+  ]
+}
+
+# group("moduletest") {
+#   testonly = true
+#   deps = []
+
+#   deps += [
+#     ":test_motion_module",
+#   ]
+# }

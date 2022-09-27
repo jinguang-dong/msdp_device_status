@@ -22,3 +22,16 @@ group("devicestatussrv_test") {
     "unittest:unittest",
   ]
 }
+
+import("//base/msdp/device_status/motion.gni")
+import("//build/test.gni")
+
+group("motionsrv_test") {
+  testonly = true
+  deps = []
+
+  deps += [
+    "unittest:unittest",
+    "moduletest:moduletest",
+    ]
+}

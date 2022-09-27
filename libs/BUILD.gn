@@ -96,7 +96,6 @@ ohos_shared_library("devicestatus_algorithm_manager") {
     "//foundation/multimodalinput/input/util:libmmi-util",
     "//third_party/cJSON:cjson_static",
     "//third_party/jsoncpp",
-    "//commonlibrary/c_utils/base:utils",
   ]
 
   external_deps = [
@@ -111,4 +110,112 @@ ohos_shared_library("devicestatus_algorithm_manager") {
   ]
 
   part_name = "${device_status_part_name}"
+}
+
+import("//base/msdp/device_status/motion.gni")
+
+config("motion_private_config") {
+  include_dirs = [ "//utils/system/safwk/native/include" ]
+}
+
+config("motion_srv_public_config") {
+  include_dirs = [
+    "include",
+    "interface",
+    "//third_party/cJSON",
+    "include/algorithm",
+    "include/datahub",
+    "${motion_interfaces_path}/innerkits/include",
+    "//foundation/distributedhardware/devicemanager/interfaces/inner_kits/native_cpp/include/",
+    "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb/include/",
+    "//foundation/aafwk/standard/frameworks/kits/ability/native/include/",
+    "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_appdatafwk/include/",
+    "//foundation/multimodalinput/input/util/common/include",
+    "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
+    "//foundation/multimodalinput/input/interfaces/native/innerkits/proxy/include",
+    "//foundation/ability/ability_runtime/frameworks/kits/ability/native/include",
+    "//commonlibrary/c_utils/base/include",
+    "//base/sensors/sensor/interfaces/native/include/",
+
+  ]
+}
+
+deps_ex = [
+  "ability_base:base",
+  "hiviewdfx_hilog_native:libhilog",
+  "ipc:ipc_core",
+  "safwk:system_ability_fwk",
+  "samgr:samgr_proxy",
+  "relational_store:native_rdb",
+  "input:libmmi-client",
+  "sensor:sensor_interface_native",
+  "c_utils:utils"
+
+]
+
+ohos_shared_library("motion_sensorhdi") {
+  sources = [
+    "src/motion_sensor_mock.cpp",
+    "src/motion_data_parse.cpp",
+    "src/algorithm/motion_gesture.cpp",
+    "src/datahub/point_event_callback.cpp",
+    "src/datahub/sensor_data_callback.cpp",
+    "src/algorithm/motion_flip.cpp",
+    "src/algorithm/motion_rotate.cpp",
+    "src/algorithm/motion_shake.cpp",
+    "src/algorithm/motion_pocket.cpp",
+    "src/algorithm/motion_pickup.cpp",
+    "src/algorithm/motion_near_ear.cpp",
+  ]
+
+  configs = [
+    "${motion_utils_path}:motion_utils_config",
+    ":motion_private_config",
+  ]
+
+  public_configs = [ ":motion_srv_public_config" ]
+
+  deps = [
+    "${motion_interfaces_path}/innerkits:motion_client",
+    "//drivers/peripheral/sensor/hal:hdi_sensor",
+    "//third_party/cJSON:cjson_static",
+    "//foundation/multimodalinput/input/util:libmmi-util",
+  ]
+
+  external_deps = deps_ex
+
+  part_name = "${motion_part_name}"
+}
+
+ohos_shared_library("motion_msdp") {
+  sources = [
+    "src/motion_gesture_manager.cpp",
+    "src/motion_data_parse.cpp",
+    "src/algorithm/motion_gesture.cpp",
+    "src/datahub/point_event_callback.cpp",
+    "src/datahub/sensor_data_callback.cpp",
+    "src/algorithm/motion_flip.cpp",
+    "src/algorithm/motion_rotate.cpp",
+    "src/algorithm/motion_shake.cpp",
+    "src/algorithm/motion_pocket.cpp", 
+    "src/algorithm/motion_pickup.cpp",  
+    "src/algorithm/motion_near_ear.cpp",
+  ]
+
+  configs = [
+    "${motion_utils_path}:motion_utils_config",
+    ":motion_private_config",
+  ]
+
+  public_configs = [ ":motion_srv_public_config" ]
+
+  deps = [
+    "${motion_interfaces_path}/innerkits:motion_client",
+    "//drivers/peripheral/sensor/hal:hdi_sensor",
+    "//third_party/cJSON:cjson_static",
+    "//foundation/multimodalinput/input/util:libmmi-util",
+  ]
+
+  external_deps = deps_ex
+  part_name = "${motion_part_name}"
 }

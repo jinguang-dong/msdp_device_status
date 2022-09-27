@@ -99,7 +99,7 @@ static DeviceStatusJsonD DeviceStatusJson[] = {
     {DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, "lid_open"}
 };
     //- end -
-static int32_t in_vector_count[DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN + 1] = {0};
+// static int32_t in_vector_count[DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN + 1] = {0};
 } // namespace Msdp
 } // namespace OHOS
 #endif // DEVICESTATUS_DATA_UTILS_H

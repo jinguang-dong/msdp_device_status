@@ -18,3 +18,11 @@ ohos_sa_profile("devicestatus_sa_profile") {
   sources = [ "2902.xml" ]
   part_name = "${device_status_part_name}"
 }
+
+import("//base/msdp/device_status/motion.gni")
+import("//build/ohos/sa_profile/sa_profile.gni")
+
+ohos_sa_profile("motion_sa_profile") {
+  sources = [ "2901.xml" ]
+  part_name = "${motion_part_name}"
+}

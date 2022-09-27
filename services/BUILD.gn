@@ -64,3 +64,64 @@ ohos_shared_library("devicestatus_service") {
 
   part_name = "${device_status_part_name}"
 }
+
+import("//base/msdp/device_status/motion.gni")
+
+config("motion_private_config") {
+  include_dirs = [
+    "//utils/system/safwk/native/include",
+    "//commonlibrary/c_utils/base/include"
+  ]
+}
+
+config("motion_srv_public_config") {
+  include_dirs = [
+    "native/include",
+    "${motion_interfaces_path}/innerkits/include",
+    "//foundation/distributedhardware/devicemanager/interfaces/inner_kits/native_cpp/include/",
+    "//base/msdp/device_status/libs/interface",
+    "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb/include/",
+    "//foundation/aafwk/standard/frameworks/kits/ability/native/include/",
+    "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_appdatafwk/include/",
+    "//foundation/ability/ability_runtime/frameworks/kits/ability/native/include"
+  ]
+  cflags_cc = [
+    "-fexceptions",
+  ]
+}
+
+ohos_shared_library("motion_service") {
+  sources = [
+    "native/src/motion_callback_stub.cpp",
+    "native/src/motion_manager.cpp",
+    "native/src/motion_service.cpp",
+    "native/src/motion_dump.cpp",
+    "native/src/motion_srv_stub.cpp",
+    "native/src/motion_msdp_client_impl.cpp"
+  ]
+
+  configs = [
+    "${motion_utils_path}:motion_utils_config",
+    ":motion_private_config",
+  ]
+
+  public_configs = [ ":motion_srv_public_config" ]
+
+  deps = [
+    "${motion_interfaces_path}/innerkits:motion_client",
+    "//drivers/peripheral/sensor/hal:hdi_sensor",
+    "//third_party/jsoncpp"
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "c_utils:utils",
+    "relational_store:native_rdb"
+  ]
+
+  part_name = "${motion_part_name}"
+}

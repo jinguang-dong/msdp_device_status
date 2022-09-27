@@ -34,28 +34,38 @@
         "fwk_group":[
           "//base/msdp/device_status/libs:devicestatus_sensorhdi",
           "//base/msdp/device_status/libs:devicestatus_msdp",
-	  "//base/msdp/device_status/libs:devicestatus_algorithm_manager",
+	        "//base/msdp/device_status/libs:devicestatus_algorithm_manager",
           "//base/msdp/device_status/interfaces/innerkits:devicestatus_client",
-          "//base/msdp/device_status/frameworks/js/napi:devicestatus"
+          "//base/msdp/device_status/frameworks/js/napi:devicestatus",
+          "//base/msdp/device_status/libs:motion_sensorhdi",
+          "//base/msdp/device_status/libs:motion_msdp",
+          "//base/msdp/device_status/interfaces/innerkits:motion_client"
         ],
         "service_group":[
           "//base/msdp/device_status/services:devicestatus_service",
           "//base/msdp/device_status/frameworks/native/src:deviceagent",
-          "//base/msdp/device_status/sa_profile:devicestatus_sa_profile"
+          "//base/msdp/device_status/sa_profile:devicestatus_sa_profile",
+          "//base/msdp/device_status/services:motion_service",
+          "//base/msdp/device_status/frameworks/js/napi:motion",
+          "//base/msdp/device_status/sa_profile:motion_sa_profile"
         ]
       },
       "inner_kits": [
         {
-            "name": "//base/msdp/device_status/interfaces/innerkits:devicestatus_client",
+            "name": [
+                "//base/msdp/device_status/interfaces/innerkits:devicestatus_client",
+                "//base/msdp/device_status/interfaces/innerkits:motion_client"
+            ],
             "header": {
               "header_files": [],
               "header_base": "//base/msdp/device_status/interfaces/innerkits/include"
             }
-          }
+            }
       ],
       "test": [
         "//base/msdp/device_status/services/native/test:devicestatussrv_test",
-        "//base/msdp/device_status/test/fuzztest:fuzztest"
+        "//base/msdp/device_status/test/fuzztest:fuzztest",
+        "//base/msdp/device_status/services/native/test:motionsrv_test"
       ]
     }
   }

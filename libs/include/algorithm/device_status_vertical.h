@@ -18,6 +18,7 @@
 #include <iostream>
 #include "devicestatus_data_utils.h"
 #include "devicestatus_data_define.h"
+#include "data_define.h"
 #include "sensor_data_callback.h"
 #include "devicestatus_algorithm_manager_interface.h"
 

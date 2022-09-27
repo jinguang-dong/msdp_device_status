@@ -177,7 +177,7 @@ void DevicestatusService::UnSubscribe(const DevicestatusDataUtils::DevicestatusT
     const DevicestatusDataUtils::DevicestatusActivityEvent& event,
     const sptr<IdevicestatusCallback>& callback)
 {
-    DEV_HILOGE(SERVICE, "EnterUNevent: %{public}d",event);
+    DEV_HILOGI(SERVICE, "EnterUNevent: %{public}d",event);
     if (devicestatusManager_ == nullptr) {
         DEV_HILOGI(SERVICE, "UnSubscribe func is nullptr");
         return;

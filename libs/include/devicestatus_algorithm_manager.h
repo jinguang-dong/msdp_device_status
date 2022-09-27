@@ -27,6 +27,7 @@
 #include "devicestatus_algorithm_manager_interface.h"
 // #include "devicestatus_data_parse.h"
 #include "devicestatus_data_define.h"
+#include "data_define.h"
 #include "sensor_data_callback.h"
 #include "device_status_absolute_still.h"
 #include "device_status_horizontal.h"

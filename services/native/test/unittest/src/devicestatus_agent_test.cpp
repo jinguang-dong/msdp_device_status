@@ -73,7 +73,7 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest001, TestSize.Level1)
     std::shared_ptr<DevicestatusAgentListenerMockFirstClient> agentEvent =
         std::make_shared<DevicestatusAgentListenerMockFirstClient>();
     int32_t ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_OK);
@@ -95,7 +95,7 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest002, TestSize.Level1)
     std::shared_ptr<DevicestatusAgentListenerMockFirstClient> agentEvent =
         std::make_shared<DevicestatusAgentListenerMockFirstClient>();
     int32_t ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_OK);
@@ -107,7 +107,7 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest002, TestSize.Level1)
     GTEST_LOG_(INFO) << "Open and close the lid, and event will not report";
     sleep(2);
     ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_OK);
@@ -131,12 +131,12 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest003, TestSize.Level1)
     std::shared_ptr<DevicestatusAgentListenerMockSecondClient> agentEvent2 =
         std::make_shared<DevicestatusAgentListenerMockSecondClient>();
     int32_t ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent1);
     EXPECT_TRUE(ret == ERR_OK);
     ret = agent2_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent2);
     EXPECT_TRUE(ret == ERR_OK);
@@ -157,14 +157,14 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest004, TestSize.Level1)
     GTEST_LOG_(INFO) << "DevicestatusAgentTest004 start";
     std::shared_ptr<DevicestatusAgentListenerMockFirstClient> agentEvent =
         std::make_shared<DevicestatusAgentListenerMockFirstClient>();
-    int32_t ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_CAR_BLUETOOTH, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+    int32_t ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_HORIZONTAL_POSITION, \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_OK);
     GTEST_LOG_(INFO) << "Open and close the lid, and event will report";
     sleep(2);
-    agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_CAR_BLUETOOTH, \
+    agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_HORIZONTAL_POSITION, \
         DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
     GTEST_LOG_(INFO) << "DevicestatusAgentTest004 end";
 }
@@ -174,14 +174,14 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest005, TestSize.Level1)
     GTEST_LOG_(INFO) << "DevicestatusAgentTest005 start";
     std::shared_ptr<DevicestatusAgentListenerMockFirstClient> agentEvent =
         std::make_shared<DevicestatusAgentListenerMockFirstClient>();
-    int32_t ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_FINE_STILL, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+    int32_t ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_VERTICAL_POSITION, \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_OK);
     GTEST_LOG_(INFO) << "Open and close the lid, and event will report";
     sleep(2);
-    agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_FINE_STILL, \
+    agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_VERTICAL_POSITION, \
         DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
     GTEST_LOG_(INFO) << "DevicestatusAgentTest005 end";
 }
@@ -191,14 +191,14 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest006, TestSize.Level1)
     GTEST_LOG_(INFO) << "DevicestatusAgentTest006 start";
     std::shared_ptr<DevicestatusAgentListenerMockFirstClient> agentEvent =
         std::make_shared<DevicestatusAgentListenerMockFirstClient>();
-    int32_t ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+    int32_t ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_STILL, \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_OK);
     GTEST_LOG_(INFO) << "Open and close the lid, and event will report";
     sleep(2);
-    agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL, \
+    agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_STILL, \
         DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
     GTEST_LOG_(INFO) << "DevicestatusAgentTest006 end";
 }
@@ -209,7 +209,7 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest007, TestSize.Level1)
     std::shared_ptr<DevicestatusAgentListenerMockFirstClient> agentEvent =
         std::make_shared<DevicestatusAgentListenerMockFirstClient>();
     int32_t ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_INVALID, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
@@ -227,7 +227,7 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest008, TestSize.Level1)
     std::shared_ptr<DevicestatusAgentListenerMockFirstClient> agentEvent =
         std::make_shared<DevicestatusAgentListenerMockFirstClient>();
     int32_t ret = agent1_->SubscribeAgentEvent(static_cast<DevicestatusDataUtils::DevicestatusType>(10), \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
@@ -245,12 +245,12 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest009, TestSize.Level1)
     std::shared_ptr<DevicestatusAgentListenerMockFirstClient> agentEvent =
         std::make_shared<DevicestatusAgentListenerMockFirstClient>();
     int32_t ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_INVALID, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
-    ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+    ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_STILL, \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_OK);
@@ -259,7 +259,7 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest009, TestSize.Level1)
     ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_INVALID, \
         DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
-    ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL, \
+    ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_STILL, \
         DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
     EXPECT_TRUE(ret == ERR_OK);
     GTEST_LOG_(INFO) << "DevicestatusAgentTest009 end";
@@ -270,7 +270,7 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest010, TestSize.Level1)
     GTEST_LOG_(INFO) << "DevicestatusAgentTest010 start";
     std::shared_ptr<DevicestatusAgentListenerMockFirstClient> agentEvent = nullptr;
     int32_t ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
@@ -285,32 +285,32 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest011, TestSize.Level1)
         std::make_shared<DevicestatusAgentListenerMockFirstClient>();
     std::shared_ptr<DevicestatusAgentListenerMockFirstClient> agentEvent1 = nullptr;
     int32_t ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_INVALID, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
-    ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+    ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_STILL, \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_OK);
     ret = agent1_->SubscribeAgentEvent(static_cast<DevicestatusDataUtils::DevicestatusType>(10), \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
-    ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_FINE_STILL, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+    ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_VERTICAL_POSITION, \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_OK);
-    ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_CAR_BLUETOOTH, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+    ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_HORIZONTAL_POSITION, \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent1);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
     ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_OK);
@@ -319,16 +319,16 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest011, TestSize.Level1)
     ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_INVALID, \
         DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
-    ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL, \
+    ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_STILL, \
         DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
     EXPECT_TRUE(ret == ERR_OK);
     ret = agent1_->UnSubscribeAgentEvent(static_cast<DevicestatusDataUtils::DevicestatusType>(10), \
         DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
-    ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_FINE_STILL, \
+    ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_VERTICAL_POSITION, \
         DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
     EXPECT_TRUE(ret == ERR_OK);
-    ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_CAR_BLUETOOTH, \
+    ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_HORIZONTAL_POSITION, \
         DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
     EXPECT_TRUE(ret == ERR_OK);
     ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, \
@@ -344,22 +344,22 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest012, TestSize.Level1)
         std::make_shared<DevicestatusAgentListenerMockFirstClient>();
     std::shared_ptr<DevicestatusAgentListenerMockFirstClient> agentEvent1 = nullptr;
     int32_t ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_INVALID, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
-    ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+    ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_STILL, \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_OK);
     ret = agent1_->SubscribeAgentEvent(static_cast<DevicestatusDataUtils::DevicestatusType>(10), \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
-    ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_CAR_BLUETOOTH, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+    ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_HORIZONTAL_POSITION, \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent1);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
@@ -368,13 +368,13 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest012, TestSize.Level1)
     ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_INVALID, \
         DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
-    ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL, \
+    ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_STILL, \
         DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
     EXPECT_TRUE(ret == ERR_OK);
     ret = agent1_->UnSubscribeAgentEvent(static_cast<DevicestatusDataUtils::DevicestatusType>(10), \
         DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
-    ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_FINE_STILL, \
+    ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_VERTICAL_POSITION, \
         DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
     EXPECT_TRUE(ret == ERR_OK);
     GTEST_LOG_(INFO) << "DevicestatusAgentTest012 end";
@@ -387,17 +387,17 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest013, TestSize.Level1)
         std::make_shared<DevicestatusAgentListenerMockFirstClient>();
     std::shared_ptr<DevicestatusAgentListenerMockFirstClient> agentEvent1 = nullptr;
     int32_t ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_INVALID, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
     ret = agent1_->SubscribeAgentEvent(static_cast<DevicestatusDataUtils::DevicestatusType>(10), \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
-    ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL, \
-        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER. \
+    ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_STILL, \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
         DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
         agentEvent1);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
@@ -406,7 +406,7 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest013, TestSize.Level1)
     ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_INVALID, \
         DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
-    ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL, \
+    ret = agent1_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_STILL, \
         DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
     EXPECT_TRUE(ret == ERR_OK);
     ret = agent1_->UnSubscribeAgentEvent(static_cast<DevicestatusDataUtils::DevicestatusType>(10), \

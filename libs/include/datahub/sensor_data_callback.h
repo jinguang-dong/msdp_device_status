@@ -21,6 +21,7 @@
 #include <mutex>
 #include <thread>
 #include "devicestatus_data_define.h"
+#include "data_define.h"
 #include "sensor_agent.h"
 
 constexpr bool PS_VALUE = true;
