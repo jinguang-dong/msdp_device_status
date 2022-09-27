@@ -39,7 +39,6 @@ ohos_shared_library("devicestatus") {
     "${device_status_frameworks_path}/js/napi/src/devicestatus_event.cpp",
     "${device_status_frameworks_path}/js/napi/src/devicestatus_napi.cpp",
   ]
-
   configs = [
     "${device_status_utils_path}:devicestatus_utils_config",
     ":devicestatusnapi_private_config",
@@ -61,4 +60,51 @@ ohos_shared_library("devicestatus") {
   relative_install_dir = "module"
   subsystem_name = "msdp"
   part_name = "${device_status_part_name}"
+}
+
+import("//build/ohos.gni")
+import("//build/ohos/ace/ace.gni")
+import("//base/msdp/device_status/motion.gni")
+
+config("motionnapi_private_config") {
+  include_dirs = [
+    "include",
+    "//foundation/ace/napi/native_engine",
+    "//foundation/ace/napi/interfaces/kits",
+    "//utils/system/safwk/native/include",
+    "//third_party/node/src",
+    "${motion_interfaces_path}/innerkits/include",
+    "${motion_service_path}/native/include",
+    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy/include",
+    "//foundation/distributedschedule/samgr/adapter/interfaces/innerkits/include",
+    "//commonlibrary/c_utils/base/include",
+  ]
+}
+
+ohos_shared_library("motion") {
+  sources = [
+    "${motion_frameworks_path}/js/napi/src/motion_event.cpp",
+    "${motion_frameworks_path}/js/napi/src/motion_napi.cpp"
+  ]
+
+  configs = [
+    "${motion_utils_path}:motion_utils_config",
+    ":motionnapi_private_config",
+  ]
+
+  deps = [
+    "//base/msdp/device_status/interfaces/innerkits:motion_client",
+    "//base/msdp/device_status/services:motion_service",
+    "//foundation/arkui/napi:ace_napi",
+  ]
+
+  external_deps = [
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "c_utils:utils"
+  ]
+
+  relative_install_dir = "module"
+  subsystem_name = "msdp"
+  part_name = "${motion_part_name}"
 }

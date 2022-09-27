@@ -50,3 +50,49 @@ ohos_shared_library("devicestatus_client") {
 
   part_name = "${device_status_part_name}"
 }
+
+import("//base/msdp/device_status/motion.gni")
+
+config("motion_private_config") {
+  include_dirs = [
+    "//utils/system/safwk/native/include",
+    "//commonlibrary/c_utils/base/include",
+    ]
+}
+
+config("motion_public_config") {
+  include_dirs = [
+    "include",
+    "${motion_service_path}/native/include",
+  ]
+}
+
+ohos_shared_library("motion_client") {
+  sources = [
+    "${motion_frameworks_path}/native/src/motion_callback_proxy.cpp",
+    "${motion_frameworks_path}/native/src/motion_client.cpp",
+    "${motion_frameworks_path}/native/src/motion_srv_proxy.cpp"
+  ]
+
+  configs = [
+    "${motion_utils_path}:motion_utils_config",
+    ":motion_private_config",
+    ":motion_public_config",
+  ]
+
+  public_configs = [ ":motion_public_config" ]
+
+  deps = [
+    #"//utils/native/base:utils",
+  ]
+
+  external_deps = [
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "c_utils:utils"
+  ]
+
+  part_name = "${motion_part_name}"
+}

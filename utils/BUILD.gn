@@ -19,3 +19,12 @@ config("devicestatus_utils_config") {
     "//commonlibrary/c_utils/base/include",
   ]
 }
+
+import("//base/msdp/device_status/motion.gni")
+
+config("motion_utils_config") {
+  include_dirs = [
+    "include",
+    "//utils/native/base/include",
+  ]
+}
