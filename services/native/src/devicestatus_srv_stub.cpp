@@ -54,7 +54,7 @@ int32_t DevicestatusSrvStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
 
 int32_t DevicestatusSrvStub::SubscribeStub(MessageParcel& data)
 {
-    DEV_HILOGD(SERVICE, "Enter");
+    DEV_HILOGI(SERVICE, "Enter");
     int32_t type = -1;
     DEVICESTATUS_READ_PARCEL_WITH_RET(data, Int32, type, E_DEVICESTATUS_READ_PARCEL_ERROR);
     DEV_HILOGD(SERVICE, "Read type successfully");
