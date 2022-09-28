@@ -182,16 +182,16 @@ std::string DevicestatusDumper::GetStatusType(const DevicestatusDataUtils::Devic
 {
     std::string stateType;
     switch (type) {
-        case DevicestatusDataUtils::TYPE_HIGH_STILL: {
-            stateType = "high still";
+        case DevicestatusDataUtils::TYPE_STILL: {
+            stateType = "still";
             break;
         }
-        case DevicestatusDataUtils::TYPE_FINE_STILL: {
-            stateType = "fine still";
+        case DevicestatusDataUtils::TYPE_HORIZONTAL_POSITION: {
+            stateType = "horizontal position";
             break;
         }
-        case DevicestatusDataUtils::TYPE_CAR_BLUETOOTH: {
-            stateType = "car bluetooth";
+        case DevicestatusDataUtils::TYPE_VERTICAL_POSITION: {
+            stateType = "vertical position";
             break;
         }
         case DevicestatusDataUtils::TYPE_LID_OPEN: {
