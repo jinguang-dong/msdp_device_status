@@ -24,8 +24,6 @@
 #include "devicestatus_data_utils.h"
 #include "devicestatus_event.h"
 
-#include "idevicestatus_callback.h"
-
 namespace OHOS {
 namespace Msdp {
 class DevicestatusCallback : public DevicestatusCallbackStub {
@@ -56,10 +54,8 @@ public:
     static void RegisterCallback(const int32_t& eventType);
     static void InvokeCallBack(napi_env env, napi_value *args, bool voidParameter, int32_t value);
     void OnDevicestatusChangedDone(const int32_t& type, const int32_t& value, bool isOnce);
-    static DevicestatusNapi* GetDevicestatusNapi(int32_t type);
-    static int32_t ConvertTypeToInt(std::string type);
+    static DevicestatusNapi* GetDevicestatusNapi();
     static std::map<int32_t, sptr<IdevicestatusCallback>> callbackMap_;
-    static std::map<int32_t, DevicestatusNapi*> objectMap_;
 
 private:
     napi_ref callbackRef_;

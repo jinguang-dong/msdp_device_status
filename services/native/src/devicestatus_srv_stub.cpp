@@ -61,7 +61,7 @@ int32_t DevicestatusSrvStub::SubscribeStub(MessageParcel& data)
     int32_t event = -1;
     DEVICESTATUS_READ_PARCEL_WITH_RET(data, Int32, event, E_DEVICESTATUS_READ_PARCEL_ERROR);
     DEV_HILOGI(SERVICE, "Read event successfully");
-    DEV_HILOGI(SERVICE,"event:%{public}d",event);
+    DEV_HILOGI(SERVICE,"event:%{public}d", event);
     int32_t latency = -1;
     DEVICESTATUS_READ_PARCEL_WITH_RET(data, Int32, latency, E_DEVICESTATUS_READ_PARCEL_ERROR);
     DEV_HILOGI(SERVICE, "Read latency successfully");
@@ -70,10 +70,9 @@ int32_t DevicestatusSrvStub::SubscribeStub(MessageParcel& data)
     DEV_HILOGI(SERVICE, "Read remote obj successfully");
     sptr<IdevicestatusCallback> callback = iface_cast<IdevicestatusCallback>(obj);
     DEVICESTATUS_RETURN_IF_WITH_RET((callback == nullptr), E_DEVICESTATUS_READ_PARCEL_ERROR);
-    DEV_HILOGI(SERVICE, "Read callback successfully");
-    Subscribe(DevicestatusDataUtils::DevicestatusType(type), \
-        DevicestatusDataUtils::DevicestatusActivityEvent(event), \
-        DevicestatusDataUtils::DevicestatusReportLatencyNs(latency), callback); 
+    DEV_HILOGI(SERVICE, "Read callback successfully"); 
+    Subscribe(DevicestatusDataUtils::DevicestatusType(type),DevicestatusDataUtils::DevicestatusActivityEvent(event), \
+        DevicestatusDataUtils::DevicestatusReportLatencyNs(latency), callback);
     return ERR_OK;
 }
 
@@ -84,7 +83,7 @@ int32_t DevicestatusSrvStub::UnSubscribeStub(MessageParcel& data)
     DEVICESTATUS_READ_PARCEL_WITH_RET(data, Int32, type, E_DEVICESTATUS_READ_PARCEL_ERROR);
     int32_t event = -1;
     DEVICESTATUS_READ_PARCEL_WITH_RET(data, Int32, event, E_DEVICESTATUS_READ_PARCEL_ERROR);
-    DEV_HILOGE(SERVICE, "UNevent: %{public}d",event);
+    DEV_HILOGE(SERVICE, "UNevent: %{public}d", event);
     sptr<IRemoteObject> obj = data.ReadRemoteObject();
     DEVICESTATUS_RETURN_IF_WITH_RET((obj == nullptr), E_DEVICESTATUS_READ_PARCEL_ERROR);
     sptr<IdevicestatusCallback> callback = iface_cast<IdevicestatusCallback>(obj);

@@ -25,13 +25,15 @@ namespace OHOS {
 namespace Msdp {
 class DeviceStatusHorizontal {
 public:
-    DeviceStatusHorizontal(const std::shared_ptr<SensorDataCallback> &sensorCallback) : sensorCallback_(sensorCallback) {};
+    DeviceStatusHorizontal(const std::shared_ptr<SensorDataCallback> &sensorCallback) : \
+        sensorCallback_(sensorCallback) {};
     ~DeviceStatusHorizontal();
     void Init();
     void HandleHorizontal();
     void HandleNonHorizontal();
     void StartAlgorithm(int32_t sensorTypeId, void* sensorData);
-    void RegisterCallback(std::shared_ptr<DevicestatusAlgorithmManagerInterface::DevicestatusAlgorithmCallback> &callback);
+    void RegisterCallback(std::shared_ptr<DevicestatusAlgorithmManagerInterface::DevicestatusAlgorithmCallback> \
+        &callback);
     DevicestatusDataUtils::DevicestatusData Report();
 private:
     enum EventType {
@@ -56,4 +58,4 @@ private:
 };
 } // namespace Msdp
 } // namespace OHOS
-#endif	// DEVICE_STATUS_HORIZONTAL_H
+#endif // DEVICE_STATUS_HORIZONTAL_H

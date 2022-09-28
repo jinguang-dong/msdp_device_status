@@ -26,13 +26,15 @@ namespace Msdp {
 
 class DeviceStatusVertical {
 public:
-    DeviceStatusVertical(const std::shared_ptr<SensorDataCallback> &sensorCallback) : sensorCallback_(sensorCallback) {};
+    DeviceStatusVertical(const std::shared_ptr<SensorDataCallback> \
+        &sensorCallback) : sensorCallback_(sensorCallback) {};
     ~DeviceStatusVertical();
     void Init();
     void HandleVertical();
     void HandleNonVertical();
     void StartAlgorithm(int32_t sensorTypeId, void* sensorData);
-    void RegisterCallback(std::shared_ptr<DevicestatusAlgorithmManagerInterface::DevicestatusAlgorithmCallback> &callback);
+    void RegisterCallback(std::shared_ptr<DevicestatusAlgorithmManagerInterface::DevicestatusAlgorithmCallback> \
+        &callback);
     DevicestatusDataUtils::DevicestatusData Report();
 private:
     enum EventType {
@@ -55,4 +57,4 @@ private:
 };
 } // namespace Msdp
 } // namespace OHOS
-#endif	// DEVICE_STATUS_VERTICAL_H
+#endif // DEVICE_STATUS_VERTICAL_H

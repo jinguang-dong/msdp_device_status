@@ -278,8 +278,7 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest010, TestSize.Level1)
     GTEST_LOG_(INFO) << "DevicestatusAgentTest010 end";
 }
 
-HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest011, 
-    TestSize.Level1)
+HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest011, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DevicestatusAgentTest011 start";
     std::shared_ptr<DevicestatusAgentListenerMockFirstClient> agentEvent =

@@ -28,7 +28,7 @@ public:
         TYPE_LID_OPEN
     };
 
-    enum DevicestatusTypeValue{
+    enum DevicestatusTypeValue {
         INVALID = 0,
         VALID,
     };
@@ -46,11 +46,11 @@ public:
         ENTER_EXIT = 3
     };
 
-    enum DevicestatusReportLatencyNs{
+    enum DevicestatusReportLatencyNs {
         Latency_INVALID = -1,
         SHORT = 1,
         MIDDLE = 2,
-        LONG =3
+        LONG = 3
     };
     enum Status {
         STATUS_INVALID = -1,
@@ -77,8 +77,9 @@ public:
         Action action;
         double move;
 
-        bool operator!= (DevicestatusData const& data) const {
-            if (type == data.type && value == data.value 
+        bool operator!= (DevicestatusData const& data) const 
+        {
+            if (type == data.type && value == data.value
             && status == data.status && action == data.action && move == data.move) {
                 return false;
             }
@@ -87,7 +88,7 @@ public:
     };
 };
 
-typedef struct DeviceStatusJsonData{
+typedef struct DeviceStatusJsonData {
     int Type;
     char Json[20];
 }DeviceStatusJsonD;
@@ -97,8 +98,7 @@ static DeviceStatusJsonD DeviceStatusJson[] = {
     {DevicestatusDataUtils::DevicestatusType::TYPE_HORIZONTAL_POSITION, "horizontalPosition"},
     {DevicestatusDataUtils::DevicestatusType::TYPE_VERTICAL_POSITION, "verticalPosition"},
     {DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, "lid_open"}
-};
-    //- end -
+}; //- end -
 static int32_t in_vector_count[DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN + 1] = {0};
 } // namespace Msdp
 } // namespace OHOS

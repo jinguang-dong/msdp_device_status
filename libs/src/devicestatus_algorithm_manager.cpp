@@ -43,19 +43,19 @@ bool DevicestatusAlgorithmManager::Init()
 ErrCode DevicestatusAlgorithmManager::RegisterCallback(std::shared_ptr<DevicestatusAlgorithmCallback>& callback)
 {
     DEV_HILOGI(SERVICE, "%{public}s enter", __func__);
-    if(type_ == DevicestatusDataUtils::TYPE_STILL) {
+    if (type_ == DevicestatusDataUtils::TYPE_STILL) {
         if (!still_) {
             still_ = std::make_shared<AbsoluteStill>(sensorEventCb_);
             still_->RegisterCallback(callback);
             still_->Init();
         }
-    } else if(type_ == DevicestatusDataUtils::TYPE_HORIZONTAL_POSITION) {
+    } else if (type_ == DevicestatusDataUtils::TYPE_HORIZONTAL_POSITION) {
         if (!horizontalPosition_) {
             horizontalPosition_ = std::make_shared<DeviceStatusHorizontal>(sensorEventCb_);
             horizontalPosition_->RegisterCallback(callback);
-            horizontalPosition_->Init(); 
+            horizontalPosition_->Init();
         }
-    } else if(type_ == DevicestatusDataUtils::TYPE_VERTICAL_POSITION) {
+    } else if (type_ ==DevicestatusDataUtils::TYPE_VERTICAL_POSITION) {
         if (!verticalPosition_) {
             verticalPosition_ = std::make_shared<DeviceStatusVertical>(sensorEventCb_);
             verticalPosition_->RegisterCallback(callback);
@@ -72,7 +72,7 @@ ErrCode DevicestatusAlgorithmManager::UnregisterCallback()
     return ERR_OK;
 }
 
-ErrCode DevicestatusAlgorithmManager::DisableCount(const DevicestatusDataUtils::DevicestatusType& type) 
+ErrCode DevicestatusAlgorithmManager::DisableCount(const DevicestatusDataUtils::DevicestatusType& type)
 {
     return ERR_OK;
 }

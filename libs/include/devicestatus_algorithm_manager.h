@@ -25,7 +25,6 @@
 #include <errors.h>
 #include "devicestatus_data_utils.h"
 #include "devicestatus_algorithm_manager_interface.h"
-// #include "devicestatus_data_parse.h"
 #include "devicestatus_data_define.h"
 #include "sensor_data_callback.h"
 #include "device_status_absolute_still.h"
@@ -56,7 +55,7 @@ private:
     std::shared_ptr<DevicestatusAlgorithmCallback> callbacksImpl_;
     std::mutex mutex_;
     DevicestatusDataUtils::DevicestatusType type_;
-    std::shared_ptr<SensorDataCallback> sensorEventCb_{nullptr}; 
+    std::shared_ptr<SensorDataCallback> sensorEventCb_{nullptr};
     std::shared_ptr<AbsoluteStill> still_{nullptr};
     std::shared_ptr<DeviceStatusHorizontal> horizontalPosition_{nullptr};
     std::shared_ptr<DeviceStatusVertical> verticalPosition_{nullptr};

@@ -64,7 +64,7 @@ void DevicestatusSrvProxy::UnSubscribe(const DevicestatusDataUtils::Devicestatus
     const sptr<IdevicestatusCallback>& callback)
 {
     DEV_HILOGI(INNERKIT, "Enter");
-    DEV_HILOGI(INNERKIT, "UNevent: %{public}d",event);
+    DEV_HILOGI(INNERKIT, "UNevent: %{public}d", event);
     sptr<IRemoteObject> remote = Remote();
     DEVICESTATUS_RETURN_IF((remote == nullptr) || (callback == nullptr));
 
