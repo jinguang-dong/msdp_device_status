@@ -50,11 +50,8 @@ public:
         const DevicestatusDataUtils::DevicestatusActivityEvent& event);
     friend class DeviceStatusAgentCallback;
 private:
-    void RegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type, \
-        const DevicestatusDataUtils::DevicestatusActivityEvent& event, \
-        const DevicestatusDataUtils::DevicestatusReportLatencyNs& latency);
-    void UnRegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type, \
-    const DevicestatusDataUtils::DevicestatusActivityEvent& event);
+    void RegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type,const DevicestatusDataUtils::DevicestatusActivityEvent& event,const DevicestatusDataUtils::DevicestatusReportLatencyNs& latency);
+    void UnRegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type,const DevicestatusDataUtils::DevicestatusActivityEvent& event);
     sptr<IdevicestatusCallback> callback_;
     std::shared_ptr<DeviceStatusAgentEvent> agentEvent_;
 };

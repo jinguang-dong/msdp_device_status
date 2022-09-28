@@ -64,6 +64,7 @@ void DeviceStatusVertical::StartAlgorithm(int32_t sensorTypeId, void* sensorData
         x_, y_, z_);
     if ((abs(x_) < ACCELERATION_VALID_THRESHOLD) && (abs(y_) < ACCELERATION_VALID_THRESHOLD) && 
         (abs(z_) < ACCELERATION_VALID_THRESHOLD)) {
+
         pitch_ = -atan2(y_, z_) * (ANGLE_ONE_HUNDRED_AND_EIGHTY_DEGREE / PI);
 
         if ((abs(pitch_) > ANGLE_EIGHTY_DEGREE) && (abs(pitch_) < ANGLE_ONE_HUNDRED_AND_TEN_DEGREE)) {

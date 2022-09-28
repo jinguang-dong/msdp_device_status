@@ -57,6 +57,7 @@ public:
     static void InvokeCallBack(napi_env env, napi_value *args, bool voidParameter, int32_t value);
     void OnDevicestatusChangedDone(const int32_t& type, const int32_t& value, bool isOnce);
     static DevicestatusNapi* GetDevicestatusNapi(int32_t type);
+    static int32_t ConvertTypeToInt(std::string type);
     static std::map<int32_t, sptr<IdevicestatusCallback>> callbackMap_;
     static std::map<int32_t, DevicestatusNapi*> objectMap_;
 

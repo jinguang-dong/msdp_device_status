@@ -74,7 +74,7 @@ DevicestatusDataUtils::DevicestatusData DevicestatusManager::GetLatestDevicestat
 bool DevicestatusManager::EnableRdb(const DevicestatusDataUtils::DevicestatusType& type)
 {
     DEV_HILOGE(SERVICE, "Enter");
-    InitInterface(type); //START SENSOR
+    InitInterface(type);//START SENSOR
     InitDataCallback();
     return true;
 }
@@ -170,18 +170,18 @@ void DevicestatusManager::NotifyDevicestatusChange(const DevicestatusDataUtils::
             return;
         }
     DEV_HILOGI(SERVICE, "type: %{public}d, arrs:%{public}d" ,devicestatusData.type,arrs[devicestatusData.type]);
-    switch (arrs[devicestatusData.type]) {
-        case DevicestatusDataUtils::ENTER:
-            if (devicestatusData.value == DevicestatusDataUtils::VALUE_ENTER) {
+    switch (arrs[devicestatusData.type]) { 
+        case 1:
+            if (devicestatusData.value == 1) {
                 listener->OnDevicestatusChanged(devicestatusData);
             }
             break;
-        case DevicestatusDataUtils::EXIT:
-            if (devicestatusData.value == DevicestatusDataUtils::VALUE_EXIT) {
+        case 2:
+            if (devicestatusData.value == 0) {
                 listener->OnDevicestatusChanged(devicestatusData);
             }
             break;
-        case DevicestatusDataUtils::ENTER_EXIT:
+        case 3:
             listener->OnDevicestatusChanged(devicestatusData);
             break;
         default:
@@ -207,7 +207,7 @@ void DevicestatusManager::Subscribe(const DevicestatusDataUtils::DevicestatusTyp
         return;
     }
     arrs [type_] = event_;
-    DEV_HILOGE(SERVICE, " arr save:%{public}d ,event:%{public}d", type_, event);
+    DEV_HILOGE(SERVICE, " arr save:%{public}d ,event:%{public}d",type_,event);
     std::lock_guard lock(mutex_);
     auto dtTypeIter = listenerMap_.find(type);
     if (dtTypeIter == listenerMap_.end()) {
@@ -237,13 +237,13 @@ void DevicestatusManager::UnSubscribe(const DevicestatusDataUtils::DevicestatusT
     const sptr<IdevicestatusCallback>& callback)
 {
     DEV_HILOGI(SERVICE, "Enter");
-    DEV_HILOGE(SERVICE, "UNevent: %{public}d", event);
+    DEV_HILOGE(SERVICE, "UNevent: %{public}d",event);
     std::lock_guard lock(mutex_);
     DEVICESTATUS_RETURN_IF(callback == nullptr);
     auto object = callback->AsObject();
     DEVICESTATUS_RETURN_IF(object == nullptr);
     arrs [type_] = 0;
-    DEV_HILOGE(SERVICE, "listenerMap_.size=%{public}zu,arrs:%{public}d", listenerMap_.size(), arrs [type_]);
+    DEV_HILOGE(SERVICE, "listenerMap_.size=%{public}zu,arrs:%{public}d", listenerMap_.size(),arrs [type_]);
 
     auto dtTypeIter = listenerMap_.find(type);
     if (dtTypeIter == listenerMap_.end()) {

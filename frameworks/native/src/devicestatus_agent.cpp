@@ -47,8 +47,10 @@ int32_t DeviceStatusAgent::SubscribeAgentEvent(const DevicestatusDataUtils::Devi
         return ERR_INVALID_VALUE;
     }
     if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
-        && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
-        //RegisterServiceEvent(type);
+        && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN
+        && event > DevicestatusDataUtils::DevicestatusActivityEvent::EVENT_INVALID
+        && event <= DevicestatusDataUtils::DevicestatusActivityEvent::ENTER_EXIT) {
+        RegisterServiceEvent(type,event,latency);
         agentEvent_ = agentEvent;
     } else {
         return ERR_INVALID_VALUE;
@@ -60,8 +62,10 @@ int32_t DeviceStatusAgent::UnSubscribeAgentEvent(const DevicestatusDataUtils::De
     const DevicestatusDataUtils::DevicestatusActivityEvent& event)
 {
     if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
-        && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
-        //UnRegisterServiceEvent(type);
+        && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN
+        && event > DevicestatusDataUtils::DevicestatusActivityEvent::EVENT_INVALID
+        && event <= DevicestatusDataUtils::DevicestatusActivityEvent::ENTER_EXIT) {
+        UnRegisterServiceEvent(type,event);
         return ERR_OK;
     }
     return ERR_INVALID_VALUE;
@@ -73,14 +77,14 @@ void DeviceStatusAgent::RegisterServiceEvent(const DevicestatusDataUtils::Device
 {
     DEV_HILOGI(INNERKIT, "Enter");
     callback_ = new DeviceStatusAgentCallback(shared_from_this());
-    // DevicestatusClient::GetInstance().SubscribeCallback(type, callback_);
+    DevicestatusClient::GetInstance().SubscribeCallback(type,event,latency, callback_);
 }
 
 void DeviceStatusAgent::UnRegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type, \
     const DevicestatusDataUtils::DevicestatusActivityEvent& event)
 {
     DEV_HILOGI(INNERKIT, "Enter");
-    // DevicestatusClient::GetInstance().UnSubscribeCallback(type, callback_);
+    DevicestatusClient::GetInstance().UnSubscribeCallback(type,event, callback_);
 }
 } // namespace Msdp
 } // namespace OHOS

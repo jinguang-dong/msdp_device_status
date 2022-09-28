@@ -56,9 +56,9 @@ HWTEST_F (DevicestatusServiceTest, DevicestatusCallbackTest, TestSize.Level0)
     auto& devicestatusClient = DevicestatusClient::GetInstance();
     sptr<IdevicestatusCallback> cb = new DevicestatusServiceTestCallback();
     GTEST_LOG_(INFO) << "Start register";
-    devicestatusClient.SubscribeCallback(type,event,latency,cb);
+    devicestatusClient.SubscribeCallback(type,event,latency, cb);
     GTEST_LOG_(INFO) << "Cancell register";
-    devicestatusClient.UnSubscribeCallback(type,event,cb);
+    devicestatusClient.UnSubscribeCallback(type,event, cb);
 }
 
 /**

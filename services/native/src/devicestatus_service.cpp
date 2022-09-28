@@ -224,6 +224,7 @@ void DevicestatusService::ReportSensorSysEvent(const DevicestatusDataUtils::Devi
         HiSysEvent::Write(HiSysEvent::Domain::MSDP, "UnSubscribe", HiSysEvent::EventType::STATISTIC,
             "UID", uid, "PKGNAME", packageName, "TYPE", type);
     }
+
 }
 } // namespace Msdp
 } // namespace OHOS

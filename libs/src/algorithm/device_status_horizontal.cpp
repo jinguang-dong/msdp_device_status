@@ -26,7 +26,7 @@ void DeviceStatusHorizontal::Init()
 {
     DEV_HILOGI(SERVICE, "%{public}s enter", __func__);
     reportInfo_.type = DevicestatusDataUtils::TYPE_INVALID;
-    reportInfo_.value = DevicestatusDataUtils::VALUE_INVALID;
+    reportInfo_.value = DevicestatusDataUtils::VALUE_INVALID; 
     reportInfo_.status = DevicestatusDataUtils::STATUS_INVALID;
     reportInfo_.action = DevicestatusDataUtils::ACTION_INVALID;
     reportInfo_.move = 0;
@@ -63,8 +63,9 @@ void DeviceStatusHorizontal::StartAlgorithm(int32_t sensorTypeId, void* sensorDa
         "acc_x_: %{public}f, acc_y_: %{public}f, acc_z_: %{public}f",
         x_, y_, z_);
     
-    if ((abs(x_) < ACCELERATION_VALID_THRESHOLD) && (abs(y_) < ACCELERATION_VALID_THRESHOLD) &&
+    if ((abs(x_) < ACCELERATION_VALID_THRESHOLD) && (abs(y_) < ACCELERATION_VALID_THRESHOLD) && 
         (abs(z_) < ACCELERATION_VALID_THRESHOLD)) {
+
         vectorModule_ = sqrt((x_ * x_) + (y_ * y_) + (z_ * z_));
         pitch_ = -atan2(y_, z_) * (ANGLE_ONE_HUNDRED_AND_EIGHTY_DEGREE / PI);
         roll_ = atan2(x_, z_) * (ANGLE_ONE_HUNDRED_AND_EIGHTY_DEGREE / PI);
@@ -121,7 +122,7 @@ DevicestatusDataUtils::DevicestatusData DeviceStatusHorizontal::Report()
     if (callbackImpl_ != nullptr) {
         callbackImpl_->OnAlogrithmResult(reportInfo_);
     } else {
-        DEV_HILOGI(SERVICE, "callbackImpl_ is null");
+        DEV_HILOGI(SERVICE, "callbackImpl_ is null"); 
     }
     return reportInfo_;
 }

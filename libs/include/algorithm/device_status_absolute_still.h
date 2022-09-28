@@ -31,8 +31,7 @@ public:
     void HandleStill();
     void HandleUnstill();
     void StartAlgorithm(int32_t sensorTypeId, void* sensorData);
-    void RegisterCallback(std::shared_ptr<DevicestatusAlgorithmManagerInterface::DevicestatusAlgorithmCallback> \
-        &callback);
+    void RegisterCallback(std::shared_ptr<DevicestatusAlgorithmManagerInterface::DevicestatusAlgorithmCallback> &callback);
     DevicestatusDataUtils::DevicestatusData Report();
 private:
     enum EventType {
