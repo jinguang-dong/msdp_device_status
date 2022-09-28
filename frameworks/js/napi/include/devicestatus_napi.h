@@ -41,8 +41,6 @@ public:
     static napi_value Init(napi_env env, napi_value exports);
     static napi_value SubscribeDevicestatus(napi_env env, napi_callback_info info);
     static napi_value UnSubscribeDevicestatus(napi_env env, napi_callback_info info);
-    static napi_value GetDevicestatus(napi_env env, napi_callback_info info);
-    static napi_value EnumDevicestatusTypeConstructor(napi_env env, napi_callback_info info);
     static napi_value CreateEnumDevicestatusType(napi_env env, napi_value exports);
     static napi_value EnumDevicestatusValueConstructor(napi_env env, napi_callback_info info);
     static napi_value CreateDevicestatusValueType(napi_env env, napi_value exports);
@@ -53,6 +51,7 @@ public:
     static napi_value CreateInstanceForResponse(napi_env env, int32_t value);
     static void RegisterCallback(const int32_t& eventType);
     static void InvokeCallBack(napi_env env, napi_value *args, bool voidParameter, int32_t value);
+	static int32_t ConvertTypeToInt(std::string type);
     void OnDevicestatusChangedDone(const int32_t& type, const int32_t& value, bool isOnce);
     static DevicestatusNapi* GetDevicestatusNapi();
     static std::map<int32_t, sptr<IdevicestatusCallback>> callbackMap_;
