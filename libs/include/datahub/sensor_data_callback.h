@@ -69,3 +69,5 @@ private:
 } // namespace Msdp
 } // namespace OHOS
 #endif // SENSOR_DATA_CALLBACK_H
+
+    
