@@ -97,6 +97,8 @@ void DevicestatusClient::DevicestatusDeathRecipient::OnRemoteDied(const wptr<IRe
 }
 
 void DevicestatusClient::SubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
+    const DevicestatusDataUtils::DevicestatusActivityEvent& event,
+    const DevicestatusDataUtils::DevicestatusReportLatencyNs& latency,
     const sptr<IdevicestatusCallback>& callback)
 {
     DEV_HILOGD(INNERKIT, "Enter");
@@ -107,13 +109,14 @@ void DevicestatusClient::SubscribeCallback(const DevicestatusDataUtils::Devicest
     }
     if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
         && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
-        devicestatusProxy_->Subscribe(type, callback);
+        devicestatusProxy_->Subscribe(type, event, latency, callback);
     }
     return;
     DEV_HILOGD(INNERKIT, "Exit");
 }
 
 void DevicestatusClient::UnSubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
+    const DevicestatusDataUtils::DevicestatusActivityEvent& event,
     const sptr<IdevicestatusCallback>& callback)
 {
     DEV_HILOGD(INNERKIT, "Enter");
@@ -124,7 +127,7 @@ void DevicestatusClient::UnSubscribeCallback(const DevicestatusDataUtils::Device
     }
     if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
         && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
-        devicestatusProxy_->UnSubscribe(type, callback);
+        devicestatusProxy_->UnSubscribe(type, event, callback);
     }
     return;
     DEV_HILOGD(INNERKIT, "Exit");
