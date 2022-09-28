@@ -37,8 +37,6 @@ void DeviceStatusAgent::DeviceStatusAgentCallback::OnDevicestatusChanged(
 }
 
 int32_t DeviceStatusAgent::SubscribeAgentEvent(const DevicestatusDataUtils::DevicestatusType& type,
-    const DevicestatusDataUtils::DevicestatusActivityEvent& event,
-    const DevicestatusDataUtils::DevicestatusReportLatencyNs& latency,
     const std::shared_ptr<DeviceStatusAgent::DeviceStatusAgentEvent>& agentEvent)
 {
     DEV_HILOGI(INNERKIT, "Enter");
@@ -47,10 +45,8 @@ int32_t DeviceStatusAgent::SubscribeAgentEvent(const DevicestatusDataUtils::Devi
         return ERR_INVALID_VALUE;
     }
     if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
-        && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN
-        && event > DevicestatusDataUtils::DevicestatusActivityEvent::EVENT_INVALID
-        && event <= DevicestatusDataUtils::DevicestatusActivityEvent::ENTER_EXIT) {
-        RegisterServiceEvent(type,event,latency);
+        && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
+        RegisterServiceEvent(type);
         agentEvent_ = agentEvent;
     } else {
         return ERR_INVALID_VALUE;
@@ -58,30 +54,27 @@ int32_t DeviceStatusAgent::SubscribeAgentEvent(const DevicestatusDataUtils::Devi
     return ERR_OK;
 }
 
-int32_t DeviceStatusAgent::UnSubscribeAgentEvent(const DevicestatusDataUtils::DevicestatusType& type,const DevicestatusDataUtils::DevicestatusActivityEvent& event)
+int32_t DeviceStatusAgent::UnSubscribeAgentEvent(const DevicestatusDataUtils::DevicestatusType& type)
 {
     if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
-        && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN
-        && event > DevicestatusDataUtils::DevicestatusActivityEvent::EVENT_INVALID
-        && event <= DevicestatusDataUtils::DevicestatusActivityEvent::ENTER_EXIT) {
-        UnRegisterServiceEvent(type,event);
+        && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
+        UnRegisterServiceEvent(type);
         return ERR_OK;
     }
     return ERR_INVALID_VALUE;
 }
 
-void DeviceStatusAgent::RegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type,const DevicestatusDataUtils::DevicestatusActivityEvent& event,
-    const DevicestatusDataUtils::DevicestatusReportLatencyNs& latency)
+void DeviceStatusAgent::RegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type)
 {
     DEV_HILOGI(INNERKIT, "Enter");
     callback_ = new DeviceStatusAgentCallback(shared_from_this());
-    DevicestatusClient::GetInstance().SubscribeCallback(type,event,latency, callback_);
+    DevicestatusClient::GetInstance().SubscribeCallback(type, callback_);
 }
 
-void DeviceStatusAgent::UnRegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type,const DevicestatusDataUtils::DevicestatusActivityEvent& event)
+void DeviceStatusAgent::UnRegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type)
 {
     DEV_HILOGI(INNERKIT, "Enter");
-    DevicestatusClient::GetInstance().UnSubscribeCallback(type,event, callback_);
+    DevicestatusClient::GetInstance().UnSubscribeCallback(type, callback_);
 }
 } // namespace Msdp
 } // namespace OHOS

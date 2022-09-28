@@ -26,7 +26,7 @@ void AbsoluteStill::Init()
 {
     DEV_HILOGI(SERVICE, "%{public}s enter", __func__);
     reportInfo_.type = DevicestatusDataUtils::TYPE_INVALID;
-    reportInfo_.value = DevicestatusDataUtils::VALUE_INVALID; 
+    reportInfo_.value = DevicestatusDataUtils::VALUE_INVALID;
     reportInfo_.status = DevicestatusDataUtils::STATUS_INVALID;
     reportInfo_.action = DevicestatusDataUtils::ACTION_INVALID;
     reportInfo_.move = 0;
@@ -41,14 +41,14 @@ void AbsoluteStill::HandleStill()
         Report();
     }
 }
-void AbsoluteStill::HandleUnstill() 
+void AbsoluteStill::HandleUnstill()
 {
     DEV_HILOGI(SERVICE, "%{public}s enter", __func__);
 }
 
-void AbsoluteStill::StartAlgorithm(int32_t sensorTypeId, void* sensorData) 
+void AbsoluteStill::StartAlgorithm(int32_t sensorTypeId, void* sensorData)
 {
-	DEV_HILOGI(SERVICE, "%{public}s enter", __func__);
+    DEV_HILOGI(SERVICE, "%{public}s enter", __func__);
     if (sensorTypeId == SENSOR_TYPE_ID_ACCELEROMETER) {
         AccelData* data = (AccelData*)sensorData;
         x_ = data->y;
@@ -61,7 +61,7 @@ void AbsoluteStill::StartAlgorithm(int32_t sensorTypeId, void* sensorData)
         "acc_x_: %{public}f, acc_y_: %{public}f, acc_z_: %{public}f",
         x_, y_, z_);
     
-    if ((abs(x_) < ACCELERATION_VALID_THRESHOLD) && (abs(y_) < ACCELERATION_VALID_THRESHOLD) && 
+    if ((abs(x_) < ACCELERATION_VALID_THRESHOLD) && (abs(y_) < ACCELERATION_VALID_THRESHOLD) &&
         (abs(z_) < ACCELERATION_VALID_THRESHOLD)) {
 
         vectorModule_ = sqrt((x_ * x_) + (y_ * y_) + (z_ * z_));
@@ -92,13 +92,14 @@ void AbsoluteStill::StartAlgorithm(int32_t sensorTypeId, void* sensorData)
             case UNSTILL:
                 HandleUnstill();
                 break;
-            default: 
+            default:
                 break;
         }
     }
 }
 
-void  AbsoluteStill::RegisterCallback(std::shared_ptr<DevicestatusAlgorithmManagerInterface::DevicestatusAlgorithmCallback> &callback)
+void AbsoluteStill::RegisterCallback(std::shared_ptr \
+    <DevicestatusAlgorithmManagerInterface::DevicestatusAlgorithmCallback> &callback)
 {
     DEV_HILOGI(SERVICE, "%{public}s enter", __func__);
     callbackImpl_ = callback;
@@ -119,7 +120,7 @@ DevicestatusDataUtils::DevicestatusData AbsoluteStill::Report()
     if (callbackImpl_ != nullptr) {
         callbackImpl_->OnAlogrithmResult(reportInfo_);
     } else {
-        DEV_HILOGI(SERVICE, "callbackImpl_ is null"); 
+        DEV_HILOGI(SERVICE, "callbackImpl_ is null");
     }
     return reportInfo_;
 }

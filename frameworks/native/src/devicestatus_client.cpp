@@ -97,11 +97,9 @@ void DevicestatusClient::DevicestatusDeathRecipient::OnRemoteDied(const wptr<IRe
 }
 
 void DevicestatusClient::SubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
-    const DevicestatusDataUtils::DevicestatusActivityEvent& event,
-    const DevicestatusDataUtils::DevicestatusReportLatencyNs& latency,
     const sptr<IdevicestatusCallback>& callback)
 {
-    DEV_HILOGI(INNERKIT, "Enter event:%{public}d,latency:%{public}d", event,latency);
+    DEV_HILOGD(INNERKIT, "Enter");
     DEVICESTATUS_RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
     if (devicestatusProxy_ == nullptr) {
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
@@ -109,16 +107,16 @@ void DevicestatusClient::SubscribeCallback(const DevicestatusDataUtils::Devicest
     }
     if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
         && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
-        devicestatusProxy_->Subscribe(type,event,latency, callback);
+        devicestatusProxy_->Subscribe(type, callback);
     }
     return;
+    DEV_HILOGD(INNERKIT, "Exit");
 }
 
 void DevicestatusClient::UnSubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
-    const DevicestatusDataUtils::DevicestatusActivityEvent& event,
     const sptr<IdevicestatusCallback>& callback)
 {
-    DEV_HILOGI(INNERKIT, "UNevent: %{public}d",event);
+    DEV_HILOGD(INNERKIT, "Enter");
     DEVICESTATUS_RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
     if (devicestatusProxy_ == nullptr) {
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
@@ -126,10 +124,10 @@ void DevicestatusClient::UnSubscribeCallback(const DevicestatusDataUtils::Device
     }
     if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
         && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
-        devicestatusProxy_->UnSubscribe(type, event, callback);
+        devicestatusProxy_->UnSubscribe(type, callback);
     }
     return;
-    DEV_HILOGI(INNERKIT, "Exit");
+    DEV_HILOGD(INNERKIT, "Exit");
 }
 
 DevicestatusDataUtils::DevicestatusData DevicestatusClient::GetDevicestatusData(const \

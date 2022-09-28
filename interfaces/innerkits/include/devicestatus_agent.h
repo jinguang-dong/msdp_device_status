@@ -43,15 +43,12 @@ public:
     };
 
     int32_t SubscribeAgentEvent(const DevicestatusDataUtils::DevicestatusType& type,
-        const DevicestatusDataUtils::DevicestatusActivityEvent& event,
-        const DevicestatusDataUtils::DevicestatusReportLatencyNs& latency,
         const std::shared_ptr<DeviceStatusAgent::DeviceStatusAgentEvent>& agentEvent);
-    int32_t UnSubscribeAgentEvent(const DevicestatusDataUtils::DevicestatusType& type,
-        const DevicestatusDataUtils::DevicestatusActivityEvent& event);
+    int32_t UnSubscribeAgentEvent(const DevicestatusDataUtils::DevicestatusType& type);
     friend class DeviceStatusAgentCallback;
 private:
-    void RegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type,const DevicestatusDataUtils::DevicestatusActivityEvent& event,const DevicestatusDataUtils::DevicestatusReportLatencyNs& latency);
-    void UnRegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type,const DevicestatusDataUtils::DevicestatusActivityEvent& event);
+    void RegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type);
+    void UnRegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type);
     sptr<IdevicestatusCallback> callback_;
     std::shared_ptr<DeviceStatusAgentEvent> agentEvent_;
 };
