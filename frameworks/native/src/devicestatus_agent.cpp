@@ -68,13 +68,13 @@ void DeviceStatusAgent::RegisterServiceEvent(const DevicestatusDataUtils::Device
 {
     DEV_HILOGI(INNERKIT, "Enter");
     callback_ = new DeviceStatusAgentCallback(shared_from_this());
-    DevicestatusClient::GetInstance().SubscribeCallback(type, callback_);
+    // DevicestatusClient::GetInstance().SubscribeCallback(type, callback_);
 }
 
 void DeviceStatusAgent::UnRegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type)
 {
     DEV_HILOGI(INNERKIT, "Enter");
-    DevicestatusClient::GetInstance().UnSubscribeCallback(type, callback_);
+    // DevicestatusClient::GetInstance().UnSubscribeCallback(type, callback_);
 }
 } // namespace Msdp
 } // namespace OHOS

@@ -138,7 +138,7 @@ int32_t DevicestatusManager::SensorDataCallback(const struct SensorEvents *event
 {
     DEV_HILOGI(SERVICE, "Enter");
     // handle sensor event properly when we get the data details of sensor HDI.
-    DevicestatusDataUtils::DevicestatusData data = {DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL,
+    DevicestatusDataUtils::DevicestatusData data = {DevicestatusDataUtils::DevicestatusType::TYPE_STILL,
         DevicestatusDataUtils::DevicestatusValue::VALUE_ENTER};
     NotifyDevicestatusChange(data);
     return ERR_OK;
@@ -169,6 +169,7 @@ void DevicestatusManager::NotifyDevicestatusChange(const DevicestatusDataUtils::
             DEV_HILOGI(SERVICE, "Listener is nullptr");
             return;
         }
+    DEV_HILOGI(SERVICE, "type: %{public}d, arrs:%{public}d" ,devicestatusData.type,arrs[devicestatusData.type]);
     switch (arrs[devicestatusData.type]) {
         case DevicestatusDataUtils::ENTER:
             if (devicestatusData.value == DevicestatusDataUtils::VALUE_ENTER) {
@@ -206,6 +207,7 @@ void DevicestatusManager::Subscribe(const DevicestatusDataUtils::DevicestatusTyp
         return;
     }
     arrs [type_] = event_;
+    DEV_HILOGE(SERVICE, " arr save:%{public}d ,event:%{public}d", type_, event);
     std::lock_guard lock(mutex_);
     auto dtTypeIter = listenerMap_.find(type);
     if (dtTypeIter == listenerMap_.end()) {
@@ -241,6 +243,7 @@ void DevicestatusManager::UnSubscribe(const DevicestatusDataUtils::DevicestatusT
     auto object = callback->AsObject();
     DEVICESTATUS_RETURN_IF(object == nullptr);
     arrs [type_] = 0;
+    DEV_HILOGE(SERVICE, "listenerMap_.size=%{public}zu,arrs:%{public}d", listenerMap_.size(), arrs [type_]);
 
     auto dtTypeIter = listenerMap_.find(type);
     if (dtTypeIter == listenerMap_.end()) {
