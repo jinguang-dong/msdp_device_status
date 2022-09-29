@@ -54,7 +54,7 @@ int32_t DevicestatusSrvStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
 
 int32_t DevicestatusSrvStub::SubscribeStub(MessageParcel& data)
 {
-    DEV_HILOGD(SERVICE, "Enter");
+    DEV_HILOGI(SERVICE, "Enter");
     int32_t type = -1;
     DEVICESTATUS_READ_PARCEL_WITH_RET(data, Int32, type, E_DEVICESTATUS_READ_PARCEL_ERROR);
     DEV_HILOGD(SERVICE, "Read type successfully");
@@ -64,7 +64,7 @@ int32_t DevicestatusSrvStub::SubscribeStub(MessageParcel& data)
     sptr<IdevicestatusCallback> callback = iface_cast<IdevicestatusCallback>(obj);
     DEVICESTATUS_RETURN_IF_WITH_RET((callback == nullptr), E_DEVICESTATUS_READ_PARCEL_ERROR);
     DEV_HILOGD(SERVICE, "Read callback successfully");
-    Subscribe(DevicestatusDataUtils::DevicestatusType(type), callback);
+    //Subscribe(DevicestatusDataUtils::DevicestatusType(type), callback);
     return ERR_OK;
 }
 
@@ -77,7 +77,7 @@ int32_t DevicestatusSrvStub::UnSubscribeStub(MessageParcel& data)
     DEVICESTATUS_RETURN_IF_WITH_RET((obj == nullptr), E_DEVICESTATUS_READ_PARCEL_ERROR);
     sptr<IdevicestatusCallback> callback = iface_cast<IdevicestatusCallback>(obj);
     DEVICESTATUS_RETURN_IF_WITH_RET((callback == nullptr), E_DEVICESTATUS_READ_PARCEL_ERROR);
-    UnSubscribe(DevicestatusDataUtils::DevicestatusType(type), callback);
+    //UnSubscribe(DevicestatusDataUtils::DevicestatusType(type), callback);
     return ERR_OK;
 }
 

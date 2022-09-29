@@ -223,7 +223,7 @@ napi_value DevicestatusNapi::SubscribeDevicestatus(napi_env env, napi_callback_i
     if (!isCallbackExists) {
         DEV_HILOGD(JS_NAPI, "Didn't find callback, so created it");
         callback = new DevicestatusCallback();
-        g_DevicestatusClient.SubscribeCallback(DevicestatusDataUtils::DevicestatusType(type), callback);
+        // g_DevicestatusClient.SubscribeCallback(DevicestatusDataUtils::DevicestatusType(type), callback);
         callbackMap_.insert(std::pair<int32_t, sptr<IdevicestatusCallback>>(type, callback));
         InvokeCallBack(env, args, false, CALLBACK_SUCCESS);
     } else {
@@ -305,7 +305,7 @@ napi_value DevicestatusNapi::UnSubscribeDevicestatus(napi_env env, napi_callback
         DEV_HILOGE(JS_NAPI, "No existed callback");
         return result;
     } else if (callback != nullptr) {
-        g_DevicestatusClient.UnSubscribeCallback(DevicestatusDataUtils::DevicestatusType(type), callback);
+        // g_DevicestatusClient.UnSubscribeCallback(DevicestatusDataUtils::DevicestatusType(type), callback);
         callbackMap_.erase(type);
     }
     napi_get_undefined(env, &result);
@@ -387,9 +387,9 @@ napi_value DevicestatusNapi::CreateEnumDevicestatusType(napi_env env, napi_value
     napi_value fineStill = nullptr;
     napi_value carBluetooth = nullptr;
 
-    napi_create_int32(env, (int32_t)DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL, &highStill);
-    napi_create_int32(env, (int32_t)DevicestatusDataUtils::DevicestatusType::TYPE_FINE_STILL, &fineStill);
-    napi_create_int32(env, (int32_t)DevicestatusDataUtils::DevicestatusType::TYPE_CAR_BLUETOOTH, &carBluetooth);
+    //napi_create_int32(env, (int32_t)DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL, &highStill);
+    //napi_create_int32(env, (int32_t)DevicestatusDataUtils::DevicestatusType::TYPE_FINE_STILL, &fineStill);
+    //napi_create_int32(env, (int32_t)DevicestatusDataUtils::DevicestatusType::TYPE_CAR_BLUETOOTH, &carBluetooth);
 
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_STATIC_PROPERTY("TYPE_HIGH_STILL", highStill),
