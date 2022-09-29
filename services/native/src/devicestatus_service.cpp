@@ -162,7 +162,7 @@ void DevicestatusService::Subscribe(const DevicestatusDataUtils::DevicestatusTyp
     appInfo->uid = GetCallingUid();
     appInfo->pid = GetCallingPid();
     appInfo->tokenId = GetCallingTokenID();
-    //appInfo->packageName = DevicestatusDumper::GetInstance().GetPackageName(appInfo->tokenId);
+    appInfo->packageName = DevicestatusDumper::GetInstance().GetPackageName(appInfo->tokenId);
     appInfo->type = type;
     appInfo->callback = callback;
     DevicestatusDumper::GetInstance().SaveAppInfo(appInfo);
@@ -189,7 +189,7 @@ void DevicestatusService::UnSubscribe(const DevicestatusDataUtils::DevicestatusT
     appInfo->uid = GetCallingUid();
     appInfo->pid = GetCallingPid();
     appInfo->tokenId = GetCallingTokenID();
-    //appInfo->packageName = DevicestatusDumper::GetInstance().GetPackageName(appInfo->tokenId);
+    appInfo->packageName = DevicestatusDumper::GetInstance().GetPackageName(appInfo->tokenId);
     appInfo->type = type;
     appInfo->callback = callback;
     DevicestatusDumper::GetInstance().RemoveAppInfo(appInfo);
@@ -213,9 +213,9 @@ DevicestatusDataUtils::DevicestatusData DevicestatusService::GetCache(const \
 void DevicestatusService::ReportSensorSysEvent(const DevicestatusDataUtils::DevicestatusType& type, bool enable)
 {
     auto uid = this->GetCallingUid();
-    // auto callerToken = this->GetCallingTokenID();
+    auto callerToken = this->GetCallingTokenID();
     std::string packageName("");
-    //devicestatusManager_->GetPackageName(callerToken, packageName);
+    devicestatusManager_->GetPackageName(callerToken, packageName);
     std::string message;
     if (enable) {
         HiSysEvent::Write(HiSysEvent::Domain::MSDP, "Subscribe", HiSysEvent::EventType::STATISTIC,
