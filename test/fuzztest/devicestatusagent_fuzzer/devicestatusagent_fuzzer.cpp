@@ -37,7 +37,10 @@ void DevicestatusAgentFuzzer::TestSubscribeAgentEvent(const uint8_t* data)
 {
     std::cout << "TestSubscribeAgentEvent: Enter " << std::endl;
 
-    agent_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, agentEvent_);
+    agent_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER, \
+        DevicestatusDataUtils::DevicestatusReportLatencyNs::Latency_INVALID, \
+        agentEvent_);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_TIME));
     TestUnSubscribeAgentEvent(agent_);
@@ -47,7 +50,8 @@ void DevicestatusAgentFuzzer::TestUnSubscribeAgentEvent(const std::shared_ptr<De
 {
     std::cout << "TestUnSubscribeAgentEvent: Enter " << std::endl;
 
-    agent_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN);
+    agent_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, \
+        DevicestatusDataUtils::DevicestatusActivityEvent::ENTER);
 }
 
 bool DevicestatusAgentFuzzer::DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
