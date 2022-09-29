@@ -101,7 +101,7 @@ void DevicestatusClient::SubscribeCallback(const DevicestatusDataUtils::Devicest
     const DevicestatusDataUtils::DevicestatusReportLatencyNs& latency,
     const sptr<IdevicestatusCallback>& callback)
 {
-    DEV_HILOGD(INNERKIT, "Enter");
+    DEV_HILOGI(INNERKIT, "Enter event:%{public}d,latency:%{public}d", event, latency);
     DEVICESTATUS_RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
     if (devicestatusProxy_ == nullptr) {
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
@@ -112,14 +112,13 @@ void DevicestatusClient::SubscribeCallback(const DevicestatusDataUtils::Devicest
         devicestatusProxy_->Subscribe(type, event, latency, callback);
     }
     return;
-    DEV_HILOGD(INNERKIT, "Exit");
 }
 
 void DevicestatusClient::UnSubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
     const DevicestatusDataUtils::DevicestatusActivityEvent& event,
     const sptr<IdevicestatusCallback>& callback)
 {
-    DEV_HILOGD(INNERKIT, "Enter");
+    DEV_HILOGI(INNERKIT, "UNevent: %{public}d", event);
     DEVICESTATUS_RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
     if (devicestatusProxy_ == nullptr) {
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
@@ -130,7 +129,7 @@ void DevicestatusClient::UnSubscribeCallback(const DevicestatusDataUtils::Device
         devicestatusProxy_->UnSubscribe(type, event, callback);
     }
     return;
-    DEV_HILOGD(INNERKIT, "Exit");
+    DEV_HILOGI(INNERKIT, "Exit");
 }
 
 DevicestatusDataUtils::DevicestatusData DevicestatusClient::GetDevicestatusData(const \
