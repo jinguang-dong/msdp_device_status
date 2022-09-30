@@ -26,6 +26,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 DevicestatusClient::DevicestatusClient() {}
 DevicestatusClient::~DevicestatusClient()
 {
@@ -96,59 +97,62 @@ void DevicestatusClient::DevicestatusDeathRecipient::OnRemoteDied(const wptr<IRe
     DEV_HILOGD(INNERKIT, "Recv death notice");
 }
 
-void DevicestatusClient::SubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
+void DevicestatusClient::SubscribeCallback(const DataUtils::Type& type, \
+    const DataUtils::ActivityEvent& event,
+    const DataUtils::ReportLatencyNs& latency,
     const sptr<IdevicestatusCallback>& callback)
 {
-    DEV_HILOGD(INNERKIT, "Enter");
+    DEV_HILOGI(INNERKIT, "Enter event:%{public}d,latency:%{public}d", event, latency);
     DEVICESTATUS_RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
     if (devicestatusProxy_ == nullptr) {
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
         return;
     }
-    if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
-        && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
-        devicestatusProxy_->Subscribe(type, callback);
+    if (type > DataUtils::Type::TYPE_INVALID
+        && type <= DataUtils::Type::TYPE_LID_OPEN) {
+        devicestatusProxy_->Subscribe(type, event, latency, callback);
     }
     return;
-    DEV_HILOGD(INNERKIT, "Exit");
 }
 
-void DevicestatusClient::UnSubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
+void DevicestatusClient::UnSubscribeCallback(const DataUtils::Type& type, \
+    const DataUtils::ActivityEvent& event,
     const sptr<IdevicestatusCallback>& callback)
 {
-    DEV_HILOGD(INNERKIT, "Enter");
+    DEV_HILOGI(INNERKIT, "UNevent: %{public}d", event);
     DEVICESTATUS_RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
     if (devicestatusProxy_ == nullptr) {
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
         return;
     }
-    if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
-        && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
-        devicestatusProxy_->UnSubscribe(type, callback);
+    if (type > DataUtils::Type::TYPE_INVALID
+        && type <= DataUtils::Type::TYPE_LID_OPEN) {
+        devicestatusProxy_->UnSubscribe(type, event, callback);
     }
     return;
-    DEV_HILOGD(INNERKIT, "Exit");
+    DEV_HILOGI(INNERKIT, "Exit");
 }
 
-DevicestatusDataUtils::DevicestatusData DevicestatusClient::GetDevicestatusData(const \
-    DevicestatusDataUtils::DevicestatusType& type)
+DataUtils::Data DevicestatusClient::GetDevicestatusData(const \
+    DataUtils::Type& type)
 {
     DEV_HILOGD(INNERKIT, "Enter");
-    DevicestatusDataUtils::DevicestatusData devicestatusData;
-    devicestatusData.type = DevicestatusDataUtils::DevicestatusType::TYPE_INVALID;
-    devicestatusData.value = DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID;
+    DataUtils::Data devicestatusData;
+    devicestatusData.type = DataUtils::Type::TYPE_INVALID;
+    devicestatusData.value = DataUtils::Value::VALUE_INVALID;
 
     DEVICESTATUS_RETURN_IF_WITH_RET((Connect() != ERR_OK), devicestatusData);
     if (devicestatusProxy_ == nullptr) {
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
         return devicestatusData;
     }
-    if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
-        && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
+    if (type > DataUtils::Type::TYPE_INVALID
+        && type <= DataUtils::Type::TYPE_LID_OPEN) {
         devicestatusData = devicestatusProxy_->GetCache(type);
     }
     DEV_HILOGD(INNERKIT, "Exit");
     return devicestatusData;
 }
+} // namespace DeviceStatus
 } // namespace Msdp
-} // namespace OHOS
+} // namespace OHOSv

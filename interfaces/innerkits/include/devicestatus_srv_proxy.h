@@ -23,6 +23,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 class DevicestatusSrvProxy : public IRemoteProxy<Idevicestatus> {
 public:
     explicit DevicestatusSrvProxy(const sptr<IRemoteObject>& impl)
@@ -30,16 +31,21 @@ public:
     ~DevicestatusSrvProxy() = default;
     DISALLOW_COPY_AND_MOVE(DevicestatusSrvProxy);
 
-    virtual void Subscribe(const DevicestatusDataUtils::DevicestatusType& type, \
+    virtual void Subscribe(const DataUtils::Type& type, \
+    const DataUtils::ActivityEvent& event,
+    const DataUtils::ReportLatencyNs& latency,
+    const sptr<IdevicestatusCallback>& callback) override;
+    virtual void UnSubscribe(const DataUtils::Type& type, \
+        const DataUtils::ActivityEvent& event,
         const sptr<IdevicestatusCallback>& callback) override;
-    virtual void UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type, \
-        const sptr<IdevicestatusCallback>& callback) override;
-    virtual DevicestatusDataUtils::DevicestatusData GetCache(const \
-        DevicestatusDataUtils::DevicestatusType& type) override;
+    virtual DataUtils::Data GetCache(const \
+        DataUtils::Type& type) override;
 
 private:
     static inline BrokerDelegator<DevicestatusSrvProxy> delegator_;
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
+
 #endif // DEVICESTATUS_SRV_PROXY_H
