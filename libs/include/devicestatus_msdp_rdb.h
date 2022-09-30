@@ -30,20 +30,22 @@
 #include "rdb_store_config.h"
 #include "values_bucket.h"
 #include "result_set.h"
+
 #include "devicestatus_data_utils.h"
 #include "devicestatus_msdp_interface.h"
 
 namespace OHOS {
 namespace Msdp {
-class DevicestatusMsdpRdb : public DevicestatusMsdpInterface {
+namespace DeviceStatus {
+class DevicestatusMsdpRdb : public IMsdp {
 public:
+    DevicestatusMsdpRdb() = default;
+    virtual ~DevicestatusMsdpRdb() = default;
+
     enum EventType {
         EVENT_UEVENT_FD,
         EVENT_TIMER_FD,
     };
-
-    DevicestatusMsdpRdb() {}
-    virtual ~DevicestatusMsdpRdb() {}
     bool Init();
     void InitRdbStore();
     void SetTimerInterval(int32_t interval);
@@ -55,21 +57,21 @@ public:
     void LoopingThreadEntry();
     void Enable() override;
     void Disable() override;
-    void RegisterCallback(const std::shared_ptr<MsdpAlgorithmCallback>& callback) override;
+    void RegisterCallback(const std::shared_ptr<MsdpAlgoCallback>& callback) override;
     void UnregisterCallback() override;
-    ErrCode NotifyMsdpImpl(const DevicestatusDataUtils::DevicestatusData& data);
-    int32_t TrigerData(const std::unique_ptr<NativeRdb::ResultSet> &resultSet);
-    int32_t TrigerDatabaseObserver();
-    DevicestatusDataUtils::DevicestatusData SaveRdbData(const DevicestatusDataUtils::DevicestatusData& data);
-    std::shared_ptr<MsdpAlgorithmCallback> GetCallbacksImpl()
+    ErrCode NotifyMsdpImpl(const DataUtils::Data& data);
+    int32_t TriggerData(const std::unique_ptr<NativeRdb::ResultSet> &resultSet);
+    int32_t TriggerDatabaseObserver();
+    DataUtils::Data SaveRdbData(const DataUtils::Data& data);
+    std::shared_ptr<MsdpAlgoCallback> GetCallbacksImpl()
     {
         std::unique_lock lock(mutex_);
-        return callbacksImpl_;
+        return callback_;
     }
 
 private:
     using Callback = std::function<void(DevicestatusMsdpRdb*)>;
-    std::shared_ptr<MsdpAlgorithmCallback> callbacksImpl_;
+    std::shared_ptr<MsdpAlgoCallback> callback_;
     std::map<int32_t, Callback> callbacks_;
     std::shared_ptr<NativeRdb::RdbStore> store_;
     int32_t devicestatusType_ = -1;
@@ -78,7 +80,7 @@ private:
     int32_t timerInterval_ = -1;
     int32_t timerFd_ = -1;
     int32_t epFd_ = -1;
-    std::map<DevicestatusDataUtils::DevicestatusType, DevicestatusDataUtils::DevicestatusValue> rdbDataMap_;
+    std::map<DataUtils::Type, DataUtils::Value> rdbDataMap_;
     std::mutex mutex_;
 };
 
@@ -87,6 +89,8 @@ public:
     int32_t OnCreate(NativeRdb::RdbStore &rdbStore) override;
     int32_t OnUpgrade(NativeRdb::RdbStore &rdbStore, int32_t oldVersion, int32_t newVersion) override;
 };
-}
-}
+} // namespace DeviceStatus
+} // namespace Msdp
+} // namespace OHOS
+
 #endif // DEVICESTATUS_MSDP_RDB_H
