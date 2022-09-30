@@ -29,6 +29,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 using namespace Security::AccessToken;
 class DevicestatusService;
 class DevicestatusManager {
@@ -47,17 +48,21 @@ public:
     };
 
     bool Init();
-    bool EnableRdb();
-    bool InitInterface();
-    bool DisableRdb();
+    bool EnableRdb(const DataUtils::Type& type);
+    bool InitInterface(const DataUtils::Type& type);
+    bool DisableRdb(const DataUtils::Type& type);
     bool InitDataCallback();
-    void NotifyDevicestatusChange(const DevicestatusDataUtils::DevicestatusData& devicestatusData);
-    void Subscribe(const DevicestatusDataUtils::DevicestatusType& type, const sptr<IdevicestatusCallback>& callback);
-    void UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type, const sptr<IdevicestatusCallback>& callback);
-    DevicestatusDataUtils::DevicestatusData GetLatestDevicestatusData(const \
-        DevicestatusDataUtils::DevicestatusType& type);
+    void NotifyDevicestatusChange(const DataUtils::Data& devicestatusData);
+    void Subscribe(const DataUtils::Type& type, \
+        const DataUtils::ActivityEvent& event, \
+        const DataUtils::ReportLatencyNs& latency, \
+        const sptr<IdevicestatusCallback>& callback);
+    void UnSubscribe(const DataUtils::Type& type, \
+        const DataUtils::ActivityEvent& event, const sptr<IdevicestatusCallback>& callback);
+    DataUtils::Data GetLatestDevicestatusData(const \
+        DataUtils::Type& type);
     int32_t SensorDataCallback(const struct SensorEvents *event);
-    int32_t MsdpDataCallback(const DevicestatusDataUtils::DevicestatusData& data);
+    int32_t MsdpDataCallback(const DataUtils::Data& data);
     int32_t LoadAlgorithm(bool bCreate);
     int32_t UnloadAlgorithm(bool bCreate);
     void GetPackageName(AccessTokenID tokenId, std::string &packageName);
@@ -73,10 +78,15 @@ private:
     std::mutex mutex_;
     sptr<IRemoteObject::DeathRecipient> devicestatusCBDeathRecipient_;
     std::unique_ptr<DevicestatusMsdpClientImpl> msdpImpl_;
-    std::map<DevicestatusDataUtils::DevicestatusType, DevicestatusDataUtils::DevicestatusValue> msdpData_;
-    std::map<DevicestatusDataUtils::DevicestatusType, std::set<const sptr<IdevicestatusCallback>, classcomp>> \
+    std::map<DataUtils::Type, DataUtils::Value> msdpData_;
+    std::map<DataUtils::Type, std::set<const sptr<IdevicestatusCallback>, classcomp>> \
         listenerMap_;
+    int32_t type_;
+    int32_t event_;
+    int arrs [4] = {0};
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
+
 #endif // DEVICESTATUS_MANAGER_H
