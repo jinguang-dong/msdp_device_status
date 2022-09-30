@@ -18,28 +18,92 @@
 
 namespace OHOS {
 namespace Msdp {
-class DevicestatusDataUtils {
+namespace DeviceStatus {
+class DataUtils {
 public:
-    enum DevicestatusType {
+    enum Type {
         TYPE_INVALID = -1,
-        TYPE_HIGH_STILL,
-        TYPE_FINE_STILL,
-        TYPE_CAR_BLUETOOTH,
-		TYPE_STAND,
-        TYPE_LID_OPEN
+        TYPE_STILL,
+        TYPE_HORIZONTAL_POSITION,
+        TYPE_VERTICAL_POSITION,
+        TYPE_LID_OPEN,
+        TYPE_MAX
     };
 
-    enum DevicestatusValue {
+    enum TypeValue {
+        INVALID = 0,
+        VALID,
+    };
+
+    enum Value {
         VALUE_INVALID = -1,
-        VALUE_ENTER,
-        VALUE_EXIT
+        VALUE_EXIT,
+        VALUE_ENTER
     };
 
-    struct DevicestatusData {
-        DevicestatusType type;
-        DevicestatusValue value;
+    enum ActivityEvent {
+        EVENT_INVALID = 0,
+        ENTER = 1,
+        EXIT = 2,
+        ENTER_EXIT = 3
+    };
+
+    enum ReportLatencyNs {
+        Latency_INVALID = -1,
+        SHORT = 1,
+        MIDDLE = 2,
+        LONG = 3
+    };
+    enum Status {
+        STATUS_INVALID = -1,
+        STATUS_CANCEL,
+        STATUS_START,
+        STATUS_PROCESS,
+        STATUS_FINISH
+    };
+
+    enum Action {
+        ACTION_INVALID = -1,
+        ACTION_ENLARGE,
+        ACTION_REDUCE,
+        ACTION_UP,
+        ACTION_LEFT,
+        ACTION_DOWN,
+        ACTION_RIGHT
+    };
+
+    struct Data {
+        Type type;
+        Value value;
+        Status status;
+        Action action;
+        double move;
+
+        bool operator!= (Data const& data) const 
+        {
+            if (type == data.type && value == data.value
+            && status == data.status && action == data.action && move == data.move) {
+                return false;
+            }
+            return true;
+        }  
     };
 };
+
+typedef struct JsonData {
+    int Type;
+    char Json[20];
+}JsonD;
+
+static JsonD Json[] = {
+    {DataUtils::Type::TYPE_STILL, "still"},
+    {DataUtils::Type::TYPE_HORIZONTAL_POSITION, "horizontalPosition"},
+    {DataUtils::Type::TYPE_VERTICAL_POSITION, "verticalPosition"},
+    {DataUtils::Type::TYPE_LID_OPEN, "lid_open"}
+};
+static int32_t in_vector_count[DataUtils::Type::TYPE_MAX] = {0};
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
+
 #endif // DEVICESTATUS_DATA_UTILS_H
