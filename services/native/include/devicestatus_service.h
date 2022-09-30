@@ -38,17 +38,14 @@ public:
     virtual void OnStop() override;
 
     void Subscribe(const DevicestatusDataUtils::DevicestatusType& type, \
-        const DevicestatusDataUtils::DevicestatusActivityEvent& event,
-        const DevicestatusDataUtils::DevicestatusReportLatencyNs& latency,
         const sptr<IdevicestatusCallback>& callback) override;
     void UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type, \
-        const DevicestatusDataUtils::DevicestatusActivityEvent& event,
         const sptr<IdevicestatusCallback>& callback) override;
     DevicestatusDataUtils::DevicestatusData GetCache(const DevicestatusDataUtils::DevicestatusType& type) override;
     bool IsServiceReady();
     std::shared_ptr<DevicestatusManager> GetDevicestatusManager();
     int Dump(int fd, const std::vector<std::u16string>& args) override;
-    void ReportSensorSysEvent(const DevicestatusDataUtils::DevicestatusType& type, bool enable);
+    void ReportMsdpSysEvent(const DevicestatusDataUtils::DevicestatusType& type, bool enable);
 private:
     bool Init();
     bool ready_ = false;

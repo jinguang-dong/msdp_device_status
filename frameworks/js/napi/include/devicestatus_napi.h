@@ -24,17 +24,15 @@
 #include "devicestatus_data_utils.h"
 #include "devicestatus_event.h"
 
+#include "idevicestatus_callback.h"
+
 namespace OHOS {
 namespace Msdp {
 class DevicestatusCallback : public DevicestatusCallbackStub {
 public:
-    explicit DevicestatusCallback(napi_env env) : env_(env)
-    {
-    }
+    explicit DevicestatusCallback() {};
     virtual ~DevicestatusCallback() {};
     void OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
-private:
-    napi_env env_;
 };
 
 class DevicestatusNapi : public DevicestatusEvent {
@@ -46,10 +44,8 @@ public:
     static napi_value SubscribeDevicestatus(napi_env env, napi_callback_info info);
     static napi_value UnSubscribeDevicestatus(napi_env env, napi_callback_info info);
     static napi_value GetDevicestatus(napi_env env, napi_callback_info info);
-    // static napi_value EnumDevicestatusTypeConstructor(napi_env env, napi_callback_info info);
-    // static napi_value CreateEnumDevicestatusType(napi_env env, napi_value exports);
-    static napi_value EnumDevicestatusEventConstructor(napi_env env, napi_callback_info info);
-    static napi_value CreateDevicestatusEvent(napi_env env, napi_value exports);
+    static napi_value EnumDevicestatusTypeConstructor(napi_env env, napi_callback_info info);
+    static napi_value CreateEnumDevicestatusType(napi_env env, napi_value exports);
     static napi_value EnumDevicestatusValueConstructor(napi_env env, napi_callback_info info);
     static napi_value CreateDevicestatusValueType(napi_env env, napi_value exports);
     static napi_value ResponseConstructor(napi_env env, napi_callback_info info);
@@ -57,14 +53,12 @@ public:
     static napi_value CreateDevicestatusValueObject(napi_env env);
     static napi_value CreateResponseClass(napi_env env, napi_value exports);
     static napi_value CreateInstanceForResponse(napi_env env, int32_t value);
-    static void InvokeCallBack(napi_env env, napi_value *args, int32_t value);
-
     static void RegisterCallback(const int32_t& eventType);
-    static int32_t ConvertTypeToInt(std::string type);
-    // static int32_t ConvertEventToInt(std::int32_t event);
+    static void InvokeCallBack(napi_env env, napi_value *args, bool voidParameter, int32_t value);
     void OnDevicestatusChangedDone(const int32_t& type, const int32_t& value, bool isOnce);
-    static DevicestatusNapi* GetDevicestatusNapi();
+    static DevicestatusNapi* GetDevicestatusNapi(int32_t type);
     static std::map<int32_t, sptr<IdevicestatusCallback>> callbackMap_;
+    static std::map<int32_t, DevicestatusNapi*> objectMap_;
 
 private:
     napi_ref callbackRef_;
