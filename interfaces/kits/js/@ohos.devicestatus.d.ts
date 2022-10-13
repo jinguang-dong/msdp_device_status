@@ -20,7 +20,7 @@ import { AsyncCallback } from "./basic";
  *
  * @since 9
  * @syscap SystemCapability.Msdp.DeviceStatus
- * @import import sensor from '@ohos.DeviceStatus'
+ * @import import DeviceStatus from '@ohos.DeviceStatus'
  * @permission N/A
  */
 declare namespace DeviceStatus {
