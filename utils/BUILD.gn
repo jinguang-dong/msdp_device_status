@@ -22,7 +22,7 @@ config("devicestatus_utils_config") {
   ]
 }
 
-ohos_shared_library("libdevicestatus-util") {
+ohos_shared_library("libdevicestatus_util") {
   sources = [ "src/devicestatus_napi_error.cpp" ]
 
   configs = [ ":devicestatus_utils_config" ]
