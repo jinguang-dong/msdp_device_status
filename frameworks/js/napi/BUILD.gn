@@ -50,7 +50,7 @@ ohos_shared_library("devicestatus") {
 
   deps = [
     "//base/msdp/device_status/interfaces/innerkits:devicestatus_client",
-    "//base/msdp/device_status/utils:libdevicestatus-util",
+    "//base/msdp/device_status/utils:libdevicestatus_util",
     "//foundation/arkui/napi:ace_napi",
   ]
 
