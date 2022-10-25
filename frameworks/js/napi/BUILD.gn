@@ -24,6 +24,7 @@ config("devicestatusnapi_private_config") {
     "//third_party/node/src",
     "${device_status_interfaces_path}/innerkits/include",
     "${device_status_service_path}/native/include",
+    "${device_status_utils_path}/include",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
     "//foundation/systemabilitymgr/samgr/adapter/interfaces/innerkits/include",
   ]
@@ -49,6 +50,7 @@ ohos_shared_library("devicestatus") {
 
   deps = [
     "//base/msdp/device_status/interfaces/innerkits:devicestatus_client",
+    "//base/msdp/device_status/utils:libdevicestatus-util",
     "//foundation/arkui/napi:ace_napi",
   ]
 

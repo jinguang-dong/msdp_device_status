@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/ohos.gni")
+import("//build/test.gni")
 import("//base/msdp/device_status/device_status.gni")
 
 config("devicestatus_utils_config") {
@@ -18,4 +20,25 @@ config("devicestatus_utils_config") {
     "include",
     "//commonlibrary/c_utils/base/include",
   ]
+}
+
+ohos_shared_library("libdevicestatus-util") {
+  sources = [
+    "src/devicestatus_napi_error.cpp",
+  ]
+
+  configs = [
+    ":devicestatus_utils_config",
+  ]
+
+  deps = [
+    "//foundation/arkui/napi:ace_napi",
+  ]
+
+  external_deps = [
+    "hiviewdfx_hilog_native:libhilog",
+  ]
+
+  subsystem_name = "msdp"
+  part_name = "${device_status_part_name}"
 }
