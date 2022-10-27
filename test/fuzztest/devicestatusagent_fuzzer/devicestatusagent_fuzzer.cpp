@@ -18,6 +18,7 @@
 using namespace std;
 using namespace OHOS;
 using namespace OHOS::Msdp;
+using namespace OHOS::Msdp::DeviceStatus;
 namespace {
 const int WAIT_TIME = 1000;
 }
@@ -26,7 +27,7 @@ static std::shared_ptr<DevicestatusAgentFuzzer::DeviceStatusAgentClient> agentEv
 static std::shared_ptr<DeviceStatusAgent> agent_ = std::make_shared<DeviceStatusAgent>();
 
 bool DevicestatusAgentFuzzer::DeviceStatusAgentClient::OnEventResult(
-    const DevicestatusDataUtils::DevicestatusData& devicestatusData)
+    const DataUtils::Data& devicestatusData)
 {
     std::cout << "type: " << devicestatusData.type << std::endl;
     std::cout << "value: " << devicestatusData.value << std::endl;
@@ -37,7 +38,10 @@ void DevicestatusAgentFuzzer::TestSubscribeAgentEvent(const uint8_t* data)
 {
     std::cout << "TestSubscribeAgentEvent: Enter " << std::endl;
 
-    agent_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, agentEvent_);
+    agent_->SubscribeAgentEvent(DataUtils::Type::TYPE_LID_OPEN, \
+        DataUtils::ActivityEvent::ENTER, \
+        DataUtils::ReportLatencyNs::Latency_INVALID, \
+        agentEvent_);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_TIME));
     TestUnSubscribeAgentEvent(agent_);
@@ -47,7 +51,8 @@ void DevicestatusAgentFuzzer::TestUnSubscribeAgentEvent(const std::shared_ptr<De
 {
     std::cout << "TestUnSubscribeAgentEvent: Enter " << std::endl;
 
-    agent_->UnSubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN);
+    agent_->UnSubscribeAgentEvent(DataUtils::Type::TYPE_LID_OPEN, \
+        DataUtils::ActivityEvent::ENTER);
 }
 
 bool DevicestatusAgentFuzzer::DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
