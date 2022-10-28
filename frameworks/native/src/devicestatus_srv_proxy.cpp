@@ -23,14 +23,18 @@
 #include "hitrace_meter.h"
 #include "idevicestatus_callback.h"
 #include "iremote_object.h"
+#include "bytrace_adapter.h"
 
 namespace OHOS {
 namespace Msdp {
-void DevicestatusSrvProxy::Subscribe(const DevicestatusDataUtils::DevicestatusType& type, \
+namespace DeviceStatus {
+void DevicestatusSrvProxy::Subscribe(const DataUtils::Type& type, \
+    const DataUtils::ActivityEvent& event,
+    const DataUtils::ReportLatencyNs& latency,
     const sptr<IdevicestatusCallback>& callback)
 {
-    DEV_HILOGD(INNERKIT, "Enter");
-    StartTrace(HITRACE_TAG_MSDP, "clientSubcribeStart");
+    DEV_HILOGI(INNERKIT, "Enter event: %{public}d", event);
+    DEV_HILOGI(INNERKIT, "Enter event: %{public}d", latency);
     sptr<IRemoteObject> remote = Remote();
     DEVICESTATUS_RETURN_IF((remote == nullptr) || (callback == nullptr));
 
@@ -44,6 +48,8 @@ void DevicestatusSrvProxy::Subscribe(const DevicestatusDataUtils::DevicestatusTy
     }
 
     DEVICESTATUS_WRITE_PARCEL_NO_RET(data, Int32, type);
+    DEVICESTATUS_WRITE_PARCEL_NO_RET(data, Int32, event);
+    DEVICESTATUS_WRITE_PARCEL_NO_RET(data, Int32, latency);
     DEVICESTATUS_WRITE_PARCEL_NO_RET(data, RemoteObject, callback->AsObject());
 
     int32_t ret = remote->SendRequest(static_cast<int32_t>(Idevicestatus::DEVICESTATUS_SUBSCRIBE), data, reply, option);
@@ -51,15 +57,15 @@ void DevicestatusSrvProxy::Subscribe(const DevicestatusDataUtils::DevicestatusTy
         DEV_HILOGE(INNERKIT, "SendRequest is failed, error code: %{public}d", ret);
         return;
     }
-    FinishTrace(HITRACE_TAG_MSDP);
-    DEV_HILOGD(INNERKIT, "Exit");
+    DEV_HILOGI(INNERKIT, "Exit");
 }
 
-void DevicestatusSrvProxy::UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type,
+void DevicestatusSrvProxy::UnSubscribe(const DataUtils::Type& type,
+    const DataUtils::ActivityEvent& event,
     const sptr<IdevicestatusCallback>& callback)
 {
-    DEV_HILOGD(INNERKIT, "Enter");
-    StartTrace(HITRACE_TAG_MSDP, "clientUnSubcribeStart");
+    DEV_HILOGI(INNERKIT, "Enter");
+    DEV_HILOGI(INNERKIT, "UNevent: %{public}d", event);
     sptr<IRemoteObject> remote = Remote();
     DEVICESTATUS_RETURN_IF((remote == nullptr) || (callback == nullptr));
 
@@ -73,6 +79,7 @@ void DevicestatusSrvProxy::UnSubscribe(const DevicestatusDataUtils::Devicestatus
     }
 
     DEVICESTATUS_WRITE_PARCEL_NO_RET(data, Int32, type);
+    DEVICESTATUS_WRITE_PARCEL_NO_RET(data, Int32, event);
     DEVICESTATUS_WRITE_PARCEL_NO_RET(data, RemoteObject, callback->AsObject());
 
     int32_t ret = remote->SendRequest(static_cast<int32_t>(Idevicestatus::DEVICESTATUS_UNSUBSCRIBE),
@@ -81,17 +88,16 @@ void DevicestatusSrvProxy::UnSubscribe(const DevicestatusDataUtils::Devicestatus
         DEV_HILOGE(INNERKIT, "SendRequest is failed, error code: %{public}d", ret);
         return;
     }
-    FinishTrace(HITRACE_TAG_MSDP);
-    DEV_HILOGD(INNERKIT, "Exit");
+    DEV_HILOGI(INNERKIT, "Exit");
 }
 
-DevicestatusDataUtils::DevicestatusData DevicestatusSrvProxy::GetCache(const \
-    DevicestatusDataUtils::DevicestatusType& type)
+DataUtils::Data DevicestatusSrvProxy::GetCache(const \
+    DataUtils::Type& type)
 {
     DEV_HILOGD(INNERKIT, "Enter");
-    DevicestatusDataUtils::DevicestatusData devicestatusData;
-    devicestatusData.type = DevicestatusDataUtils::DevicestatusType::TYPE_INVALID;
-    devicestatusData.value = DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID;
+    DataUtils::Data devicestatusData;
+    devicestatusData.type = DataUtils::Type::TYPE_INVALID;
+    devicestatusData.value = DataUtils::Value::VALUE_INVALID;
 
     sptr<IRemoteObject> remote = Remote();
     DEVICESTATUS_RETURN_IF_WITH_RET((remote == nullptr), devicestatusData);
@@ -117,11 +123,12 @@ DevicestatusDataUtils::DevicestatusData DevicestatusSrvProxy::GetCache(const \
     int32_t devicestatusValue = -1;
     DEVICESTATUS_READ_PARCEL_WITH_RET(reply, Int32, devicestatusType, devicestatusData);
     DEVICESTATUS_READ_PARCEL_WITH_RET(reply, Int32, devicestatusValue, devicestatusData);
-    devicestatusData.type = DevicestatusDataUtils::DevicestatusType(devicestatusType);
-    devicestatusData.value = DevicestatusDataUtils::DevicestatusValue(devicestatusValue);
+    devicestatusData.type = DataUtils::Type(devicestatusType);
+    devicestatusData.value = DataUtils::Value(devicestatusValue);
     DEV_HILOGD(INNERKIT, "type: %{public}d, value: %{public}d", devicestatusData.type, devicestatusData.value);
     DEV_HILOGD(INNERKIT, "Exit");
     return devicestatusData;
 }
+} // namespace DeviceStatus
 } // Msdp
 } // OHOS

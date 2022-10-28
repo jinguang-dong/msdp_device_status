@@ -25,17 +25,21 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 class DevicestatusClient final : public DelayedRefSingleton<DevicestatusClient> {
     DECLARE_DELAYED_REF_SINGLETON(DevicestatusClient)
 
 public:
     DISALLOW_COPY_AND_MOVE(DevicestatusClient);
 
-    void SubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
+    void SubscribeCallback(const DataUtils::Type& type, \
+    const DataUtils::ActivityEvent& event,
+    const DataUtils::ReportLatencyNs& latency,
+    const sptr<IdevicestatusCallback>& callback);
+    void UnSubscribeCallback(const DataUtils::Type& type, \
+        const DataUtils::ActivityEvent& event,
         const sptr<IdevicestatusCallback>& callback);
-    void UnSubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
-        const sptr<IdevicestatusCallback>& callback);
-    DevicestatusDataUtils::DevicestatusData GetDevicestatusData(const DevicestatusDataUtils::DevicestatusType& type);
+    DataUtils::Data GetDevicestatusData(const DataUtils::Type& type);
 
 private:
     class DevicestatusDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -53,6 +57,8 @@ private:
     void ResetProxy(const wptr<IRemoteObject>& remote);
     std::mutex mutex_;
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
+
 #endif // IDEVICESTATUS_H
