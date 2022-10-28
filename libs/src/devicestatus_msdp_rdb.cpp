@@ -27,6 +27,7 @@
 using namespace OHOS::NativeRdb;
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 namespace {
 const std::string DATABASE_NAME = "/data/MsdpStub.db";
 constexpr int32_t TIMER_INTERVAL = 3;
@@ -50,14 +51,14 @@ bool DevicestatusMsdpRdb::Init()
 void DevicestatusMsdpRdb::InitRdbStore()
 {}
 
-void DevicestatusMsdpRdb::RegisterCallback(const std::shared_ptr<MsdpAlgorithmCallback>& callback)
+void DevicestatusMsdpRdb::RegisterCallback(const std::shared_ptr<MsdpAlgoCallback>& callback)
 {
-    callbacksImpl_ = callback;
+    callback_ = callback;
 }
 
 void DevicestatusMsdpRdb::UnregisterCallback()
 {
-    callbacksImpl_ = nullptr;
+    callback_ = nullptr;
 }
 
 void DevicestatusMsdpRdb::Enable()
@@ -74,7 +75,7 @@ void DevicestatusMsdpRdb::Disable()
     DEV_HILOGI(SERVICE, "Exit");
 }
 
-ErrCode DevicestatusMsdpRdb::NotifyMsdpImpl(const DevicestatusDataUtils::DevicestatusData& data)
+ErrCode DevicestatusMsdpRdb::NotifyMsdpImpl(const DataUtils::Data& data)
 {
     DEV_HILOGI(SERVICE, "Enter");
     if (g_rdb == nullptr) {
@@ -90,8 +91,8 @@ ErrCode DevicestatusMsdpRdb::NotifyMsdpImpl(const DevicestatusDataUtils::Devices
     return ERR_OK;
 }
 
-DevicestatusDataUtils::DevicestatusData DevicestatusMsdpRdb::SaveRdbData(
-    const DevicestatusDataUtils::DevicestatusData& data)
+DataUtils::Data DevicestatusMsdpRdb::SaveRdbData(
+    const DataUtils::Data& data)
 {
     for (auto iter = rdbDataMap_.begin(); iter != rdbDataMap_.end(); ++iter) {
         if (iter->first == data.type) {
@@ -113,7 +114,7 @@ DevicestatusDataUtils::DevicestatusData DevicestatusMsdpRdb::SaveRdbData(
     return data;
 }
 
-int32_t DevicestatusMsdpRdb::TrigerData(const std::unique_ptr<NativeRdb::ResultSet> &resultSet)
+int32_t DevicestatusMsdpRdb::TriggerData(const std::unique_ptr<NativeRdb::ResultSet> &resultSet)
 {
     int32_t columnIndex;
     int32_t intVal;
@@ -122,7 +123,7 @@ int32_t DevicestatusMsdpRdb::TrigerData(const std::unique_ptr<NativeRdb::ResultS
         return ERR_NG;
     }
     int32_t ret = resultSet->GetColumnIndex("ID", columnIndex);
-    DEV_HILOGI(SERVICE, "TrigerDatabaseObserver GetColumnIndex = %{public}d", columnIndex);
+    DEV_HILOGI(SERVICE, "TriggerDatabaseObserver GetColumnIndex = %{public}d", columnIndex);
     if (ret != ERR_OK) {
         DEV_HILOGE(SERVICE, "CheckID: GetColumnIndex failed");
         return -1;
@@ -141,7 +142,7 @@ int32_t DevicestatusMsdpRdb::TrigerData(const std::unique_ptr<NativeRdb::ResultS
         return -1;
     }
     ret = resultSet->GetInt(columnIndex, intVal);
-    DEV_HILOGI(SERVICE, "ret = %{public}d, DevicestatusType = %{public}d", ret, intVal);
+    DEV_HILOGI(SERVICE, "ret = %{public}d, Type = %{public}d", ret, intVal);
     devicestatusType_ = intVal;
     if (ret != ERR_OK) {
         DEV_HILOGE(SERVICE, "CheckDevicestatusType: GetValue failed");
@@ -165,7 +166,7 @@ int32_t DevicestatusMsdpRdb::TrigerData(const std::unique_ptr<NativeRdb::ResultS
     return ERR_OK;
 }
 
-int32_t DevicestatusMsdpRdb::TrigerDatabaseObserver()
+int32_t DevicestatusMsdpRdb::TriggerDatabaseObserver()
 {
     DEV_HILOGI(SERVICE, "Enter");
 
@@ -191,7 +192,7 @@ int32_t DevicestatusMsdpRdb::TrigerDatabaseObserver()
         return -1;
     }
 
-    if (TrigerData(resultSet) != ERR_OK) {
+    if (TriggerData(resultSet) != ERR_OK) {
         DEV_HILOGE(SERVICE, "triger data failed");
         return -1;
     }
@@ -202,9 +203,9 @@ int32_t DevicestatusMsdpRdb::TrigerDatabaseObserver()
         return -1;
     }
 
-    DevicestatusDataUtils::DevicestatusData data;
-    data.type = (DevicestatusDataUtils::DevicestatusType)devicestatusType_;
-    data.value = (DevicestatusDataUtils::DevicestatusValue)devicestatusStatus_;
+    DataUtils::Data data;
+    data.type = (DataUtils::Type)devicestatusType_;
+    data.value = (DataUtils::Value)devicestatusStatus_;
 
     SaveRdbData(data);
     DEV_HILOGI(SERVICE, "notifyFlag_ is %{public}d", notifyFlag_);
@@ -280,7 +281,7 @@ void DevicestatusMsdpRdb::TimerCallback()
         DEV_HILOGI(SERVICE, "read timer fd failed");
         return;
     }
-    TrigerDatabaseObserver();
+    TriggerDatabaseObserver();
 }
 
 int32_t DevicestatusMsdpRdb::RegisterTimerCallback(const int32_t fd, const EventType et)
@@ -342,17 +343,18 @@ int32_t InsertOpenCallback::OnUpgrade(RdbStore &store, int32_t oldVersion, int32
     return ERR_OK;
 }
 
-extern "C" DevicestatusMsdpInterface *Create(void)
+extern "C" IMsdp *Create(void)
 {
     DEV_HILOGI(SERVICE, "Enter");
     g_rdb = new DevicestatusMsdpRdb();
     return g_rdb;
 }
 
-extern "C" void Destroy(DevicestatusMsdpInterface* algorithm)
+extern "C" void Destroy(IMsdp* algorithm)
 {
     DEV_HILOGI(SERVICE, "Enter");
     delete algorithm;
 }
-}
-}
+} // namespace DeviceStatus
+} // namespace Msdp
+} // namespace OHOS
