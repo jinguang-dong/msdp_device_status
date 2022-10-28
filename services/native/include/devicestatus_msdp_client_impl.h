@@ -30,31 +30,37 @@
 #include "rdb_store_config.h"
 #include "values_bucket.h"
 #include "result_set.h"
+
 #include "devicestatus_data_utils.h"
 #include "devicestatus_delayed_sp_singleton.h"
 #include "devicestatus_dumper.h"
 #include "devicestatus_msdp_interface.h"
 #include "devicestatus_sensor_interface.h"
+#include "devicestatus_algorithm_manager_interface.h"
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 class DevicestatusMsdpClientImpl :
-    public DevicestatusMsdpInterface::MsdpAlgorithmCallback,
-    public DevicestatusSensorInterface::DevicestatusSensorHdiCallback {
+    public IMsdp::MsdpAlgoCallback,
+    public ISensor::SensorHdiCallback,
+    public IAlgoMgr::AlgoCallback {
 public:
-    using CallbackManager = std::function<int32_t(const DevicestatusDataUtils::DevicestatusData&)>;
+    using CallbackManager = std::function<int32_t(const DataUtils::Data&)>;
 
-    ErrCode InitMsdpImpl();
-    ErrCode DisableMsdpImpl();
+    ErrCode InitMsdpImpl(const DataUtils::Type& type);
+    ErrCode DisableMsdpImpl(const DataUtils::Type& type);
     ErrCode RegisterImpl(const CallbackManager& callback);
     ErrCode UnregisterImpl();
-    int32_t MsdpCallback(const DevicestatusDataUtils::DevicestatusData& data);
+    int32_t MsdpCallback(const DataUtils::Data& data);
     ErrCode RegisterMsdp();
     ErrCode UnregisterMsdp(void);
     ErrCode RegisterSensor();
     ErrCode UnregisterSensor(void);
-    DevicestatusDataUtils::DevicestatusData SaveObserverData(const DevicestatusDataUtils::DevicestatusData& data);
-    std::map<DevicestatusDataUtils::DevicestatusType, DevicestatusDataUtils::DevicestatusValue> GetObserverData() const;
+    ErrCode RegisterDevAlgorithm();
+    ErrCode UnregisterDevAlgorithm(void);
+    DataUtils::Data SaveObserverData(const DataUtils::Data& data);
+    std::map<DataUtils::Type, DataUtils::Value> GetObserverData() const;
     void GetDevicestatusTimestamp();
     void GetLongtitude();
     void GetLatitude();
@@ -62,17 +68,25 @@ public:
     int32_t UnloadAlgorithmLibrary(bool bCreate);
     int32_t LoadSensorHdiLibrary(bool bCreate);
     int32_t UnloadSensorHdiLibrary(bool bCreate);
+    int32_t LoadDevAlgorithmLibrary(bool bCreate);
+    int32_t UnloadDevAlgorithmLibrary(bool bCreate);
 private:
-    ErrCode ImplCallback(const DevicestatusDataUtils::DevicestatusData& data);
-    DevicestatusSensorInterface* GetSensorHdiInst();
-    DevicestatusMsdpInterface* GetAlgorithmInst();
-    MsdpAlgorithmHandle mAlgorithm_;
+    std::shared_ptr<AlgoCallback> callback_ {nullptr};
+    ErrCode ImplCallback(const DataUtils::Data& data);
+    ISensor* GetSensorHdiInst();
+    IMsdp* GetAlgorithmInst();
+    IAlgoMgr* GetDevAlgorithmInst();
+    MsdpAlgoHandle mAlgorithm_;
     SensorHdiHandle sensorHdi_;
+    AlgoHandle devAlgorithm_;
     std::mutex mMutex_;
     bool notifyManagerFlag_ = false;
-    void OnResult(const DevicestatusDataUtils::DevicestatusData& data) override;
-    void OnSensorHdiResult(const DevicestatusDataUtils::DevicestatusData& data) override;
+    void OnResult(const DataUtils::Data& data) override;
+    void OnSensorHdiResult(const DataUtils::Data& data) override;
+    void OnAlogrithmResult(const DataUtils::Data& data) override;
 };
-}
-}
+} // namespace DeviceStatus
+} // namespace Msdp
+} // namespace OHOS
+
 #endif // DEVICESTATUS_MSDP_CLIENT_IMPL_H
