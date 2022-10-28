@@ -23,6 +23,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 class DeviceStatusAgent : public std::enable_shared_from_this<DeviceStatusAgent> {
 public:
     DeviceStatusAgent() {};
@@ -30,28 +31,36 @@ public:
     class DeviceStatusAgentEvent {
     public:
         virtual ~DeviceStatusAgentEvent() = default;
-        virtual bool OnEventResult(const DevicestatusDataUtils::DevicestatusData& devicestatusData) = 0;
+        virtual bool OnEventResult(const DataUtils::Data& devicestatusData) = 0;
     };
 
     class DeviceStatusAgentCallback : public DevicestatusCallbackStub {
     public:
         explicit DeviceStatusAgentCallback(std::shared_ptr<DeviceStatusAgent> agent) : agent_(agent) {};
         virtual ~DeviceStatusAgentCallback() {};
-        void OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+        void OnDevicestatusChanged(const DataUtils::Data& devicestatusData) override;
     private:
         std::weak_ptr<DeviceStatusAgent> agent_;
     };
 
-    int32_t SubscribeAgentEvent(const DevicestatusDataUtils::DevicestatusType& type,
+    int32_t SubscribeAgentEvent(const DataUtils::Type& type,
+        const DataUtils::ActivityEvent& event,
+        const DataUtils::ReportLatencyNs& latency,
         const std::shared_ptr<DeviceStatusAgent::DeviceStatusAgentEvent>& agentEvent);
-    int32_t UnSubscribeAgentEvent(const DevicestatusDataUtils::DevicestatusType& type);
+    int32_t UnSubscribeAgentEvent(const DataUtils::Type& type,
+        const DataUtils::ActivityEvent& event);
     friend class DeviceStatusAgentCallback;
 private:
-    void RegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type);
-    void UnRegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type);
+    void RegisterServiceEvent(const DataUtils::Type& type, \
+        const DataUtils::ActivityEvent& event, \
+        const DataUtils::ReportLatencyNs& latency);
+    void UnRegisterServiceEvent(const DataUtils::Type& type, \
+    const DataUtils::ActivityEvent& event);
     sptr<IdevicestatusCallback> callback_;
     std::shared_ptr<DeviceStatusAgentEvent> agentEvent_;
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
+
 #endif // OHOS_MSDP_DEVICESTATUS_AGENT_H
