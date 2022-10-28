@@ -28,17 +28,18 @@
 
 using namespace testing::ext;
 using namespace OHOS::Msdp;
+using namespace OHOS::Msdp::DeviceStatus;
 using namespace OHOS;
 using namespace std;
 
 void DevicestatusModuleTest::DevicestatusModuleTestCallback::OnDevicestatusChanged(const \
-    DevicestatusDataUtils::DevicestatusData& devicestatusData)
+    DataUtils::Data& devicestatusData)
 {
     GTEST_LOG_(INFO) << "DevicestatusModuleTestCallback type: " << devicestatusData.type;
     GTEST_LOG_(INFO) << "DevicestatusModuleTestCallback value: " << devicestatusData.value;
-    EXPECT_EQ(true, devicestatusData.type == DevicestatusDataUtils::DevicestatusType::TYPE_FINE_STILL && \
-        devicestatusData.value == DevicestatusDataUtils::DevicestatusValue::VALUE_ENTER) << \
-        "DevicestatusModuleTestCallback failed";
+    EXPECT_EQ(true, devicestatusData.type == DataUtils::Type::TYPE_VERTICAL_POSITION && \
+        devicestatusData.value == DataUtils::Value::VALUE_ENTER) << \
+        "DevicestatusModuleTestCallback falied";
 }
 
 /**
@@ -48,13 +49,17 @@ void DevicestatusModuleTest::DevicestatusModuleTestCallback::OnDevicestatusChang
  */
 HWTEST_F (DevicestatusModuleTest, DevicestatusCallbackTest, TestSize.Level0)
 {
-    DevicestatusDataUtils::DevicestatusType type = DevicestatusDataUtils::DevicestatusType::TYPE_FINE_STILL;
+    DataUtils::Type type = DataUtils::Type::TYPE_VERTICAL_POSITION;
+    DataUtils::ActivityEvent event = \
+        DataUtils::ActivityEvent::EVENT_INVALID;
+    DataUtils::ReportLatencyNs latency = \
+        DataUtils::ReportLatencyNs::Latency_INVALID;
     auto& devicestatusClient = DevicestatusClient::GetInstance();
     sptr<IdevicestatusCallback> cb = new DevicestatusModuleTestCallback();
     GTEST_LOG_(INFO) << "Start register";
-    devicestatusClient.SubscribeCallback(type, cb);
+    devicestatusClient.SubscribeCallback(type, event, latency, cb);
     GTEST_LOG_(INFO) << "Cancell register";
-    devicestatusClient.UnSubscribeCallback(type, cb);
+    devicestatusClient.UnSubscribeCallback(type, event, cb);
 }
 
 /**
@@ -65,13 +70,13 @@ HWTEST_F (DevicestatusModuleTest, DevicestatusCallbackTest, TestSize.Level0)
 HWTEST_F (DevicestatusModuleTest, GetDevicestatusDataTest001, TestSize.Level0)
 {
     DEV_HILOGI(SERVICE, "GetDevicestatusDataTest001 Enter");
-    DevicestatusDataUtils::DevicestatusType type = DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL;
+    DataUtils::Type type = DataUtils::Type::TYPE_STILL;
     auto& devicestatusClient = DevicestatusClient::GetInstance();
-    DevicestatusDataUtils::DevicestatusData data = devicestatusClient.GetDevicestatusData(type);
+    DataUtils::Data data = devicestatusClient.GetDevicestatusData(type);
     GTEST_LOG_(INFO) << "type: " << data.type;
     GTEST_LOG_(INFO) << "value: " << data.value;
-    EXPECT_EQ(true, data.type == DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL && \
-        data.value == DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID) << "GetDevicestatusData failed";
+    EXPECT_EQ(true, data.type == DataUtils::Type::TYPE_STILL && \
+        data.value == DataUtils::Value::VALUE_ENTER) << "GetDevicestatusData falied";
 }
 
 /**
@@ -82,13 +87,13 @@ HWTEST_F (DevicestatusModuleTest, GetDevicestatusDataTest001, TestSize.Level0)
 HWTEST_F (DevicestatusModuleTest, GetDevicestatusDataTest002, TestSize.Level0)
 {
     DEV_HILOGI(SERVICE, "GetDevicestatusDataTest002 Enter");
-    DevicestatusDataUtils::DevicestatusType type = DevicestatusDataUtils::DevicestatusType::TYPE_FINE_STILL;
+    DataUtils::Type type = DataUtils::Type::TYPE_VERTICAL_POSITION;
     auto& devicestatusClient = DevicestatusClient::GetInstance();
-    DevicestatusDataUtils::DevicestatusData data = devicestatusClient.GetDevicestatusData(type);
+    DataUtils::Data data = devicestatusClient.GetDevicestatusData(type);
     GTEST_LOG_(INFO) << "type: " << data.type;
     GTEST_LOG_(INFO) << "value: " << data.value;
-    EXPECT_EQ(true, data.type == DevicestatusDataUtils::DevicestatusType::TYPE_FINE_STILL && \
-        data.value == DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID) << "GetDevicestatusData failed";
+    EXPECT_EQ(true, data.type == DataUtils::Type::TYPE_VERTICAL_POSITION && \
+        data.value == DataUtils::Value::VALUE_ENTER) << "GetDevicestatusData falied";
 }
 
 /**
@@ -99,11 +104,11 @@ HWTEST_F (DevicestatusModuleTest, GetDevicestatusDataTest002, TestSize.Level0)
 HWTEST_F (DevicestatusModuleTest, GetDevicestatusDataTest003, TestSize.Level0)
 {
     DEV_HILOGI(SERVICE, "GetDevicestatusDataTest003 Enter");
-    DevicestatusDataUtils::DevicestatusType type = DevicestatusDataUtils::DevicestatusType::TYPE_CAR_BLUETOOTH;
+    DataUtils::Type type = DataUtils::Type::TYPE_HORIZONTAL_POSITION;
     auto& devicestatusClient = DevicestatusClient::GetInstance();
-    DevicestatusDataUtils::DevicestatusData data = devicestatusClient.GetDevicestatusData(type);
+    DataUtils::Data data = devicestatusClient.GetDevicestatusData(type);
     GTEST_LOG_(INFO) << "type: " << data.type;
     GTEST_LOG_(INFO) << "value: " << data.value;
-    EXPECT_EQ(true, data.type == DevicestatusDataUtils::DevicestatusType::TYPE_CAR_BLUETOOTH && \
-        data.value == DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID) << "GetDevicestatusData failed";
+    EXPECT_EQ(true, data.type == DataUtils::Type::TYPE_HORIZONTAL_POSITION && \
+        data.value == DataUtils::Value::VALUE_ENTER) << "GetDevicestatusData falied";
 }
