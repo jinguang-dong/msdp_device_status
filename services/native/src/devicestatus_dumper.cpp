@@ -31,11 +31,12 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 namespace {
     constexpr uint32_t MS_NS = 1000000;
 }
 void DevicestatusDumper::ParseCommand(int32_t fd, const std::vector<std::string> &args,
-    const std::vector<DevicestatusDataUtils::DevicestatusData> &datas)
+    const std::vector<DataUtils::Data> &datas)
 {
     int32_t optionIndex = 0;
     struct option dumpOptions[] = {
@@ -134,7 +135,7 @@ void DevicestatusDumper::DumpDevicestatusChanges(int32_t fd)
 }
 
 void DevicestatusDumper::DumpDevicestatusCurrentStatus(int32_t fd,
-    const std::vector<DevicestatusDataUtils::DevicestatusData> &datas) const
+    const std::vector<DataUtils::Data> &datas) const
 {
     DEV_HILOGI(SERVICE, "start");
     std::string startTime;
@@ -146,7 +147,7 @@ void DevicestatusDumper::DumpDevicestatusCurrentStatus(int32_t fd,
         return;
     }
     for (auto it = datas.begin(); it != datas.end(); ++it) {
-        if (it->value == DevicestatusDataUtils::VALUE_INVALID) {
+        if (it->value == DataUtils::VALUE_INVALID) {
             continue;
         }
         dprintf(fd, "Device status Type is %s , current type state is %s .\n",
@@ -154,19 +155,19 @@ void DevicestatusDumper::DumpDevicestatusCurrentStatus(int32_t fd,
     }
 }
 
-std::string DevicestatusDumper::GetDeviceState(const DevicestatusDataUtils::DevicestatusValue &value) const
+std::string DevicestatusDumper::GetDeviceState(const DataUtils::Value &value) const
 {
     std::string state;
     switch (value) {
-        case DevicestatusDataUtils::VALUE_ENTER: {
+        case DataUtils::VALUE_ENTER: {
             state = "enter";
             break;
         }
-        case DevicestatusDataUtils::VALUE_EXIT: {
+        case DataUtils::VALUE_EXIT: {
             state = "exit";
             break;
         }
-        case DevicestatusDataUtils::VALUE_INVALID: {
+        case DataUtils::VALUE_INVALID: {
             state = "invalid";
             break;
         }
@@ -178,23 +179,23 @@ std::string DevicestatusDumper::GetDeviceState(const DevicestatusDataUtils::Devi
     return state;
 }
 
-std::string DevicestatusDumper::GetStatusType(const DevicestatusDataUtils::DevicestatusType &type) const
+std::string DevicestatusDumper::GetStatusType(const DataUtils::Type &type) const
 {
     std::string stateType;
     switch (type) {
-        case DevicestatusDataUtils::TYPE_HIGH_STILL: {
-            stateType = "high still";
+        case DataUtils::TYPE_STILL: {
+            stateType = "still";
             break;
         }
-        case DevicestatusDataUtils::TYPE_FINE_STILL: {
-            stateType = "fine still";
+        case DataUtils::TYPE_HORIZONTAL_POSITION: {
+            stateType = "horizontal position";
             break;
         }
-        case DevicestatusDataUtils::TYPE_CAR_BLUETOOTH: {
-            stateType = "car bluetooth";
+        case DataUtils::TYPE_VERTICAL_POSITION: {
+            stateType = "vertical position";
             break;
         }
-        case DevicestatusDataUtils::TYPE_LID_OPEN: {
+        case DataUtils::TYPE_LID_OPEN: {
             stateType = "lid open";
             break;
         }
@@ -278,7 +279,7 @@ void DevicestatusDumper::RemoveAppInfo(std::shared_ptr<AppInfo> appInfo)
     }
 }
 
-void DevicestatusDumper::pushDeviceStatus(const DevicestatusDataUtils::DevicestatusData& data)
+void DevicestatusDumper::pushDeviceStatus(const DataUtils::Data& data)
 {
     DEV_HILOGI(SERVICE, "Enter");
     std::unique_lock lock(mutex_);
@@ -294,5 +295,38 @@ void DevicestatusDumper::pushDeviceStatus(const DevicestatusDataUtils::Devicesta
         deviceStatusQueue_.pop();
     }
 }
+
+std::string DevicestatusDumper::GetPackageName(Security::AccessToken::AccessTokenID tokenId)
+{
+    DEV_HILOGI(SERVICE, "Enter");
+    std::string packageName = "unknown";
+    int32_t tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    switch (tokenType) {
+        case Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE: {
+            Security::AccessToken::NativeTokenInfo tokenInfo;
+            if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, tokenInfo) != 0) {
+                DEV_HILOGI(SERVICE, "get native token info fail");
+                return packageName;
+            }
+            packageName = tokenInfo.processName;
+            break;
+        }
+        case Security::AccessToken::ATokenTypeEnum::TOKEN_HAP: {
+            Security::AccessToken::HapTokenInfo hapInfo;
+            if (Security::AccessToken::AccessTokenKit::GetHapTokenInfo(tokenId, hapInfo) != 0) {
+                DEV_HILOGI(SERVICE, "get hap token info fail");
+                return packageName;
+            }
+            packageName = hapInfo.bundleName;
+            break;
+        }
+        default: {
+            DEV_HILOGI(SERVICE, "token type not match");
+            break;
+        }
+    }
+    return packageName;
+}
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
