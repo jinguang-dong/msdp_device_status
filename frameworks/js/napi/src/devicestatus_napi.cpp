@@ -17,6 +17,8 @@
 
 #include "devicestatus_common.h"
 #include "devicestatus_client.h"
+#include "devicestatus_napi_error.h"
+#include "devicestatus_napi_util.h"
 
 using namespace OHOS::Msdp;
 using namespace OHOS;
@@ -158,15 +160,17 @@ napi_value DevicestatusNapi::SubscribeDevicestatus(napi_env env, napi_callback_i
     napi_status status = napi_get_cb_info(env, info, &argc, args, &jsthis, &data);
     NAPI_ASSERT(env, status == napi_ok, "Bad parameters");
 
-    napi_valuetype valueType1 = napi_undefined;
-    napi_typeof(env, args[ARG_0], &valueType1);
-    DEV_HILOGD(JS_NAPI, "valueType1: %{public}d", valueType1);
-    NAPI_ASSERT(env, valueType1 == napi_number, "type mismatch for parameter 1");
+    if (!TypeOf(env, args[ARG_0], napi_number)) {
+        THROWERR_API9(env, DEVICESTATUS_PARAMETER_ERROR, "type", "number");
+        DEV_HILOGE(JS_NAPI, "The first parameter is not number");
+        return result;
+    }
 
-    napi_valuetype valueType2 = napi_undefined;
-    napi_typeof(env, args[ARG_1], &valueType2);
-    DEV_HILOGD(JS_NAPI, "valueType2: %{public}d", valueType2);
-    NAPI_ASSERT(env, valueType2 == napi_function, "type mismatch for parameter 2");
+    if (!TypeOf(env, args[ARG_1], napi_function)) {
+        THROWERR_API9(env, DEVICESTATUS_PARAMETER_ERROR, "type", "function");
+        DEV_HILOGE(JS_NAPI, "The second parameter is not function");
+        return result;
+    }
 
     int32_t type;
     status = napi_get_value_int32(env, args[ARG_0], &type);
@@ -177,6 +181,8 @@ napi_value DevicestatusNapi::SubscribeDevicestatus(napi_env env, napi_callback_i
 
     if (type < 0 || type > DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
         InvokeCallBack(env, args, false, ERROR_MESSAGE);
+        DEV_HILOGE(JS_NAPI, "type is invalid");
+        THROWERR_CUSTOM(env, DEVICESTATUS_PARAMETER_ERROR, "type is invalid");
         return result;
     }
 
@@ -248,11 +254,11 @@ napi_value DevicestatusNapi::UnSubscribeDevicestatus(napi_env env, napi_callback
     napi_status status = napi_get_cb_info(env, info, &argc, args, &jsthis, &data);
     NAPI_ASSERT(env, status == napi_ok, "Bad parameters");
 
-    napi_valuetype valueType1 = napi_undefined;
-    napi_typeof(env, args[ARG_0], &valueType1);
-    DEV_HILOGD(JS_NAPI, "valueType1: %{public}d", valueType1);
-    NAPI_ASSERT(env, valueType1 == napi_number, "type mismatch for parameter 1");
-
+    if (!TypeOf(env, args[ARG_0], napi_number)) {
+        THROWERR_API9(env, DEVICESTATUS_PARAMETER_ERROR, "type", "number");
+        DEV_HILOGE(JS_NAPI, "The first parameter is not number");
+        return result;
+    }
     int32_t type;
     status = napi_get_value_int32(env, args[ARG_0], &type);
     if (status != napi_ok) {
@@ -262,6 +268,8 @@ napi_value DevicestatusNapi::UnSubscribeDevicestatus(napi_env env, napi_callback
 
     if (type < 0 || type > DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
         InvokeCallBack(env, args, true, ERROR_MESSAGE);
+        DEV_HILOGE(JS_NAPI, "type is invalid");
+        THROWERR_CUSTOM(env, DEVICESTATUS_PARAMETER_ERROR, "type is invalid");
         return result;
     }
 
@@ -325,15 +333,16 @@ napi_value DevicestatusNapi::GetDevicestatus(napi_env env, napi_callback_info in
     napi_status status = napi_get_cb_info(env, info, &argc, args, &jsthis, &data);
     NAPI_ASSERT(env, status == napi_ok, "Bad parameters");
 
-    napi_valuetype valueType1 = napi_undefined;
-    napi_typeof(env, args[ARG_0], &valueType1);
-    DEV_HILOGD(JS_NAPI, "valueType1: %{public}d", valueType1);
-    NAPI_ASSERT(env, valueType1 == napi_number, "type mismatch for parameter 1");
-
-    napi_valuetype valueType2 = napi_undefined;
-    napi_typeof(env, args[ARG_1], &valueType2);
-    DEV_HILOGD(JS_NAPI, "valueType2: %{public}d", valueType2);
-    NAPI_ASSERT(env, valueType2 == napi_function, "type mismatch for parameter 2");
+    if (!TypeOf(env, args[ARG_0], napi_number)) {
+        THROWERR_API9(env, DEVICESTATUS_PARAMETER_ERROR, "type", "number");
+        DEV_HILOGE(JS_NAPI, "The first parameter is not number");
+        return result;
+    }
+    if (!TypeOf(env, args[ARG_1], napi_function)) {
+        THROWERR_API9(env, DEVICESTATUS_PARAMETER_ERROR, "type", "function");
+        DEV_HILOGE(JS_NAPI, "The second parameter is not function");
+        return result;
+    }
 
     int32_t type;
     status = napi_get_value_int32(env, args[ARG_0], &type);
