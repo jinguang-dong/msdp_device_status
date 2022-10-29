@@ -32,13 +32,14 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 enum class ApiNumber {
     NUM_ZERO = 0,
     NUM_ONE,
     NUM_TWO,
     NUM_THREE
 };
-class DevicestatusAgentFuzzer {
+class DeviceStatusAgentFuzzer {
 public:
     static bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size);
     static void TestSubscribeAgentEvent(const uint8_t* data);
@@ -46,9 +47,11 @@ public:
     class DeviceStatusAgentClient : public DeviceStatusAgent::DeviceStatusAgentEvent {
     public:
         virtual ~DeviceStatusAgentClient() {};
-        bool OnEventResult(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+        bool OnEventResult(const DataUtils::Data& devicestatusData) override;
     };
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
+
 #endif // DEVICESTATUSAGENT_FUZZER_H
