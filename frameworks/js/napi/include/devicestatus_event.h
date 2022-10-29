@@ -54,5 +54,4 @@ public:
 };
 } // namespace Msdp
 } // namespace OHOS
-
 #endif // DEVICESTATUS_EVENT_H

@@ -62,5 +62,4 @@ private:
 };
 } // namespace Msdp
 } // namespace OHOS
-
 #endif // DEVICESTATUS_NAPI_H
