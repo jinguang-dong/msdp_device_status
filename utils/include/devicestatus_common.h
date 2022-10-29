@@ -24,53 +24,55 @@
 
 namespace OHOS {
 namespace Msdp {
-#define DEVICESTATUS_RETURN_IF_WITH_RET(cond, retval) if (cond) {return (retval);}
-#define DEVICESTATUS_RETURN_IF(cond) if (cond) {return;}
-#define DEVICESTATUS_RETURN_IF_WITH_LOG(cond, loginfo)                                  \
-    do {                                                                                \
-        if (cond) {                                                                     \
+namespace DeviceStatus {
+#define DEV_RET_IF_NULL_WITH_RET(cond, retval) if (cond) {return (retval);}
+#define DEV_RET_IF_NULL(cond) if (cond) {return;}
+#define DEV_RET_IF_NULL_WITH_LOG(cond, loginfo) \
+    do { \
+        if (cond) { \
             DEV_HILOGE(COMMON, "%{public}s "#loginfo" ", __func__); \
-            return;                                                                     \
-        }                                                                               \
-    } while (0)                                                                         \
+            return; \
+        } \
+    } while (0) \
 
-#define DEVICESTATUS_READ_PARCEL_NO_RET(parcel, type, out)                              \
-    do {                                                                                \
-        if (!(parcel).Read##type(out)) {                                                \
+#define DEVICESTATUS_READ_PARCEL_NO_RET(parcel, type, out) \
+    do { \
+        if (!(parcel).Read##type(out)) { \
             DEV_HILOGE(COMMON, "%{public}s read "#out" failed", __func__); \
-            return;                                                                     \
-        }                                                                               \
-    } while (0)                                                                         \
+            return; \
+        } \
+    } while (0) \
 
-#define DEVICESTATUS_WRITE_PARCEL_NO_RET(parcel, type, data)                            \
-    do {                                                                                \
-        if (!(parcel).Write##type(data)) {                                              \
+#define DEVICESTATUS_WRITE_PARCEL_NO_RET(parcel, type, data) \
+    do { \
+        if (!(parcel).Write##type(data)) { \
             DEV_HILOGE(COMMON, "%{public}s write "#data" failed", __func__); \
-            return;                                                                     \
-        }                                                                               \
-    } while (0)                                                                         \
+            return; \
+        } \
+    } while (0) \
 
-#define DEVICESTATUS_READ_PARCEL_WITH_RET(parcel, type, out, retval)                    \
-    do {                                                                                \
-        if (!(parcel).Read##type(out)) {                                                \
+#define DEVICESTATUS_READ_PARCEL_WITH_RET(parcel, type, out, retval) \
+    do { \
+        if (!(parcel).Read##type(out)) { \
             DEV_HILOGE(COMMON, "%{public}s read "#out" failed", __func__); \
-            return (retval);                                                            \
-        }                                                                               \
-    } while (0)                                                                         \
+            return (retval); \
+        } \
+    } while (0) \
 
-#define DEVICESTATUS_WRITE_PARCEL_WITH_RET(parcel, type, data, retval)                  \
-    do {                                                                                \
-        if (!(parcel).Write##type(data)) {                                              \
+#define DEVICESTATUS_WRITE_PARCEL_WITH_RET(parcel, type, data, retval) \
+    do { \
+        if (!(parcel).Write##type(data)) { \
             DEV_HILOGE(COMMON, "%{public}s write "#data" failed", __func__); \
-            return (retval);                                                            \
-        }                                                                               \
+            return (retval); \
+        } \
     } while (0)
 
 template<typename E>
-constexpr auto DevicestatusToUnderlying(E e) noexcept
+constexpr auto DeviceStatusToUnderlying(E e) noexcept
 {
     return static_cast<std::underlying_type_t<E>>(e);
 }
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 
