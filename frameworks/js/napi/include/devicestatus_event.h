@@ -16,16 +16,18 @@
 #ifndef DEVICESTATUS_EVENT_H
 #define DEVICESTATUS_EVENT_H
 
-#include "napi/native_api.h"
-
+#include <list>
 #include <map>
 #include <memory>
+#include <set>
+#include <string>
+
+#include "napi/native_api.h"
 
 namespace OHOS {
 namespace Msdp {
 struct DevicestatusEventListener {
-    int32_t eventType;
-    napi_ref handlerRef = nullptr;
+    napi_ref onHandlerRef;
 };
 
 class DevicestatusEvent {
@@ -37,7 +39,8 @@ public:
     virtual bool On(const int32_t& eventType, napi_value handler, bool isOnce);
     virtual bool Off(const int32_t& eventType, bool isOnce);
     virtual void OnEvent(const int32_t& eventType, size_t argc, const int32_t& value, bool isOnce);
-
+    void CheckRet(const int32_t eventType, size_t argc, const int32_t value,
+        std::map<int32_t, std::shared_ptr<DevicestatusEventListener>>::iterator& typeHandler);
 protected:
     napi_env env_;
     napi_ref thisVarRef_;
