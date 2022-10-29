@@ -74,7 +74,8 @@ void DevicestatusCallback::OnDevicestatusChanged(const DevicestatusDataUtils::De
     }
 }
 
-void DevicestatusCallback::EmitOnEvent(uv_work_t *work, int status) {
+void DevicestatusCallback::EmitOnEvent(uv_work_t *work, int status)
+{
     if (work == nullptr) {
         return;
     }
@@ -145,7 +146,8 @@ int32_t DeviceStatusNapi::ConvertTypeToInt(const std::string &type)
     }
 }
 
-bool DeviceStatusNapi::CheckArguments(napi_env env, napi_callback_info info) {
+bool DeviceStatusNapi::CheckArguments(napi_env env, napi_callback_info info)
+{
     int arr [ARG_4] = {};
     size_t argc = ARG_4;
     napi_value args[ARG_4] = {};
@@ -154,7 +156,7 @@ bool DeviceStatusNapi::CheckArguments(napi_env env, napi_callback_info info) {
     if (status != napi_ok) {
         return false;
     }
-    for (int arg = 0; arg < 4; arg++) {
+    for (int arg = 0; arg < ARG_4; arg++) {
         napi_valuetype valueType = napi_undefined;
         status = napi_typeof(env, args[arg], &valueType);
         if (status != napi_ok) {
@@ -172,7 +174,8 @@ bool DeviceStatusNapi::CheckArguments(napi_env env, napi_callback_info info) {
     return true;
 }
 
-bool DeviceStatusNapi::CheckUnsubArguments(napi_env env, napi_callback_info info) {
+bool DeviceStatusNapi::CheckUnsubArguments(napi_env env, napi_callback_info info)
+{
     int arr [ARG_3] = {};
     size_t argc = ARG_3;
     napi_value args[ARG_3] = {};
@@ -181,7 +184,7 @@ bool DeviceStatusNapi::CheckUnsubArguments(napi_env env, napi_callback_info info
     if (status != napi_ok) {
         return false;
     }
-    for (int arg = 0; arg < 3; arg++) {
+    for (int arg = 0; arg < ARG_3; arg++) {
         napi_valuetype valueType = napi_undefined;
         status = napi_typeof(env, args[arg], &valueType);
         if (status != napi_ok) {
@@ -198,7 +201,8 @@ bool DeviceStatusNapi::CheckUnsubArguments(napi_env env, napi_callback_info info
     return true;
 }
 
-bool DeviceStatusNapi::CheckGetArguments(napi_env env, napi_callback_info info) {
+bool DeviceStatusNapi::CheckGetArguments(napi_env env, napi_callback_info info)
+{
     int arr [ARG_2] = {};
     size_t argc = ARG_2;
     napi_value args[ARG_2] = {};
@@ -207,7 +211,7 @@ bool DeviceStatusNapi::CheckGetArguments(napi_env env, napi_callback_info info) 
     if (status != napi_ok) {
         return false;
     }
-    for (int arg = 0; arg < 2; arg++) {
+    for (int arg = 0; arg < ARG_2; arg++) {
         napi_valuetype valueType = napi_undefined;
         status = napi_typeof(env, args[arg], &valueType);
         if (status != napi_ok) {
