@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,13 +20,14 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 enum {
     /**
-     *  Module type: Devicestatus Service
+     *  Module type: DeviceStatus Service
      */
     DEVICESTATUS_MODULE_TYPE_SERVICE = 0,
     /**
-     *  Module type: Devicestatus Kit
+     *  Module type: DeviceStatus Kit
      */
     DEVICESTATUS_MODULE_TYPE_KIT = 1
 };
@@ -42,6 +43,7 @@ enum {
     E_DEVICESTATUS_ADD_DEATH_RECIPIENT_FAILED,
     E_DEVICESTATUS_INNER_ERR
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 
