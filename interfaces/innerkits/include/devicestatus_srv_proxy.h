@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,23 +23,24 @@
 
 namespace OHOS {
 namespace Msdp {
-class DevicestatusSrvProxy : public IRemoteProxy<Idevicestatus> {
+namespace DeviceStatus {
+class DeviceStatusSrvProxy : public IRemoteProxy<Idevicestatus> {
 public:
-    explicit DevicestatusSrvProxy(const sptr<IRemoteObject>& impl)
+    explicit DeviceStatusSrvProxy(const sptr<IRemoteObject>& impl)
         : IRemoteProxy<Idevicestatus>(impl) {}
-    ~DevicestatusSrvProxy() = default;
-    DISALLOW_COPY_AND_MOVE(DevicestatusSrvProxy);
+    ~DeviceStatusSrvProxy() = default;
+    DISALLOW_COPY_AND_MOVE(DeviceStatusSrvProxy);
 
-    virtual void Subscribe(const DevicestatusDataUtils::DevicestatusType& type, \
-        const sptr<IdevicestatusCallback>& callback) override;
-    virtual void UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type, \
-        const sptr<IdevicestatusCallback>& callback) override;
-    virtual DevicestatusDataUtils::DevicestatusData GetCache(const \
-        DevicestatusDataUtils::DevicestatusType& type) override;
+    virtual void Subscribe(const Type& type, const ActivityEvent& event, const ReportLatencyNs& latency,
+        const sptr<IRemoteDevStaCallbck>& callback) override;
+    virtual void UnSubscribe(const Type& type, const ActivityEvent& event,
+        const sptr<IRemoteDevStaCallbck>& callback) override;
+    virtual Data GetCache(const Type& type) override;
 
 private:
-    static inline BrokerDelegator<DevicestatusSrvProxy> delegator_;
+    static inline BrokerDelegator<DeviceStatusSrvProxy> delegator_;
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 #endif // DEVICESTATUS_SRV_PROXY_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define DEVICESTATUS_CLIENT_H
 
 #include <singleton.h>
+#include <map>
 
 #include "idevicestatus.h"
 #include "idevicestatus_callback.h"
@@ -25,26 +26,30 @@
 
 namespace OHOS {
 namespace Msdp {
-class DevicestatusClient final : public DelayedRefSingleton<DevicestatusClient> {
-    DECLARE_DELAYED_REF_SINGLETON(DevicestatusClient)
+namespace DeviceStatus {
+class DeviceStatusClient final : public DelayedRefSingleton<DeviceStatusClient> {
+    DECLARE_DELAYED_REF_SINGLETON(DeviceStatusClient)
 
 public:
-    DISALLOW_COPY_AND_MOVE(DevicestatusClient);
+std::map<Type, int32_t> GetTypeMap()
+    {
+        return typeMap_;
+    }
+    DISALLOW_COPY_AND_MOVE(DeviceStatusClient);
 
-    void SubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
-        const sptr<IdevicestatusCallback>& callback);
-    void UnSubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
-        const sptr<IdevicestatusCallback>& callback);
-    DevicestatusDataUtils::DevicestatusData GetDevicestatusData(const DevicestatusDataUtils::DevicestatusType& type);
+    void SubscribeCallback(Type type, ActivityEvent event, ReportLatencyNs latency,
+    sptr<IRemoteDevStaCallbck> callback);
+    void UnSubscribeCallback(Type type, ActivityEvent event, sptr<IRemoteDevStaCallbck> callback);
+    Data GetDeviceStatusData(const Type type);
 
 private:
-    class DevicestatusDeathRecipient : public IRemoteObject::DeathRecipient {
+    class DeviceStatusDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
-        DevicestatusDeathRecipient() = default;
-        ~DevicestatusDeathRecipient() = default;
+        DeviceStatusDeathRecipient() = default;
+        ~DeviceStatusDeathRecipient() = default;
         void OnRemoteDied(const wptr<IRemoteObject>& remote);
     private:
-        DISALLOW_COPY_AND_MOVE(DevicestatusDeathRecipient);
+        DISALLOW_COPY_AND_MOVE(DeviceStatusDeathRecipient);
     };
 
     ErrCode Connect();
@@ -52,7 +57,9 @@ private:
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ {nullptr};
     void ResetProxy(const wptr<IRemoteObject>& remote);
     std::mutex mutex_;
+    std::map<Type, int32_t> typeMap_ = {};
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // IDEVICESTATUS_H
+#endif // DEVICESTATUS_CLIENT_H

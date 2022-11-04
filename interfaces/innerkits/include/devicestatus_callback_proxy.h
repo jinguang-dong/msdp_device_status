@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,20 +21,23 @@
 
 #include "idevicestatus_callback.h"
 #include "devicestatus_data_utils.h"
+#include "devicestatus_client.h"
 
 namespace OHOS {
 namespace Msdp {
-class DevicestatusCallbackProxy : public IRemoteProxy<IdevicestatusCallback> {
+namespace DeviceStatus {
+class DeviceStatusCallbackProxy : public IRemoteProxy<IRemoteDevStaCallbck> {
 public:
-    explicit DevicestatusCallbackProxy(const sptr<IRemoteObject>& impl)
-        : IRemoteProxy<IdevicestatusCallback>(impl) {}
-    ~DevicestatusCallbackProxy() = default;
-    DISALLOW_COPY_AND_MOVE(DevicestatusCallbackProxy);
-    virtual void OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+    explicit DeviceStatusCallbackProxy(const sptr<IRemoteObject>& impl)
+        : IRemoteProxy<IRemoteDevStaCallbck>(impl) {}
+    ~DeviceStatusCallbackProxy() = default;
+    DISALLOW_COPY_AND_MOVE(DeviceStatusCallbackProxy);
+    virtual void OnDeviceStatusChanged(const Data& devicestatusData) override;
 
 private:
-    static inline BrokerDelegator<DevicestatusCallbackProxy> delegator_;
+    static inline BrokerDelegator<DeviceStatusCallbackProxy> delegator_;
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 #endif // DEVICESTATUS_CALLBACK_PROXY_H
