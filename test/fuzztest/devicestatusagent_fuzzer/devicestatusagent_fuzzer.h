@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,26 +32,25 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 enum class ApiNumber {
     NUM_ZERO = 0,
     NUM_ONE,
     NUM_TWO,
     NUM_THREE
 };
-class DevicestatusAgentFuzzer {
+class DeviceStatusAgentFuzzer {
 public:
     static bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size);
     static void TestSubscribeAgentEvent(const uint8_t* data);
     static void TestUnSubscribeAgentEvent(const std::shared_ptr<DeviceStatusAgent>& agent);
-    static void TestSubscribeAgentEventIsNullptr(const uint8_t* data);
-    static void TestSubscribeAgentEventTypeIsNullptr(const uint8_t* data);
-    static void TestUnSubscribeAgentEventTypeIsNullptr(const std::shared_ptr<DeviceStatusAgent>& agent_);
     class DeviceStatusAgentClient : public DeviceStatusAgent::DeviceStatusAgentEvent {
     public:
         virtual ~DeviceStatusAgentClient() {};
-        bool OnEventResult(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+        bool OnEventResult(const Data& devicestatusData) override;
     };
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 #endif // DEVICESTATUSAGENT_FUZZER_H
