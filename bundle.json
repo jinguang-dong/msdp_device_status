@@ -32,8 +32,8 @@
       "group_type": {
         "base_group":[],
         "fwk_group":[
-          "//base/msdp/device_status/libs:devicestatus_sensorhdi",
-          "//base/msdp/device_status/libs:devicestatus_msdp",
+          "//base/msdp/device_status/libs:devicestatus_mock",
+          "//base/msdp/device_status/libs:devicestatus_algo",
           "//base/msdp/device_status/interfaces/innerkits:devicestatus_client",
           "//base/msdp/device_status/frameworks/js/napi:devicestatus"
         ],
@@ -54,7 +54,9 @@
       ],
       "test": [
         "//base/msdp/device_status/services/native/test:devicestatussrv_test",
-        "//base/msdp/device_status/test/fuzztest:fuzztest"
+        "//base/msdp/device_status/test/fuzztest:fuzztest",
+        "//base/msdp/device_status/test/systemtest:DeviceStatusClientTest",
+        "//base/msdp/device_status/libs/test:devicestatussrv_test"
       ]
     }
   }
