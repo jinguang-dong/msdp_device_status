@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 class DeviceStatusAgent : public std::enable_shared_from_this<DeviceStatusAgent> {
 public:
     DeviceStatusAgent() {};
@@ -30,28 +31,32 @@ public:
     class DeviceStatusAgentEvent {
     public:
         virtual ~DeviceStatusAgentEvent() = default;
-        virtual bool OnEventResult(const DevicestatusDataUtils::DevicestatusData& devicestatusData) = 0;
+        virtual bool OnEventResult(const Data& devicestatusData) = 0;
     };
 
-    class DeviceStatusAgentCallback : public DevicestatusCallbackStub {
+    class DeviceStatusAgentCallback : public DeviceStatusCallbackStub {
     public:
         explicit DeviceStatusAgentCallback(std::shared_ptr<DeviceStatusAgent> agent) : agent_(agent) {};
         virtual ~DeviceStatusAgentCallback() {};
-        void OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+        void OnDeviceStatusChanged(const Data& devicestatusData) override;
     private:
         std::weak_ptr<DeviceStatusAgent> agent_;
     };
 
-    int32_t SubscribeAgentEvent(const DevicestatusDataUtils::DevicestatusType& type,
+    int32_t SubscribeAgentEvent(const Type& type,
+        const ActivityEvent& event,
+        const ReportLatencyNs& latency,
         const std::shared_ptr<DeviceStatusAgent::DeviceStatusAgentEvent>& agentEvent);
-    int32_t UnSubscribeAgentEvent(const DevicestatusDataUtils::DevicestatusType& type);
+    int32_t UnSubscribeAgentEvent(const Type& type,
+        const ActivityEvent& event);
     friend class DeviceStatusAgentCallback;
 private:
-    void RegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type);
-    void UnRegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type);
-    sptr<IdevicestatusCallback> callback_;
+    void RegisterServiceEvent(const Type& type, const ActivityEvent& event, const ReportLatencyNs& latency);
+    void UnRegisterServiceEvent(const Type& type, const ActivityEvent& event);
+    sptr<IRemoteDevStaCallbck> callback_;
     std::shared_ptr<DeviceStatusAgentEvent> agentEvent_;
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 #endif // OHOS_MSDP_DEVICESTATUS_AGENT_H
