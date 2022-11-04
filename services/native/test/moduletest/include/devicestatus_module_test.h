@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,16 +22,18 @@
 
 namespace OHOS {
 namespace Msdp {
-class DevicestatusModuleTest : public testing::Test {
+namespace DeviceStatus {
+class DeviceStatusModuleTest : public testing::Test {
 public:
 
-    class DevicestatusModuleTestCallback : public DevicestatusCallbackStub {
+    class DeviceStatusModuleTestCallback : public DeviceStatusCallbackStub {
     public:
-        DevicestatusModuleTestCallback() {};
-        virtual ~DevicestatusModuleTestCallback() {};
-        virtual void OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+        DeviceStatusModuleTestCallback() {};
+        virtual ~DeviceStatusModuleTestCallback() {};
+        virtual void OnDeviceStatusChanged(const Data& devicestatusData) override;
     };
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 #endif // DEVICESTATUS_SERVICE_TEST_H
