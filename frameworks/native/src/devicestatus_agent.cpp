@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,12 +22,12 @@
 
 namespace OHOS {
 namespace Msdp {
-void DeviceStatusAgent::DeviceStatusAgentCallback::OnDevicestatusChanged(
-    const DevicestatusDataUtils::DevicestatusData& devicestatusData)
+namespace DeviceStatus {
+void DeviceStatusAgent::DeviceStatusAgentCallback::OnDeviceStatusChanged(
+    const Data& devicestatusData)
 {
-    DEV_HILOGI(INNERKIT, "type=%{punlic}d, value=%{public}d",
-        static_cast<DevicestatusDataUtils::DevicestatusType>(devicestatusData.type),
-        static_cast<DevicestatusDataUtils::DevicestatusValue>(devicestatusData.value));
+    DEV_HILOGI(INNERKIT, "type=%{punlic}d, value=%{public}d", static_cast<Type>(devicestatusData.type),
+        static_cast<OnChangedValue>(devicestatusData.value));
     std::shared_ptr<DeviceStatusAgent> agent = agent_.lock();
     if (agent == nullptr) {
         DEV_HILOGE(SERVICE, "agent is nullptr");
@@ -36,17 +36,21 @@ void DeviceStatusAgent::DeviceStatusAgentCallback::OnDevicestatusChanged(
     agent->agentEvent_->OnEventResult(devicestatusData);
 }
 
-int32_t DeviceStatusAgent::SubscribeAgentEvent(const DevicestatusDataUtils::DevicestatusType& type,
+int32_t DeviceStatusAgent::SubscribeAgentEvent(const Type& type,
+    const ActivityEvent& event,
+    const ReportLatencyNs& latency,
     const std::shared_ptr<DeviceStatusAgent::DeviceStatusAgentEvent>& agentEvent)
 {
-    DEV_HILOGI(INNERKIT, "Enter");
-    
+    DEV_HILOGD(INNERKIT, "Enter");
+
     if (agentEvent == nullptr) {
         return ERR_INVALID_VALUE;
     }
-    if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
-        && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
-        RegisterServiceEvent(type);
+    if (type > Type::TYPE_INVALID
+        && type <= Type::TYPE_LID_OPEN
+        && event > ActivityEvent::EVENT_INVALID
+        && event <= ActivityEvent::ENTER_EXIT) {
+        RegisterServiceEvent(type,event, latency);
         agentEvent_ = agentEvent;
     } else {
         return ERR_INVALID_VALUE;
@@ -54,27 +58,33 @@ int32_t DeviceStatusAgent::SubscribeAgentEvent(const DevicestatusDataUtils::Devi
     return ERR_OK;
 }
 
-int32_t DeviceStatusAgent::UnSubscribeAgentEvent(const DevicestatusDataUtils::DevicestatusType& type)
+int32_t DeviceStatusAgent::UnSubscribeAgentEvent(const Type& type, const ActivityEvent& event)
 {
-    if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
-        && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
-        UnRegisterServiceEvent(type);
+    if (type > Type::TYPE_INVALID
+        && type <= Type::TYPE_LID_OPEN
+        && event > ActivityEvent::EVENT_INVALID
+        && event <= ActivityEvent::ENTER_EXIT) {
+        UnRegisterServiceEvent(type, event);
         return ERR_OK;
     }
     return ERR_INVALID_VALUE;
 }
 
-void DeviceStatusAgent::RegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type)
+void DeviceStatusAgent::RegisterServiceEvent(const Type& type,
+    const ActivityEvent& event,
+    const ReportLatencyNs& latency)
 {
-    DEV_HILOGI(INNERKIT, "Enter");
+    DEV_HILOGD(INNERKIT, "Enter");
     callback_ = new DeviceStatusAgentCallback(shared_from_this());
-    DevicestatusClient::GetInstance().SubscribeCallback(type, callback_);
+    DeviceStatusClient::GetInstance().SubscribeCallback(type, event, latency, callback_);
 }
 
-void DeviceStatusAgent::UnRegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type)
+void DeviceStatusAgent::UnRegisterServiceEvent(const Type& type,
+    const ActivityEvent& event)
 {
-    DEV_HILOGI(INNERKIT, "Enter");
-    DevicestatusClient::GetInstance().UnSubscribeCallback(type, callback_);
+    DEV_HILOGD(INNERKIT, "Enter");
+    DeviceStatusClient::GetInstance().UnSubscribeCallback(type, event, callback_);
 }
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
