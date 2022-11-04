@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 class Idevicestatus : public IRemoteBroker {
 public:
     enum {
@@ -32,14 +33,18 @@ public:
         DEVICESTATUS_GETCACHE
     };
 
-    virtual void Subscribe(const DevicestatusDataUtils::DevicestatusType& type, \
-        const sptr<IdevicestatusCallback>& callback) = 0;
-    virtual void UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type, \
-        const sptr<IdevicestatusCallback>& callback) = 0;
-    virtual DevicestatusDataUtils::DevicestatusData GetCache(const DevicestatusDataUtils::DevicestatusType& type) = 0;
+    virtual void Subscribe(const Type& type,
+        const ActivityEvent& event,
+        const ReportLatencyNs& latency,
+        const sptr<IRemoteDevStaCallbck>& callback) = 0;
+    virtual void UnSubscribe(const Type& type,
+        const ActivityEvent& event,
+        const sptr<IRemoteDevStaCallbck>& callback) = 0;
+    virtual Data GetCache(const Type& type) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.Idevicestatus");
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 #endif // IDEVICESTATUS_H
