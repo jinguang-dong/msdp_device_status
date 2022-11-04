@@ -20,7 +20,8 @@
 
 namespace OHOS {
 namespace Msdp {
-bool DevicestatusPermission::CheckCallingPermission(const string &permissionName)
+namespace DeviceStatus {
+bool DeviceStatusPermission::CheckCallingPermission(const string &permissionName)
 {
     Security::AccessToken::AccessTokenID callingToken = IPCSkeleton::GetCallingTokenID();
     int32_t auth = Security::AccessToken::TypePermissionState::PERMISSION_DENIED;
@@ -33,11 +34,12 @@ bool DevicestatusPermission::CheckCallingPermission(const string &permissionName
     }
 }
 
-string DevicestatusPermission::GetAppInfo()
+string DeviceStatusPermission::GetAppInfo()
 {
     pid_t pid = IPCSkeleton::GetCallingPid();
     uid_t uid = IPCSkeleton::GetCallingUid();
     return Security::Permission::AppIdInfoHelper::CreateAppIdInfo(pid, uid);
 }
-}  // namespace Msdp
-}  // namespace OHOS
+} // namespace DeviceStatus
+} // namespace Msdp
+} // namespace OHOS

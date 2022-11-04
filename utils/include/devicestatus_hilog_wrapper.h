@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 #define __FILENAME__            (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 #define __FORMATED(fmt, ...)    "[%{public}s] %{public}s# " fmt, __FILENAME__, __FUNCTION__, ##__VA_ARGS__
 
@@ -47,7 +48,7 @@ namespace Msdp {
 #endif
 
 // param of log interface, such as DEV_HILOGF.
-enum DevicestatusSubModule {
+enum DeviceStatusSubModule {
     INNERKIT = 0,
     SERVICE,
     JS_NAPI,
@@ -55,10 +56,10 @@ enum DevicestatusSubModule {
     BUTT,
 };
 
-// 0xD002220: subsystem:Msdp module:Devicestatus, 8 bits reserved.
+// 0xD002220: subsystem:Msdp module:DeviceStatus, 8 bits reserved.
 static constexpr unsigned int BASE_MSDP_DOMAIN_ID = 0xD002220;
 
-enum DevicestatusDomainId {
+enum DeviceStatusDomainId {
     DEVICESTATUS_INNERKIT_DOMAIN = BASE_MSDP_DOMAIN_ID + INNERKIT,
     DEVICESTATUS_SERVICE_DOMAIN,
     DEVICESTATUS_JS_NAPI,
@@ -67,10 +68,10 @@ enum DevicestatusDomainId {
 };
 
 static constexpr OHOS::HiviewDFX::HiLogLabel DEVICESTATUS_LABEL[BUTT] = {
-    {LOG_CORE, DEVICESTATUS_INNERKIT_DOMAIN, "DevicestatusClient"},
-    {LOG_CORE, DEVICESTATUS_SERVICE_DOMAIN, "DevicestatusService"},
-    {LOG_CORE, DEVICESTATUS_JS_NAPI, "DevicestatusJsNapi"},
-    {LOG_CORE, DEVICESTATUS_COMMON, "DevicestatusCommon"},
+    {LOG_CORE, DEVICESTATUS_INNERKIT_DOMAIN, "DeviceStatusClient"},
+    {LOG_CORE, DEVICESTATUS_SERVICE_DOMAIN, "DeviceStatusService"},
+    {LOG_CORE, DEVICESTATUS_JS_NAPI, "DeviceStatusJsNapi"},
+    {LOG_CORE, DEVICESTATUS_COMMON, "DeviceStatusCommon"},
 };
 
 // In order to improve performance, do not check the module range.
@@ -85,6 +86,7 @@ static constexpr OHOS::HiviewDFX::HiLogLabel DEVICESTATUS_LABEL[BUTT] = {
     (void)OHOS::HiviewDFX::HiLog::Info(DEVICESTATUS_LABEL[module], __FORMATED(__VA_ARGS__))
 #define DEV_HILOGD(module, ...) \
     (void)OHOS::HiviewDFX::HiLog::Debug(DEVICESTATUS_LABEL[module], __FORMATED(__VA_ARGS__))
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 
