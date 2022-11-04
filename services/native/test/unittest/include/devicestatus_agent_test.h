@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,23 +23,25 @@
 
 namespace OHOS {
 namespace Msdp {
-class DevicestatusAgentTest : public testing::Test {
+namespace DeviceStatus {
+class DeviceStatusAgentTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
-class DevicestatusAgentListenerMockFirstClient : public DeviceStatusAgent::DeviceStatusAgentEvent {
+class DeviceStatusAgentListenerMockFirstClient : public DeviceStatusAgent::DeviceStatusAgentEvent {
 public:
-    virtual ~DevicestatusAgentListenerMockFirstClient() {};
-    bool OnEventResult(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+    virtual ~DeviceStatusAgentListenerMockFirstClient() {};
+    bool OnEventResult(const Data& devicestatusData) override;
 };
-class DevicestatusAgentListenerMockSecondClient : public DeviceStatusAgent::DeviceStatusAgentEvent {
+class DeviceStatusAgentListenerMockSecondClient : public DeviceStatusAgent::DeviceStatusAgentEvent {
 public:
-    virtual ~DevicestatusAgentListenerMockSecondClient() {};
-    bool OnEventResult(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+    virtual ~DeviceStatusAgentListenerMockSecondClient() {};
+    bool OnEventResult(const Data& devicestatusData) override;
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 #endif // OHOS_MSDP_DEVICESTATUS_AGENT_TEST_H
