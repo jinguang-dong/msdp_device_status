@@ -38,9 +38,10 @@ enum NapiErrorCode : int32_t {
 };
 
 const std::map<int32_t, NapiError> NAPI_ERRORS = {
-    {DEVICESTATUS_PERMISSION_CHECK_ERROR,
-        {DEVICESTATUS_PERMISSION_CHECK_ERROR, "Permission denied. An attempt was made to %s forbidden by permission:%s."}},
-    {DEVICESTATUS_PARAMETER_ERROR, {DEVICESTATUS_PARAMETER_ERROR, "Parameter error. The type of %s must be %s."}},
+    {DEVICESTATUS_PERMISSION_CHECK_ERROR, {DEVICESTATUS_PERMISSION_CHECK_ERROR,
+    "Permission denied. An attempt was made to %s forbidden by permission:%s."}},
+    {DEVICESTATUS_PARAMETER_ERROR, {DEVICESTATUS_PARAMETER_ERROR,
+    "Parameter error. The type of %s must be %s."}},
 };
 
 #define THROWERR_CUSTOM(env, code, msg) \
