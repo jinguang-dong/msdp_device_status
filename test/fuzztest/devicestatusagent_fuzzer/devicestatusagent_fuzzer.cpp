@@ -17,7 +17,7 @@
 
 using namespace std;
 using namespace OHOS;
-using namespace OHOS::Msdp;
+using namespace OHOS::Msdp::DeviceStatus;
 namespace {
 const int WAIT_TIME = 1000;
 }
