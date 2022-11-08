@@ -25,14 +25,49 @@ public:
         TYPE_HIGH_STILL,
         TYPE_FINE_STILL,
         TYPE_CAR_BLUETOOTH,
-		TYPE_STAND,
+        TYPE_STAND,
+        TYPE_STILL,
+        TYPE_HORIZONTAL_POSITION,
+        TYPE_VERTICAL_POSITION,
         TYPE_LID_OPEN
     };
 
     enum DevicestatusValue {
         VALUE_INVALID = -1,
-        VALUE_ENTER,
-        VALUE_EXIT
+        VALUE_EXIT,
+        VALUE_ENTER
+    };
+
+    enum DevicestatusActivityEvent {
+        EVENT_INVALID = 0,
+        ENTER = 1,
+        EXIT = 2,
+        ENTER_EXIT = 3
+    };
+
+    enum DevicestatusReportLatencyNs {
+        Latency_INVALID = -1,
+        SHORT = 1,
+        MIDDLE = 2,
+        LONG = 3
+    };
+
+    enum Status {
+        STATUS_INVALID = -1,
+        STATUS_CANCEL,
+        STATUS_START,
+        STATUS_PROCESS,
+        STATUS_FINISH
+    };
+
+    enum Action {
+        ACTION_INVALID = -1,
+        ACTION_ENLARGE,
+        ACTION_REDUCE,
+        ACTION_UP,
+        ACTION_LEFT,
+        ACTION_DOWN,
+        ACTION_RIGHT
     };
 
     struct DevicestatusData {
