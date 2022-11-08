@@ -37,7 +37,7 @@ public:
 
 class DevicestatusNapi : public DevicestatusEvent {
 public:
-    explicit DevicestatusNapi(napi_env env, napi_value thisVar);
+    explicit DevicestatusNapi(napi_env env);
     virtual ~DevicestatusNapi();
 
     static napi_value Init(napi_env env, napi_value exports);
