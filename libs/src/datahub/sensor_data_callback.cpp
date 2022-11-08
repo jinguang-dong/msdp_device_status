@@ -70,7 +70,7 @@ bool SensorDataCallback::SubscribeSensorEvent(int32_t sensorTypeId, SensorCallba
     algoMap_.insert(std::pair(sensorTypeId, callback));
     if (algoMap_.second) {
         return true;
-    } 
+    }
     return false;
 }
 
