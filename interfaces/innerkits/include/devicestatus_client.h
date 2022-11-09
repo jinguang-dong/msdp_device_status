@@ -16,6 +16,8 @@
 #ifndef DEVICESTATUS_CLIENT_H
 #define DEVICESTATUS_CLIENT_H
 
+#include <condition_variable>
+#include <mutex>
 #include <singleton.h>
 
 #include "idevicestatus.h"
@@ -36,8 +38,12 @@ public:
     void UnSubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
         const sptr<IdevicestatusCallback>& callback);
     DevicestatusDataUtils::DevicestatusData GetDevicestatusData(const DevicestatusDataUtils::DevicestatusType& type);
-
+    void LoadServiceSuccess();
+    void LoadServiceFail();
 private:
+    int32_t LoadService();
+    void CheckConnect();
+    void ResetProxy(const wptr<IRemoteObject>& remote);
     class DevicestatusDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
         DevicestatusDeathRecipient() = default;
@@ -52,6 +58,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ {nullptr};
     void ResetProxy(const wptr<IRemoteObject>& remote);
     std::mutex mutex_;
+    std::condition_variable proxyConVar_;
 };
 } // namespace Msdp
 } // namespace OHOS
