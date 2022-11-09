@@ -57,10 +57,10 @@ public:
     void Disable() override;
     void RegisterCallback(const std::shared_ptr<MsdpAlgorithmCallback>& callback) override;
     void UnregisterCallback() override;
-    ErrCode NotifyMsdpImpl(const DevicestatusDataUtils::DevicestatusData& data);
+    ErrCode NotifyMsdpImpl(const Data& data);
     int32_t TrigerData(const std::unique_ptr<NativeRdb::ResultSet> &resultSet);
     int32_t TrigerDatabaseObserver();
-    DevicestatusDataUtils::DevicestatusData SaveRdbData(const DevicestatusDataUtils::DevicestatusData& data);
+    Data SaveRdbData(const Data& data);
     std::shared_ptr<MsdpAlgorithmCallback> GetCallbacksImpl()
     {
         std::unique_lock lock(mutex_);
@@ -78,7 +78,7 @@ private:
     int32_t timerInterval_ = -1;
     int32_t timerFd_ = -1;
     int32_t epFd_ = -1;
-    std::map<DevicestatusDataUtils::DevicestatusType, DevicestatusDataUtils::DevicestatusValue> rdbDataMap_;
+    std::map<Type, OnChangedValue> rdbDataMap_;
     std::mutex mutex_;
 };
 

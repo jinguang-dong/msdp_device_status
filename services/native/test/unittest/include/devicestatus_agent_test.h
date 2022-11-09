@@ -33,12 +33,12 @@ public:
 class DevicestatusAgentListenerMockFirstClient : public DeviceStatusAgent::DeviceStatusAgentEvent {
 public:
     virtual ~DevicestatusAgentListenerMockFirstClient() {};
-    bool OnEventResult(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+    bool OnEventResult(const Data& devicestatusData) override;
 };
 class DevicestatusAgentListenerMockSecondClient : public DeviceStatusAgent::DeviceStatusAgentEvent {
 public:
     virtual ~DevicestatusAgentListenerMockSecondClient() {};
-    bool OnEventResult(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+    bool OnEventResult(const Data& devicestatusData) override;
 };
 } // namespace Msdp
 } // namespace OHOS

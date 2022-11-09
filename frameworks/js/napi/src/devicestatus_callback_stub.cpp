@@ -49,9 +49,9 @@ int32_t DevicestatusCallbackStub::OnDevicestatusChangedStub(MessageParcel& data)
     int32_t value;
     DEVICESTATUS_READ_PARCEL_WITH_RET(data, Int32, type, E_DEVICESTATUS_READ_PARCEL_ERROR);
     DEVICESTATUS_READ_PARCEL_WITH_RET(data, Int32, value, E_DEVICESTATUS_READ_PARCEL_ERROR);
-    DevicestatusDataUtils::DevicestatusData devicestatusData = {
-        static_cast<DevicestatusDataUtils::DevicestatusType>(type),
-        static_cast<DevicestatusDataUtils::DevicestatusValue>(value)
+    Data devicestatusData = {
+        static_cast<Type>(type),
+        static_cast<OnChangedValue>(value)
     };
     OnDevicestatusChanged(devicestatusData);
     return ERR_OK;

@@ -32,7 +32,7 @@ class DevicestatusCallback : public DevicestatusCallbackStub {
 public:
     explicit DevicestatusCallback() {};
     virtual ~DevicestatusCallback() {};
-    void OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+    void OnDevicestatusChanged(const Data& devicestatusData) override;
 };
 
 class DevicestatusNapi : public DevicestatusEvent {
