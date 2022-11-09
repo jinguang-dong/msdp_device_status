@@ -30,12 +30,12 @@ public:
     ~DevicestatusSrvProxy() = default;
     DISALLOW_COPY_AND_MOVE(DevicestatusSrvProxy);
 
-    virtual void Subscribe(const DevicestatusDataUtils::DevicestatusType& type, \
+    virtual void Subscribe(const Type& type, \
         const sptr<IdevicestatusCallback>& callback) override;
-    virtual void UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type, \
+    virtual void UnSubscribe(const Type& type, \
         const sptr<IdevicestatusCallback>& callback) override;
-    virtual DevicestatusDataUtils::DevicestatusData GetCache(const \
-        DevicestatusDataUtils::DevicestatusType& type) override;
+    virtual Data GetCache(const \
+        Type& type) override;
 
 private:
     static inline BrokerDelegator<DevicestatusSrvProxy> delegator_;

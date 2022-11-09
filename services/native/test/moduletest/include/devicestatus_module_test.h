@@ -29,7 +29,7 @@ public:
     public:
         DevicestatusModuleTestCallback() {};
         virtual ~DevicestatusModuleTestCallback() {};
-        virtual void OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+        virtual void OnDevicestatusChanged(const Data& devicestatusData) override;
     };
 };
 } // namespace Msdp

@@ -35,7 +35,7 @@ namespace {
     constexpr uint32_t MS_NS = 1000000;
 }
 void DevicestatusDumper::ParseCommand(int32_t fd, const std::vector<std::string> &args,
-    const std::vector<DevicestatusDataUtils::DevicestatusData> &datas)
+    const std::vector<Data> &datas)
 {
     int32_t optionIndex = 0;
     struct option dumpOptions[] = {
@@ -134,7 +134,7 @@ void DevicestatusDumper::DumpDevicestatusChanges(int32_t fd)
 }
 
 void DevicestatusDumper::DumpDevicestatusCurrentStatus(int32_t fd,
-    const std::vector<DevicestatusDataUtils::DevicestatusData> &datas) const
+    const std::vector<Data> &datas) const
 {
     DEV_HILOGI(SERVICE, "start");
     std::string startTime;
@@ -146,7 +146,7 @@ void DevicestatusDumper::DumpDevicestatusCurrentStatus(int32_t fd,
         return;
     }
     for (auto it = datas.begin(); it != datas.end(); ++it) {
-        if (it->value == DevicestatusDataUtils::VALUE_INVALID) {
+        if (it->value == OnChangedValue::VALUE_INVALID) {
             continue;
         }
         dprintf(fd, "Device status Type is %s , current type state is %s .\n",
@@ -154,19 +154,19 @@ void DevicestatusDumper::DumpDevicestatusCurrentStatus(int32_t fd,
     }
 }
 
-std::string DevicestatusDumper::GetDeviceState(const DevicestatusDataUtils::DevicestatusValue &value) const
+std::string DevicestatusDumper::GetDeviceState(const OnChangedValue &value) const
 {
     std::string state;
     switch (value) {
-        case DevicestatusDataUtils::VALUE_ENTER: {
+        case OnChangedValue::VALUE_ENTER: {
             state = "enter";
             break;
         }
-        case DevicestatusDataUtils::VALUE_EXIT: {
+        case OnChangedValue::VALUE_EXIT: {
             state = "exit";
             break;
         }
-        case DevicestatusDataUtils::VALUE_INVALID: {
+        case OnChangedValue::VALUE_INVALID: {
             state = "invalid";
             break;
         }
@@ -178,23 +178,23 @@ std::string DevicestatusDumper::GetDeviceState(const DevicestatusDataUtils::Devi
     return state;
 }
 
-std::string DevicestatusDumper::GetStatusType(const DevicestatusDataUtils::DevicestatusType &type) const
+std::string DevicestatusDumper::GetStatusType(const Type &type) const
 {
     std::string stateType;
     switch (type) {
-        case DevicestatusDataUtils::TYPE_HIGH_STILL: {
+        case Type::TYPE_STILL: {
             stateType = "high still";
             break;
         }
-        case DevicestatusDataUtils::TYPE_FINE_STILL: {
+        case Type::TYPE_HORIZONTAL_POSITION: {
             stateType = "fine still";
             break;
         }
-        case DevicestatusDataUtils::TYPE_CAR_BLUETOOTH: {
+        case Type::TYPE_VERTICAL_POSITION: {
             stateType = "car bluetooth";
             break;
         }
-        case DevicestatusDataUtils::TYPE_LID_OPEN: {
+        case Type::TYPE_LID_OPEN: {
             stateType = "lid open";
             break;
         }
@@ -278,7 +278,7 @@ void DevicestatusDumper::RemoveAppInfo(std::shared_ptr<AppInfo> appInfo)
     }
 }
 
-void DevicestatusDumper::pushDeviceStatus(const DevicestatusDataUtils::DevicestatusData& data)
+void DevicestatusDumper::pushDeviceStatus(const Data& data)
 {
     DEV_HILOGI(SERVICE, "Enter");
     std::unique_lock lock(mutex_);

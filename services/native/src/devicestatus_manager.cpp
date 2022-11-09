@@ -48,14 +48,14 @@ bool DevicestatusManager::Init()
     return true;
 }
 
-DevicestatusDataUtils::DevicestatusData DevicestatusManager::GetLatestDevicestatusData(const \
-    DevicestatusDataUtils::DevicestatusType& type)
+Data DevicestatusManager::GetLatestDevicestatusData(const \
+    Type& type)
 {
     DEV_HILOGI(SERVICE, "Enter");
-    DevicestatusDataUtils::DevicestatusData data = {type, DevicestatusDataUtils::DevicestatusValue::VALUE_EXIT};
+    Data data = {type, OnChangedValue::VALUE_EXIT};
     if (msdpImpl_ == nullptr) {
         DEV_HILOGI(SERVICE, "GetObserverData func is nullptr,return default!");
-        data.value = DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID;
+        data.value = OnChangedValue::VALUE_INVALID;
         return data;
     }
     msdpData_ = msdpImpl_->GetObserverData();
@@ -66,7 +66,7 @@ DevicestatusDataUtils::DevicestatusData DevicestatusManager::GetLatestDevicestat
         }
     }
 
-    data.value = DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID;
+    data.value = OnChangedValue::VALUE_INVALID;
     return data;
 }
 
@@ -134,7 +134,7 @@ bool DevicestatusManager::InitDataCallback()
     return true;
 }
 
-int32_t DevicestatusManager::MsdpDataCallback(const DevicestatusDataUtils::DevicestatusData& data)
+int32_t DevicestatusManager::MsdpDataCallback(const Data& data)
 {
     NotifyDevicestatusChange(data);
     return ERR_OK;
@@ -144,13 +144,13 @@ int32_t DevicestatusManager::SensorDataCallback(const struct SensorEvents *event
 {
     DEV_HILOGI(SERVICE, "Enter");
     // handle sensor event properly when we get the data details of sensor HDI.
-    DevicestatusDataUtils::DevicestatusData data = {DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL,
-        DevicestatusDataUtils::DevicestatusValue::VALUE_ENTER};
+    Data data = {Type::TYPE_STILL,
+        OnChangedValue::VALUE_ENTER};
     NotifyDevicestatusChange(data);
     return ERR_OK;
 }
 
-void DevicestatusManager::NotifyDevicestatusChange(const DevicestatusDataUtils::DevicestatusData& devicestatusData)
+void DevicestatusManager::NotifyDevicestatusChange(const Data& devicestatusData)
 {
     DEV_HILOGI(SERVICE, "Enter");
 
@@ -179,7 +179,7 @@ void DevicestatusManager::NotifyDevicestatusChange(const DevicestatusDataUtils::
     }
 }
 
-void DevicestatusManager::Subscribe(const DevicestatusDataUtils::DevicestatusType& type,
+void DevicestatusManager::Subscribe(const Type& type,
     const sptr<IdevicestatusCallback>& callback)
 {
     DEV_HILOGI(SERVICE, "Enter");
@@ -218,7 +218,7 @@ void DevicestatusManager::Subscribe(const DevicestatusDataUtils::DevicestatusTyp
     DEV_HILOGI(SERVICE, "Subscribe success,Exit");
 }
 
-void DevicestatusManager::UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type,
+void DevicestatusManager::UnSubscribe(const Type& type,
     const sptr<IdevicestatusCallback>& callback)
 {
     DEV_HILOGI(SERVICE, "Enter");

@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Msdp {
 class IdevicestatusAlgorithmCallback : public IRemoteBroker {
 public:
-    virtual void OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& data) = 0;
+    virtual void OnDevicestatusChanged(const Data& data) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.IdevicestatusAlgorithmCallback");
 };
