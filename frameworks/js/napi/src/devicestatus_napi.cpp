@@ -73,7 +73,7 @@ DevicestatusNapi* DevicestatusNapi::GetDevicestatusNapi(int32_t type)
     return obj;
 }
 
-DevicestatusNapi::DevicestatusNapi(napi_env env, napi_value thisVar) : DevicestatusEvent(env, thisVar)
+DevicestatusNapi::DevicestatusNapi(napi_env env) : DevicestatusEvent(env)
 {
     env_ = env;
     callbackRef_ = nullptr;
@@ -191,8 +191,8 @@ napi_value DevicestatusNapi::SubscribeDevicestatus(napi_env env, napi_callback_i
     }
     if (!isObjExists) {
         DEV_HILOGD(JS_NAPI, "Didn't find object, so created it");
-        obj = new DevicestatusNapi(env, jsthis);
-        napi_wrap(env, jsthis, reinterpret_cast<void *>(obj),
+        obj = new DevicestatusNapi(env);
+        napi_wrap(env, nullptr, reinterpret_cast<void *>(obj),
             [](napi_env env, void *data, void *hint) {
                 (void)env;
                 (void)hint;
@@ -342,8 +342,8 @@ napi_value DevicestatusNapi::GetDevicestatus(napi_env env, napi_callback_info in
         return result;
     }
 
-    DevicestatusNapi* obj = new DevicestatusNapi(env, jsthis);
-    napi_wrap(env, jsthis, reinterpret_cast<void *>(obj),
+    DevicestatusNapi* obj = new DevicestatusNapi(env);
+    napi_wrap(env, nullptr, reinterpret_cast<void *>(obj),
         [](napi_env env, void *data, void *hint) {
             (void)env;
             (void)hint;
