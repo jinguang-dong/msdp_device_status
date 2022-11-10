@@ -26,7 +26,7 @@ config("devicestatusnapi_private_config") {
 }
 
 ohos_shared_library("deviceagent") {
-  sources = [ "./devicestatus_agent.cpp" ]
+  sources = []
 
   configs = [
     "${device_status_utils_path}:devicestatus_utils_config",
