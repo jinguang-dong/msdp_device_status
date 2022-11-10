@@ -22,6 +22,8 @@ config("devicestatus_public_config") {
     "include",
     "${device_status_service_path}/native/include",
     "${device_status_frameworks_path}/js/napi/include",
+    "//foundation/systemabilitymgr/samgr/services/lsamgr/include",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
   ]
 }
 
@@ -30,6 +32,7 @@ ohos_shared_library("devicestatus_client") {
     "${device_status_frameworks_path}/native/src/devicestatus_callback_proxy.cpp",
     "${device_status_frameworks_path}/native/src/devicestatus_client.cpp",
     "${device_status_frameworks_path}/native/src/devicestatus_srv_proxy.cpp",
+    "${device_status_frameworks_path}/native/src/load_devicestatus_callback.cpp",
   ]
 
   configs = [
@@ -45,6 +48,7 @@ ohos_shared_library("devicestatus_client") {
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "samgr:samgr_common",
     "samgr:samgr_proxy",
   ]
 

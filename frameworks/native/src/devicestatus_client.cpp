@@ -18,11 +18,16 @@
 #include <if_system_ability_manager.h>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
+#include "load_devicestatus_callback.h"
 
 #include "devicestatus_common.h"
 
 #include "iremote_broker.h"
 #include "iremote_object.h"
+
+namespace {
+constexpr uint32_t WAIT_MS = 500;
+}
 
 namespace OHOS {
 namespace Msdp {
@@ -39,7 +44,6 @@ DevicestatusClient::~DevicestatusClient()
 
 ErrCode DevicestatusClient::Connect()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     if (devicestatusProxy_ != nullptr) {
         DEV_HILOGE(INNERKIT, "devicestatusProxy_ is nut nullptr");
         return ERR_OK;
@@ -75,7 +79,6 @@ ErrCode DevicestatusClient::Connect()
 
 void DevicestatusClient::ResetProxy(const wptr<IRemoteObject>& remote)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     DEVICESTATUS_RETURN_IF(devicestatusProxy_ == nullptr);
 
     auto serviceRemote = devicestatusProxy_->AsObject();
@@ -100,7 +103,8 @@ void DevicestatusClient::SubscribeCallback(const DevicestatusDataUtils::Devicest
     const sptr<IdevicestatusCallback>& callback)
 {
     DEV_HILOGD(INNERKIT, "Enter");
-    DEVICESTATUS_RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
+    DEVICESTATUS_RETURN_IF(callback == nullptr);
+    CheckConnect();
     if (devicestatusProxy_ == nullptr) {
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
         return;
@@ -117,7 +121,8 @@ void DevicestatusClient::UnSubscribeCallback(const DevicestatusDataUtils::Device
     const sptr<IdevicestatusCallback>& callback)
 {
     DEV_HILOGD(INNERKIT, "Enter");
-    DEVICESTATUS_RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
+    DEVICESTATUS_RETURN_IF(callback == nullptr);
+    CheckConnect()
     if (devicestatusProxy_ == nullptr) {
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
         return;
@@ -137,8 +142,7 @@ DevicestatusDataUtils::DevicestatusData DevicestatusClient::GetDevicestatusData(
     DevicestatusDataUtils::DevicestatusData devicestatusData;
     devicestatusData.type = DevicestatusDataUtils::DevicestatusType::TYPE_INVALID;
     devicestatusData.value = DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID;
-
-    DEVICESTATUS_RETURN_IF_WITH_RET((Connect() != ERR_OK), devicestatusData);
+    CheckConnect();
     if (devicestatusProxy_ == nullptr) {
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
         return devicestatusData;
@@ -149,6 +153,63 @@ DevicestatusDataUtils::DevicestatusData DevicestatusClient::GetDevicestatusData(
     }
     DEV_HILOGD(INNERKIT, "Exit");
     return devicestatusData;
+}
+void DevicestatusClient::CheckConnect()
+{
+    DEV_HILOGI(INNERKIT, "Enter");
+    if(Connect() != ERR_OK) {
+        DEV_HILOGE(INNERKIT, "Failed to get service");
+        if (LoadService() != ERR_OK) {
+            DEV_HILOGE(INNERKIT, "Failed to load service");
+            return;
+        }
+    }
+    DEV_HILOGI(INNERKIT, "Exit");
+}
+int32_t DevicestatusClient::LoadService()
+{
+    DEV_HILOGI(INNERKIT, "Enter");
+    std::unique_lock lock(mutex_);
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetIntance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        DEV_HILOGI(INNERKIT, "GetSystemAbilityManager is null");
+        return E_DEVICESTATUS_GET_SYSTEM_ABILITY_MANAGER_FAILED;
+    }
+    sptr<LoadDevicestatusCallback> loadCallback = new (std::nothrow) LoadDevicestatusCallback();
+    int32_t result = sm->LoadSystemAbility(MSDP_DEVICESTATUS_SERVICE_ID, loadCallback);
+    if (result != ERR_OK) {
+       DEV_HILOGE(INNERKIT, "LoadSystemAbility failed");
+       return E_LOAD_SYSTEM_ABILITY_FAILED;
+    }
+
+    auto waitStatus = proxyConVar_wait_for(lock, std::chrono::milliseconds(WAIT_MS), [this]() {
+        if (this->Connect() != ERR_OK) {
+            DEV_HILOGE(INNERKIT, "failed to get service Id, load service");
+            return false;
+        }
+        return this->devicestatusProxy_ != nullptr;
+    });
+    if (!waitStatus) {
+        DEV_HILOGE(INNERKIT, "timeline load timeout");
+        return E_LOAD_TIMEOUT;
+    }
+    DEV_HILOGI(INNERKIT, "Exit");
+    return ERR_OK;
+}
+
+void DevicestatusClient::LoadServiceSuccess()
+{
+    DEV_HILOGI(INNERKIT, "Enter");
+    std::lock_guardstd::mutex lock(mutex_);
+    proxyConVar_.notify_all();
+}
+
+void DevicestatusClient::LoadServiceFail()
+{
+    DEV_HILOGI(INNERKIT, "Enter");
+    std::lock_guardstd::mutex lock(mutex_);
+    proxyConVar_.notify_all();
+    LoadService();
 }
 } // namespace Msdp
 } // namespace OHOS
