@@ -27,9 +27,6 @@ config("devicestatus_public_config") {
 
 ohos_shared_library("devicestatus_client") {
   sources = [
-    "${device_status_frameworks_path}/native/src/devicestatus_callback_proxy.cpp",
-    "${device_status_frameworks_path}/native/src/devicestatus_client.cpp",
-    "${device_status_frameworks_path}/native/src/devicestatus_srv_proxy.cpp",
   ]
 
   configs = [

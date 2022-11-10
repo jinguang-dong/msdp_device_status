@@ -46,7 +46,6 @@ ohos_fuzztest("DeviceStatusAgentFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "./devicestatusagent_fuzzer.cpp" ]
   deps = [
     "${device_status_frameworks_path}/native/src:deviceagent",
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
