@@ -24,6 +24,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 class Idevicestatus : public IRemoteBroker {
 public:
     enum {
@@ -32,14 +33,15 @@ public:
         DEVICESTATUS_GETCACHE
     };
 
-    virtual void Subscribe(const DevicestatusDataUtils::DevicestatusType& type, \
+    virtual void Subscribe(const Type& type, \
         const sptr<IdevicestatusCallback>& callback) = 0;
-    virtual void UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type, \
+    virtual void UnSubscribe(const Type& type, \
         const sptr<IdevicestatusCallback>& callback) = 0;
-    virtual DevicestatusDataUtils::DevicestatusData GetCache(const DevicestatusDataUtils::DevicestatusType& type) = 0;
+    virtual Data GetCache(const Type& type) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.Idevicestatus");
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 #endif // IDEVICESTATUS_H
