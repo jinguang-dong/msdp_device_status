@@ -22,8 +22,8 @@ namespace Msdp {
 class LoadDeviceStatusCallback : public SystemAbilityLoadCallbackStub {
 public:
     LoadDeviceStatusCallback() {}
-    void OnLoadSystemAbilitySuccessInner(int32_t systemAbilityId, const sptr<IRemoteObject> &remoteObject) override;
-    void OnLoadSystemAbilityFailInner(int32_t systemAbilityId) override;
+    void OnLoadSystemAbilitySuccessInner(int32_t systemAbilityId, const sptr<IRemoteObject> &remoteObject);
+    void OnLoadSystemAbilityFailInner(int32_t systemAbilityId);
 };
 } //namespace Msdp
 } //namespace OHOS
