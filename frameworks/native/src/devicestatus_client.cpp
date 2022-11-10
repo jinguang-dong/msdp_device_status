@@ -166,6 +166,7 @@ void DevicestatusClient::CheckConnect()
     }
     DEV_HILOGI(INNERKIT, "Exit");
 }
+
 int32_t DevicestatusClient::LoadService()
 {
     DEV_HILOGI(INNERKIT, "Enter");
