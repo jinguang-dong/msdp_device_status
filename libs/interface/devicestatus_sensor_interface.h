@@ -25,6 +25,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 class DevicestatusSensorInterface {
 public:
     DevicestatusSensorInterface() {}
@@ -33,7 +34,7 @@ public:
     public:
         DevicestatusSensorHdiCallback() = default;
         virtual ~DevicestatusSensorHdiCallback() = default;
-        virtual void OnSensorHdiResult(const DevicestatusDataUtils::DevicestatusData& data) = 0;
+        virtual void OnSensorHdiResult(const Data& data) = 0;
     };
 
     virtual void RegisterCallback(const std::shared_ptr<DevicestatusSensorHdiCallback>& callback) = 0;
@@ -57,6 +58,7 @@ struct SensorHdiHandle {
         pAlgorithm = nullptr;
     }
 };
+} // namespace DeviceStatus
 }
 }
 #endif // DEVICESTATUS_SENSOR_INTERFACE_H

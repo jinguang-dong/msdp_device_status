@@ -29,6 +29,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 class DevicestatusService final : public SystemAbility, public DevicestatusSrvStub {
     DECLARE_SYSTEM_ABILITY(DevicestatusService)
     DECLARE_DELAYED_SP_SINGLETON(DevicestatusService);
@@ -37,21 +38,22 @@ public:
     virtual void OnStart() override;
     virtual void OnStop() override;
 
-    void Subscribe(const DevicestatusDataUtils::DevicestatusType& type, \
+    void Subscribe(const Type& type, \
         const sptr<IdevicestatusCallback>& callback) override;
-    void UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type, \
+    void UnSubscribe(const Type& type, \
         const sptr<IdevicestatusCallback>& callback) override;
-    DevicestatusDataUtils::DevicestatusData GetCache(const DevicestatusDataUtils::DevicestatusType& type) override;
+    Data GetCache(const Type& type) override;
     bool IsServiceReady();
     std::shared_ptr<DevicestatusManager> GetDevicestatusManager();
     int Dump(int fd, const std::vector<std::u16string>& args) override;
-    void ReportMsdpSysEvent(const DevicestatusDataUtils::DevicestatusType& type, bool enable);
+    void ReportMsdpSysEvent(const Type& type, bool enable);
 private:
     bool Init();
     bool ready_ = false;
     std::shared_ptr<DevicestatusManager> devicestatusManager_;
     std::shared_ptr<DevicestatusMsdpClientImpl> msdpImpl_;
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 #endif // DEVICESTATUS_SERVICE_H

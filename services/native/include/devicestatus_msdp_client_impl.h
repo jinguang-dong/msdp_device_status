@@ -38,23 +38,24 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 class DevicestatusMsdpClientImpl :
     public DevicestatusMsdpInterface::MsdpAlgorithmCallback,
     public DevicestatusSensorInterface::DevicestatusSensorHdiCallback {
 public:
-    using CallbackManager = std::function<int32_t(const DevicestatusDataUtils::DevicestatusData&)>;
+    using CallbackManager = std::function<int32_t(const Data&)>;
 
     ErrCode InitMsdpImpl();
     ErrCode DisableMsdpImpl();
     ErrCode RegisterImpl(const CallbackManager& callback);
     ErrCode UnregisterImpl();
-    int32_t MsdpCallback(const DevicestatusDataUtils::DevicestatusData& data);
+    int32_t MsdpCallback(const Data& data);
     ErrCode RegisterMsdp();
     ErrCode UnregisterMsdp(void);
     ErrCode RegisterSensor();
     ErrCode UnregisterSensor(void);
-    DevicestatusDataUtils::DevicestatusData SaveObserverData(const DevicestatusDataUtils::DevicestatusData& data);
-    std::map<DevicestatusDataUtils::DevicestatusType, DevicestatusDataUtils::DevicestatusValue> GetObserverData() const;
+    Data SaveObserverData(const Data& data);
+    std::map<Type, OnChangedValue> GetObserverData() const;
     void GetDevicestatusTimestamp();
     void GetLongtitude();
     void GetLatitude();
@@ -63,16 +64,17 @@ public:
     int32_t LoadSensorHdiLibrary(bool bCreate);
     int32_t UnloadSensorHdiLibrary(bool bCreate);
 private:
-    ErrCode ImplCallback(const DevicestatusDataUtils::DevicestatusData& data);
+    ErrCode ImplCallback(const Data& data);
     DevicestatusSensorInterface* GetSensorHdiInst();
     DevicestatusMsdpInterface* GetAlgorithmInst();
     MsdpAlgorithmHandle mAlgorithm_;
     SensorHdiHandle sensorHdi_;
     std::mutex mMutex_;
     bool notifyManagerFlag_ = false;
-    void OnResult(const DevicestatusDataUtils::DevicestatusData& data) override;
-    void OnSensorHdiResult(const DevicestatusDataUtils::DevicestatusData& data) override;
+    void OnResult(const Data& data) override;
+    void OnSensorHdiResult(const Data& data) override;
 };
+} // namespace DeviceStatus
 }
 }
 #endif // DEVICESTATUS_MSDP_CLIENT_IMPL_H
