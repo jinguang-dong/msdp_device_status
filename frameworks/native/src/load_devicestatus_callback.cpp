@@ -20,11 +20,11 @@
 
 namespace OHOS {
 namespace Msdp {
-void LoadDeviceStatusCallback::OnLoadSystemAbilitySucess(
+void LoadDeviceStatusCallback::OnLoadSystemAbilitySuccessInner(
     int32_t systemAbilityId, const sptr<IRemoteObject> &remoteObject)
 {  
     DEV_HILOGI(INNERKIT, "load devicestatus SA sucess, systemAbilityId %{public}d, remoteObject result:%{public}s",
-    systemAbilityId, (remoteObject != nullptr) ? "true" : "false"));
+    systemAbilityId, (remoteObject != nullptr) ? "true" : "false");
     if (remoteObject == nullptr) {
         DEV_HILOGI(INNERKIT, "remoteObject is nullptr");
         return;
@@ -32,7 +32,7 @@ void LoadDeviceStatusCallback::OnLoadSystemAbilitySucess(
     DevicestatusClient::GetInstance().LoadServiceSuccess();
 }    
 
-void LoadDeviceStatusCallback::OnLoadSystemAbilityFail(int32_t systemAbilityId)
+void LoadDeviceStatusCallback::OnLoadSystemAbilityFailInner(int32_t systemAbilityId)
 {
     DEV_HILOGI(INNERKIT, "load devicestatus failed, systemAbilityId %{public}d", systemAbilityId);
     DevicestatusClient::GetInstance().LoadServiceFail();
