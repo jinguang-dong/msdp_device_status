@@ -32,7 +32,7 @@ public:
     DevicestatusCallbackStub() = default;
     virtual ~DevicestatusCallbackStub() = default;
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
-    void OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& __attribute__((unused))value) override {}
+    void OnDevicestatusChanged(const Data& __attribute__((unused))value) override {}
 
 private:
     int32_t OnDevicestatusChangedStub(MessageParcel& data);

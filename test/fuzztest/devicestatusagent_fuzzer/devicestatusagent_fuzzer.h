@@ -50,7 +50,7 @@ public:
     class DeviceStatusAgentClient : public DeviceStatusAgent::DeviceStatusAgentEvent {
     public:
         virtual ~DeviceStatusAgentClient() {};
-        bool OnEventResult(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+        bool OnEventResult(const Data& devicestatusData) override;
     };
 };
 } // namespace DeviceStatus

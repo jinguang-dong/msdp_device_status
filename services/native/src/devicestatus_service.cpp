@@ -103,13 +103,13 @@ int DevicestatusService::Dump(int fd, const std::vector<std::u16string>& args)
         return Str16ToStr8(arg);
     });
 
-    DevicestatusDataUtils::DevicestatusType type;
-    std::vector<DevicestatusDataUtils::DevicestatusData> datas;
-    for (type = DevicestatusDataUtils::TYPE_HIGH_STILL;
-        type <= DevicestatusDataUtils::TYPE_LID_OPEN;
-        type = (DevicestatusDataUtils::DevicestatusType)(type+1)) {
-        DevicestatusDataUtils::DevicestatusData data = GetCache(type);
-        if (data.value != DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID) {
+    Type type;
+    std::vector<Data> datas;
+    for (type = Type::TYPE_STILL;
+        type <= Type::TYPE_LID_OPEN;
+        type = (Type)(type+1)) {
+        Data data = GetCache(type);
+        if (data.value != OnChangedValue::VALUE_INVALID) {
             datas.emplace_back(data);
         }
     }
@@ -145,7 +145,7 @@ std::shared_ptr<DevicestatusManager> DevicestatusService::GetDevicestatusManager
     return devicestatusManager_;
 }
 
-void DevicestatusService::Subscribe(const DevicestatusDataUtils::DevicestatusType& type,
+void DevicestatusService::Subscribe(const Type& type,
     const sptr<IdevicestatusCallback>& callback)
 {
     DEV_HILOGI(SERVICE, "Enter");
@@ -168,7 +168,7 @@ void DevicestatusService::Subscribe(const DevicestatusDataUtils::DevicestatusTyp
     ReportMsdpSysEvent(type, true);
 }
 
-void DevicestatusService::UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type,
+void DevicestatusService::UnSubscribe(const Type& type,
     const sptr<IdevicestatusCallback>& callback)
 {
     DEV_HILOGI(SERVICE, "Enter");
@@ -191,20 +191,20 @@ void DevicestatusService::UnSubscribe(const DevicestatusDataUtils::DevicestatusT
     ReportMsdpSysEvent(type, false);
 }
 
-DevicestatusDataUtils::DevicestatusData DevicestatusService::GetCache(const \
-    DevicestatusDataUtils::DevicestatusType& type)
+Data DevicestatusService::GetCache(const \
+    Type& type)
 {
     DEV_HILOGI(SERVICE, "Enter");
     if (devicestatusManager_ == nullptr) {
-        DevicestatusDataUtils::DevicestatusData data = {type, DevicestatusDataUtils::DevicestatusValue::VALUE_EXIT};
-        data.value = DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID;
+        Data data = {type, OnChangedValue::VALUE_EXIT};
+        data.value = OnChangedValue::VALUE_INVALID;
         DEV_HILOGI(SERVICE, "GetLatestDevicestatusData func is nullptr,return default!");
         return data;
     }
     return devicestatusManager_->GetLatestDevicestatusData(type);
 }
 
-void DevicestatusService::ReportMsdpSysEvent(const DevicestatusDataUtils::DevicestatusType& type, bool enable)
+void DevicestatusService::ReportMsdpSysEvent(const Type& type, bool enable)
 {
     auto uid = this->GetCallingUid();
     auto callerToken = this->GetCallingTokenID();
