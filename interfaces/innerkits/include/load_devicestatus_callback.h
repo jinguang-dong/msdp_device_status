@@ -21,10 +21,10 @@ namespace OHOS {
 namespace Msdp {
 class load_devicestatus_callback : public SystemAbilityLoadCallbackStub {
 public:
-    LoadDeviceStatusCallback() {}
-    void OnLoadSystemAblitySucess(int32_t systemAbilityId, const sptr<IRmoteObject> &remoteObject) override;
+    void LoadDeviceStatusCallback() {}
+    virtual void OnLoadSystemAblitySucess(int32_t systemAbilityId, const sptr<IRemoteObject> &remoteObject) override;
     void OnLoadSystemAblityFail(int32_t systemAbilityId) override;
-}
+};
 } //namespace Msdp
 } //namespace OHOS
 #endif //LOAD_DEVICESTATUS_CALLBACK_H

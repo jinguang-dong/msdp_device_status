@@ -122,7 +122,7 @@ void DevicestatusClient::UnSubscribeCallback(const DevicestatusDataUtils::Device
 {
     DEV_HILOGD(INNERKIT, "Enter");
     DEVICESTATUS_RETURN_IF(callback == nullptr);
-    CheckConnect()
+    CheckConnect();
     if (devicestatusProxy_ == nullptr) {
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
         return;
@@ -170,19 +170,19 @@ int32_t DevicestatusClient::LoadService()
 {
     DEV_HILOGI(INNERKIT, "Enter");
     std::unique_lock lock(mutex_);
-    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetIntance().GetSystemAbilityManager();
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sm == nullptr) {
         DEV_HILOGI(INNERKIT, "GetSystemAbilityManager is null");
         return E_DEVICESTATUS_GET_SYSTEM_ABILITY_MANAGER_FAILED;
     }
-    sptr<LoadDevicestatusCallback> loadCallback = new (std::nothrow) LoadDevicestatusCallback();
+    sptr<LoadDeviceStatusCallback> loadCallback = new (std::nothrow) LoadDeviceStatusCallback();
     int32_t result = sm->LoadSystemAbility(MSDP_DEVICESTATUS_SERVICE_ID, loadCallback);
     if (result != ERR_OK) {
        DEV_HILOGE(INNERKIT, "LoadSystemAbility failed");
        return E_LOAD_SYSTEM_ABILITY_FAILED;
     }
 
-    auto waitStatus = proxyConVar_wait_for(lock, std::chrono::milliseconds(WAIT_MS), [this]() {
+    auto waitStatus = proxyConVar_.wait_for(lock, std::chrono::milliseconds(WAIT_MS), [this]() {
         if (this->Connect() != ERR_OK) {
             DEV_HILOGE(INNERKIT, "failed to get service Id, load service");
             return false;
@@ -200,14 +200,14 @@ int32_t DevicestatusClient::LoadService()
 void DevicestatusClient::LoadServiceSuccess()
 {
     DEV_HILOGI(INNERKIT, "Enter");
-    std::lock_guardstd::mutex lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     proxyConVar_.notify_all();
 }
 
 void DevicestatusClient::LoadServiceFail()
 {
     DEV_HILOGI(INNERKIT, "Enter");
-    std::lock_guardstd::mutex lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     proxyConVar_.notify_all();
     LoadService();
 }

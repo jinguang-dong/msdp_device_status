@@ -29,7 +29,7 @@ void LoadDeviceStatusCallback::OnLoadSystemAbilitySucess(
         DEV_HILOGI(INNERKIT, "remoteObject is nullptr");
         return;
     }
-    DevicestatusClient::GetInstance().LoadServiceSuccess();1
+    DevicestatusClient::GetInstance().LoadServiceSuccess();
 }    
 
 void LoadDeviceStatusCallback::OnLoadSystemAbilityFail(int32_t systemAbilityId)
