@@ -73,7 +73,7 @@ private:
     const wptr<DevicestatusService> ms_;
     std::mutex mutex_;
     sptr<IRemoteObject::DeathRecipient> devicestatusCBDeathRecipient_;
-    std::unique_ptr<DevicestatusMsdpClientImpl> msdpImpl_;
+    std::unique_ptr<DeviceStatusMsdpClientImpl> msdpImpl_;
     std::map<Type, OnChangedValue> msdpData_;
     std::map<Type, std::set<const sptr<IdevicestatusCallback>, classcomp>> \
         listenerMap_;

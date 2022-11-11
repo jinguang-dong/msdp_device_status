@@ -51,7 +51,7 @@ private:
     bool Init();
     bool ready_ = false;
     std::shared_ptr<DevicestatusManager> devicestatusManager_;
-    std::shared_ptr<DevicestatusMsdpClientImpl> msdpImpl_;
+    std::shared_ptr<DeviceStatusMsdpClientImpl> msdpImpl_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

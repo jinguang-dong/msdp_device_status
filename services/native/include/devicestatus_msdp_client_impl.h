@@ -28,53 +28,73 @@
 #include "rdb_helper.h"
 #include "rdb_open_callback.h"
 #include "rdb_store_config.h"
-#include "values_bucket.h"
 #include "result_set.h"
+#include "values_bucket.h"
 #include "devicestatus_data_utils.h"
 #include "devicestatus_delayed_sp_singleton.h"
 #include "devicestatus_dumper.h"
 #include "devicestatus_msdp_interface.h"
-#include "devicestatus_sensor_interface.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class DevicestatusMsdpClientImpl :
-    public DevicestatusMsdpInterface::MsdpAlgorithmCallback,
-    public DevicestatusSensorInterface::DevicestatusSensorHdiCallback {
+class DeviceStatusMsdpClientImpl : public IMsdp::MsdpAlgoCallback {
 public:
     using CallbackManager = std::function<int32_t(const Data&)>;
 
-    ErrCode InitMsdpImpl();
-    ErrCode DisableMsdpImpl();
+    ErrCode InitMsdpImpl() { return ERR_OK; }
+    ErrCode DisableMsdpImpl() { return ERR_OK; }
+    ErrCode InitMsdpImpl(Type type);
+    ErrCode Disable(Type type);
+    ErrCode GetSensorHdi(Type type);
+    ErrCode GetAlgoAbility(Type type);
     ErrCode RegisterImpl(const CallbackManager& callback);
-    ErrCode UnregisterImpl();
+    ErrCode UnregisterImpl() { return ERR_OK; }
     int32_t MsdpCallback(const Data& data);
-    ErrCode RegisterMsdp();
-    ErrCode UnregisterMsdp(void);
-    ErrCode RegisterSensor();
-    ErrCode UnregisterSensor(void);
+    ErrCode RegisterMsdp() { return ERR_OK; }
+    ErrCode UnregisterMsdp(void) { return ERR_OK; }
+    ErrCode RegisterSensor() { return ERR_OK; }
+    ErrCode UnregisterSensor(void) { return ERR_OK; }
+    ErrCode StartMock(Type type);
+    ErrCode RegisterMock();
+    ErrCode UnregisterMock();
+    ErrCode RegisterAlgo();
+    ErrCode UnregisterAlgo();
     Data SaveObserverData(const Data& data);
     std::map<Type, OnChangedValue> GetObserverData() const;
-    void GetDevicestatusTimestamp();
+    void GetDevicestatusTimestamp() {}
+    void GetDeviceStatusTimestamp();
     void GetLongtitude();
     void GetLatitude();
-    int32_t LoadAlgorithmLibrary(bool bCreate);
-    int32_t UnloadAlgorithmLibrary(bool bCreate);
-    int32_t LoadSensorHdiLibrary(bool bCreate);
-    int32_t UnloadSensorHdiLibrary(bool bCreate);
+    int32_t LoadAlgorithmLibrary(bool bCreate) { return ERR_OK; }
+    int32_t UnloadAlgorithmLibrary(bool bCreate) { return ERR_OK; }
+    int32_t LoadSensorHdiLibrary(bool bCreate) { return ERR_OK; }
+    int32_t UnloadSensorHdiLibrary(bool bCreate) { return ERR_OK; }
+    ErrCode LoadAlgoLibrary();
+    ErrCode UnloadAlgoLibrary();
+    ErrCode LoadMockLibrary();
+    ErrCode UnloadMockLibrary();
+    ErrCode MockHandle(Type type);
+    ErrCode AlgoHandle(Type type);
+    ErrCode StartAlgo(Type type);
+    ErrCode AlgoDisable(Type type);
+    ErrCode MockDisable(Type type);
+    ErrCode SensorHdiDisable(Type type);
 private:
+    std::shared_ptr<MsdpAlgoCallback> callback_ {nullptr};
     ErrCode ImplCallback(const Data& data);
-    DevicestatusSensorInterface* GetSensorHdiInst();
-    DevicestatusMsdpInterface* GetAlgorithmInst();
-    MsdpAlgorithmHandle mAlgorithm_;
-    SensorHdiHandle sensorHdi_;
+    IMsdp* GetAlgoInst(Type type);
+    IMsdp* GetMockInst(Type type);
+    MsdpAlgoHandle mock_;
+    MsdpAlgoHandle algo_;
+    std::map<Type, int32_t> algoCallCount_;
+    std::map<Type, int32_t> mockCallCount_;
+
     std::mutex mMutex_;
     bool notifyManagerFlag_ = false;
     void OnResult(const Data& data) override;
-    void OnSensorHdiResult(const Data& data) override;
 };
 } // namespace DeviceStatus
-}
-}
+} // namespace Msdp
+} // namespace OHOS
 #endif // DEVICESTATUS_MSDP_CLIENT_IMPL_H

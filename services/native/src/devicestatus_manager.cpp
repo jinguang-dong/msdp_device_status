@@ -39,7 +39,7 @@ bool DevicestatusManager::Init()
         devicestatusCBDeathRecipient_ = new DevicestatusCallbackDeathRecipient();
     }
 
-    msdpImpl_ = std::make_unique<DevicestatusMsdpClientImpl>();
+    msdpImpl_ = std::make_unique<DeviceStatusMsdpClientImpl>();
     if (msdpImpl_ == nullptr) {
         return false;
     }
@@ -127,7 +127,7 @@ bool DevicestatusManager::InitDataCallback()
         DEV_HILOGE(SERVICE, "msdpImpl_ is nullptr");
         return false;
     }
-    DevicestatusMsdpClientImpl::CallbackManager callback =
+    DeviceStatusMsdpClientImpl::CallbackManager callback =
         std::bind(&DevicestatusManager::MsdpDataCallback, this, std::placeholders::_1);
     if (msdpImpl_->RegisterImpl(callback) == ERR_NG) {
         DEV_HILOGE(SERVICE, "register impl failed");
