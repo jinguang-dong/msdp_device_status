@@ -29,29 +29,38 @@
 
 namespace OHOS {
 namespace Msdp {
-class DevicestatusService final : public SystemAbility, public DevicestatusSrvStub {
-    DECLARE_SYSTEM_ABILITY(DevicestatusService)
-    DECLARE_DELAYED_SP_SINGLETON(DevicestatusService);
+namespace DeviceStatus {
+class DeviceStatusService final : public SystemAbility, public DevicestatusSrvStub {
+    DECLARE_SYSTEM_ABILITY(DeviceStatusService)
+    DECLARE_DELAYED_SP_SINGLETON(DeviceStatusService);
 public:
     virtual void OnDump() override;
     virtual void OnStart() override;
     virtual void OnStop() override;
 
-    void Subscribe(const DevicestatusDataUtils::DevicestatusType& type, \
-        const sptr<IdevicestatusCallback>& callback) override;
-    void UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type, \
-        const sptr<IdevicestatusCallback>& callback) override;
-    DevicestatusDataUtils::DevicestatusData GetCache(const DevicestatusDataUtils::DevicestatusType& type) override;
+    void Subscribe(const Type& type, \
+        const sptr<IdevicestatusCallback>& callback) override { return; }
+    void UnSubscribe(const Type& type, \
+        const sptr<IdevicestatusCallback>& callback) override { return; }
+    void Subscribe(Type type,
+        ActivityEvent event,
+        ReportLatencyNs latency,
+        sptr<IdevicestatusCallback> callback);
+    void UnSubscribe(Type type,
+        ActivityEvent event,
+        sptr<IdevicestatusCallback> callback);
+    Data GetCache(const Type& type) override;
     bool IsServiceReady();
-    std::shared_ptr<DevicestatusManager> GetDevicestatusManager();
+    std::shared_ptr<DeviceStatusManager> GetDeviceStatusManager();
     int Dump(int fd, const std::vector<std::u16string>& args) override;
-    void ReportMsdpSysEvent(const DevicestatusDataUtils::DevicestatusType& type, bool enable);
+    void ReportSensorSysEvent(int32_t type, bool enable);
 private:
     bool Init();
-    bool ready_ = false;
-    std::shared_ptr<DevicestatusManager> devicestatusManager_;
-    std::shared_ptr<DevicestatusMsdpClientImpl> msdpImpl_;
+    std::atomic<bool> ready_ = false;
+    std::shared_ptr<DeviceStatusManager> devicestatusManager_;
+    std::shared_ptr<DeviceStatusMsdpClientImpl> msdpImpl_;
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 #endif // DEVICESTATUS_SERVICE_H

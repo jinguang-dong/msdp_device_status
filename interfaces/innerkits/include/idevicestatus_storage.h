@@ -22,11 +22,12 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 class IdevicestatusStorage : public IRemoteBroker {
 public:
     struct DevicestatusRecord {
-        DevicestatusDataUtils::DevicestatusType type;
-        DevicestatusDataUtils::DevicestatusValue value;
+        Type type;
+        OnChangedValue value;
         std::string date;
         std::string time;
     };
@@ -35,6 +36,7 @@ public:
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.IdevicestatusStorage");
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 #endif // IDEVICESTATUS_STORAGE_H
