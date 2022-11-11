@@ -29,15 +29,16 @@
 using namespace OHOS::NativeRdb;
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 namespace {
 constexpr int32_t ERR_OK = 0;
 constexpr int32_t ERR_NG = -1;
 const std::string DEVICESTATUS_SENSOR_HDI_LIB_PATH = "libdevicestatus_sensorhdi.z.so";
 const std::string DEVICESTATUS_MSDP_ALGORITHM_LIB_PATH = "libdevicestatus_msdp.z.so";
-std::map<DevicestatusDataUtils::DevicestatusType, DevicestatusDataUtils::DevicestatusValue> g_devicestatusDataMap;
+std::map<Type, OnChangedValue> g_devicestatusDataMap;
 DevicestatusMsdpClientImpl::CallbackManager g_callbacksMgr;
-using clientType = DevicestatusDataUtils::DevicestatusType;
-using clientValue = DevicestatusDataUtils::DevicestatusValue;
+using clientType = Type;
+using clientValue = OnChangedValue;
 DevicestatusMsdpInterface* g_msdpInterface;
 DevicestatusSensorInterface* g_sensorHdiInterface_;
 }
@@ -159,7 +160,7 @@ ErrCode DevicestatusMsdpClientImpl::UnregisterImpl()
     return ERR_OK;
 }
 
-ErrCode DevicestatusMsdpClientImpl::ImplCallback(const DevicestatusDataUtils::DevicestatusData& data)
+ErrCode DevicestatusMsdpClientImpl::ImplCallback(const Data& data)
 {
     if (g_callbacksMgr == nullptr) {
         DEV_HILOGI(SERVICE, "g_callbacksMgr is nullptr");
@@ -170,12 +171,12 @@ ErrCode DevicestatusMsdpClientImpl::ImplCallback(const DevicestatusDataUtils::De
     return ERR_OK;
 }
 
-void DevicestatusMsdpClientImpl::OnResult(const DevicestatusDataUtils::DevicestatusData& data)
+void DevicestatusMsdpClientImpl::OnResult(const Data& data)
 {
     MsdpCallback(data);
 }
 
-void DevicestatusMsdpClientImpl::OnSensorHdiResult(const DevicestatusDataUtils::DevicestatusData& data)
+void DevicestatusMsdpClientImpl::OnSensorHdiResult(const Data& data)
 {
     MsdpCallback(data);
 }
@@ -208,7 +209,7 @@ ErrCode DevicestatusMsdpClientImpl::UnregisterMsdp(void)
     return ERR_OK;
 }
 
-int32_t DevicestatusMsdpClientImpl::MsdpCallback(const DevicestatusDataUtils::DevicestatusData& data)
+int32_t DevicestatusMsdpClientImpl::MsdpCallback(const Data& data)
 {
     DEV_HILOGI(SERVICE, "Enter");
     DevicestatusDumper::GetInstance().pushDeviceStatus(data);
@@ -221,8 +222,8 @@ int32_t DevicestatusMsdpClientImpl::MsdpCallback(const DevicestatusDataUtils::De
     return ERR_OK;
 }
 
-DevicestatusDataUtils::DevicestatusData DevicestatusMsdpClientImpl::SaveObserverData(
-    const DevicestatusDataUtils::DevicestatusData& data)
+Data DevicestatusMsdpClientImpl::SaveObserverData(
+    const Data& data)
 {
     DEV_HILOGI(SERVICE, "Enter");
     for (auto iter = g_devicestatusDataMap.begin(); iter != g_devicestatusDataMap.end(); ++iter) {
@@ -363,5 +364,6 @@ DevicestatusMsdpInterface* DevicestatusMsdpClientImpl::GetAlgorithmInst()
 
     return mAlgorithm_.pAlgorithm;
 }
+} // namespace DeviceStatus
 }
 }

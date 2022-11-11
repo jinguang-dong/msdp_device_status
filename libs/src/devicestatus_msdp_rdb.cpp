@@ -27,6 +27,7 @@
 using namespace OHOS::NativeRdb;
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 namespace {
 const std::string DATABASE_NAME = "/data/MsdpStub.db";
 constexpr int32_t TIMER_INTERVAL = 3;
@@ -74,7 +75,7 @@ void DevicestatusMsdpRdb::Disable()
     DEV_HILOGI(SERVICE, "Exit");
 }
 
-ErrCode DevicestatusMsdpRdb::NotifyMsdpImpl(const DevicestatusDataUtils::DevicestatusData& data)
+ErrCode DevicestatusMsdpRdb::NotifyMsdpImpl(const Data& data)
 {
     DEV_HILOGI(SERVICE, "Enter");
     if (g_rdb == nullptr) {
@@ -90,8 +91,8 @@ ErrCode DevicestatusMsdpRdb::NotifyMsdpImpl(const DevicestatusDataUtils::Devices
     return ERR_OK;
 }
 
-DevicestatusDataUtils::DevicestatusData DevicestatusMsdpRdb::SaveRdbData(
-    const DevicestatusDataUtils::DevicestatusData& data)
+Data DevicestatusMsdpRdb::SaveRdbData(
+    const Data& data)
 {
     for (auto iter = rdbDataMap_.begin(); iter != rdbDataMap_.end(); ++iter) {
         if (iter->first == data.type) {
@@ -202,9 +203,9 @@ int32_t DevicestatusMsdpRdb::TrigerDatabaseObserver()
         return -1;
     }
 
-    DevicestatusDataUtils::DevicestatusData data;
-    data.type = (DevicestatusDataUtils::DevicestatusType)devicestatusType_;
-    data.value = (DevicestatusDataUtils::DevicestatusValue)devicestatusStatus_;
+    Data data;
+    data.type = (Type)devicestatusType_;
+    data.value = (OnChangedValue)devicestatusStatus_;
 
     SaveRdbData(data);
     DEV_HILOGI(SERVICE, "notifyFlag_ is %{public}d", notifyFlag_);
@@ -354,5 +355,6 @@ extern "C" void Destroy(DevicestatusMsdpInterface* algorithm)
     DEV_HILOGI(SERVICE, "Enter");
     delete algorithm;
 }
+} // namespace DeviceStatus
 }
 }

@@ -31,6 +31,7 @@
 #define FUZZ_PROJECT_NAME "devicestatusclient_fuzzer"
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 class DevicestatusClientFuzzer {
 public:
     static bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size);
@@ -42,9 +43,10 @@ public:
     public:
         DevicestatusTestCallback() {};
         virtual ~DevicestatusTestCallback() {};
-        virtual void OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+        virtual void OnDevicestatusChanged(const Data& devicestatusData) override;
     };
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 #endif // DEVICESTATUSCLIENT_FUZZER_H
