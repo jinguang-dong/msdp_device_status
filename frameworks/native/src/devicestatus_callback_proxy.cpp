@@ -24,7 +24,8 @@
 
 namespace OHOS {
 namespace Msdp {
-void DevicestatusCallbackProxy::OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& devicestatusData)
+namespace DeviceStatus {
+void DevicestatusCallbackProxy::OnDevicestatusChanged(const Data& devicestatusData)
 {
     sptr<IRemoteObject> remote = Remote();
     DEVICESTATUS_RETURN_IF(remote == nullptr);
@@ -47,5 +48,6 @@ void DevicestatusCallbackProxy::OnDevicestatusChanged(const DevicestatusDataUtil
         DEV_HILOGE(INNERKIT, "SendRequest is failed, error code: %{public}d", ret);
     }
 }
+} // namespace DeviceStatus
 } // Msdp
 } // OHOS

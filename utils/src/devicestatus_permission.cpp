@@ -20,6 +20,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 bool DevicestatusPermission::CheckCallingPermission(const string &permissionName)
 {
     Security::AccessToken::AccessTokenID callingToken = IPCSkeleton::GetCallingTokenID();

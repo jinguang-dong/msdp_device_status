@@ -25,6 +25,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 class DevicestatusMsdpInterface {
 public:
     DevicestatusMsdpInterface() {}
@@ -33,7 +34,7 @@ public:
     public:
         MsdpAlgorithmCallback() = default;
         virtual ~MsdpAlgorithmCallback() = default;
-        virtual void OnResult(const DevicestatusDataUtils::DevicestatusData& data) = 0;
+        virtual void OnResult(const Data& data) = 0;
     };
 
     virtual void RegisterCallback(const std::shared_ptr<MsdpAlgorithmCallback>& callback) = 0;
@@ -57,6 +58,7 @@ struct MsdpAlgorithmHandle {
         pAlgorithm = nullptr;
     }
 };
+} // namespace DeviceStatus
 }
 }
 #endif // DEVICESTATUS_MSDP_INTERFACE_H

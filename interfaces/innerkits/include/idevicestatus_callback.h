@@ -23,16 +23,18 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 class IdevicestatusCallback : public IRemoteBroker {
 public:
     enum  {
         DEVICESTATUS_CHANGE = 0,
     };
 
-    virtual void OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& devicestatusData) = 0;
+    virtual void OnDevicestatusChanged(const Data& devicestatusData) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.IdevicestatusCallback");
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 #endif // IDEVICESTATUS_CALLBACK_H
