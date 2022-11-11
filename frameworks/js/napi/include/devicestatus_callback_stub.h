@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,11 @@
 #include <iremote_stub.h>
 #include <nocopyable.h>
 
-#include "devicestatus_data_utils.h"
-#include "idevicestatus_callback.h"
 #include "message_option.h"
 #include "message_parcel.h"
+
+#include "devicestatus_data_utils.h"
+#include "idevicestatus_callback.h"
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
@@ -32,7 +33,7 @@ public:
     DevicestatusCallbackStub() = default;
     virtual ~DevicestatusCallbackStub() = default;
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
-    void OnDevicestatusChanged(const Data& __attribute__((unused))value) override {}
+    void OnDevicestatusChanged(const Data& value) override {}
 
 private:
     int32_t OnDevicestatusChangedStub(MessageParcel& data);

@@ -78,7 +78,7 @@ struct Data {
     Action action;
     double movement;
 
-    bool operator!= (const Data& r) const 
+    bool operator!= (const Data& r) const
     {
         if (type == r.type && value == r.value
         && status - r.status && action == r.action && (movement - r.movement) < 0.001) {
