@@ -29,6 +29,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 using namespace OHOS::HiviewDFX;
 namespace {
 auto ms = DelayedSpSingleton<DevicestatusService>::GetInstance();
@@ -74,11 +75,11 @@ void DevicestatusService::OnStop()
     }
     ready_ = false;
 
-    if (devicestatusManager_ == nullptr) {
-        DEV_HILOGI(SERVICE, "devicestatusManager_ is null");
+    if (DeviceStatusManager_ == nullptr) {
+        DEV_HILOGI(SERVICE, "DeviceStatusManager_ is null");
         return;
     }
-    devicestatusManager_->UnloadAlgorithm(false);
+    DeviceStatusManager_->UnloadAlgorithm(false);
     DEV_HILOGI(SERVICE, "unload algorithm library exit");
 }
 
@@ -102,13 +103,13 @@ int DevicestatusService::Dump(int fd, const std::vector<std::u16string>& args)
         return Str16ToStr8(arg);
     });
 
-    DevicestatusDataUtils::DevicestatusType type;
-    std::vector<DevicestatusDataUtils::DevicestatusData> datas;
-    for (type = DevicestatusDataUtils::TYPE_HIGH_STILL;
-        type <= DevicestatusDataUtils::TYPE_LID_OPEN;
-        type = (DevicestatusDataUtils::DevicestatusType)(type+1)) {
-        DevicestatusDataUtils::DevicestatusData data = GetCache(type);
-        if (data.value != DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID) {
+    Type type;
+    std::vector<Data> datas;
+    for (type = Type::TYPE_STILL;
+        type <= Type::TYPE_LID_OPEN;
+        type = (Type)(type+1)) {
+        Data data = GetCache(type);
+        if (data.value != OnChangedValue::VALUE_INVALID) {
             datas.emplace_back(data);
         }
     }
@@ -121,10 +122,10 @@ bool DevicestatusService::Init()
 {
     DEV_HILOGI(SERVICE, "Enter");
 
-    if (!devicestatusManager_) {
-        devicestatusManager_ = std::make_shared<DevicestatusManager>(ms);
+    if (!DeviceStatusManager_) {
+        DeviceStatusManager_ = std::make_shared<DeviceStatusManager>(ms);
     }
-    if (!devicestatusManager_->Init()) {
+    if (!DeviceStatusManager_->Init()) {
         DEV_HILOGE(SERVICE, "OnStart init fail");
         return false;
     }
@@ -138,17 +139,17 @@ bool DevicestatusService::IsServiceReady()
     return ready_;
 }
 
-std::shared_ptr<DevicestatusManager> DevicestatusService::GetDevicestatusManager()
+std::shared_ptr<DeviceStatusManager> DevicestatusService::GetDeviceStatusManager()
 {
     DEV_HILOGI(SERVICE, "Enter");
-    return devicestatusManager_;
+    return DeviceStatusManager_;
 }
 
-void DevicestatusService::Subscribe(const DevicestatusDataUtils::DevicestatusType& type,
+void DevicestatusService::Subscribe(const Type& type,
     const sptr<IdevicestatusCallback>& callback)
 {
     DEV_HILOGI(SERVICE, "Enter");
-    if (devicestatusManager_ == nullptr) {
+    if (DeviceStatusManager_ == nullptr) {
         DEV_HILOGI(SERVICE, "UnSubscribe func is nullptr");
         return;
     }
@@ -157,21 +158,21 @@ void DevicestatusService::Subscribe(const DevicestatusDataUtils::DevicestatusTyp
     appInfo->uid = GetCallingUid();
     appInfo->pid = GetCallingPid();
     appInfo->tokenId = GetCallingTokenID();
-    devicestatusManager_->GetPackageName(appInfo->tokenId, appInfo->packageName);
+    DeviceStatusManager_->GetPackageName(appInfo->tokenId, appInfo->packageName);
     appInfo->type = type;
     appInfo->callback = callback;
     DevicestatusDumper::GetInstance().SaveAppInfo(appInfo);
     StartTrace(HITRACE_TAG_MSDP, "serviceSubcribeStart");
-    devicestatusManager_->Subscribe(type, callback);
+    DeviceStatusManager_->Subscribe(type, callback);
     FinishTrace(HITRACE_TAG_MSDP);
     ReportMsdpSysEvent(type, true);
 }
 
-void DevicestatusService::UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type,
+void DevicestatusService::UnSubscribe(const Type& type,
     const sptr<IdevicestatusCallback>& callback)
 {
     DEV_HILOGI(SERVICE, "Enter");
-    if (devicestatusManager_ == nullptr) {
+    if (DeviceStatusManager_ == nullptr) {
         DEV_HILOGI(SERVICE, "UnSubscribe func is nullptr");
         return;
     }
@@ -180,35 +181,35 @@ void DevicestatusService::UnSubscribe(const DevicestatusDataUtils::DevicestatusT
     appInfo->uid = GetCallingUid();
     appInfo->pid = GetCallingPid();
     appInfo->tokenId = GetCallingTokenID();
-    devicestatusManager_->GetPackageName(appInfo->tokenId, appInfo->packageName);
+    DeviceStatusManager_->GetPackageName(appInfo->tokenId, appInfo->packageName);
     appInfo->type = type;
     appInfo->callback = callback;
     DevicestatusDumper::GetInstance().RemoveAppInfo(appInfo);
     StartTrace(HITRACE_TAG_MSDP, "serviceUnSubcribeStart");
-    devicestatusManager_->UnSubscribe(type, callback);
+    DeviceStatusManager_->UnSubscribe(type, callback);
     FinishTrace(HITRACE_TAG_MSDP);
     ReportMsdpSysEvent(type, false);
 }
 
-DevicestatusDataUtils::DevicestatusData DevicestatusService::GetCache(const \
-    DevicestatusDataUtils::DevicestatusType& type)
+Data DevicestatusService::GetCache(const \
+    Type& type)
 {
     DEV_HILOGI(SERVICE, "Enter");
-    if (devicestatusManager_ == nullptr) {
-        DevicestatusDataUtils::DevicestatusData data = {type, DevicestatusDataUtils::DevicestatusValue::VALUE_EXIT};
-        data.value = DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID;
+    if (DeviceStatusManager_ == nullptr) {
+        Data data = {type, OnChangedValue::VALUE_EXIT};
+        data.value = OnChangedValue::VALUE_INVALID;
         DEV_HILOGI(SERVICE, "GetLatestDevicestatusData func is nullptr,return default!");
         return data;
     }
-    return devicestatusManager_->GetLatestDevicestatusData(type);
+    return DeviceStatusManager_->GetLatestDeviceStatusData(type);
 }
 
-void DevicestatusService::ReportMsdpSysEvent(const DevicestatusDataUtils::DevicestatusType& type, bool enable)
+void DevicestatusService::ReportMsdpSysEvent(const Type& type, bool enable)
 {
     auto uid = this->GetCallingUid();
     auto callerToken = this->GetCallingTokenID();
     std::string packageName("");
-    devicestatusManager_->GetPackageName(callerToken, packageName);
+    DeviceStatusManager_->GetPackageName(callerToken, packageName);
     std::string message;
     if (enable) {
         HiSysEvent::Write(HiSysEvent::Domain::MSDP, "SUBSCRIBE", HiSysEvent::EventType::STATISTIC,
@@ -218,5 +219,6 @@ void DevicestatusService::ReportMsdpSysEvent(const DevicestatusDataUtils::Device
     HiSysEvent::Write(HiSysEvent::Domain::MSDP, "UNSUBSCRIBE", HiSysEvent::EventType::STATISTIC,
         "UID", uid, "PKGNAME", packageName, "TYPE", type);
 }
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

@@ -29,140 +29,196 @@
 using namespace OHOS::NativeRdb;
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 namespace {
 constexpr int32_t ERR_OK = 0;
 constexpr int32_t ERR_NG = -1;
-const std::string DEVICESTATUS_SENSOR_HDI_LIB_PATH = "libdevicestatus_sensorhdi.z.so";
-const std::string DEVICESTATUS_MSDP_ALGORITHM_LIB_PATH = "libdevicestatus_msdp.z.so";
-std::map<DevicestatusDataUtils::DevicestatusType, DevicestatusDataUtils::DevicestatusValue> g_devicestatusDataMap;
-DevicestatusMsdpClientImpl::CallbackManager g_callbacksMgr;
-using clientType = DevicestatusDataUtils::DevicestatusType;
-using clientValue = DevicestatusDataUtils::DevicestatusValue;
-DevicestatusMsdpInterface* g_msdpInterface;
-DevicestatusSensorInterface* g_sensorHdiInterface_;
+const std::string DEVICESTATUS_MOCK_LIB_PATH = "libdevicestatus_mock.z.so";
+const std::string DEVICESTATUS_ALGO_LIB_PATH = "libdevicestatus_algo.z.so";
+std::map<Type, OnChangedValue> g_devicestatusDataMap;
+DeviceStatusMsdpClientImpl::CallbackManager g_callbacksMgr;
+using ClientType = Type;
+using ClientValue = OnChangedValue;
+IMsdp* g_IAlgo;
+IMsdp* g_IMock;
 }
 
-ErrCode DevicestatusMsdpClientImpl::InitMsdpImpl()
+ErrCode DeviceStatusMsdpClientImpl::InitMsdpImpl(Type type)
 {
-    DEV_HILOGI(SERVICE, "Enter");
-    if (g_msdpInterface == nullptr) {
-        g_msdpInterface = GetAlgorithmInst();
-        if (g_msdpInterface == nullptr) {
-            DEV_HILOGI(SERVICE, "get msdp module instance failed");
-            return ERR_NG;
-        }
+    DEV_HILOGD(SERVICE, "Enter");
+    if (GetSensorHdi(type) == ERR_OK) {
+        DEV_HILOGI(SERVICE, "GetSensorHdi is support");
+        return ERR_OK;
     }
-
-    if (g_sensorHdiInterface_ == nullptr) {
-        g_sensorHdiInterface_ = GetSensorHdiInst();
-        if (g_sensorHdiInterface_ == nullptr) {
-            DEV_HILOGI(SERVICE, "get sensor module instance failed");
-            return ERR_NG;
-        }
+    if (AlgoHandle(type) == ERR_OK) {
+        DEV_HILOGI(SERVICE, "AlgoHandle is support");
+        return ERR_OK;
     }
-
-    g_msdpInterface->Enable();
-    g_sensorHdiInterface_->Enable();
-
-    DEV_HILOGI(SERVICE, "Exit");
-    return ERR_OK;
+    if (MockHandle(type) == ERR_OK) {
+        DEV_HILOGI(SERVICE, "MockHandle is support");
+        return ERR_OK;
+    }
+    DEV_HILOGD(SERVICE, "Exit");
+    return ERR_NG;
 }
 
-ErrCode DevicestatusMsdpClientImpl::DisableMsdpImpl()
+ErrCode DeviceStatusMsdpClientImpl::MockHandle(Type type)
 {
-    DEV_HILOGI(SERVICE, "Enter");
-    if (g_msdpInterface == nullptr) {
-        DEV_HILOGI(SERVICE, "disable msdp impl failed");
+    if (StartMock(type) == ERR_NG) {
+        DEV_HILOGE(SERVICE, "Start mock Library failed");
         return ERR_NG;
     }
+    g_IMock->Enable(type);
+    mockCallCount_[type]++;
+    RegisterMock();
+    DEV_HILOGI(SERVICE, "mockCallCount_ %{public}d", mockCallCount_[type]);
+    return ERR_OK;
+}
 
-    if (g_sensorHdiInterface_ == nullptr) {
-        DEV_HILOGI(SERVICE, "disable msdp impl failed");
+ErrCode DeviceStatusMsdpClientImpl::AlgoHandle(Type type)
+{
+    if (GetAlgoAbility(type) == ERR_NG) {
         return ERR_NG;
     }
-
-    g_msdpInterface->Disable();
-    g_sensorHdiInterface_->Disable();
-    DEV_HILOGI(SERVICE, "Exit");
-    return ERR_OK;
-}
-
-ErrCode DevicestatusMsdpClientImpl::RegisterSensor()
-{
-    DEV_HILOGI(SERVICE, "Enter");
-    if (g_sensorHdiInterface_ != nullptr) {
-        std::shared_ptr<DevicestatusSensorHdiCallback> callback = std::make_shared<DevicestatusMsdpClientImpl>();
-        g_sensorHdiInterface_->RegisterCallback(callback);
-        DEV_HILOGI(SERVICE, "g_sensorHdiInterface_ is not nullptr");
-    }
-
-    DEV_HILOGI(SERVICE, "Exit");
-    return ERR_OK;
-}
-
-ErrCode DevicestatusMsdpClientImpl::UnregisterSensor(void)
-{
-    DEV_HILOGI(SERVICE, "Enter");
-
-    if (g_sensorHdiInterface_ == nullptr) {
-        DEV_HILOGI(SERVICE, "unregister callback failed");
+    if (StartAlgo(type) == ERR_NG) {
+        DEV_HILOGE(SERVICE, "Start algo Library failed");
         return ERR_NG;
     }
-
-    g_sensorHdiInterface_->UnregisterCallback();
-    g_sensorHdiInterface_ = nullptr;
-
-    DEV_HILOGI(SERVICE, "Exit");
+    if ((g_IAlgo->Enable(type)) == ERR_NG) {
+        DEV_HILOGE(SERVICE, "Enable algo Library failed");
+        return ERR_NG;
+    }
+    algoCallCount_[type]++;
+    RegisterAlgo();
+    DEV_HILOGI(SERVICE, "algoCallCount_ %{public}d", algoCallCount_[type]);
     return ERR_OK;
 }
 
-ErrCode DevicestatusMsdpClientImpl::RegisterImpl(const CallbackManager& callback)
+ErrCode DeviceStatusMsdpClientImpl::StartAlgo(Type type)
 {
-    DEV_HILOGI(SERVICE, "Enter");
-    g_callbacksMgr = callback;
-
-    if (g_msdpInterface == nullptr) {
-        g_msdpInterface = GetAlgorithmInst();
-        if (g_msdpInterface == nullptr) {
-            DEV_HILOGI(SERVICE, "get msdp module instance failed");
-            return ERR_NG;
-        }
+    if (LoadAlgoLibrary() == ERR_NG) {
+        DEV_HILOGE(SERVICE, "load algo Library failed");
+        return ERR_NG;
     }
-
-    if (g_sensorHdiInterface_ == nullptr) {
-        g_sensorHdiInterface_ = GetSensorHdiInst();
-        if (g_sensorHdiInterface_ == nullptr) {
-            DEV_HILOGI(SERVICE, "get sensor module instance failed");
-            return ERR_NG;
-        }
+    g_IAlgo = GetAlgoInst(type);
+    if (g_IAlgo == nullptr) {
+        DEV_HILOGE(SERVICE, "get algo module failed");
+        return ERR_NG;
     }
-
-    RegisterMsdp();
-    RegisterSensor();
-
     return ERR_OK;
 }
 
-ErrCode DevicestatusMsdpClientImpl::UnregisterImpl()
+ErrCode DeviceStatusMsdpClientImpl::StartMock(Type type)
 {
-    DEV_HILOGI(SERVICE, "Enter");
+    if (LoadMockLibrary() == ERR_NG) {
+        DEV_HILOGE(SERVICE, "load mock Library failed");
+        return ERR_NG;
+    }
+    g_IMock = GetMockInst(type);
+    if (g_IMock == nullptr) {
+        DEV_HILOGE(SERVICE, "get mock module failed");
+        return ERR_NG;
+    }
+    return ERR_OK;
+}
+
+
+ErrCode DeviceStatusMsdpClientImpl::GetSensorHdi(Type type)
+{
+    return ERR_NG;
+}
+
+ErrCode DeviceStatusMsdpClientImpl::GetAlgoAbility(Type type)
+{
+    if (type == Type::TYPE_STILL ||type == Type::TYPE_HORIZONTAL_POSITION ||
+        type == Type::TYPE_VERTICAL_POSITION) {
+        return ERR_OK;
+    }
+    DEV_HILOGI(SERVICE, "Not support ability");
+    return ERR_NG;
+}
+
+ErrCode DeviceStatusMsdpClientImpl::Disable(Type type)
+{
+    DEV_HILOGD(SERVICE, "Enter");
+    if (SensorHdiDisable(type) == ERR_OK) {
+        return ERR_OK;
+    }
+    if (AlgoDisable(type) == ERR_OK) {
+        return ERR_OK;
+    }
+    if (MockDisable(type) == ERR_OK) {
+        return ERR_OK;
+    }
+    DEV_HILOGD(SERVICE, "Exit");
+    return ERR_NG;
+}
+
+ErrCode DeviceStatusMsdpClientImpl::SensorHdiDisable(Type type)
+{
+    return ERR_NG;
+}
+
+ErrCode DeviceStatusMsdpClientImpl::AlgoDisable(Type type)
+{
+    if (g_IAlgo == nullptr ) {
+        return ERR_NG;
+    }
+    if (algoCallCount_[type] == 0) {
+        return ERR_NG;
+    }
+    algoCallCount_[type]--;
+    if (algoCallCount_[type] != 0) {
+        return ERR_NG;
+    }
+    g_IAlgo->Disable(type);
+    UnregisterAlgo();
+    algoCallCount_.erase(type);
+    if (algoCallCount_.empty()) {
+        if (UnloadAlgoLibrary() == ERR_NG) {
+            DEV_HILOGE(SERVICE, "Failed to close algorithm library");
+            return ERR_NG;
+        }
+        DEV_HILOGI(SERVICE, "Close algorithm library");
+        g_IAlgo = nullptr;
+        g_callbacksMgr = nullptr;
+        return ERR_OK;
+    }
+    DEV_HILOGI(SERVICE, "algoCallCount_ %{public}d", algoCallCount_[type]);
+    return ERR_NG;
+}
+
+ErrCode DeviceStatusMsdpClientImpl::MockDisable(Type type)
+{
+    if (g_IMock == nullptr ) {
+        return ERR_NG;
+    }
+    if (mockCallCount_[type] == 0) {
+        return ERR_NG;
+    }
+    mockCallCount_[type]--;
+    if (mockCallCount_[type] != 0) {
+        return ERR_NG;
+    }
+    mockCallCount_.erase(type);
+    g_IMock->Disable(type);
+    UnregisterMock();
+    if (mockCallCount_.empty()) {
+        if (UnloadMockLibrary() == ERR_NG) {
+            DEV_HILOGE(SERVICE, "Failed to close library");
+            return ERR_NG;
+        }
+        g_IMock = nullptr;
+        g_callbacksMgr = nullptr;
+        return ERR_OK;
+    }
+    return ERR_OK;
+}
+
+ErrCode DeviceStatusMsdpClientImpl::ImplCallback(const Data& data)
+{
     if (g_callbacksMgr == nullptr) {
-        DEV_HILOGI(SERVICE, "unregister callback failed");
-        return ERR_NG;
-    }
-
-    UnregisterMsdp();
-    UnregisterSensor();
-
-    g_callbacksMgr = nullptr;
-
-    return ERR_OK;
-}
-
-ErrCode DevicestatusMsdpClientImpl::ImplCallback(const DevicestatusDataUtils::DevicestatusData& data)
-{
-    if (g_callbacksMgr == nullptr) {
-        DEV_HILOGI(SERVICE, "g_callbacksMgr is nullptr");
+        DEV_HILOGE(SERVICE, "g_callbacksMgr is nullptr");
         return ERR_NG;
     }
     g_callbacksMgr(data);
@@ -170,61 +226,87 @@ ErrCode DevicestatusMsdpClientImpl::ImplCallback(const DevicestatusDataUtils::De
     return ERR_OK;
 }
 
-void DevicestatusMsdpClientImpl::OnResult(const DevicestatusDataUtils::DevicestatusData& data)
+ErrCode DeviceStatusMsdpClientImpl::RegisterImpl(const CallbackManager& callback)
 {
-    MsdpCallback(data);
-}
-
-void DevicestatusMsdpClientImpl::OnSensorHdiResult(const DevicestatusDataUtils::DevicestatusData& data)
-{
-    MsdpCallback(data);
-}
-
-ErrCode DevicestatusMsdpClientImpl::RegisterMsdp()
-{
-    DEV_HILOGI(SERVICE, "Enter");
-    if (g_msdpInterface != nullptr) {
-        std::shared_ptr<MsdpAlgorithmCallback> callback = std::make_shared<DevicestatusMsdpClientImpl>();
-        g_msdpInterface->RegisterCallback(callback);
-    }
-
-    DEV_HILOGI(SERVICE, "Exit");
+    DEV_HILOGD(SERVICE, "Enter");
+    g_callbacksMgr = callback;
     return ERR_OK;
 }
 
-ErrCode DevicestatusMsdpClientImpl::UnregisterMsdp(void)
+void DeviceStatusMsdpClientImpl::OnResult(const Data& data)
 {
-    DEV_HILOGI(SERVICE, "Enter");
+    MsdpCallback(data);
+}
 
-    if (g_msdpInterface == nullptr) {
-        DEV_HILOGI(SERVICE, "unregister callback failed");
+ErrCode DeviceStatusMsdpClientImpl::RegisterMock()
+{
+    DEV_HILOGD(SERVICE, "Enter");
+    if (g_IMock != nullptr) {
+        std::shared_ptr<IMsdp::MsdpAlgoCallback> callback = std::make_shared<DeviceStatusMsdpClientImpl>();
+        g_IMock->RegisterCallback(callback);
+    }
+
+    DEV_HILOGD(SERVICE, "Exit");
+    return ERR_OK;
+}
+
+ErrCode DeviceStatusMsdpClientImpl::UnregisterMock()
+{
+    DEV_HILOGD(SERVICE, "Enter");
+
+    if (g_IMock == nullptr) {
+        DEV_HILOGE(SERVICE, "unregister mock callback failed");
         return ERR_NG;
     }
 
-    g_msdpInterface->UnregisterCallback();
-    g_msdpInterface = nullptr;
-
-    DEV_HILOGI(SERVICE, "Exit");
+    g_IMock->UnregisterCallback();
+    DEV_HILOGD(SERVICE, "Exit");
     return ERR_OK;
 }
 
-int32_t DevicestatusMsdpClientImpl::MsdpCallback(const DevicestatusDataUtils::DevicestatusData& data)
+ErrCode DeviceStatusMsdpClientImpl::RegisterAlgo()
 {
-    DEV_HILOGI(SERVICE, "Enter");
+    DEV_HILOGD(SERVICE, "Enter");
+    if (g_IAlgo != nullptr) {
+        std::shared_ptr<IMsdp::MsdpAlgoCallback> callback_ = std::make_shared<DeviceStatusMsdpClientImpl>();
+        g_IAlgo->RegisterCallback(callback_);
+    }
+
+    DEV_HILOGD(SERVICE, "Exit");
+    return ERR_OK;
+}
+
+ErrCode DeviceStatusMsdpClientImpl::UnregisterAlgo()
+{
+    DEV_HILOGD(SERVICE, "Enter");
+
+    if (g_IAlgo == nullptr) {
+        DEV_HILOGE(SERVICE, "unregister algo callback failed");
+        return ERR_NG;
+    }
+
+    g_IAlgo->UnregisterCallback();
+
+    DEV_HILOGD(SERVICE, "Exit");
+    return ERR_OK;
+}
+
+int32_t DeviceStatusMsdpClientImpl::MsdpCallback(const Data& data)
+{
+    DEV_HILOGD(SERVICE, "Enter");
     DevicestatusDumper::GetInstance().pushDeviceStatus(data);
     SaveObserverData(data);
     if (notifyManagerFlag_) {
         ImplCallback(data);
         notifyManagerFlag_ = false;
     }
-    DEV_HILOGI(SERVICE, "Exit");
+    DEV_HILOGD(SERVICE, "Exit");
     return ERR_OK;
 }
 
-DevicestatusDataUtils::DevicestatusData DevicestatusMsdpClientImpl::SaveObserverData(
-    const DevicestatusDataUtils::DevicestatusData& data)
+Data DeviceStatusMsdpClientImpl::SaveObserverData(const Data& data)
 {
-    DEV_HILOGI(SERVICE, "Enter");
+    DEV_HILOGD(SERVICE, "Enter");
     for (auto iter = g_devicestatusDataMap.begin(); iter != g_devicestatusDataMap.end(); ++iter) {
         if (iter->first == data.type) {
             iter->second = data.value;
@@ -239,129 +321,168 @@ DevicestatusDataUtils::DevicestatusData DevicestatusMsdpClientImpl::SaveObserver
     return data;
 }
 
-std::map<clientType, clientValue> DevicestatusMsdpClientImpl::GetObserverData() const
+std::map<ClientType,ClientValue> DeviceStatusMsdpClientImpl::GetObserverData() const
 {
-    DEV_HILOGI(SERVICE, "Enter");
+    DEV_HILOGD(SERVICE, "Enter");
     return g_devicestatusDataMap;
 }
 
-void DevicestatusMsdpClientImpl::GetDevicestatusTimestamp()
+void DeviceStatusMsdpClientImpl::GetDeviceStatusTimestamp()
 {
-    DEV_HILOGI(SERVICE, "Enter");
+    DEV_HILOGD(SERVICE, "Enter");
 
-    DEV_HILOGI(SERVICE, "Exit");
+    DEV_HILOGD(SERVICE, "Exit");
 }
 
-void DevicestatusMsdpClientImpl::GetLongtitude()
+void DeviceStatusMsdpClientImpl::GetLongtitude()
 {
-    DEV_HILOGI(SERVICE, "Enter");
+    DEV_HILOGD(SERVICE, "Enter");
 
-    DEV_HILOGI(SERVICE, "Exit");
+    DEV_HILOGD(SERVICE, "Exit");
 }
 
-void DevicestatusMsdpClientImpl::GetLatitude()
+void DeviceStatusMsdpClientImpl::GetLatitude()
 {
-    DEV_HILOGI(SERVICE, "Enter");
+    DEV_HILOGD(SERVICE, "Enter");
 
-    DEV_HILOGI(SERVICE, "Exit");
+    DEV_HILOGD(SERVICE, "Exit");
 }
 
-int32_t DevicestatusMsdpClientImpl::LoadSensorHdiLibrary(bool bCreate)
+ErrCode DeviceStatusMsdpClientImpl::LoadMockLibrary()
 {
-    DEV_HILOGI(SERVICE, "Enter");
-    if (sensorHdi_.handle != nullptr) {
+    DEV_HILOGD(SERVICE, "Enter");
+    if (mock_.handle != nullptr) {
         return ERR_OK;
     }
-    DEV_HILOGI(SERVICE, "Exit");
-    return ERR_OK;
-}
-
-int32_t DevicestatusMsdpClientImpl::UnloadSensorHdiLibrary(bool bCreate)
-{
-    DEV_HILOGI(SERVICE, "Enter");
-    if (sensorHdi_.handle == nullptr) {
+    mock_.handle = dlopen(DEVICESTATUS_MOCK_LIB_PATH.c_str(), RTLD_LAZY);
+    if (mock_.handle == nullptr) {
+        DEV_HILOGE(SERVICE, "Cannot load library error = %{public}s", dlerror());
         return ERR_NG;
     }
 
-    if (sensorHdi_.pAlgorithm != nullptr) {
-        sensorHdi_.destroy(sensorHdi_.pAlgorithm);
-        sensorHdi_.pAlgorithm = nullptr;
-    }
+    DEV_HILOGI(SERVICE, "start create pointer");
+    mock_.create = (IMsdp* (*)()) dlsym(mock_.handle, "Create");
+    DEV_HILOGI(SERVICE, "start destroy pointer");
+    mock_.destroy = (void *(*)(IMsdp*))dlsym(mock_.handle, "Destroy");
 
-    if (!bCreate) {
-        dlclose(sensorHdi_.handle);
-        sensorHdi_.Clear();
-    }
-
-    DEV_HILOGI(SERVICE, "Exit");
-    return ERR_OK;
-}
-
-DevicestatusSensorInterface* DevicestatusMsdpClientImpl::GetSensorHdiInst()
-{
-    DEV_HILOGI(SERVICE, "Enter");
-    if (sensorHdi_.handle == nullptr) {
-        return nullptr;
-    }
-
-    if (sensorHdi_.pAlgorithm == nullptr) {
-        std::unique_lock<std::mutex> lock(mMutex_);
-        if (sensorHdi_.pAlgorithm == nullptr) {
-            DEV_HILOGI(SERVICE, "Get mAlgorithm.pAlgorithm");
-            sensorHdi_.pAlgorithm = sensorHdi_.create();
+    if (mock_.create == nullptr || mock_.destroy == nullptr) {
+        DEV_HILOGE(SERVICE, "%{public}s dlsym Create or Destroy failed",
+            DEVICESTATUS_MOCK_LIB_PATH.c_str());
+        dlclose(mock_.handle);
+        mock_.Clear();
+        if (mock_.handle == nullptr) {
+            return ERR_OK;
         }
+        return ERR_NG;
     }
+    mock_.pAlgorithm = mock_.create();
 
-    return sensorHdi_.pAlgorithm;
-}
-
-int32_t DevicestatusMsdpClientImpl::LoadAlgorithmLibrary(bool bCreate)
-{
-    DEV_HILOGI(SERVICE, "Enter");
-    if (mAlgorithm_.handle != nullptr) {
-        return ERR_OK;
-    }
-    DEV_HILOGI(SERVICE, "Exit");
+    DEV_HILOGD(SERVICE, "Exit");
     return ERR_OK;
 }
 
-int32_t DevicestatusMsdpClientImpl::UnloadAlgorithmLibrary(bool bCreate)
+ErrCode DeviceStatusMsdpClientImpl::UnloadMockLibrary()
 {
-    DEV_HILOGI(SERVICE, "Enter");
-    if (mAlgorithm_.handle == nullptr) {
+    DEV_HILOGD(SERVICE, "Enter");
+    if (mock_.handle == nullptr) {
         return ERR_NG;
     }
 
-    if (mAlgorithm_.pAlgorithm != nullptr) {
-        mAlgorithm_.destroy(mAlgorithm_.pAlgorithm);
-        mAlgorithm_.pAlgorithm = nullptr;
+    if (mock_.pAlgorithm != nullptr) {
+        mock_.destroy(mock_.pAlgorithm);
+        mock_.pAlgorithm = nullptr;
     }
 
-    if (!bCreate) {
-        dlclose(mAlgorithm_.handle);
-        mAlgorithm_.Clear();
-    }
+    dlclose(mock_.handle);
+    mock_.Clear();
 
-    DEV_HILOGI(SERVICE, "Exit");
+    DEV_HILOGD(SERVICE, "Exit");
     return ERR_OK;
 }
 
-DevicestatusMsdpInterface* DevicestatusMsdpClientImpl::GetAlgorithmInst()
+IMsdp* DeviceStatusMsdpClientImpl::GetMockInst(Type type)
 {
-    DEV_HILOGI(SERVICE, "Enter");
-    if (mAlgorithm_.handle == nullptr) {
+    DEV_HILOGD(SERVICE, "Enter");
+    if (mock_.handle == nullptr) {
         return nullptr;
     }
 
-    if (mAlgorithm_.pAlgorithm == nullptr) {
+    if (mock_.pAlgorithm == nullptr) {
         std::unique_lock<std::mutex> lock(mMutex_);
-        if (mAlgorithm_.pAlgorithm == nullptr) {
-            DEV_HILOGI(SERVICE, "Get mAlgorithm.pAlgorithm");
-            mAlgorithm_.pAlgorithm = mAlgorithm_.create();
-        }
+        mock_.pAlgorithm = mock_.create();
+        mockCallCount_[type] = 0;
     }
 
-    return mAlgorithm_.pAlgorithm;
+    return mock_.pAlgorithm;
 }
+
+ErrCode DeviceStatusMsdpClientImpl::LoadAlgoLibrary()
+{
+    DEV_HILOGD(SERVICE, "Enter");
+    if (algo_.handle != nullptr) {
+        return ERR_OK;
+    }
+    algo_.handle = dlopen(DEVICESTATUS_ALGO_LIB_PATH.c_str(), RTLD_LAZY);
+    if (algo_.handle == nullptr) {
+        DEV_HILOGE(SERVICE, "Cannot load library error = %{public}s", dlerror());
+        return ERR_NG;
+    }
+
+    DEV_HILOGI(SERVICE, "start create pointer");
+    algo_.create = (IMsdp* (*)()) dlsym(algo_.handle, "Create");
+    DEV_HILOGI(SERVICE, "start destroy pointer");
+    algo_.destroy = (void *(*)(IMsdp*))dlsym(algo_.handle, "Destroy");
+
+    if (algo_.create == nullptr || algo_.destroy == nullptr) {
+        DEV_HILOGE(SERVICE, "%{public}s dlsym Create or Destroy failed",
+            DEVICESTATUS_ALGO_LIB_PATH.c_str());
+        dlclose(algo_.handle);
+        algo_.Clear();
+        if (algo_.handle == nullptr) {
+            return ERR_OK;
+        }
+        return ERR_NG;
+    }
+
+    algo_.pAlgorithm = algo_.create();
+
+    DEV_HILOGD(SERVICE, "Exit");
+    return ERR_OK;
 }
+
+ErrCode DeviceStatusMsdpClientImpl::UnloadAlgoLibrary()
+{
+    DEV_HILOGD(SERVICE, "Enter");
+    if (algo_.handle == nullptr) {
+        return ERR_NG;
+    }
+
+    if (algo_.pAlgorithm != nullptr) {
+        algo_.destroy(algo_.pAlgorithm);
+        algo_.pAlgorithm = nullptr;
+    }
+
+    dlclose(algo_.handle);
+    algo_.Clear();
+
+    DEV_HILOGD(SERVICE, "Exit");
+    return ERR_OK;
 }
+
+IMsdp* DeviceStatusMsdpClientImpl::GetAlgoInst(Type type)
+{
+    DEV_HILOGD(SERVICE, "Enter");
+    if (algo_.handle == nullptr) {
+        return nullptr;
+    }
+
+    if (algo_.pAlgorithm == nullptr) {
+        std::unique_lock<std::mutex> lock(mMutex_);
+        algoCallCount_[type] = 0;
+        algo_.pAlgorithm = algo_.create();
+    }
+    return algo_.pAlgorithm;
+}
+} // namespace DeviceStatus
+} // namespace Msdp
+} // namespace OHOS

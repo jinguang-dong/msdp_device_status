@@ -26,7 +26,8 @@
 
 namespace OHOS {
 namespace Msdp {
-void DevicestatusSrvProxy::Subscribe(const DevicestatusDataUtils::DevicestatusType& type, \
+namespace DeviceStatus {
+void DevicestatusSrvProxy::Subscribe(const Type& type, \
     const sptr<IdevicestatusCallback>& callback)
 {
     DEV_HILOGD(INNERKIT, "Enter");
@@ -55,7 +56,7 @@ void DevicestatusSrvProxy::Subscribe(const DevicestatusDataUtils::DevicestatusTy
     DEV_HILOGD(INNERKIT, "Exit");
 }
 
-void DevicestatusSrvProxy::UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type,
+void DevicestatusSrvProxy::UnSubscribe(const Type& type,
     const sptr<IdevicestatusCallback>& callback)
 {
     DEV_HILOGD(INNERKIT, "Enter");
@@ -85,13 +86,13 @@ void DevicestatusSrvProxy::UnSubscribe(const DevicestatusDataUtils::Devicestatus
     DEV_HILOGD(INNERKIT, "Exit");
 }
 
-DevicestatusDataUtils::DevicestatusData DevicestatusSrvProxy::GetCache(const \
-    DevicestatusDataUtils::DevicestatusType& type)
+Data DevicestatusSrvProxy::GetCache(const \
+    Type& type)
 {
     DEV_HILOGD(INNERKIT, "Enter");
-    DevicestatusDataUtils::DevicestatusData devicestatusData;
-    devicestatusData.type = DevicestatusDataUtils::DevicestatusType::TYPE_INVALID;
-    devicestatusData.value = DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID;
+    Data devicestatusData;
+    devicestatusData.type = Type::TYPE_INVALID;
+    devicestatusData.value = OnChangedValue::VALUE_INVALID;
 
     sptr<IRemoteObject> remote = Remote();
     DEVICESTATUS_RETURN_IF_WITH_RET((remote == nullptr), devicestatusData);
@@ -117,11 +118,12 @@ DevicestatusDataUtils::DevicestatusData DevicestatusSrvProxy::GetCache(const \
     int32_t devicestatusValue = -1;
     DEVICESTATUS_READ_PARCEL_WITH_RET(reply, Int32, devicestatusType, devicestatusData);
     DEVICESTATUS_READ_PARCEL_WITH_RET(reply, Int32, devicestatusValue, devicestatusData);
-    devicestatusData.type = DevicestatusDataUtils::DevicestatusType(devicestatusType);
-    devicestatusData.value = DevicestatusDataUtils::DevicestatusValue(devicestatusValue);
+    devicestatusData.type = Type(devicestatusType);
+    devicestatusData.value = OnChangedValue(devicestatusValue);
     DEV_HILOGD(INNERKIT, "type: %{public}d, value: %{public}d", devicestatusData.type, devicestatusData.value);
     DEV_HILOGD(INNERKIT, "Exit");
     return devicestatusData;
 }
+} // namespace DeviceStatus
 } // Msdp
 } // OHOS
