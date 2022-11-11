@@ -49,12 +49,6 @@ public:
     };
 
     bool Init();
-    bool EnableRdb() { return true; }
-    bool InitInterface() { return true; }
-    bool DisableRdb() { return true; }
-    void NotifyDevicestatusChange(const Data& devicestatusData) { return; }
-    void Subscribe(const Type& type, const sptr<IdevicestatusCallback>& callback) { return; }
-    void UnSubscribe(const Type& type, const sptr<IdevicestatusCallback>& callback) { return; }
     bool Enable(Type type);
     bool InitAlgoMngrInterface(Type type);
     bool Disable(Type type);
@@ -69,8 +63,6 @@ public:
     Data GetLatestDeviceStatusData(Type type);
     int32_t SensorDataCallback(const struct SensorEvents *event);
     int32_t MsdpDataCallback(const Data& data);
-    int32_t LoadAlgorithm(bool bCreate) { return 0; }
-    int32_t UnloadAlgorithm(bool bCreate) { return 0; }
     int32_t LoadAlgorithm();
     int32_t UnloadAlgorithm();
     int32_t GetPackageName(AccessTokenID tokenId, std::string &packageName);

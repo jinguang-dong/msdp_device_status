@@ -22,6 +22,7 @@
 #include <memory>
 #include <queue>
 #include <set>
+#include <singleton.h>
 #include <string>
 #include <vector>
 
@@ -54,28 +55,29 @@ struct DeviceStatusRecord {
     std::string startTime;
     Data data;
 };
-class DevicestatusDumper final : public RefBase,
-    public Singleton<DevicestatusDumper> {
+class DeviceStatusDumper final : public RefBase,
+    public Singleton<DeviceStatusDumper> {
 public:
-    DevicestatusDumper() = default;
-    ~DevicestatusDumper() = default;
+    DeviceStatusDumper() = default;
+    ~DeviceStatusDumper() = default;
     void ParseCommand(int32_t fd, const std::vector<std::string> &args,
         const std::vector<Data> &datas);
     void DumpHelpInfo(int32_t fd) const;
-    void DumpDevicestatusSubscriber(int32_t fd);
-    void DumpDevicestatusChanges(int32_t fd);
-    void DumpDevicestatusCurrentStatus(int32_t fd,
+    void DumpDeviceStatusSubscriber(int32_t fd);
+    void DumpDeviceStatusChanges(int32_t fd);
+    void DumpDeviceStatusCurrentStatus(int32_t fd,
         const std::vector<Data> &datas) const;
-    void SaveAppInfo(std::shared_ptr<AppInfo> appInfo);
+    void SaveAppInfo(Type type,sptr<IdevicestatusCallback> callback);
     void RemoveAppInfo(std::shared_ptr<AppInfo> appInfo);
     void pushDeviceStatus(const Data& data);
+    std::string GetPackageName(Security::AccessToken::AccessTokenID tokenId);
+    std::shared_ptr<AppInfo> appInfo;
 private:
-    DISALLOW_COPY_AND_MOVE(DevicestatusDumper);
+    DISALLOW_COPY_AND_MOVE(DeviceStatusDumper);
     void DumpCurrentTime(std::string &startTime) const;
-    std::string GetStatusType(const Type &type) const;
-    std::string GetDeviceState(const OnChangedValue &type) const;
-    std::map<Type, std::set<std::shared_ptr<AppInfo>>> \
-        appInfoMap_;
+    std::string GetStatusType(Type type) const;
+    std::string GetDeviceState(OnChangedValue type) const;
+    std::map<Type, std::set<std::shared_ptr<AppInfo>>> appInfoMap_;
     std::queue<std::shared_ptr<DeviceStatusRecord>> deviceStatusQueue_;
     std::mutex mutex_;
 };

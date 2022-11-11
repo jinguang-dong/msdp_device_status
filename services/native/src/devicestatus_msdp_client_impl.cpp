@@ -294,7 +294,7 @@ ErrCode DeviceStatusMsdpClientImpl::UnregisterAlgo()
 int32_t DeviceStatusMsdpClientImpl::MsdpCallback(const Data& data)
 {
     DEV_HILOGD(SERVICE, "Enter");
-    DevicestatusDumper::GetInstance().pushDeviceStatus(data);
+    DeviceStatusDumper::GetInstance().pushDeviceStatus(data);
     SaveObserverData(data);
     if (notifyManagerFlag_) {
         ImplCallback(data);
