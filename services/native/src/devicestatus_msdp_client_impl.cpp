@@ -350,11 +350,53 @@ void DeviceStatusMsdpClientImpl::GetLatitude()
 
 ErrCode DeviceStatusMsdpClientImpl::LoadMockLibrary()
 {
+    DEV_HILOGD(SERVICE, "Enter");
+    if (mock_.handle != nullptr) {
+        return ERR_OK;
+    }
+    mock_.handle = dlopen(DEVICESTATUS_MOCK_LIB_PATH.c_str(), RTLD_LAZY);
+    if (mock_.handle == nullptr) {
+        DEV_HILOGE(SERVICE, "Cannot load library error = %{public}s", dlerror());
+        return ERR_NG;
+    }
+
+    DEV_HILOGI(SERVICE, "start create pointer");
+    mock_.create = (IMsdp* (*)()) dlsym(mock_.handle, "Create");
+    DEV_HILOGI(SERVICE, "start destroy pointer");
+    mock_.destroy = (void *(*)(IMsdp*))dlsym(mock_.handle, "Destroy");
+
+    if (mock_.create == nullptr || mock_.destroy == nullptr) {
+        DEV_HILOGE(SERVICE, "%{public}s dlsym Create or Destroy failed",
+            DEVICESTATUS_MOCK_LIB_PATH.c_str());
+        dlclose(mock_.handle);
+        mock_.Clear();
+        if (mock_.handle == nullptr) {
+            return ERR_OK;
+        }
+        return ERR_NG;
+    }
+    mock_.pAlgorithm = mock_.create();
+
+    DEV_HILOGD(SERVICE, "Exit");
     return ERR_OK;
 }
 
 ErrCode DeviceStatusMsdpClientImpl::UnloadMockLibrary()
 {
+    DEV_HILOGD(SERVICE, "Enter");
+    if (mock_.handle == nullptr) {
+        return ERR_NG;
+    }
+
+    if (mock_.pAlgorithm != nullptr) {
+        mock_.destroy(mock_.pAlgorithm);
+        mock_.pAlgorithm = nullptr;
+    }
+
+    dlclose(mock_.handle);
+    mock_.Clear();
+
+    DEV_HILOGD(SERVICE, "Exit");
     return ERR_OK;
 }
 
@@ -376,11 +418,54 @@ IMsdp* DeviceStatusMsdpClientImpl::GetMockInst(Type type)
 
 ErrCode DeviceStatusMsdpClientImpl::LoadAlgoLibrary()
 {
+    DEV_HILOGD(SERVICE, "Enter");
+    if (algo_.handle != nullptr) {
+        return ERR_OK;
+    }
+    algo_.handle = dlopen(DEVICESTATUS_ALGO_LIB_PATH.c_str(), RTLD_LAZY);
+    if (algo_.handle == nullptr) {
+        DEV_HILOGE(SERVICE, "Cannot load library error = %{public}s", dlerror());
+        return ERR_NG;
+    }
+
+    DEV_HILOGI(SERVICE, "start create pointer");
+    algo_.create = (IMsdp* (*)()) dlsym(algo_.handle, "Create");
+    DEV_HILOGI(SERVICE, "start destroy pointer");
+    algo_.destroy = (void *(*)(IMsdp*))dlsym(algo_.handle, "Destroy");
+
+    if (algo_.create == nullptr || algo_.destroy == nullptr) {
+        DEV_HILOGE(SERVICE, "%{public}s dlsym Create or Destroy failed",
+            DEVICESTATUS_ALGO_LIB_PATH.c_str());
+        dlclose(algo_.handle);
+        algo_.Clear();
+        if (algo_.handle == nullptr) {
+            return ERR_OK;
+        }
+        return ERR_NG;
+    }
+
+    algo_.pAlgorithm = algo_.create();
+
+    DEV_HILOGD(SERVICE, "Exit");
     return ERR_OK;
 }
 
 ErrCode DeviceStatusMsdpClientImpl::UnloadAlgoLibrary()
 {
+    DEV_HILOGD(SERVICE, "Enter");
+    if (algo_.handle == nullptr) {
+        return ERR_NG;
+    }
+
+    if (algo_.pAlgorithm != nullptr) {
+        algo_.destroy(algo_.pAlgorithm);
+        algo_.pAlgorithm = nullptr;
+    }
+
+    dlclose(algo_.handle);
+    algo_.Clear();
+
+    DEV_HILOGD(SERVICE, "Exit");
     return ERR_OK;
 }
 

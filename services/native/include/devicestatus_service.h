@@ -44,13 +44,13 @@ public:
         const sptr<IdevicestatusCallback>& callback) override;
     Data GetCache(const Type& type) override;
     bool IsServiceReady();
-    std::shared_ptr<DevicestatusManager> GetDevicestatusManager();
+    std::shared_ptr<DeviceStatusManager> GetDeviceStatusManager();
     int Dump(int fd, const std::vector<std::u16string>& args) override;
     void ReportMsdpSysEvent(const Type& type, bool enable);
 private:
     bool Init();
     bool ready_ = false;
-    std::shared_ptr<DevicestatusManager> devicestatusManager_;
+    std::shared_ptr<DeviceStatusManager> DeviceStatusManager_;
     std::shared_ptr<DeviceStatusMsdpClientImpl> msdpImpl_;
 };
 } // namespace DeviceStatus

@@ -42,19 +42,12 @@ class DeviceStatusMsdpClientImpl : public IMsdp::MsdpAlgoCallback {
 public:
     using CallbackManager = std::function<int32_t(const Data&)>;
 
-    ErrCode InitMsdpImpl() { return ERR_OK; }
-    ErrCode DisableMsdpImpl() { return ERR_OK; }
     ErrCode InitMsdpImpl(Type type);
     ErrCode Disable(Type type);
     ErrCode GetSensorHdi(Type type);
     ErrCode GetAlgoAbility(Type type);
     ErrCode RegisterImpl(const CallbackManager& callback);
-    ErrCode UnregisterImpl() { return ERR_OK; }
     int32_t MsdpCallback(const Data& data);
-    ErrCode RegisterMsdp() { return ERR_OK; }
-    ErrCode UnregisterMsdp(void) { return ERR_OK; }
-    ErrCode RegisterSensor() { return ERR_OK; }
-    ErrCode UnregisterSensor(void) { return ERR_OK; }
     ErrCode StartMock(Type type);
     ErrCode RegisterMock();
     ErrCode UnregisterMock();
@@ -62,14 +55,9 @@ public:
     ErrCode UnregisterAlgo();
     Data SaveObserverData(const Data& data);
     std::map<Type, OnChangedValue> GetObserverData() const;
-    void GetDevicestatusTimestamp() {}
     void GetDeviceStatusTimestamp();
     void GetLongtitude();
     void GetLatitude();
-    int32_t LoadAlgorithmLibrary(bool bCreate) { return ERR_OK; }
-    int32_t UnloadAlgorithmLibrary(bool bCreate) { return ERR_OK; }
-    int32_t LoadSensorHdiLibrary(bool bCreate) { return ERR_OK; }
-    int32_t UnloadSensorHdiLibrary(bool bCreate) { return ERR_OK; }
     ErrCode LoadAlgoLibrary();
     ErrCode UnloadAlgoLibrary();
     ErrCode LoadMockLibrary();
