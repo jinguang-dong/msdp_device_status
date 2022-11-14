@@ -31,25 +31,25 @@ public:
     class DeviceStatusAgentEvent {
     public:
         virtual ~DeviceStatusAgentEvent() = default;
-        virtual bool OnEventResult(const DevicestatusDataUtils::DevicestatusData& devicestatusData) = 0;
+        virtual bool OnEventResult(const Data& devicestatusData) = 0;
     };
 
     class DeviceStatusAgentCallback : public DevicestatusCallbackStub {
     public:
         explicit DeviceStatusAgentCallback(std::shared_ptr<DeviceStatusAgent> agent) : agent_(agent) {};
         virtual ~DeviceStatusAgentCallback() {};
-        void OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+        void OnDevicestatusChanged(const Data& devicestatusData) override;
     private:
         std::weak_ptr<DeviceStatusAgent> agent_;
     };
 
-    int32_t SubscribeAgentEvent(const DevicestatusDataUtils::DevicestatusType& type,
+    int32_t SubscribeAgentEvent(const Type& type,
         const std::shared_ptr<DeviceStatusAgent::DeviceStatusAgentEvent>& agentEvent);
-    int32_t UnSubscribeAgentEvent(const DevicestatusDataUtils::DevicestatusType& type);
+    int32_t UnSubscribeAgentEvent(const Type& type);
     friend class DeviceStatusAgentCallback;
 private:
-    void RegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type);
-    void UnRegisterServiceEvent(const DevicestatusDataUtils::DevicestatusType& type);
+    void RegisterServiceEvent(const Type& type);
+    void UnRegisterServiceEvent(const Type& type);
     sptr<IdevicestatusCallback> callback_;
     std::shared_ptr<DeviceStatusAgentEvent> agentEvent_;
 };
