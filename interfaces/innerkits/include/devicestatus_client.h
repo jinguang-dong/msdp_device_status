@@ -32,11 +32,11 @@ class DevicestatusClient final : public DelayedRefSingleton<DevicestatusClient> 
 public:
     DISALLOW_COPY_AND_MOVE(DevicestatusClient);
 
-    void SubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
+    void SubscribeCallback(const Type& type, \
         const sptr<IdevicestatusCallback>& callback);
-    void UnSubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
+    void UnSubscribeCallback(const Type& type, \
         const sptr<IdevicestatusCallback>& callback);
-    DevicestatusDataUtils::DevicestatusData GetDevicestatusData(const DevicestatusDataUtils::DevicestatusType& type);
+    Data GetDevicestatusData(const Type& type);
 
 private:
     class DevicestatusDeathRecipient : public IRemoteObject::DeathRecipient {
