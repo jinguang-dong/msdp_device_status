@@ -41,6 +41,7 @@ public:
         DevicestatusValue value;
     };
 };
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
