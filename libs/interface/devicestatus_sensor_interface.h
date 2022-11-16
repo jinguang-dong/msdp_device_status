@@ -34,7 +34,7 @@ public:
     public:
         DevicestatusSensorHdiCallback() = default;
         virtual ~DevicestatusSensorHdiCallback() = default;
-        virtual void OnSensorHdiResult(const DevicestatusDataUtils::DevicestatusData& data) = 0;
+        virtual void OnSensorHdiResult(const Data& data) = 0;
     };
 
     virtual void RegisterCallback(const std::shared_ptr<DevicestatusSensorHdiCallback>& callback) = 0;
