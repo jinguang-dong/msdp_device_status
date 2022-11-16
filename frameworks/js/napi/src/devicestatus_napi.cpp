@@ -73,7 +73,7 @@ DevicestatusNapi* DevicestatusNapi::GetDevicestatusNapi(int32_t type)
     return obj;
 }
 
-DevicestatusNapi::DevicestatusNapi(napi_env env, napi_value thisVar) : DevicestatusEvent(env, thisVar)
+DevicestatusNapi::DevicestatusNapi(napi_env env) : DeviceStatusEvent(env)
 {
     env_ = env;
     callbackRef_ = nullptr;
@@ -152,10 +152,9 @@ napi_value DevicestatusNapi::SubscribeDevicestatus(napi_env env, napi_callback_i
     napi_value result = nullptr;
     size_t argc = ARG_2;
     napi_value args[ARG_2] = {0};
-    napi_value jsthis;
     void *data = nullptr;
 
-    napi_status status = napi_get_cb_info(env, info, &argc, args, &jsthis, &data);
+    napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, &data);
     NAPI_ASSERT(env, status == napi_ok, "Bad parameters");
 
     napi_valuetype valueType1 = napi_undefined;
@@ -191,12 +190,12 @@ napi_value DevicestatusNapi::SubscribeDevicestatus(napi_env env, napi_callback_i
     DevicestatusNapi* obj = nullptr;
     if (!isObjExists) {
         DEV_HILOGD(JS_NAPI, "Didn't find object, so created it");
-        obj = new (std::nothrow) DevicestatusNapi(env, jsthis);
+        obj = new (std::nothrow) DevicestatusNapi(env);
         if (obj == nullptr) {
             DEV_HILOGE(JS_NAPI, "obj is nullptr");
             return result;
         }
-        napi_wrap(env, jsthis, reinterpret_cast<void *>(obj),
+        napi_wrap(env, nullptr, reinterpret_cast<void *>(obj),
             [](napi_env env, void *data, void *hint) {
                 (void)env;
                 (void)hint;
@@ -244,10 +243,9 @@ napi_value DevicestatusNapi::UnSubscribeDevicestatus(napi_env env, napi_callback
     napi_value result = nullptr;
     size_t argc = ARG_2;
     napi_value args[ARG_2] = { 0 };
-    napi_value jsthis;
     void *data = nullptr;
 
-    napi_status status = napi_get_cb_info(env, info, &argc, args, &jsthis, &data);
+    napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, &data);
     NAPI_ASSERT(env, status == napi_ok, "Bad parameters");
 
     napi_valuetype valueType1 = napi_undefined;
@@ -285,7 +283,7 @@ napi_value DevicestatusNapi::UnSubscribeDevicestatus(napi_env env, napi_callback
         DEV_HILOGE(JS_NAPI, "obj is nullptr");
         return result;
     }
-    if (!obj->Off(type, false)) {
+    if (!obj->Off(type, args[ARG_1],false)) {
         DEV_HILOGE(JS_NAPI, "Failed to get callback for type: %{public}d", type);
         return result;
     }
@@ -320,10 +318,9 @@ napi_value DevicestatusNapi::GetDevicestatus(napi_env env, napi_callback_info in
     napi_value result = nullptr;
     size_t argc = ARG_2;
     napi_value args[ARG_2] = {0};
-    napi_value jsthis;
     void *data = nullptr;
 
-    napi_status status = napi_get_cb_info(env, info, &argc, args, &jsthis, &data);
+    napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, &data);
     NAPI_ASSERT(env, status == napi_ok, "Bad parameters");
 
     napi_valuetype valueType1 = napi_undefined;
@@ -343,12 +340,12 @@ napi_value DevicestatusNapi::GetDevicestatus(napi_env env, napi_callback_info in
         return result;
     }
 
-    DevicestatusNapi* obj = new (std::nothrow) DevicestatusNapi(env, jsthis);
+    DevicestatusNapi* obj = new (std::nothrow) DevicestatusNapi(env);
     if (obj == nullptr) {
         DEV_HILOGE(JS_NAPI, "obj is nullptr");
         return result;
     }
-    napi_wrap(env, jsthis, reinterpret_cast<void *>(obj),
+    napi_wrap(env, nullptr, reinterpret_cast<void *>(obj),
         [](napi_env env, void *data, void *hint) {
             (void)env;
             (void)hint;
@@ -366,7 +363,7 @@ napi_value DevicestatusNapi::GetDevicestatus(napi_env env, napi_callback_info in
         g_DevicestatusClient.GetDevicestatusData(Type(type));
 
     obj->OnDevicestatusChangedDone(devicestatusData.type, devicestatusData.value, true);
-    obj->Off(devicestatusData.type, true);
+    obj->Off(devicestatusData.type, args[ARG_1], true);
 
     napi_get_undefined(env, &result);
     DEV_HILOGD(JS_NAPI, "Exit");
