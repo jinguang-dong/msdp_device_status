@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,38 +17,41 @@
 #define DEVICESTATUS_NAPI_H
 
 #include <map>
+#include <uv.h>
 
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
 #include "devicestatus_callback_stub.h"
 #include "devicestatus_data_utils.h"
 #include "devicestatus_event.h"
-
-#include "idevicestatus_callback.h"
+#include "napi/native_api.h"
+#include "napi/native_node_api.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class DevicestatusCallback : public DevicestatusCallbackStub {
+class DeviceStatusCallback : public DevicestatusCallbackStub {
 public:
-    explicit DevicestatusCallback() {};
-    virtual ~DevicestatusCallback() {};
+    explicit DeviceStatusCallback(napi_env env) : env_(env) {}
+    virtual ~DeviceStatusCallback() {};
     void OnDevicestatusChanged(const Data& devicestatusData) override;
+    static void EmitOnEvent(uv_work_t *work, int status);
+private:
+    napi_env env_ = { nullptr };
 };
 
-class DevicestatusNapi : public DeviceStatusEvent {
+class DeviceStatusNapi : public DeviceStatusEvent {
 public:
-    explicit DevicestatusNapi(napi_env env);
-    virtual ~DevicestatusNapi();
+    explicit DeviceStatusNapi(napi_env env);
+    virtual ~DeviceStatusNapi();
 
     static napi_value Init(napi_env env, napi_value exports);
-    static napi_value SubscribeDevicestatus(napi_env env, napi_callback_info info);
-    static napi_value UnSubscribeDevicestatus(napi_env env, napi_callback_info info);
-    static napi_value GetDevicestatus(napi_env env, napi_callback_info info);
-    void OnDevicestatusChangedDone(const int32_t& type, const int32_t& value, bool isOnce);
-    static DevicestatusNapi* GetDevicestatusNapi(int32_t type);
+    static napi_value SubscribeDeviceStatus(napi_env env, napi_callback_info info);
+    static napi_value UnsubscribeDeviceStatus(napi_env env, napi_callback_info info);
+    static napi_value GetDeviceStatus(napi_env env, napi_callback_info info);
+
+    static int32_t ConvertTypeToInt(const std::string &type);
+    void OnDeviceStatusChangedDone(int32_t type, int32_t value, bool isOnce);
+    static DeviceStatusNapi* GetDeviceStatusNapi();
     static std::map<int32_t, sptr<IdevicestatusCallback>> callbackMap_;
-    static std::map<int32_t, DevicestatusNapi*> objectMap_;
 
 private:
     static bool CheckArguments(napi_env env, napi_callback_info info);
