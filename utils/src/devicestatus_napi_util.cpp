@@ -17,6 +17,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 bool TypeOf(napi_env env, napi_value value, napi_valuetype type)
 {
     napi_valuetype valueType = napi_undefined;
@@ -28,5 +29,6 @@ bool TypeOf(napi_env env, napi_value value, napi_valuetype type)
 
     return (valueType == type);
 }
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

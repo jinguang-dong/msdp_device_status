@@ -23,7 +23,9 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 bool TypeOf(napi_env env, napi_value value, napi_valuetype type);
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 

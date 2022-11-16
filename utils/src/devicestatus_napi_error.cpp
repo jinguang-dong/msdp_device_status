@@ -19,6 +19,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 bool GetApiError(int32_t code, NapiError& codeMsg)
 {
     auto iter = NAPI_ERRORS.find(code);
@@ -29,5 +30,6 @@ bool GetApiError(int32_t code, NapiError& codeMsg)
     codeMsg = iter->second;
     return true;
 }
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

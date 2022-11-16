@@ -26,6 +26,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 const std::string ERR_CODE = "code";
 struct NapiError {
     int32_t errorCode;
@@ -70,6 +71,7 @@ const std::map<int32_t, NapiError> NAPI_ERRORS = {
         } \
     } while (0)
 bool GetApiError(int32_t code, NapiError& codeMsg);
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 #endif // DEVICESTATUS_NAPI_ERROR_H
