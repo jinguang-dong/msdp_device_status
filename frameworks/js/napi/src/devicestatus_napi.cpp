@@ -37,10 +37,10 @@ std::map<int32_t, DevicestatusNapi*> DevicestatusNapi::objectMap_;
 napi_ref DevicestatusNapi::devicestatusValueRef_;
 
 struct ResponseEntity {
-    DevicestatusDataUtils::DevicestatusValue value;
+    OnChangedValue value;
 };
 
-void DevicestatusCallback::OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& devicestatusData)
+void DevicestatusCallback::OnDevicestatusChanged(const Data& devicestatusData)
 {
     DEV_HILOGD(JS_NAPI, "Callback enter");
     DevicestatusNapi* devicestatusNapi = DevicestatusNapi::GetDevicestatusNapi(devicestatusData.type);
@@ -114,7 +114,7 @@ napi_value DevicestatusNapi::CreateInstanceForResponse(napi_env env, int32_t val
         DEV_HILOGE(JS_NAPI, "%{public}s: cannot unwrap entity from instance", __func__);
         return nullptr;
     }
-    entity->value = DevicestatusDataUtils::DevicestatusValue(value);
+    entity->value = OnChangedValue(value);
     DEV_HILOGD(JS_NAPI, "Exit");
 
     return instance;
@@ -175,7 +175,7 @@ napi_value DevicestatusNapi::SubscribeDevicestatus(napi_env env, napi_callback_i
         return result;
     }
 
-    if (type < 0 || type > DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
+    if (type < 0 || type > Type::TYPE_LID_OPEN) {
         InvokeCallBack(env, args, false, ERROR_MESSAGE);
         return result;
     }
@@ -229,7 +229,7 @@ napi_value DevicestatusNapi::SubscribeDevicestatus(napi_env env, napi_callback_i
         DEV_HILOGE(JS_NAPI, "Callback is nullptr.");
         return result;
     }
-    g_DevicestatusClient.SubscribeCallback(DevicestatusDataUtils::DevicestatusType(type), callback);
+    g_DevicestatusClient.SubscribeCallback(Type(type), callback);
     callbackMap_.insert(std::pair<int32_t, sptr<IdevicestatusCallback>>(type, callback));
     InvokeCallBack(env, args, false, CALLBACK_SUCCESS);
 
@@ -262,7 +262,7 @@ napi_value DevicestatusNapi::UnSubscribeDevicestatus(napi_env env, napi_callback
         return result;
     }
 
-    if (type < 0 || type > DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
+    if (type < 0 || type > Type::TYPE_LID_OPEN) {
         InvokeCallBack(env, args, true, ERROR_MESSAGE);
         return result;
     }
@@ -306,7 +306,7 @@ napi_value DevicestatusNapi::UnSubscribeDevicestatus(napi_env env, napi_callback
         DEV_HILOGE(JS_NAPI, "No existed callback");
         return result;
     } else if (callback != nullptr) {
-        g_DevicestatusClient.UnSubscribeCallback(DevicestatusDataUtils::DevicestatusType(type), callback);
+        g_DevicestatusClient.UnSubscribeCallback(Type(type), callback);
         callbackMap_.erase(type);
     }
     napi_get_undefined(env, &result);
@@ -362,8 +362,8 @@ napi_value DevicestatusNapi::GetDevicestatus(napi_env env, napi_callback_info in
         return result;
     }
 
-    DevicestatusDataUtils::DevicestatusData devicestatusData = \
-        g_DevicestatusClient.GetDevicestatusData(DevicestatusDataUtils::DevicestatusType(type));
+    Data devicestatusData = \
+        g_DevicestatusClient.GetDevicestatusData(Type(type));
 
     obj->OnDevicestatusChangedDone(devicestatusData.type, devicestatusData.value, true);
     obj->Off(devicestatusData.type, true);
@@ -392,14 +392,14 @@ napi_value DevicestatusNapi::CreateEnumDevicestatusType(napi_env env, napi_value
     napi_value fineStill = nullptr;
     napi_value carBluetooth = nullptr;
 
-    napi_create_int32(env, (int32_t)DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL, &highStill);
-    napi_create_int32(env, (int32_t)DevicestatusDataUtils::DevicestatusType::TYPE_FINE_STILL, &fineStill);
-    napi_create_int32(env, (int32_t)DevicestatusDataUtils::DevicestatusType::TYPE_CAR_BLUETOOTH, &carBluetooth);
+    napi_create_int32(env, (int32_t)Type::TYPE_STILL, &highStill);
+    napi_create_int32(env, (int32_t)Type::TYPE_HORIZONTAL_POSITION, &fineStill);
+    napi_create_int32(env, (int32_t)Type::TYPE_VERTICAL_POSITION, &carBluetooth);
 
     napi_property_descriptor desc[] = {
-        DECLARE_NAPI_STATIC_PROPERTY("TYPE_HIGH_STILL", highStill),
-        DECLARE_NAPI_STATIC_PROPERTY("TYPE_FINE_STILL", fineStill),
-        DECLARE_NAPI_STATIC_PROPERTY("TYPE_CAR_BLUETOOTH", carBluetooth),
+        DECLARE_NAPI_STATIC_PROPERTY("TYPE_STILL", highStill),
+        DECLARE_NAPI_STATIC_PROPERTY("TYPE_HORIZONTAL_POSITION", fineStill),
+        DECLARE_NAPI_STATIC_PROPERTY("TYPE_VERTICAL_POSITION", carBluetooth),
     };
     napi_value result = nullptr;
     napi_define_class(env, "DevicestatusType", NAPI_AUTO_LENGTH, EnumDevicestatusTypeConstructor, nullptr,
@@ -428,8 +428,8 @@ napi_value DevicestatusNapi::CreateDevicestatusValueType(napi_env env, napi_valu
     napi_value enter = nullptr;
     napi_value exit = nullptr;
 
-    napi_create_int32(env, (int32_t)DevicestatusDataUtils::DevicestatusValue::VALUE_ENTER, &enter);
-    napi_create_int32(env, (int32_t)DevicestatusDataUtils::DevicestatusValue::VALUE_EXIT, &exit);
+    napi_create_int32(env, (int32_t)OnChangedValue::VALUE_ENTER, &enter);
+    napi_create_int32(env, (int32_t)OnChangedValue::VALUE_EXIT, &exit);
 
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_STATIC_PROPERTY("VALUE_ENTER", enter),
@@ -491,7 +491,7 @@ napi_value DevicestatusNapi::CreateDevicestatusValueObject(napi_env env)
 
     status = napi_create_object(env, &result);
     if (status == napi_ok) {
-        for (uint32_t i = DevicestatusDataUtils::DevicestatusValue::VALUE_ENTER; \
+        for (uint32_t i = OnChangedValue::VALUE_ENTER; \
             i < vecDevicestatusValue.size(); i++) {
             std::string propName = vecDevicestatusValue[i];
             DEV_HILOGD(JS_NAPI, "propName: %{public}s", propName.c_str());
