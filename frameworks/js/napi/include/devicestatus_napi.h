@@ -33,12 +33,12 @@ class DevicestatusCallback : public DevicestatusCallbackStub {
 public:
     explicit DevicestatusCallback() {};
     virtual ~DevicestatusCallback() {};
-    void OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
+    void OnDevicestatusChanged(const Data& devicestatusData) override;
 };
 
-class DevicestatusNapi : public DevicestatusEvent {
+class DevicestatusNapi : public DeviceStatusEvent {
 public:
-    explicit DevicestatusNapi(napi_env env, napi_value thisVar);
+    explicit DevicestatusNapi(napi_env env);
     virtual ~DevicestatusNapi();
 
     static napi_value Init(napi_env env, napi_value exports);

@@ -34,7 +34,7 @@ public:
     public:
         MsdpAlgorithmCallback() = default;
         virtual ~MsdpAlgorithmCallback() = default;
-        virtual void OnResult(const DevicestatusDataUtils::DevicestatusData& data) = 0;
+        virtual void OnResult(const Data& data) = 0;
     };
 
     virtual void RegisterCallback(const std::shared_ptr<MsdpAlgorithmCallback>& callback) = 0;

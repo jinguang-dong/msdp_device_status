@@ -78,7 +78,7 @@ void DevicestatusSensorRdb::Disable()
 }
 
 
-ErrCode DevicestatusSensorRdb::NotifyMsdpImpl(const DevicestatusDataUtils::DevicestatusData& data)
+ErrCode DevicestatusSensorRdb::NotifyMsdpImpl(const Data& data)
 {
     DEV_HILOGI(SERVICE, "Enter");
     if (g_rdb == nullptr) {
@@ -94,8 +94,8 @@ ErrCode DevicestatusSensorRdb::NotifyMsdpImpl(const DevicestatusDataUtils::Devic
     return ERR_OK;
 }
 
-DevicestatusDataUtils::DevicestatusData DevicestatusSensorRdb::SaveRdbData(
-    const DevicestatusDataUtils::DevicestatusData& data)
+Data DevicestatusSensorRdb::SaveRdbData(
+    const Data& data)
 {
     for (auto iter = rdbDataMap_.begin(); iter != rdbDataMap_.end(); ++iter) {
         if (iter->first == data.type) {
@@ -207,9 +207,9 @@ int32_t DevicestatusSensorRdb::TrigerDatabaseObserver()
         return -1;
     }
 
-    DevicestatusDataUtils::DevicestatusData data;
-    data.type = (DevicestatusDataUtils::DevicestatusType)devicestatusType_;
-    data.value = (DevicestatusDataUtils::DevicestatusValue)devicestatusStatus_;
+    Data data;
+    data.type = (Type)devicestatusType_;
+    data.value = (OnChangedValue)devicestatusStatus_;
 
     SaveRdbData(data);
     DEV_HILOGI(SERVICE, "notifyFlag_ is %{public}d", notifyFlag_);

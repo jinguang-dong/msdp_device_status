@@ -97,9 +97,9 @@ HWTEST_F (DevicestatusClientTest, DevicestatusClientTest002, TestSize.Level1)
         return;
     }
     callbackProxy_ = std::make_shared<DevicestatusCallbackProxy>(remoteObject_);
-    DevicestatusDataUtils::DevicestatusData devicestatusData = {
-        DevicestatusDataUtils::DevicestatusType::TYPE_HIGH_STILL,
-        DevicestatusDataUtils::DevicestatusValue::VALUE_ENTER
+    Data devicestatusData = {
+        Type::TYPE_HORIZONTAL_POSITION,
+        OnChangedValue::VALUE_ENTER
     };
     DEV_HILOGE(INNERKIT, "test OnDevicestatusChanged start");
     callbackProxy_->OnDevicestatusChanged(devicestatusData);
@@ -120,7 +120,7 @@ HWTEST_F (DevicestatusClientTest, DevicestatusClientTest003, TestSize.Level1)
     auto& client = DevicestatusClient::GetInstance();
     client.devicestatusProxy_ = nullptr;
     DEV_HILOGE(INNERKIT, "test SubscribeCallback start");
-    client.SubscribeCallback(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, callback);
+    client.SubscribeCallback(Type::TYPE_LID_OPEN, callback);
     DEV_HILOGE(INNERKIT, "test SubscribeCallback end");
     GTEST_LOG_(INFO) << "DevicestatusClientTest003 end";
 }
@@ -138,7 +138,7 @@ HWTEST_F (DevicestatusClientTest, DevicestatusClientTest004, TestSize.Level1)
     auto& client = DevicestatusClient::GetInstance();
     client.devicestatusProxy_ = nullptr;
     DEV_HILOGE(INNERKIT, "test UnSubscribeCallback start");
-    client.UnSubscribeCallback(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, callback);
+    client.UnSubscribeCallback(Type::TYPE_LID_OPEN, callback);
     DEV_HILOGE(INNERKIT, "test UnSubscribeCallback end");
     GTEST_LOG_(INFO) << "DevicestatusClientTest004 end";
 }
@@ -154,10 +154,10 @@ HWTEST_F (DevicestatusClientTest, DevicestatusClientTest005, TestSize.Level1)
     auto& client = DevicestatusClient::GetInstance();
     client.devicestatusProxy_ = nullptr;
     DEV_HILOGE(INNERKIT, "test GetDevicestatusData start");
-    auto data = client.GetDevicestatusData(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN);
+    auto data = client.GetDevicestatusData(Type::TYPE_LID_OPEN);
     DEV_HILOGE(INNERKIT, "test GetDevicestatusData end");
-    EXPECT_TRUE(data.type == DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN && \
-        data.value == DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID) << "GetDevicestatusData failed";
+    EXPECT_TRUE(data.type == Type::TYPE_LID_OPEN && \
+        data.value == OnChangedValue::VALUE_INVALID) << "GetDevicestatusData failed";
     GTEST_LOG_(INFO) << "DevicestatusClientTest005 end";
 }
 
