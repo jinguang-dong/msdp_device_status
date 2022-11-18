@@ -90,14 +90,14 @@ int DevicestatusService::Dump(int fd, const std::vector<std::u16string>& args)
     DEV_HILOGI(SERVICE, "dump DeviceStatusServiceInfo");
     if (fd < 0) {
         DEV_HILOGE(SERVICE, "fd is invalid");
-        return RET_NG;
+        return ERR_NG;
     }
     DevicestatusDumper &deviceStatusDumper = DevicestatusDumper::GetInstance();
     if (args.empty()) {
         DEV_HILOGE(SERVICE, "param cannot be empty");
         dprintf(fd, "param cannot be empty\n");
         deviceStatusDumper.DumpHelpInfo(fd);
-        return RET_NG;
+        return ERR_NG;
     }
     std::vector<std::string> argList = { "" };
     std::transform(args.begin(), args.end(), std::back_inserter(argList),
