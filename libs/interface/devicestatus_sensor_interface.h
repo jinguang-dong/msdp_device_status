@@ -26,28 +26,29 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class DevicestatusSensorInterface {
+class ISensor {
 public:
-    DevicestatusSensorInterface() {}
-    virtual ~DevicestatusSensorInterface() {}
-    class DevicestatusSensorHdiCallback {
+    ISensor() {}
+    virtual ~ISensor() {}
+    class SensorHdiCallback {
     public:
-        DevicestatusSensorHdiCallback() = default;
-        virtual ~DevicestatusSensorHdiCallback() = default;
-        virtual void OnSensorHdiResult(const DevicestatusDataUtils::DevicestatusData& data) = 0;
+        SensorHdiCallback() = default;
+        virtual ~SensorHdiCallback() = default;
+        virtual void OnSensorHdiResult(const Data& data) = 0;
     };
 
-    virtual void RegisterCallback(const std::shared_ptr<DevicestatusSensorHdiCallback>& callback) = 0;
-    virtual void UnregisterCallback() = 0;
-    virtual void Enable() = 0;
-    virtual void Disable() = 0;
+    virtual ErrCode RegisterCallback(const std::shared_ptr<SensorHdiCallback>& callback) = 0;
+    virtual ErrCode UnregisterCallback() = 0;
+    virtual ErrCode Enable(Type type) = 0;
+    virtual ErrCode Disable(Type type) = 0;
+    virtual ErrCode DisableCount(const Type& type) = 0;
 };
 
 struct SensorHdiHandle {
     void* handle;
-    DevicestatusSensorInterface* (*create)();
-    void* (*destroy)(DevicestatusSensorInterface*);
-    DevicestatusSensorInterface* pAlgorithm;
+    ISensor* (*create)();
+    void* (*destroy)(ISensor*);
+    ISensor* pAlgorithm;
     SensorHdiHandle() : handle(nullptr), create(nullptr), destroy(nullptr), pAlgorithm(nullptr) {}
     ~SensorHdiHandle() {}
     void Clear()

@@ -22,14 +22,13 @@ config("module_private_config") {
   include_dirs = [
     "include",
     "//utils/system/safwk/native/include",
-    "//foundation/distributeddatamgr/distributeddatamgr/frameworks/innerkitsimpl/rdb/include",
   ]
 }
 
 ohos_moduletest("test_devicestatus_module") {
   module_out_path = module_output_path
 
-  sources = [ "src/devicestatus_module_test.cpp" ]
+  sources = [ "src/device_status_module_test.cpp" ]
 
   configs = [
     "${device_status_utils_path}:devicestatus_utils_config",

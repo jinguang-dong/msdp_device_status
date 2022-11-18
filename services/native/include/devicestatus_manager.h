@@ -31,52 +31,54 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 using namespace Security::AccessToken;
-class DevicestatusService;
-class DevicestatusManager {
+static constexpr uint8_t ARG_4 = 4;
+class DeviceStatusService;
+class DeviceStatusManager {
 public:
-    explicit DevicestatusManager(const wptr<DevicestatusService>& ms) : ms_(ms)
+    explicit DeviceStatusManager(const wptr<DeviceStatusService> &ms) : ms_(ms)
     {
-        DEV_HILOGI(SERVICE, "DevicestatusManager instance is created.");
+        DEV_HILOGI(SERVICE, "DeviceStatusManager instance is created.");
     }
-    ~DevicestatusManager() = default;
+    ~DeviceStatusManager() = default;
 
-    class DevicestatusCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
+    class DeviceStatusCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
-        DevicestatusCallbackDeathRecipient() = default;
+        DeviceStatusCallbackDeathRecipient() = default;
         virtual void OnRemoteDied(const wptr<IRemoteObject> &remote);
-        virtual ~DevicestatusCallbackDeathRecipient() = default;
+        virtual ~DeviceStatusCallbackDeathRecipient() = default;
     };
 
     bool Init();
-    bool EnableRdb();
-    bool InitInterface();
-    bool DisableRdb();
-    bool InitDataCallback();
-    void NotifyDevicestatusChange(const DevicestatusDataUtils::DevicestatusData& devicestatusData);
-    void Subscribe(const DevicestatusDataUtils::DevicestatusType& type, const sptr<IdevicestatusCallback>& callback);
-    void UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type, const sptr<IdevicestatusCallback>& callback);
-    DevicestatusDataUtils::DevicestatusData GetLatestDevicestatusData(const \
-        DevicestatusDataUtils::DevicestatusType& type);
+    bool Enable(Type type);
+    bool InitAlgoMngrInterface(Type type);
+    bool Disable(Type type);
+    int32_t InitDataCallback();
+    int32_t NotifyDeviceStatusChange(const Data &devicestatusData);
+    void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency, sptr<IRemoteDevStaCallback> callback);
+    void Unsubscribe(Type type, ActivityEvent event, const sptr<IRemoteDevStaCallback> callback);
+    Data GetLatestDeviceStatusData(Type type);
     int32_t SensorDataCallback(const struct SensorEvents *event);
-    int32_t MsdpDataCallback(const DevicestatusDataUtils::DevicestatusData& data);
-    int32_t LoadAlgorithm(bool bCreate);
-    int32_t UnloadAlgorithm(bool bCreate);
-    void GetPackageName(AccessTokenID tokenId, std::string &packageName);
+    int32_t MsdpDataCallback(const Data &data);
+    int32_t LoadAlgorithm();
+    int32_t UnloadAlgorithm();
+    int32_t GetPackageName(AccessTokenID tokenId, std::string &packageName);
 
 private:
     struct classcomp {
-        bool operator()(const sptr<IdevicestatusCallback> &l, const sptr<IdevicestatusCallback> &r) const
+        bool operator()(const sptr<IRemoteDevStaCallback> &l, const sptr<IRemoteDevStaCallback> &r) const
         {
             return l->AsObject() < r->AsObject();
         }
     };
-    const wptr<DevicestatusService> ms_;
+    const wptr<DeviceStatusService> ms_;
     std::mutex mutex_;
     sptr<IRemoteObject::DeathRecipient> devicestatusCBDeathRecipient_;
-    std::unique_ptr<DevicestatusMsdpClientImpl> msdpImpl_;
-    std::map<DevicestatusDataUtils::DevicestatusType, DevicestatusDataUtils::DevicestatusValue> msdpData_;
-    std::map<DevicestatusDataUtils::DevicestatusType, std::set<const sptr<IdevicestatusCallback>, classcomp>> \
-        listenerMap_;
+    std::unique_ptr<DeviceStatusMsdpClientImpl> msdpImpl_;
+    std::map<Type, OnChangedValue> msdpData_;
+    std::map<Type, std::set<const sptr<IRemoteDevStaCallback>, classcomp>> listenerMap_;
+    int32_t type_ {};
+    int32_t event_ {};
+    int arrs_ [ARG_4] {};
 };
 } // namespace DeviceStatus
 } // namespace Msdp

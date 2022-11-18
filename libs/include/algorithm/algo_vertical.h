@@ -13,29 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_MSDP_DEVICESTATUS_CLIENT_TEST_H
-#define OHOS_MSDP_DEVICESTATUS_CLIENT_TEST_H
+#ifndef DEVICE_STATUS_VERTICAL_H
+#define DEVICE_STATUS_VERTICAL_H
 
-#include <gtest/gtest.h>
-
-#include "devicestatus_agent.h"
-#include "devicestatus_callback_proxy.h"
-#define private public
-#include "devicestatus_client.h"
-#undef private
-#include "devicestatus_data_utils.h"
+#include "algo_base.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class DevicestatusClientTest : public testing::Test {
+class AlgoVertical : public AlgoBase {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
+    AlgoVertical(const std::shared_ptr<SensorDataCallback> sensorCallback) : AlgoBase(sensorCallback) {};
+    virtual ~AlgoVertical() = default;
+    bool Init(Type type) override;
+
+private:
+    bool StartAlgorithm(int32_t sensorTypeId, AccelData* sensorData) override;
+    void ExecuteOperation() override;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // OHOS_MSDP_DEVICESTATUS_CLIENT_TEST_H
+#endif // DEVICE_STATUS_VERTICAL_H
