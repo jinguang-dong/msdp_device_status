@@ -15,14 +15,15 @@
 
 #include "devicestatus_msdp_client_impl.h"
 
-#include <dlfcn.h>
-#include <string>
 #include <cerrno>
+#include <string>
+
+#include <dlfcn.h>
+#include <errors.h>
+#include <linux/netlink.h>
 #include <sys/epoll.h>
 #include <sys/timerfd.h>
 #include <unistd.h>
-#include <errors.h>
-#include <linux/netlink.h>
 
 #include "devicestatus_common.h"
 
@@ -31,8 +32,6 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr int32_t ERR_OK = 0;
-constexpr int32_t ERR_NG = -1;
 const std::string DEVICESTATUS_SENSOR_HDI_LIB_PATH = "libdevicestatus_sensorhdi.z.so";
 const std::string DEVICESTATUS_MSDP_ALGORITHM_LIB_PATH = "libdevicestatus_msdp.z.so";
 std::map<DevicestatusDataUtils::DevicestatusType, DevicestatusDataUtils::DevicestatusValue> g_devicestatusDataMap;
@@ -363,5 +362,5 @@ DevicestatusMsdpInterface* DevicestatusMsdpClientImpl::GetAlgorithmInst()
     return mAlgorithm_.pAlgorithm;
 }
 } // namespace DeviceStatus
-}
-}
+} // namespace Msdp
+} // namespace OHOS

@@ -16,20 +16,22 @@
 #ifndef DEVICESTATUS_MSDP_CLIENT_IMPL_H
 #define DEVICESTATUS_MSDP_CLIENT_IMPL_H
 
-#include <string>
+#include <map>
 #include <memory>
 #include <mutex>
-#include <vector>
+#include <string>
 #include <thread>
-#include <map>
+#include <vector>
+
 #include <errors.h>
 
-#include "rdb_store.h"
 #include "rdb_helper.h"
 #include "rdb_open_callback.h"
+#include "rdb_store.h"
 #include "rdb_store_config.h"
-#include "values_bucket.h"
 #include "result_set.h"
+#include "values_bucket.h"
+
 #include "devicestatus_data_utils.h"
 #include "devicestatus_delayed_sp_singleton.h"
 #include "devicestatus_dumper.h"
@@ -75,6 +77,6 @@ private:
     void OnSensorHdiResult(const DevicestatusDataUtils::DevicestatusData& data) override;
 };
 } // namespace DeviceStatus
-}
-}
+} // namespace Msdp
+} // namespace OHOS
 #endif // DEVICESTATUS_MSDP_CLIENT_IMPL_H

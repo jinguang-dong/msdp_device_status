@@ -15,8 +15,8 @@
 
 #include "devicestatus_napi.h"
 
-#include "devicestatus_common.h"
 #include "devicestatus_client.h"
+#include "devicestatus_common.h"
 
 using namespace OHOS::Msdp::DeviceStatus;
 using namespace OHOS;

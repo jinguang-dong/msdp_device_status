@@ -15,12 +15,13 @@
 
 #include "devicestatus_sensor_rdb.h"
 
-#include <string>
 #include <cerrno>
+#include <string>
+
+#include <linux/netlink.h>
 #include <sys/epoll.h>
 #include <sys/timerfd.h>
 #include <unistd.h>
-#include <linux/netlink.h>
 
 #include "devicestatus_common.h"
 
@@ -34,7 +35,6 @@ constexpr int32_t TIMER_INTERVAL = 3;
 constexpr int32_t ERR_INVALID_FD = -1;
 constexpr int32_t READ_RDB_WAIT_TIME = 30;
 std::unique_ptr<DevicestatusSensorRdb> g_msdpRdb = std::make_unique<DevicestatusSensorRdb>();
-constexpr int32_t ERR_NG = -1;
 DevicestatusSensorRdb* g_rdb;
 }
 

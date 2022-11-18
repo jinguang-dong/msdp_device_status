@@ -16,16 +16,17 @@
 #ifndef DEVICESTATUS_MANAGER_H
 #define DEVICESTATUS_MANAGER_H
 
-#include <set>
 #include <map>
+#include <set>
 
+#include "accesstoken_kit.h"
 #include "sensor_if.h"
+
+#include "devicestatus_common.h"
 #include "devicestatus_data_utils.h"
+#include "devicestatus_msdp_client_impl.h"
 #include "idevicestatus_algorithm.h"
 #include "idevicestatus_callback.h"
-#include "devicestatus_common.h"
-#include "devicestatus_msdp_client_impl.h"
-#include "accesstoken_kit.h"
 
 namespace OHOS {
 namespace Msdp {

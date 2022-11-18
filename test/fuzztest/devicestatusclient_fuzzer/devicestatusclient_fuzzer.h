@@ -16,17 +16,18 @@
 #ifndef DEVICESTATUSCLIENT_FUZZER_H
 #define DEVICESTATUSCLIENT_FUZZER_H
 
-#include <cstdint>
-#include <unistd.h>
 #include <climits>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
-#include <fcntl.h>
 #include <iostream>
 #include <thread>
 
-#include "devicestatus_client.h"
+#include <unistd.h>
+#include <fcntl.h>
+
 #include "devicestatus_callback_stub.h"
+#include "devicestatus_client.h"
 
 #define FUZZ_PROJECT_NAME "devicestatusclient_fuzzer"
 namespace OHOS {

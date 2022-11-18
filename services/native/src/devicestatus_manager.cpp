@@ -19,10 +19,6 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 using namespace OHOS::HiviewDFX;
-namespace {
-constexpr int32_t ERR_OK = 0;
-constexpr int32_t ERR_NG = -1;
-}
 void DevicestatusManager::DevicestatusCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     if (remote == nullptr) {

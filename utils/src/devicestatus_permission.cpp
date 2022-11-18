@@ -15,8 +15,8 @@
 
 #include "devicestatus_permission.h"
 
-#include "ipc_skeleton.h"
 #include "accesstoken_kit.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace Msdp {

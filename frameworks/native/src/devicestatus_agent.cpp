@@ -15,9 +15,8 @@
 
 #include "devicestatus_agent.h"
 
-#include "devicestatus_common.h"
 #include "devicestatus_client.h"
-
+#include "devicestatus_common.h"
 #include "idevicestatus_callback.h"
 
 namespace OHOS {
