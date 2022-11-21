@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "devicestatus_callback_stub.h"
+#include "device_status_callback_stub.h"
 
 #include <message_parcel.h>
 
@@ -22,20 +22,20 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-int32_t DevicestatusCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, \
+int32_t DeviceStatusCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
 {
     DEV_HILOGD(SERVICE, "cmd = %{public}u, flags= %{public}d", code, option.GetFlags());
-    std::u16string descriptor = DevicestatusCallbackStub::GetDescriptor();
-    std::u16string remoteDescriptor = data.ReadInterfaceToken();
-    if (descriptor != remoteDescriptor) {
-        DEV_HILOGE(SERVICE, "DevicestatusCallbackStub::OnRemoteRequest failed, descriptor mismatch");
+    std::u16string descripter = DeviceStatusCallbackStub::GetDescriptor();
+    std::u16string remoteDescripter = data.ReadInterfaceToken();
+    if (descripter != remoteDescripter) {
+        DEV_HILOGE(SERVICE, "DeviceStatusCallbackStub::OnRemoteRequest failed, descriptor mismatch");
         return E_DEVICESTATUS_GET_SERVICE_FAILED;
     }
 
     switch (code) {
-        case static_cast<int32_t>(IdevicestatusCallback::DEVICESTATUS_CHANGE): {
-            return OnDevicestatusChangedStub(data);
+        case static_cast<int32_t>(IRemoteDevStaCallback::DEVICESTATUS_CHANGE): {
+            return OnDeviceStatusChangedStub(data);
         }
         default:
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -43,18 +43,18 @@ int32_t DevicestatusCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &
     return ERR_OK;
 }
 
-int32_t DevicestatusCallbackStub::OnDevicestatusChangedStub(MessageParcel& data)
+int32_t DeviceStatusCallbackStub::OnDeviceStatusChangedStub(MessageParcel &data)
 {
     DEV_HILOGD(SERVICE, "Enter");
     int32_t type;
     int32_t value;
     READINT32(data, type, E_DEVICESTATUS_READ_PARCEL_ERROR);
     READINT32(data, value, E_DEVICESTATUS_READ_PARCEL_ERROR);
-    DevicestatusDataUtils::DevicestatusData devicestatusData = {
-        static_cast<DevicestatusDataUtils::DevicestatusType>(type),
-        static_cast<DevicestatusDataUtils::DevicestatusValue>(value)
+    Data devicestatusData = {
+        static_cast<Type>(type),
+        static_cast<OnChangedValue>(value)
     };
-    OnDevicestatusChanged(devicestatusData);
+    OnDeviceStatusChanged(devicestatusData);
     return ERR_OK;
 }
 } // namespace DeviceStatus

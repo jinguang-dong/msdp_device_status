@@ -13,27 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef DEVICESTATUS_SERVICE_TEST_H
-#define DEVICESTATUS_SERVICE_TEST_H
+#ifndef DEVICE_STATUS_ABSOLUTE_STILL_H
+#define DEVICE_STATUS_ABSOLUTE_STILL_H
 
-#include <gtest/gtest.h>
-
-#include "devicestatus_callback_stub.h"
+#include "algo_base.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class DevicestatusServiceTest : public testing::Test {
+class AlgoAbsoluteStill : public AlgoBase {
 public:
+    AlgoAbsoluteStill(const std::shared_ptr<SensorDataCallback> sensorCallback) : AlgoBase(sensorCallback) {};
+    virtual ~AlgoAbsoluteStill() = default;
 
-    class DevicestatusServiceTestCallback : public DevicestatusCallbackStub {
-    public:
-        DevicestatusServiceTestCallback() {};
-        virtual ~DevicestatusServiceTestCallback() {};
-        virtual void OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& devicestatusData) override;
-    };
+    bool Init(Type type) override;
+
+private:
+    bool StartAlgorithm(int32_t sensorTypeId, AccelData* sensorData) override;
+    void ExecuteOperation() override;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // DEVICESTATUS_SERVICE_TEST_H
+#endif // DEVICE_STATUS_ABSOLUTE_STILL_H

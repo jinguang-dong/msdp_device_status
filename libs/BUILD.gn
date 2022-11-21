@@ -21,15 +21,22 @@ config("devicestatus_srv_public_config") {
   include_dirs = [
     "include",
     "interface",
+    "include/algorithm",
+    "include/datahub",
     "${device_status_interfaces_path}/innerkits/include",
     "//foundation/distributedhardware/device_manager/interfaces/inner_kits/native_cpp/include/",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/",
     "//base/sensors/sensor/interfaces/native/include/",
+    "//third_party/cJSON",
   ]
 }
 
-ohos_shared_library("devicestatus_sensorhdi") {
-  sources = [ "src/devicestatus_sensor_rdb.cpp" ]
+ohos_shared_library("devicestatus_mock") {
+  sources = [
+    "src/devicestatus_data_parse.cpp",
+    "src/devicestatus_msdp_mock.cpp",
+    "src/devicestatus_sensor_mock.cpp",
+  ]
 
   configs = [
     "${device_status_utils_path}:devicestatus_utils_config",
@@ -38,18 +45,22 @@ ohos_shared_library("devicestatus_sensorhdi") {
 
   public_configs = [ ":devicestatus_srv_public_config" ]
 
-  deps = []
+  deps = [ "//third_party/cJSON:cjson_static" ]
 
-  external_deps = [
-    "hiviewdfx_hilog_native:libhilog",
-    "relational_store:native_rdb",
-  ]
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 
   part_name = "${device_status_part_name}"
 }
 
-ohos_shared_library("devicestatus_msdp") {
-  sources = [ "src/devicestatus_msdp_rdb.cpp" ]
+ohos_shared_library("devicestatus_algo") {
+  sources = [
+    "src/algorithm/algo_base.cpp",
+    "src/algorithm/algo_absolute_still.cpp",
+    "src/algorithm/algo_horizontal.cpp",
+    "src/algorithm/algo_vertical.cpp",
+    "src/datahub/sensor_data_callback.cpp",
+    "src/devicestatus_algorithm_manager.cpp",
+  ]
 
   configs = [
     "${device_status_utils_path}:devicestatus_utils_config",
@@ -58,11 +69,23 @@ ohos_shared_library("devicestatus_msdp") {
 
   public_configs = [ ":devicestatus_srv_public_config" ]
 
-  deps = []
+  deps = [
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "//commonlibrary/c_utils/base:utils",
+    "//drivers/peripheral/sensor/hal:hdi_sensor",
+    "//foundation/multimodalinput/input/util:libmmi-util",
+    "//third_party/cJSON:cjson_static",
+    "//third_party/jsoncpp",
+  ]
 
   external_deps = [
+    "ability_base:base",
     "hiviewdfx_hilog_native:libhilog",
-    "relational_store:native_rdb",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "sensor:sensor_interface_native",
   ]
 
   part_name = "${device_status_part_name}"

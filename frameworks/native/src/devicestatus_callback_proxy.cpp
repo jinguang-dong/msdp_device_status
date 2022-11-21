@@ -13,28 +13,35 @@
  * limitations under the License.
  */
 
-#include "devicestatus_callback_proxy.h"
-
 #include <message_parcel.h>
-
-#include "devicestatus_common.h"
 
 #include "iremote_object.h"
 #include "message_option.h"
 
+#include "devicestatus_common.h"
+#include "devicestatus_callback_proxy.h"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-void DevicestatusCallbackProxy::OnDevicestatusChanged(const DevicestatusDataUtils::DevicestatusData& devicestatusData)
+void DeviceStatusCallbackProxy::OnDeviceStatusChanged(const Data& devicestatusData)
 {
     sptr<IRemoteObject> remote = Remote();
-    DEVICESTATUS_RETURN_IF(remote == nullptr);
+    DEV_RET_IF_NULL(remote == nullptr);
+    DEV_HILOGE(INNERKIT, "remote is nullptr");
+
+    std::map<Type, int32_t>::iterator typeHandler =
+        DeviceStatusClient::GetInstance().GetTypeMap().find(devicestatusData.type);
+    if (typeHandler != DeviceStatusClient::GetInstance().GetTypeMap().end()) {
+        DEV_HILOGE(INNERKIT, "type not exist report failed");
+        return;
+    }
 
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
 
-    if (!data.WriteInterfaceToken(DevicestatusCallbackProxy::GetDescriptor())) {
+    if (!data.WriteInterfaceToken(DeviceStatusCallbackProxy::GetDescriptor())) {
         DEV_HILOGE(INNERKIT, "Write descriptor failed");
         return;
     }
@@ -42,10 +49,11 @@ void DevicestatusCallbackProxy::OnDevicestatusChanged(const DevicestatusDataUtil
     WRITEINT32(data, static_cast<int32_t>(devicestatusData.type));
     WRITEINT32(data, static_cast<int32_t>(devicestatusData.value));
 
-    int32_t ret = remote->SendRequest(static_cast<int32_t>(IdevicestatusCallback::DEVICESTATUS_CHANGE),
+    int32_t ret = remote->SendRequest(static_cast<int32_t>(IRemoteDevStaCallback::DEVICESTATUS_CHANGE),
         data, reply, option);
     if (ret != ERR_OK) {
         DEV_HILOGE(INNERKIT, "SendRequest is failed, error code: %{public}d", ret);
+        return;
     }
 }
 } // namespace DeviceStatus

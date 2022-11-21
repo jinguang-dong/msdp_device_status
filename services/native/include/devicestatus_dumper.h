@@ -22,6 +22,7 @@
 #include <memory>
 #include <queue>
 #include <set>
+#include <singleton.h>
 #include <string>
 #include <vector>
 
@@ -43,41 +44,43 @@ constexpr uint32_t BASE_YEAR = 1900;
 constexpr uint32_t BASE_MON = 1;
 struct AppInfo {
     std::string startTime;
-    int32_t uid = 0;
-    int32_t pid = 0;
+    int32_t uid {};
+    int32_t pid {};
     Security::AccessToken::AccessTokenID tokenId;
     std::string packageName;
-    DevicestatusDataUtils::DevicestatusType type;
-    sptr<IdevicestatusCallback> callback;
+    Type type;
+    sptr<IRemoteDevStaCallback> callback;
 };
 struct DeviceStatusRecord {
     std::string startTime;
-    DevicestatusDataUtils::DevicestatusData data;
+    Data data;
 };
-class DevicestatusDumper final : public RefBase,
-    public Singleton<DevicestatusDumper> {
+class DeviceStatusDumper final : public RefBase,
+    public Singleton<DeviceStatusDumper> {
 public:
-    DevicestatusDumper() = default;
-    ~DevicestatusDumper() = default;
-    void ParseCommand(int32_t fd, const std::vector<std::string> &args,
-        const std::vector<DevicestatusDataUtils::DevicestatusData> &datas);
+    DeviceStatusDumper() = default;
+    ~DeviceStatusDumper() = default;
+    void ParseCommand(int32_t fd, const std::vector<std::string> &args, const std::vector<Data> &datas);
+    void ParseLong(int32_t fd, const std::vector<std::string> &args, const std::vector<Data> &datas);
+    void ExecutDump(int32_t fd, const std::vector<Data> &datas, int32_t temp);
     void DumpHelpInfo(int32_t fd) const;
-    void DumpDevicestatusSubscriber(int32_t fd);
-    void DumpDevicestatusChanges(int32_t fd);
-    void DumpDevicestatusCurrentStatus(int32_t fd,
-        const std::vector<DevicestatusDataUtils::DevicestatusData> &datas) const;
-    void SaveAppInfo(std::shared_ptr<AppInfo> appInfo);
-    void RemoveAppInfo(std::shared_ptr<AppInfo> appInfo);
-    void pushDeviceStatus(const DevicestatusDataUtils::DevicestatusData& data);
+    void DumpDeviceStatusSubscriber(int32_t fd);
+    void DumpDeviceStatusChanges(int32_t fd);
+    void DumpDeviceStatusCurrentStatus(int32_t fd, const std::vector<Data> &datas) const;
+    void SaveAppInfo(Type type, sptr<IRemoteDevStaCallback> callback);
+    void RemoveAppInfo(std::shared_ptr<AppInfo> appInfo_);
+    void PushDeviceStatus(const Data &data);
+    std::string GetPackageName(Security::AccessToken::AccessTokenID tokenId);
 private:
-    DISALLOW_COPY_AND_MOVE(DevicestatusDumper);
+    DISALLOW_COPY_AND_MOVE(DeviceStatusDumper);
     void DumpCurrentTime(std::string &startTime) const;
-    std::string GetStatusType(const DevicestatusDataUtils::DevicestatusType &type) const;
-    std::string GetDeviceState(const DevicestatusDataUtils::DevicestatusValue &type) const;
-    std::map<DevicestatusDataUtils::DevicestatusType, std::set<std::shared_ptr<AppInfo>>> \
-        appInfoMap_;
+    std::string GetStatusType(Type type) const;
+    std::string GetDeviceState(OnChangedValue type) const;
+
+    std::map<Type, std::set<std::shared_ptr<AppInfo>>> appInfoMap_;
     std::queue<std::shared_ptr<DeviceStatusRecord>> deviceStatusQueue_;
     std::mutex mutex_;
+    std::shared_ptr<AppInfo> appInfo_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

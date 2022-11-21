@@ -19,8 +19,8 @@ SUBSCRIBE:
   PACKAGE_NAME: {type: STRING, desc: devicestatus pkgname}
   TYPE: {type: INT32, desc: deviceStatus type}
 
-UNSUBSCRIBE:
-  __BASE: {type: STATISTIC, level: MINOR, tag: deviceStatus, desc: unSubscribe}
-  UID: {type: INT32, desc: unSubscribe uid}
+Unsubscribe:
+  __BASE: {type: STATISTIC, level: MINOR, tag: deviceStatus, desc: Unsubscribe}
+  UID: {type: INT32, desc: Unsubscribe uid}
   PACKAGE_NAME: {type: STRING, desc: devicestatus pkgname}
   TYPE: {type: INT32, desc: deviceStatus type}
