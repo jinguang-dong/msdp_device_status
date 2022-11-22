@@ -141,7 +141,6 @@ ErrCode DevicestatusMsdpClientImpl::RegisterImpl(const CallbackManager& callback
     RegisterMsdp();
     RegisterSensor();
 
-    DEV_HILOGI(SERVICE, "Exit");
     return ERR_OK;
 }
 
@@ -186,7 +185,6 @@ ErrCode DevicestatusMsdpClientImpl::RegisterMsdp()
 {
     DEV_HILOGI(SERVICE, "Enter");
     if (g_msdpInterface != nullptr) {
-        DEV_HILOGI(SERVICE, "g_msdpInterface is not nullptr");
         std::shared_ptr<MsdpAlgorithmCallback> callback = std::make_shared<DevicestatusMsdpClientImpl>();
         g_msdpInterface->RegisterCallback(callback);
     }
