@@ -268,17 +268,6 @@ int32_t DevicestatusManager::LoadAlgorithm(bool bCreate)
     return ERR_OK;
 }
 
-int32_t DevicestatusManager::UnloadAlgorithm(bool bCreate)
-{
-    DEV_HILOGI(SERVICE, "Enter");
-    if (msdpImpl_ != nullptr) {
-        msdpImpl_->UnloadAlgorithmLibrary(bCreate);
-        msdpImpl_->UnloadSensorHdiLibrary(bCreate);
-    }
-
-    return ERR_OK;
-}
-
 void DevicestatusManager::GetPackageName(AccessTokenID tokenId, std::string &packageName)
 {
     int32_t tokenType = AccessTokenKit::GetTokenTypeFlag(tokenId);
