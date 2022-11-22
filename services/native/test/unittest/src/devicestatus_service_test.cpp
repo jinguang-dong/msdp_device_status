@@ -150,3 +150,8 @@ HWTEST_F (DevicestatusServiceTest, GetDevicestatusDataTest006, TestSize.Level0)
         data.value == DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID) << "GetDevicestatusDataTest006 failed";
     GTEST_LOG_(INFO) << "GetDevicestatusDataTest006 end";
 }
+
+// HWTEST_F (DevicestatusServiceTest, GetDevicestatusDataTest007, TestSize.Level0)
+// {
+//     GTEST_LOG_(INFO) << "GetDevicestatusDataTest007 Enter";
+// }
