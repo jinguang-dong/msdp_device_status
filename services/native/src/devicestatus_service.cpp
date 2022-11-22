@@ -67,6 +67,22 @@ void DevicestatusService::OnStart()
     DEV_HILOGI(SERVICE, "OnStart and add system ability success");
 }
 
+void DevicestatusService::OnStop()
+{
+    DEV_HILOGI(SERVICE, "Enter");
+    if (!ready_) {
+        return;
+    }
+    ready_ = false;
+
+    if (devicestatusManager_ == nullptr) {
+        DEV_HILOGI(SERVICE, "devicestatusManager_ is null");
+        return;
+    }
+    devicestatusManager_->UnloadAlgorithm(false);
+    DEV_HILOGI(SERVICE, "unload algorithm library exit");
+}
+
 int DevicestatusService::Dump(int fd, const std::vector<std::u16string>& args)
 {
     DEV_HILOGI(SERVICE, "dump DeviceStatusServiceInfo");

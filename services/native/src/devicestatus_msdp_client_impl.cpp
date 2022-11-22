@@ -256,6 +256,27 @@ int32_t DevicestatusMsdpClientImpl::LoadSensorHdiLibrary(bool bCreate)
     return ERR_OK;
 }
 
+int32_t DevicestatusMsdpClientImpl::UnloadSensorHdiLibrary(bool bCreate)
+{
+    DEV_HILOGI(SERVICE, "Enter");
+    if (sensorHdi_.handle == nullptr) {
+        return ERR_NG;
+    }
+
+    if (sensorHdi_.pAlgorithm != nullptr) {
+        sensorHdi_.destroy(sensorHdi_.pAlgorithm);
+        sensorHdi_.pAlgorithm = nullptr;
+    }
+
+    if (!bCreate) {
+        dlclose(sensorHdi_.handle);
+        sensorHdi_.Clear();
+    }
+
+    DEV_HILOGI(SERVICE, "Exit");
+    return ERR_OK;
+}
+
 DevicestatusSensorInterface* DevicestatusMsdpClientImpl::GetSensorHdiInst()
 {
     DEV_HILOGI(SERVICE, "Enter");
@@ -280,6 +301,27 @@ int32_t DevicestatusMsdpClientImpl::LoadAlgorithmLibrary(bool bCreate)
     if (mAlgorithm_.handle != nullptr) {
         return ERR_OK;
     }
+    DEV_HILOGI(SERVICE, "Exit");
+    return ERR_OK;
+}
+
+int32_t DevicestatusMsdpClientImpl::UnloadAlgorithmLibrary(bool bCreate)
+{
+    DEV_HILOGI(SERVICE, "Enter");
+    if (mAlgorithm_.handle == nullptr) {
+        return ERR_NG;
+    }
+
+    if (mAlgorithm_.pAlgorithm != nullptr) {
+        mAlgorithm_.destroy(mAlgorithm_.pAlgorithm);
+        mAlgorithm_.pAlgorithm = nullptr;
+    }
+
+    if (!bCreate) {
+        dlclose(mAlgorithm_.handle);
+        mAlgorithm_.Clear();
+    }
+
     DEV_HILOGI(SERVICE, "Exit");
     return ERR_OK;
 }

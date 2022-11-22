@@ -36,6 +36,7 @@ class DevicestatusService final : public SystemAbility, public DevicestatusSrvSt
 public:
     virtual void OnDump() override;
     virtual void OnStart() override;
+    virtual void OnStop() override;
 
     void Subscribe(const DevicestatusDataUtils::DevicestatusType& type, \
         const sptr<IdevicestatusCallback>& callback) override;

@@ -56,10 +56,10 @@ public:
     ErrCode UnregisterSensor(void);
     DevicestatusDataUtils::DevicestatusData SaveObserverData(const DevicestatusDataUtils::DevicestatusData& data);
     std::map<DevicestatusDataUtils::DevicestatusType, DevicestatusDataUtils::DevicestatusValue> GetObserverData() const;
-    void GetLongitude();
-    void GetLatitude();
     int32_t LoadAlgorithmLibrary(bool bCreate);
+    int32_t UnloadAlgorithmLibrary(bool bCreate);
     int32_t LoadSensorHdiLibrary(bool bCreate);
+    int32_t UnloadSensorHdiLibrary(bool bCreate);
 private:
     ErrCode ImplCallback(const DevicestatusDataUtils::DevicestatusData& data);
     DevicestatusSensorInterface* GetSensorHdiInst();
