@@ -30,26 +30,27 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class DevicestatusService final : public SystemAbility, public DevicestatusSrvStub {
-    DECLARE_SYSTEM_ABILITY(DevicestatusService)
-    DECLARE_DELAYED_SP_SINGLETON(DevicestatusService);
+class DeviceStatusService final : public SystemAbility, public DeviceStatusServiceStub {
+    DECLARE_SYSTEM_ABILITY(DeviceStatusService)
+    DECLARE_DELAYED_SP_SINGLETON(DeviceStatusService);
 public:
     virtual void OnDump() override;
     virtual void OnStart() override;
     virtual void OnStop() override;
 
-    void Subscribe(const DevicestatusDataUtils::DevicestatusType& type, \
-        const sptr<IdevicestatusCallback>& callback) override;
-    void UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type, \
-        const sptr<IdevicestatusCallback>& callback) override;
-    DevicestatusDataUtils::DevicestatusData GetCache(const DevicestatusDataUtils::DevicestatusType& type) override;
+    void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency,
+        sptr<IRemoteDevStaCallback> callback) override;
+    void Unsubscribe(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback) override;
+    Data GetCache(const Type& type) override;
+    bool IsServiceReady();
+    std::shared_ptr<DeviceStatusManager> GetDeviceStatusManager();
     int Dump(int fd, const std::vector<std::u16string>& args) override;
-    void ReportMsdpSysEvent(const DevicestatusDataUtils::DevicestatusType& type, bool enable);
+    void ReportSensorSysEvent(int32_t type, bool enable);
 private:
     bool Init();
-    bool ready_ = false;
-    std::shared_ptr<DevicestatusManager> devicestatusManager_;
-    std::shared_ptr<DevicestatusMsdpClientImpl> msdpImpl_;
+    std::atomic<bool> ready_ = false;
+    std::shared_ptr<DeviceStatusManager> devicestatusManager_;
+    std::shared_ptr<DeviceStatusMsdpClientImpl> msdpImpl_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
