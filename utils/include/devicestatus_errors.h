@@ -23,11 +23,11 @@ namespace Msdp {
 namespace DeviceStatus {
 enum {
     /**
-     *  Module type: Devicestatus Service
+     *  Module type: DeviceStatus Service
      */
     DEVICESTATUS_MODULE_TYPE_SERVICE = 0,
     /**
-     *  Module type: Devicestatus Kit
+     *  Module type: DeviceStatus Kit
      */
     DEVICESTATUS_MODULE_TYPE_KIT = 1
 };
@@ -42,6 +42,13 @@ enum {
     E_DEVICESTATUS_GET_SERVICE_FAILED,
     E_DEVICESTATUS_ADD_DEATH_RECIPIENT_FAILED,
     E_DEVICESTATUS_INNER_ERR
+};
+
+enum {
+    DEVICESTATUS_OK = 0,
+    DEVICESTATUS_FAILED = -1,
+    DEVICESTATUS_INVALID_FD = -2,
+    DEVICESTATUS_NOT_FIND_JSON_ITEM = -3,
 };
 } // namespace DeviceStatus
 } // namespace Msdp

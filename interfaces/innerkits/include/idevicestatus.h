@@ -33,11 +33,14 @@ public:
         DEVICESTATUS_GETCACHE
     };
 
-    virtual void Subscribe(const DevicestatusDataUtils::DevicestatusType& type, \
-        const sptr<IdevicestatusCallback>& callback) = 0;
-    virtual void UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type, \
-        const sptr<IdevicestatusCallback>& callback) = 0;
-    virtual DevicestatusDataUtils::DevicestatusData GetCache(const DevicestatusDataUtils::DevicestatusType& type) = 0;
+    virtual void Subscribe(Type type,
+        ActivityEvent event,
+        ReportLatencyNs latency,
+        sptr<IRemoteDevStaCallback> callback) = 0;
+    virtual void Unsubscribe(Type type,
+        ActivityEvent event,
+        sptr<IRemoteDevStaCallback> callback) = 0;
+    virtual Data GetCache(const Type& type) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.Idevicestatus");
 };
