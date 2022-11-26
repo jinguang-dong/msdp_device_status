@@ -17,10 +17,10 @@
 #define IDEVICESTATUS_H
 
 #include <iremote_broker.h>
-
 #include "iremote_object.h"
-#include "idevicestatus_callback.h"
+
 #include "devicestatus_data_utils.h"
+#include "idevicestatus_callback.h"
 
 namespace OHOS {
 namespace Msdp {

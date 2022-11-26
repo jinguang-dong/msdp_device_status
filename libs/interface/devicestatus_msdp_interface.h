@@ -16,9 +16,10 @@
 #ifndef DEVICESTATUS_MSDP_INTERFACE_H
 #define DEVICESTATUS_MSDP_INTERFACE_H
 
-#include <string>
-#include <memory>
 #include <map>
+#include <memory>
+#include <string>
+
 #include <errors.h>
 
 #include "devicestatus_data_utils.h"
@@ -59,6 +60,6 @@ struct MsdpAlgorithmHandle {
     }
 };
 } // namespace DeviceStatus
-}
-}
+} // namespace Msdp
+} // namespace OHOS
 #endif // DEVICESTATUS_MSDP_INTERFACE_H

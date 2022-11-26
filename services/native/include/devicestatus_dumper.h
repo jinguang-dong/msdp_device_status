@@ -16,8 +16,6 @@
 #ifndef DEVICESTATUS_DUMPER_H
 #define DEVICESTATUS_DUMPER_H
 
-#include <refbase.h>
-#include <singleton.h>
 #include <map>
 #include <memory>
 #include <queue>
@@ -26,6 +24,9 @@
 #include <vector>
 
 #include "accesstoken_kit.h"
+#include <refbase.h>
+#include <singleton.h>
+
 #include "devicestatus_data_utils.h"
 #include "idevicestatus_callback.h"
 
@@ -36,8 +37,6 @@ const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_DEVICESTATUS_SUBSCRIBER = "-s";
 const std::string ARG_DUMP_DEVICESTATUS_CHANGES = "-l";
 const std::string ARG_DUMP_DEVICESTATUS_CURRENT_STATE = "-c";
-constexpr int32_t RET_OK = 0;
-constexpr int32_t RET_NG = -1;
 constexpr uint32_t MAX_DEVICE_STATUS_SIZE = 10;
 constexpr uint32_t BASE_YEAR = 1900;
 constexpr uint32_t BASE_MON = 1;

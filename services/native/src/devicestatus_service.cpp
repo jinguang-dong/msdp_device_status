@@ -16,16 +16,18 @@
 #include "devicestatus_service.h"
 
 #include <vector>
-#include <ipc_skeleton.h>
+
+#include "hisysevent.h"
+#include "hitrace_meter.h"
 #include "if_system_ability_manager.h"
+#include <ipc_skeleton.h>
 #include "iservice_registry.h"
-#include "string_ex.h"
 #include "system_ability_definition.h"
+#include "string_ex.h"
+
 #include "devicestatus_permission.h"
 #include "devicestatus_common.h"
 #include "devicestatus_dumper.h"
-#include "hisysevent.h"
-#include "hitrace_meter.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -88,14 +90,14 @@ int DevicestatusService::Dump(int fd, const std::vector<std::u16string>& args)
     DEV_HILOGI(SERVICE, "dump DeviceStatusServiceInfo");
     if (fd < 0) {
         DEV_HILOGE(SERVICE, "fd is invalid");
-        return RET_NG;
+        return ERR_NG;
     }
     DevicestatusDumper &deviceStatusDumper = DevicestatusDumper::GetInstance();
     if (args.empty()) {
         DEV_HILOGE(SERVICE, "param cannot be empty");
         dprintf(fd, "param cannot be empty\n");
         deviceStatusDumper.DumpHelpInfo(fd);
-        return RET_NG;
+        return ERR_NG;
     }
     std::vector<std::string> argList = { "" };
     std::transform(args.begin(), args.end(), std::back_inserter(argList),
@@ -114,7 +116,7 @@ int DevicestatusService::Dump(int fd, const std::vector<std::u16string>& args)
         }
     }
     deviceStatusDumper.ParseCommand(fd, argList, datas);
-    return RET_OK;
+    return ERR_OK;
 }
 
 

@@ -15,16 +15,17 @@
 
 #include "devicestatus_service_test.h"
 
-#include <iostream>
 #include <chrono>
+#include <iostream>
 #include <thread>
 #include <gtest/gtest.h>
+
 #include <if_system_ability_manager.h>
 #include <ipc_skeleton.h>
 #include <string_ex.h>
 
-#include "devicestatus_common.h"
 #include "devicestatus_client.h"
+#include "devicestatus_common.h"
 
 using namespace testing::ext;
 using namespace OHOS::Msdp::DeviceStatus;

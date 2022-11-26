@@ -16,13 +16,15 @@
 #ifndef DEVICESTATUSAGENT_FUZZER_H
 #define DEVICESTATUSAGENT_FUZZER_H
 
-#include <cstdio>
-#include <fcntl.h>
 #include <cstdint>
+#include <cstdio>
 #include <ctime>
 #include <iostream>
 #include <string>
 #include <thread>
+
+#include <fcntl.h>
+
 #include "securec.h"
 
 #include "devicestatus_agent.h"

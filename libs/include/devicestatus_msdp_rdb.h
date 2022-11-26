@@ -16,20 +16,22 @@
 #ifndef DEVICESTATUS_MSDP_RDB_H
 #define DEVICESTATUS_MSDP_RDB_H
 
-#include <string>
-#include <memory>
-#include <vector>
-#include <thread>
-#include <mutex>
 #include <map>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <thread>
+#include <vector>
+
 #include <errors.h>
 
-#include "rdb_store.h"
 #include "rdb_helper.h"
 #include "rdb_open_callback.h"
+#include "rdb_store.h"
 #include "rdb_store_config.h"
-#include "values_bucket.h"
 #include "result_set.h"
+#include "values_bucket.h"
+
 #include "devicestatus_data_utils.h"
 #include "devicestatus_msdp_interface.h"
 

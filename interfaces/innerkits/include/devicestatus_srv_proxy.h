@@ -16,9 +16,9 @@
 #ifndef DEVICESTATUS_SRV_PROXY_H
 #define DEVICESTATUS_SRV_PROXY_H
 
+#include "iremote_proxy.h"
 #include <nocopyable.h>
 
-#include "iremote_proxy.h"
 #include "idevicestatus.h"
 
 namespace OHOS {

@@ -15,12 +15,11 @@
 
 #include "devicestatus_callback_proxy.h"
 
+#include "iremote_object.h"
+#include "message_option.h"
 #include <message_parcel.h>
 
 #include "devicestatus_common.h"
-
-#include "iremote_object.h"
-#include "message_option.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -49,5 +48,5 @@ void DevicestatusCallbackProxy::OnDevicestatusChanged(const DevicestatusDataUtil
     }
 }
 } // namespace DeviceStatus
-} // Msdp
-} // OHOS
+} // namespace Msdp
+} // namespace OHOS

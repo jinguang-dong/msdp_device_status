@@ -16,11 +16,11 @@
 #ifndef DEVICESTATUS_DELAYED_SP_SINGLETON_H
 #define DEVICESTATUS_DELAYED_SP_SINGLETON_H
 
-#include <mutex>
 #include <memory>
-#include <refbase.h>
+#include <mutex>
 
 #include "nocopyable.h"
+#include <refbase.h>
 
 namespace OHOS {
 namespace Msdp {

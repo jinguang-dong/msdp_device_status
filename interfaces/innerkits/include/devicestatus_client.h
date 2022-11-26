@@ -18,10 +18,10 @@
 
 #include <singleton.h>
 
+#include "devicestatus_common.h"
+#include "devicestatus_data_utils.h"
 #include "idevicestatus.h"
 #include "idevicestatus_callback.h"
-#include "devicestatus_data_utils.h"
-#include "devicestatus_common.h"
 
 namespace OHOS {
 namespace Msdp {

@@ -17,11 +17,11 @@
 #define DEVICESTATUS_SRV_STUB_H
 
 #include <iremote_stub.h>
+#include "message_option.h"
+#include "message_parcel.h"
 #include <nocopyable.h>
 
 #include "idevicestatus.h"
-#include "message_option.h"
-#include "message_parcel.h"
 
 namespace OHOS {
 namespace Msdp {

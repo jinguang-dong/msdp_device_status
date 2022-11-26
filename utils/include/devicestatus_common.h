@@ -19,12 +19,20 @@
 #include <cstdint>
 #include <type_traits>
 
-#include "devicestatus_hilog_wrapper.h"
 #include "devicestatus_errors.h"
+#include "devicestatus_hilog_wrapper.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+#ifndef ERR_OK
+    #define ERR_OK (0)
+#endif
+
+#ifndef ERR_NG
+    #define ERR_NG (-1)
+#endif
+
 #define DEVICESTATUS_RETURN_IF_WITH_RET(cond, retval) if (cond) {return (retval);}
 #define DEVICESTATUS_RETURN_IF(cond) if (cond) {return;}
 #define DEVICESTATUS_RETURN_IF_WITH_LOG(cond, loginfo)                                  \

@@ -16,13 +16,12 @@
 #include "devicestatus_client.h"
 
 #include <if_system_ability_manager.h>
+#include "iremote_broker.h"
+#include "iremote_object.h"
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
 #include "devicestatus_common.h"
-
-#include "iremote_broker.h"
-#include "iremote_object.h"
 
 namespace OHOS {
 namespace Msdp {
