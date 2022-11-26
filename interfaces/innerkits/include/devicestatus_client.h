@@ -16,7 +16,9 @@
 #ifndef DEVICESTATUS_CLIENT_H
 #define DEVICESTATUS_CLIENT_H
 
+#include <functional>
 #include <singleton.h>
+#include <map>
 
 #include "idevicestatus.h"
 #include "idevicestatus_callback.h"
@@ -26,26 +28,30 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class DevicestatusClient final : public DelayedRefSingleton<DevicestatusClient> {
-    DECLARE_DELAYED_REF_SINGLETON(DevicestatusClient)
+class DeviceStatusClient final : public DelayedRefSingleton<DeviceStatusClient> {
+    DECLARE_DELAYED_REF_SINGLETON(DeviceStatusClient)
 
 public:
-    DISALLOW_COPY_AND_MOVE(DevicestatusClient);
+    std::map<Type, int32_t> GetTypeMap()
+    {
+        return typeMap_;
+    }
+    DISALLOW_COPY_AND_MOVE(DeviceStatusClient);
 
-    void SubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
-        const sptr<IdevicestatusCallback>& callback);
-    void UnSubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
-        const sptr<IdevicestatusCallback>& callback);
-    DevicestatusDataUtils::DevicestatusData GetDevicestatusData(const DevicestatusDataUtils::DevicestatusType& type);
+    void SubscribeCallback(Type type, ActivityEvent event, ReportLatencyNs latency,
+        sptr<IRemoteDevStaCallback> callback);
+    void UnsubscribeCallback(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback);
+    Data GetDeviceStatusData(const Type type);
+    void RegisterDeathListener(std::function<void()> deathListener);
 
 private:
-    class DevicestatusDeathRecipient : public IRemoteObject::DeathRecipient {
+    class DeviceStatusDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
-        DevicestatusDeathRecipient() = default;
-        ~DevicestatusDeathRecipient() = default;
+        DeviceStatusDeathRecipient() = default;
+        ~DeviceStatusDeathRecipient() = default;
         void OnRemoteDied(const wptr<IRemoteObject>& remote);
     private:
-        DISALLOW_COPY_AND_MOVE(DevicestatusDeathRecipient);
+        DISALLOW_COPY_AND_MOVE(DeviceStatusDeathRecipient);
     };
 
     ErrCode Connect();
@@ -53,8 +59,10 @@ private:
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ {nullptr};
     void ResetProxy(const wptr<IRemoteObject>& remote);
     std::mutex mutex_;
+    std::map<Type, int32_t> typeMap_ = {};
+    std::function<void()> deathListener_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // IDEVICESTATUS_H
+#endif // DEVICESTATUS_CLIENT_H
