@@ -69,10 +69,6 @@ void DeviceStatusAgent::RegisterServiceEvent(const DevicestatusDataUtils::Device
 {
     DEV_HILOGI(INNERKIT, "Enter");
     callback_ = new (std::nothrow) DeviceStatusAgentCallback(shared_from_this());
-    if (callback_ == nullptr) {
-        DEV_HILOGE(INNERKIT, "callback_ is nullptr");
-        return;
-    }
     DevicestatusClient::GetInstance().SubscribeCallback(type, callback_);
 }
 

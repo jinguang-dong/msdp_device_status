@@ -54,7 +54,6 @@ int32_t DInput::OnStartInputDeviceCooperate(SessionPtr sess, int32_t userData,
     const std::string& sinkDeviceId, int32_t srcInputDeviceId)
 {
     sptr<CooperateEventManager::EventInfo> event = new (std::nothrow) CooperateEventManager::EventInfo();
-    CHKPR(event, SERVICE, RET_ERR);
     event->type = CooperateEventManager::EventType::START;
     event->sess = sess;
     event->msgId = MmiMessageId::COOPERATION_MESSAGE;
@@ -72,7 +71,6 @@ int32_t DInput::OnStartInputDeviceCooperate(SessionPtr sess, int32_t userData,
 int32_t DInput::OnStopDeviceCooperate(SessionPtr sess, int32_t userData)
 {
     sptr<CooperateEventManager::EventInfo> event = new (std::nothrow) CooperateEventManager::EventInfo();
-    CHKPR(event, SERVICE, RET_ERR);
     event->type = CooperateEventManager::EventType::STOP;
     event->sess = sess;
     event->msgId = MmiMessageId::COOPERATION_MESSAGE;
@@ -91,7 +89,6 @@ int32_t DInput::OnGetInputDeviceCooperateState(SessionPtr sess, int32_t userData
     const std::string& deviceId)
 {
     sptr<CooperateEventManager::EventInfo> event = new (std::nothrow) CooperateEventManager::EventInfo();
-    CHKPR(event, SERVICE, RET_ERR);
     event->type = CooperateEventManager::EventType::STATE;
     event->sess = sess;
     event->msgId = MmiMessageId::COOPERATION_GET_STATE;
@@ -104,7 +101,6 @@ int32_t DInput::OnGetInputDeviceCooperateState(SessionPtr sess, int32_t userData
 int32_t DInput::OnRegisterCooperateListener(SessionPtr sess)
 {
     sptr<CooperateEventManager::EventInfo> event = new (std::nothrow) CooperateEventManager::EventInfo();
-    CHKPR(event, SERVICE, RET_ERR);
     event->type = CooperateEventManager::EventType::LISTENER;
     event->sess = sess;
     event->msgId = MmiMessageId::COOPERATION_ADD_LISTENER;
@@ -115,7 +111,6 @@ int32_t DInput::OnRegisterCooperateListener(SessionPtr sess)
 int32_t DInput::OnUnregisterCooperateListener(SessionPtr sess)
 {
     sptr<CooperateEventManager::EventInfo> event = new (std::nothrow) CooperateEventManager::EventInfo();
-    CHKPR(event, SERVICE, RET_ERR);
     event->type = CooperateEventManager::EventType::LISTENER;
     event->sess = sess;
     CooperateEventMgr->RemoveCooperationEvent(event);
@@ -204,10 +199,6 @@ IDInput* CreateIDInpt(IInputContext* context)
     }
     CooperateEventMgr->SetIInputContext(context);
     IDInput* input = new (std::nothrow) DInput();
-    if (input == nullptr) {
-        DEV_HILOGE(SERVICE, "Create IDInpt failed");
-        return nullptr;
-    }
     return input;
 }
 } // namespace DeviceStatus

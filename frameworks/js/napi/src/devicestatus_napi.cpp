@@ -52,10 +52,6 @@ void DevicestatusCallback::OnDevicestatusChanged(const DevicestatusDataUtils::De
         return;
     }
     uv_work_t* work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        DEV_HILOGE(JS_NAPI, "%{public}s Work is nullptr", __func__);
-        return;
-    }
     static DevicestatusDataUtils::DevicestatusData statusData;
     statusData = devicestatusData;
     work->data = &statusData;
@@ -217,10 +213,6 @@ napi_value DevicestatusNapi::SubscribeDevicestatus(napi_env env, napi_callback_i
     if (!isObjExists) {
         DEV_HILOGD(JS_NAPI, "Didn't find object, so created it");
         obj = new (std::nothrow) DevicestatusNapi(env, jsthis);
-        if (obj == nullptr) {
-            DEV_HILOGE(JS_NAPI, "obj is nullptr");
-            return result;
-        }
         napi_wrap(env, jsthis, reinterpret_cast<void *>(obj),
             [](napi_env env, void *data, void *hint) {
                 (void)env;
@@ -250,10 +242,6 @@ napi_value DevicestatusNapi::SubscribeDevicestatus(napi_env env, napi_callback_i
     }
     DEV_HILOGD(JS_NAPI, "Didn't find callback, so created it");
     sptr<IdevicestatusCallback> callback = new (std::nothrow) DevicestatusCallback(env);
-    if (callback == nullptr) {
-        DEV_HILOGE(JS_NAPI, "Callback is nullptr.");
-        return result;
-    }
     g_DevicestatusClient.SubscribeCallback(DevicestatusDataUtils::DevicestatusType(type), callback);
     callbackMap_.insert(std::pair<int32_t, sptr<IdevicestatusCallback>>(type, callback));
     InvokeCallBack(env, args, false, CALLBACK_SUCCESS);
@@ -369,10 +357,6 @@ napi_value DevicestatusNapi::GetDevicestatus(napi_env env, napi_callback_info in
     }
 
     DevicestatusNapi* obj = new (std::nothrow) DevicestatusNapi(env, jsthis);
-    if (obj == nullptr) {
-        DEV_HILOGE(JS_NAPI, "obj is nullptr");
-        return result;
-    }
     napi_wrap(env, jsthis, reinterpret_cast<void *>(obj),
         [](napi_env env, void *data, void *hint) {
             (void)env;
@@ -477,10 +461,6 @@ napi_value DevicestatusNapi::ResponseConstructor(napi_env env, napi_callback_inf
     napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, &data);
 
     auto entity = new (std::nothrow) ResponseEntity();
-    if (entity == nullptr) {
-        DEV_HILOGE(JS_NAPI, "entity is nullptr");
-        return nullptr;
-    }
     napi_wrap(
         env, thisVar, entity,
         [](napi_env env, void *data, void *hint) {

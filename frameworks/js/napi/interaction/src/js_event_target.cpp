@@ -58,14 +58,7 @@ void JsEventTarget::EmitJsEnable(int32_t userData, std::string deviceId, Coordin
     uv_loop_s *loop = nullptr;
     CHKRV(napi_get_uv_event_loop(iter->second->env, &loop), GET_UV_EVENT_LOOP);
     uv_work_s *work = new (std::nothrow) uv_work_t;
-    CHKPV(work);
     int32_t *uData = new (std::nothrow) int32_t(userData);
-    if (uData == nullptr) {
-        FI_HILOGE("uData is nullptr");
-        delete work;
-        work = nullptr;
-        return;
-    }
     work->data = static_cast<void*>(uData);
     int32_t result;
     if (iter->second->ref == nullptr) {
@@ -101,14 +94,7 @@ void JsEventTarget::EmitJsStart(int32_t userData, std::string deviceId, Coordina
     uv_loop_s *loop = nullptr;
     CHKRV(napi_get_uv_event_loop(iter->second->env, &loop), GET_UV_EVENT_LOOP);
     uv_work_s *work = new (std::nothrow) uv_work_t;
-    CHKPV(work);
     int32_t *uData = new (std::nothrow) int32_t(userData);
-    if (uData == nullptr) {
-        FI_HILOGE("uData is nullptr");
-        delete work;
-        work = nullptr;
-        return;
-    }
     work->data = static_cast<void*>(uData);
     int32_t result;
     if (iter->second->ref == nullptr) {
@@ -144,14 +130,7 @@ void JsEventTarget::EmitJsStop(int32_t userData, std::string deviceId, Coordinat
     uv_loop_s *loop = nullptr;
     CHKRV(napi_get_uv_event_loop(iter->second->env, &loop), GET_UV_EVENT_LOOP);
     uv_work_s *work = new (std::nothrow) uv_work_t;
-    CHKPV(work);
     int32_t *uData = new (std::nothrow) int32_t(userData);
-    if (uData == nullptr) {
-        FI_HILOGE("uData is nullptr");
-        delete work;
-        work = nullptr;
-        return;
-    }
     work->data = static_cast<void*>(uData);
     int32_t result;
     if (iter->second->ref == nullptr) {
@@ -186,14 +165,7 @@ void JsEventTarget::EmitJsGetState(int32_t userData, bool state)
     uv_loop_s *loop = nullptr;
     CHKRV(napi_get_uv_event_loop(iter->second->env, &loop), GET_UV_EVENT_LOOP);
     uv_work_s *work = new (std::nothrow) uv_work_t;
-    CHKPV(work);
     int32_t *uData = new (std::nothrow) int32_t(userData);
-    if (uData == nullptr) {
-        FI_HILOGE("uData is null");
-        delete work;
-        work = nullptr;
-        return;
-    }
     work->data = static_cast<void*>(uData);
     int32_t result;
     if (iter->second->ref == nullptr) {
@@ -229,11 +201,6 @@ void JsEventTarget::AddListener(napi_env env, const std::string &type, napi_valu
     napi_ref ref = nullptr;
     CHKRV(napi_create_reference(env, handle, 1, &ref), CREATE_REFERENCE);
     auto monitor = std::make_unique<JsUtil::CallbackInfo>();
-    if (monitor == nullptr) {
-        napi_delete_reference(env, ref);
-        FI_HILOGE("monitor is nullptr");
-        return;
-    }
     monitor->env = env;
     monitor->ref = ref;
     iter->second.push_back(std::move(monitor));
