@@ -21,7 +21,6 @@ namespace DeviceStatus {
 namespace {
 constexpr int32_t FILE_SIZE_MAX = 0x5000;
 constexpr int32_t READ_DATA_BUFF_SIZE = 256;
-constexpr int32_t INVALID_FILE_SIZE = -1;
 const std::string MSDP_DATA_PATH = "/data/msdp/device_status_data.json";
 const std::string MSDP_DATA_DIR = "/data/msdp";
 } // namespace
@@ -34,10 +33,6 @@ bool DeviceStatusDataParse::ParseDeviceStatusData(DevicestatusDataUtils::Devices
     DevicestatusDataUtils::DevicestatusType& type)
 {
     std::string jsonBuf = ReadJsonFile(MSDP_DATA_PATH.c_str());
-    if (jsonBuf.empty()) {
-        DEV_HILOGE(SERVICE, "read json failed, errno is %{public}d", errno);
-        return false;
-    }
     return DataInit(jsonBuf, true, type, data);
 }
 
@@ -116,10 +111,6 @@ std::string DeviceStatusDataParse::ReadJsonFile(const std::string &filePath)
 int32_t DeviceStatusDataParse::GetFileSize(const std::string& filePath)
 {
     struct stat statbuf = {0};
-    if (stat(filePath.c_str(), &statbuf) != 0) {
-        DEV_HILOGE(SERVICE, "Get file size error");
-        return INVALID_FILE_SIZE;
-    }
     return statbuf.st_size;
 }
 
@@ -161,10 +152,6 @@ std::string DeviceStatusDataParse::ReadFile(const std::string &filePath)
 {
     DEV_HILOGD(SERVICE, "Enter");
     FILE* fp = fopen(filePath.c_str(), "r");
-    if (fp == nullptr) {
-        DEV_HILOGE(SERVICE, "Open failed");
-        return "";
-    }
     std::string dataStr;
     char buf[READ_DATA_BUFF_SIZE] = {};
     while (fgets(buf, sizeof(buf), fp) != nullptr) {
