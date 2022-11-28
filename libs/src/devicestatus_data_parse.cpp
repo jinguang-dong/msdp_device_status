@@ -21,7 +21,6 @@ namespace DeviceStatus {
 namespace {
 constexpr int32_t FILE_SIZE_MAX = 0x5000;
 constexpr int32_t READ_DATA_BUFF_SIZE = 256;
-constexpr int32_t INVALID_FILE_SIZE = -1;
 const std::string MSDP_DATA_PATH = "/data/msdp/device_status_data.json";
 const std::string MSDP_DATA_DIR = "/data/msdp";
 } // namespace
