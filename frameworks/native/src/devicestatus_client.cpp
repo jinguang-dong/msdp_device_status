@@ -40,28 +40,12 @@ DevicestatusClient::~DevicestatusClient()
 ErrCode DevicestatusClient::Connect()
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (devicestatusProxy_ != nullptr) {
-        DEV_HILOGE(INNERKIT, "devicestatusProxy_ is nut nullptr");
-        return ERR_OK;
-    }
 
     sptr<ISystemAbilityManager> sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (sam == nullptr) {
-        DEV_HILOGE(INNERKIT, "GetSystemAbilityManager failed");
-        return E_DEVICESTATUS_GET_SYSTEM_ABILITY_MANAGER_FAILED;
-    }
 
     sptr<IRemoteObject> remoteObject_ = sam->CheckSystemAbility(MSDP_DEVICESTATUS_SERVICE_ID);
-    if (remoteObject_ == nullptr) {
-        DEV_HILOGE(INNERKIT, "CheckSystemAbility failed");
-        return E_DEVICESTATUS_GET_SERVICE_FAILED;
-    }
 
     deathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new DevicestatusDeathRecipient());
-    if (deathRecipient_ == nullptr) {
-        DEV_HILOGE(INNERKIT, "Failed to create DevicestatusDeathRecipient");
-        return ERR_NO_MEMORY;
-    }
 
     if ((remoteObject_->IsProxyObject()) && (!remoteObject_->AddDeathRecipient(deathRecipient_))) {
         DEV_HILOGE(INNERKIT, "Add death recipient to Devicestatus service failed");
@@ -101,10 +85,6 @@ void DevicestatusClient::SubscribeCallback(const DevicestatusDataUtils::Devicest
 {
     DEV_HILOGD(INNERKIT, "Enter");
     DEVICESTATUS_RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
-    if (devicestatusProxy_ == nullptr) {
-        DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
-        return;
-    }
     if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
         && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
         devicestatusProxy_->Subscribe(type, callback);
@@ -118,10 +98,6 @@ void DevicestatusClient::UnSubscribeCallback(const DevicestatusDataUtils::Device
 {
     DEV_HILOGD(INNERKIT, "Enter");
     DEVICESTATUS_RETURN_IF((callback == nullptr) || (Connect() != ERR_OK));
-    if (devicestatusProxy_ == nullptr) {
-        DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
-        return;
-    }
     if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
         && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
         devicestatusProxy_->UnSubscribe(type, callback);
@@ -139,10 +115,6 @@ DevicestatusDataUtils::DevicestatusData DevicestatusClient::GetDevicestatusData(
     devicestatusData.value = DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID;
 
     DEVICESTATUS_RETURN_IF_WITH_RET((Connect() != ERR_OK), devicestatusData);
-    if (devicestatusProxy_ == nullptr) {
-        DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
-        return devicestatusData;
-    }
     if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
         && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
         devicestatusData = devicestatusProxy_->GetCache(type);
