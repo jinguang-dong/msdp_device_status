@@ -20,33 +20,85 @@
 #include <iremote_object.h>
 #include <system_ability.h>
 
-#include "devicestatus_srv_stub.h"
-#include "idevicestatus_callback.h"
 #ifdef OHOS_BUILD_ENABLE_COOPERATE
 #include "coordination_event_handler.h"
 #endif // OHOS_BUILD_ENABLE_COOPERATE
+#include "delegate_tasks.h"
+#include "device_manager.h"
+#include "devicestatus_srv_stub.h"
 #include "devicestatus_data_utils.h"
 #include "devicestatus_dumper.h"
 #include "devicestatus_manager.h"
 #include "devicestatus_delayed_sp_singleton.h"
+#include "timer_manager.h"
+#include "i_context.h"
+#include "idevicestatus_callback.h"
 #include "uds_server.h"
-#include "delegate_tasks.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 enum class ServiceRunningState {STATE_NOT_START, STATE_RUNNING, STATE_EXIT};   
-class DevicestatusService final : public UDSServer, public SystemAbility, public DevicestatusSrvStub {
+class DevicestatusService final : public IContext,
+                                  public UDSServer,
+                                  public SystemAbility,
+                                  public DevicestatusSrvStub {
     DECLARE_SYSTEM_ABILITY(DevicestatusService)
     DECLARE_DELAYED_SP_SINGLETON(DevicestatusService);
+
 public:
     virtual void OnDump() override;
     virtual void OnStart() override;
     virtual void OnStop() override;
 
-    void Subscribe(const DevicestatusDataUtils::DevicestatusType& type, \
+    IDelegateTasks& GetDelegateTasks() override;
+    IDeviceManager& GetDeviceManager() override;
+    ITimerManager& GetTimerManager() override;
+
+
+    int32_t FindInputDeviceId(struct libinput_device* inputDevice) override
+    {
+        return -1;
+    }
+
+    std::shared_ptr<MMI::PointerEvent> GetPointerEvent() override
+    {
+        return nullptr;
+    }
+
+    MouseLocation GetMouseInfo() override
+    {
+        return MouseLocation();
+    }
+
+    int32_t SetPointerVisible(int32_t pid, bool visible) override
+    {
+        return -1;
+    }
+
+    void SelectAutoRepeat(std::shared_ptr<MMI::KeyEvent>& keyEvent) override
+    {}
+
+    void SetJumpInterceptState(bool isJump) override
+    {}
+
+    bool IsRemote(struct libinput_device *inputDevice) override
+    {
+        return false;
+    }
+
+    const ::OHOS::MMI::DisplayGroupInfo& GetDisplayGroupInfo() override
+    {
+        return ::OHOS::MMI::DisplayGroupInfo();
+    }
+
+    void SetAbsolutionLocation(double xPercent, double yPercent) override
+    {}
+
+
+    void Subscribe(const DevicestatusDataUtils::DevicestatusType& type,
         const sptr<IdevicestatusCallback>& callback) override;
-    void UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type, \
+    void UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type,
         const sptr<IdevicestatusCallback>& callback) override;
     DevicestatusDataUtils::DevicestatusData GetCache(const DevicestatusDataUtils::DevicestatusType& type) override;
 
@@ -70,17 +122,23 @@ public:
     int32_t DelEpoll(EpollEventType type, int32_t fd);
     bool IsRunning() const;
 
-    bool InitDelegateTasks();
+private:
+    bool Init();
+    int32_t InitDelegateTasks();
+    int32_t InitTimerMgr();
+
     void OnThread();
     void OnSignalEvent(int32_t signalFd);
-    void OnDelegateTask(epoll_event& ev);
+    void OnDelegateTask(epoll_event &ev);
+    void OnTimeout(epoll_event &ev);
 
 private:
-    std::atomic<ServiceRunningState> state_ = ServiceRunningState::STATE_NOT_START;
+    std::atomic<ServiceRunningState> state_ { ServiceRunningState::STATE_NOT_START };
+    bool ready_ { false };
     std::thread t_;
-    bool Init();
-    bool ready_ = false;
     DelegateTasks delegateTasks_;
+    DeviceManager devMgr_;
+    TimerManager timerMgr_;
 #ifdef OHOS_BUILD_ENABLE_COOPERATE
     CoordinationEventHandler coordinationHandler;
 #endif // OHOS_BUILD_ENABLE_COOPERATE
