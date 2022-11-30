@@ -65,7 +65,7 @@ ErrCode DevicestatusClient::Connect()
         return E_DEVICESTATUS_GET_SERVICE_FAILED;
     }
 
-    deathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new DevicestatusDeathRecipient());
+    deathRecipient_ = sptr<IRemoteObject::DeathRecipient> (new (std::nothrow) DevicestatusDeathRecipient());
     if (deathRecipient_ == nullptr) {
         DEV_HILOGE(INNERKIT, "Failed to create DevicestatusDeathRecipient");
         return ERR_NO_MEMORY;
