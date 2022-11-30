@@ -132,6 +132,16 @@ private:
     void OnDelegateTask(epoll_event &ev);
     void OnTimeout(epoll_event &ev);
 
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    int32_t OnRegisterCoordinationListener(int32_t pid);
+    int32_t OnUnregisterCoordinationListener(int32_t pid);
+    int32_t OnEnableInputDeviceCoordination(int32_t pid, int32_t userData, bool enabled);
+    int32_t OnStartInputDeviceCoordination(int32_t pid, int32_t userData, const std::string &sinkDeviceId,
+        int32_t srcInputDeviceId);
+    int32_t OnStopInputDeviceCoordination(int32_t pid, int32_t userData);
+    int32_t OnGetInputDeviceCoordinationState(int32_t pid, int32_t userData, const std::string &deviceId);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+
 private:
     std::atomic<ServiceRunningState> state_ { ServiceRunningState::STATE_NOT_START };
     bool ready_ { false };
