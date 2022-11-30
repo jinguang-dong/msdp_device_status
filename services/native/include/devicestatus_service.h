@@ -28,6 +28,7 @@
 #include "devicestatus_delayed_sp_singleton.h"
 #include "uds_server.h"
 #include "delegate_tasks.h"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
@@ -72,6 +73,15 @@ public:
     void OnDelegateTask(epoll_event& ev);
 
 private:
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    int32_t OnRegisterCoordinationListener(int32_t pid);
+    int32_t OnUnregisterCoordinationListener(int32_t pid);
+    int32_t OnEnableInputDeviceCoordination(int32_t pid, int32_t userData, bool enabled);
+    int32_t OnStartInputDeviceCoordination(int32_t pid, int32_t userData, const std::string &sinkDeviceId,
+        int32_t srcInputDeviceId);
+    int32_t OnStopInputDeviceCoordination(int32_t pid, int32_t userData);
+    int32_t OnGetInputDeviceCoordinationState(int32_t pid, int32_t userData, const std::string &deviceId);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
     std::atomic<ServiceRunningState> state_ = ServiceRunningState::STATE_NOT_START;
     std::thread t_;
     bool Init();
