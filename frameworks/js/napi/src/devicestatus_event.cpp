@@ -59,7 +59,6 @@ bool DevicestatusEvent::On(int32_t eventType, napi_value handler, bool isOnce)
     listener->eventType = eventType;
     napi_create_reference(env_, handler, 1, &listener->handlerRef);
     if (isOnce) {
-        
         eventOnceMap_[eventType] = listener;
     } else {
         eventMap_[eventType] = listener;
