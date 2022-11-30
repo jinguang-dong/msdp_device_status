@@ -40,21 +40,17 @@ DevicestatusEvent::~DevicestatusEvent()
     napi_delete_reference(env_, thisVarRef_);
 }
 
-bool DevicestatusEvent::On(const int32_t& eventType, napi_value handler, bool isOnce)
+bool DevicestatusEvent::On(int32_t eventType, napi_value handler, bool isOnce)
 {
     DEV_HILOGD(JS_NAPI, \
         "DevicestatusEvent On in for event: %{public}d, isOnce: %{public}d", eventType, isOnce);
-
-    std::map<int32_t, std::shared_ptr<DevicestatusEventListener>>::iterator iter;
     if (isOnce) {
-        iter = eventOnceMap_.find(eventType);
-        if (iter != eventOnceMap_.end()) {
+        if (eventOnceMap_.find(eventType) != eventOnceMap_.end()) {
             DEV_HILOGE(JS_NAPI, "eventType: %{public}d already exists", eventType);
             return false;
         }
     } else {
-        iter = eventMap_.find(eventType);
-        if (iter != eventMap_.end()) {
+        if (eventMap_.find(eventType) != eventMap_.end()) {
             DEV_HILOGE(JS_NAPI, "eventType: %{public}d already exists", eventType);
             return false;
         }
@@ -63,6 +59,7 @@ bool DevicestatusEvent::On(const int32_t& eventType, napi_value handler, bool is
     listener->eventType = eventType;
     napi_create_reference(env_, handler, 1, &listener->handlerRef);
     if (isOnce) {
+        
         eventOnceMap_[eventType] = listener;
     } else {
         eventMap_[eventType] = listener;
@@ -70,7 +67,7 @@ bool DevicestatusEvent::On(const int32_t& eventType, napi_value handler, bool is
     return true;
 }
 
-bool DevicestatusEvent::Off(const int32_t& eventType, bool isOnce)
+bool DevicestatusEvent::Off(int32_t eventType, bool isOnce)
 {
     DEV_HILOGD(JS_NAPI, \
         "DevicestatusEvent off in for event: %{public}d, isOnce: %{public}d", eventType, isOnce);
@@ -111,7 +108,7 @@ bool DevicestatusEvent::Off(const int32_t& eventType, bool isOnce)
     return true;
 }
 
-void DevicestatusEvent::OnEvent(const int32_t& eventType, size_t argc, const int32_t& value, bool isOnce)
+void DevicestatusEvent::OnEvent(int32_t eventType, size_t argc, int32_t value, bool isOnce)
 {
     DEV_HILOGD(JS_NAPI, "OnEvent for %{public}d, isOnce: %{public}d", eventType, isOnce);
     napi_handle_scope scope = nullptr;
