@@ -21,7 +21,7 @@
 #include "hitrace_meter.h"
 
 #include "cooperate_event_manager.h"
-#include "cooperation_message.h"
+#include "coordination_message.h"
 #include "device_cooperate_softbus_adapter.h"
 #include "device_profile_adapter.h"
 #include "devicestatus_define.h"
@@ -554,7 +554,6 @@ bool InputDeviceCooperateSM::InitDeviceManager()
 {
     CALL_DEBUG_ENTER;
     initCallback_ = std::make_shared<DeviceInitCallBack>();
-    CHKPR(initCallback_, false);
     int32_t ret = DisHardware.InitDeviceManager(MMI_DINPUT_PKG_NAME, initCallback_);
     if (ret != 0) {
         FI_HILOGE("Init device manager failed, ret:%{public}d", ret);
