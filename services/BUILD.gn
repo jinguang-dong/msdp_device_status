@@ -16,6 +16,7 @@ import("//foundation/distributeddatamgr/relational_store/relational_store.gni")
 
 config("devicestatus_private_config") {
   include_dirs = [
+    "context/include",
     "delegate_task/include",
     "native/include",
     "timer_manager/include",
