@@ -70,7 +70,7 @@ HWTEST_F (DevicestatusClientTest, DevicestatusClientTest001, TestSize.Level1)
     auto& client = DevicestatusClient::GetInstance();
     DEV_HILOGE(INNERKIT, "test OnRemoteDied start");
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ =
-        sptr<IRemoteObject::DeathRecipient>(new DevicestatusClient::DevicestatusDeathRecipient());
+        sptr<IRemoteObject::DeathRecipient> (new (std::nothrow) DevicestatusClient::DevicestatusDeathRecipient());
     deathRecipient_->OnRemoteDied(remoteObject_);
 
     DEV_HILOGE(INNERKIT, "test OnRemoteDied end");
@@ -116,7 +116,7 @@ HWTEST_F (DevicestatusClientTest, DevicestatusClientTest003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DevicestatusClientTest003 start";
     sptr<IdevicestatusCallback> callback =
-        sptr<IdevicestatusCallback>(new DeviceStatusAgent::DeviceStatusAgentCallback(agent_));
+        sptr<IdevicestatusCallback>(new (std::nothrow) DeviceStatusAgent::DeviceStatusAgentCallback(agent_));
     auto& client = DevicestatusClient::GetInstance();
     client.devicestatusProxy_ = nullptr;
     DEV_HILOGE(INNERKIT, "test SubscribeCallback start");
@@ -134,7 +134,7 @@ HWTEST_F (DevicestatusClientTest, DevicestatusClientTest004, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DevicestatusClientTest004 start";
     sptr<IdevicestatusCallback> callback =
-        sptr<IdevicestatusCallback>(new DeviceStatusAgent::DeviceStatusAgentCallback(agent_));
+        sptr<IdevicestatusCallback>(new (std::nothrow) DeviceStatusAgent::DeviceStatusAgentCallback(agent_));
     auto& client = DevicestatusClient::GetInstance();
     client.devicestatusProxy_ = nullptr;
     DEV_HILOGE(INNERKIT, "test UnSubscribeCallback start");
@@ -169,11 +169,11 @@ HWTEST_F (DevicestatusClientTest, DevicestatusClientTest005, TestSize.Level1)
 HWTEST_F (DevicestatusClientTest, DevicestatusClientTest006, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DevicestatusClientTest006 start";
-    DevicestatusClient* client1 = new(std::nothrow) DevicestatusClient();
+    DevicestatusClient* client1 = new (std::nothrow) DevicestatusClient();
     delete client1;
     client1 = nullptr;
 
-    DevicestatusClient* client2 = new(std::nothrow) DevicestatusClient();
+    DevicestatusClient* client2 = new (std::nothrow) DevicestatusClient();
     client2->devicestatusProxy_ = nullptr;
     delete client2;
     client2 = nullptr;
@@ -190,7 +190,7 @@ HWTEST_F (DevicestatusClientTest, DevicestatusClientTest007, TestSize.Level1)
     GTEST_LOG_(INFO) << "DevicestatusClientTest007 start";
     DEV_HILOGE(INNERKIT, "test OnRemoteDied start");
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ =
-        sptr<IRemoteObject::DeathRecipient>(new DevicestatusClient::DevicestatusDeathRecipient());
+        sptr<IRemoteObject::DeathRecipient>(new (std::nothrow) DevicestatusClient::DevicestatusDeathRecipient());
     deathRecipient_->OnRemoteDied(nullptr);
     DEV_HILOGE(INNERKIT, "test OnRemoteDied end");
     auto& client = DevicestatusClient::GetInstance();

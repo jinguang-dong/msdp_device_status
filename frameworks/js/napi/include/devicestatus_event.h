@@ -35,9 +35,9 @@ public:
     DevicestatusEvent() {};
     virtual ~DevicestatusEvent();
 
-    virtual bool On(const int32_t& eventType, napi_value handler, bool isOnce);
-    virtual bool Off(const int32_t& eventType, bool isOnce);
-    virtual void OnEvent(const int32_t& eventType, size_t argc, const int32_t& value, bool isOnce);
+    virtual bool On(int32_t eventType, napi_value handler, bool isOnce);
+    virtual bool Off(int32_t eventType, bool isOnce);
+    virtual void OnEvent(int32_t eventType, size_t argc, const int32_t value, bool isOnce);
 
 protected:
     napi_env env_;
