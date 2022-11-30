@@ -320,7 +320,7 @@ HWTEST_F (DevicestatusAgentTest, DevicestatusAgentTest014, TestSize.Level1)
     int32_t ret = agent1_->SubscribeAgentEvent(DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN, agentEvent);
     EXPECT_TRUE(ret == ERR_OK);
 
-    sptr<IdevicestatusCallback> callback = new DeviceStatusAgent::DeviceStatusAgentCallback(agent1_);
+    sptr<IdevicestatusCallback> callback = new (std::nothrow) DeviceStatusAgent::DeviceStatusAgentCallback(agent1_);
     DevicestatusDataUtils::DevicestatusData devicestatusData = {
         DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN,
         DevicestatusDataUtils::DevicestatusValue::VALUE_ENTER
