@@ -46,9 +46,21 @@ void DevicestatusDumper::ParseCommand(int32_t fd, const std::vector<std::string>
         {"current", no_argument, 0, 'c'},
         {NULL, 0, 0, 0}
     };
+    if (args.size() == 0) {
+        DEV_HILOGI(SERVICE, "args is empty");
+        return;
+    }
     char **argv = new char *[args.size()];
+    if (argv == nullptr) {
+        DEV_HILOGI(SERVICE, "argv is nullptr");
+        return;
+    }
     for (size_t i = 0; i < args.size(); ++i) {
         argv[i] = new char[args[i].size() + 1];
+        if (argv[i] == nullptr) {
+            DEV_HILOGI(SERVICE, "argv[i] is nullptr");
+            goto RELEASE_RES;
+        }
         if (strcpy_s(argv[i], args[i].size() + 1, args[i].c_str()) != EOK) {
             DEV_HILOGE(SERVICE, "strcpy_s error");
             goto RELEASE_RES;
@@ -84,7 +96,9 @@ void DevicestatusDumper::ParseCommand(int32_t fd, const std::vector<std::string>
     }
     RELEASE_RES:
     for (size_t i = 0; i < args.size(); ++i) {
-        delete[] argv[i];
+        if (argv[i] != nullptr) {
+            delete[] argv[i];
+        }
     }
     delete[] argv;
 }
