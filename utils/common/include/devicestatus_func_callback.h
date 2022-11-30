@@ -13,30 +13,26 @@
  * limitations under the License.
  */
 
-#include "input_device_cooperate_util.h"
+#ifndef MMI_FUNC_CALLBACK_H
+#define MMI_FUNC_CALLBACK_H
 
-#include "softbus_bus_center.h"
-
-#include "devicestatus_define.h"
+#include <functional>
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-namespace COOPERATE {
-namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "InputDeviceCooperateUtil" };
-} // namespace
-std::string GetLocalDeviceId()
+template<class MemberFunType, class ClassType>
+auto MsgCallbackBind1(MemberFunType func, ClassType* obj)
 {
-    auto localNode = std::make_unique<NodeBasicInfo>();
-    int32_t ret = GetLocalNodeDeviceInfo(MMI_DINPUT_PKG_NAME, localNode.get());
-    if (ret != RET_OK) {
-        FI_HILOGE("GetLocalNodeDeviceInfo ret:%{public}d", ret);
-        return {};
-    }
-    return localNode->networkId;
+    return std::bind(func, obj, std::placeholders::_1);
 }
-} // namespace COOPERATE
+
+template<class MemberFunType, class ClassType>
+auto MsgCallbackBind2(MemberFunType func, ClassType* obj)
+{
+    return std::bind(func, obj, std::placeholders::_1, std::placeholders::_2);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
+#endif // MMI_FUNC_CALLBACK_H
