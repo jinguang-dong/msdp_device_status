@@ -16,6 +16,7 @@ import("//foundation/distributeddatamgr/relational_store/relational_store.gni")
 
 ohos_source_set("coordination_lib") {
   include_dirs = [
+    "${device_status_service_path}/context/include",
     "//base/msdp/device_status/utils/common/include",
     "//base/msdp/device_status/utils/ipc/include",
     "//foundation/deviceprofile/device_profile_core/interfaces/innerkits/core/include",
@@ -39,6 +40,8 @@ ohos_source_set("coordination_lib") {
   ]
 
   public_configs = [ "${device_status_service_path}/interaction/coordination:coordination_config" ]
+
+  defines = device_status_default_defines
 
   deps = [
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",

@@ -25,13 +25,30 @@
 #include "singleton.h"
 #include "uds_session.h"
 
-#include "cooperation_message.h"
 #include "fi_log.h"
-#include "i_input_context.h"
+#include "i_context.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+enum class CooperationMessage {
+    OPEN_SUCCESS = 100,
+    OPEN_FAIL = 101,
+    INFO_START = 200,
+    INFO_SUCCESS = 201,
+    INFO_FAIL = 202,
+    CLOSE = 300,
+    CLOSE_SUCCESS = 301,
+    STOP = 400,
+    STOP_SUCCESS = 401,
+    STOP_FAIL = 402,
+    STATE_ON = 500,
+    STATE_OFF = 501,
+    INPUT_DEVICE_ID_ERROR = 4400001,
+    COOPERATE_FAIL = 4400002,
+    COOPERATION_DEVICE_ERROR = 4400003,
+};
+
 class CooperateEventManager final {
     DECLARE_DELAYED_SINGLETON(CooperateEventManager);
 public:
@@ -58,8 +75,8 @@ public:
     void OnGetState(bool state);
     void OnErrorMessage(EventType type, CooperationMessage msg);
 
-    void SetIInputContext(IInputContext* context);
-    IInputContext* GetIInputContext() const;
+    void SetIContext(IContext *context);
+    IContext* GetIContext() const;
 
 private:
     void NotifyCooperateMessage(SessionPtr sess, MmiMessageId msgId, int32_t userData,
@@ -75,7 +92,7 @@ private:
         {EventType::STOP, nullptr},
         {EventType::STATE, nullptr}
     };
-    IInputContext* context_;
+    IContext *context_ { nullptr };
 };
 
 #define CooperateEventMgr ::OHOS::DelayedSingleton<CooperateEventManager>::GetInstance()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,12 +30,12 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceManager" };
 } // namespace
 
-DeviceManager::DeviceManager() {}
-DeviceManager::~DeviceManager() {}
-
-int32_t DeviceManager::Enable()
+int32_t DeviceManager::Enable(IContext *context)
 {
     CALL_INFO_TRACE;
+    CHKPR(context, RET_ERR);
+    context_ = context;
+
     int32_t ret = InputMgr->RegisterDevListener(CHANGED_TYPE, shared_from_this());
     if (ret != RET_OK) {
         FI_HILOGE("RegisterDevListener failed");
@@ -85,24 +85,46 @@ void DeviceManager::OnDeviceAdded(int32_t deviceId, const std::string &type)
 void DeviceManager::OnDeviceRemoved(int32_t deviceId, const std::string &type)
 {
     CALL_INFO_TRACE;
-    if (auto devIter = devices_.find(deviceId); devIter != devices_.cend()) {
-        FI_HILOGI("Device(\'%{public}s\') removed", devIter->second->GetName().c_str());
-        devices_.erase(devIter);
+    int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
+        std::bind(&DeviceManager::RemoveDevice, this, deviceId));
+    if (ret != RET_OK) {
+        FI_HILOGE("PostAsyncTask failed");
     }
 }
 
 void DeviceManager::OnDeviceInfoObtained(std::shared_ptr<::OHOS::MMI::InputDevice> inputDev)
 {
     CALL_INFO_TRACE;
-    CHKPV(inputDev);
+    int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
+        std::bind(&DeviceManager::AddDevice, this, inputDev));
+    if (ret != RET_OK) {
+        FI_HILOGE("PostAsyncTask failed");
+    }
+}
+
+int32_t DeviceManager::AddDevice(std::shared_ptr<::OHOS::MMI::InputDevice> inputDev)
+{
+    CALL_INFO_TRACE;
+    CHKPR(inputDev, RET_ERR);
     std::shared_ptr<Device> dev = std::make_shared<Device>(inputDev);
     auto [devIter, isOk] = devices_.insert_or_assign(dev->GetId(), dev);
     if (!isOk) {
         FI_HILOGW("Device(\'%{public}s\') exists already", devIter->second->GetName().c_str());
     }
+    return RET_OK;
 }
 
-std::shared_ptr<Device> DeviceManager::GetDevice(int32_t id) const
+int32_t DeviceManager::RemoveDevice(int32_t deviceId)
+{
+    CALL_INFO_TRACE;
+    if (auto devIter = devices_.find(deviceId); devIter != devices_.cend()) {
+        FI_HILOGI("Device(\'%{public}s\') removed", devIter->second->GetName().c_str());
+        devices_.erase(devIter);
+    }
+    return RET_OK;
+}
+
+std::shared_ptr<IDevice> DeviceManager::GetDevice(int32_t id) const
 {
     if (auto devIter = devices_.find(id); devIter != devices_.cend()) {
         return devIter->second;
@@ -125,7 +147,7 @@ bool DeviceManager::IsRemote(int32_t id) const
     return false;
 }
 
-std::vector<std::string> DeviceManager::GetCooperateDhids(int32_t deviceId)
+std::vector<std::string> DeviceManager::GetCooperateDhids(int32_t deviceId) const
 {
     std::vector<std::string> dhids;
     auto devIter = devices_.find(deviceId);
@@ -157,7 +179,7 @@ std::vector<std::string> DeviceManager::GetCooperateDhids(int32_t deviceId)
     return dhids;
 }
 
-std::vector<std::string> DeviceManager::GetCooperateDhids(const std::string &dhid)
+std::vector<std::string> DeviceManager::GetCooperateDhids(const std::string &dhid) const
 {
     int32_t inputDeviceId { -1 };
     for (const auto &[id, dev] : devices_) {
@@ -169,7 +191,7 @@ std::vector<std::string> DeviceManager::GetCooperateDhids(const std::string &dhi
     return GetCooperateDhids(inputDeviceId);
 }
 
-std::string DeviceManager::GetOriginNetworkId(int32_t id)
+std::string DeviceManager::GetOriginNetworkId(int32_t id) const
 {
     auto devIter = devices_.find(id);
     if (devIter == devices_.end()) {
@@ -183,7 +205,7 @@ std::string DeviceManager::GetOriginNetworkId(int32_t id)
     return networkId;
 }
 
-std::string DeviceManager::GetOriginNetworkId(const std::string &dhid)
+std::string DeviceManager::GetOriginNetworkId(const std::string &dhid) const
 {
     if (dhid.empty()) {
         return EMPTYSTR;
