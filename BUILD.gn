@@ -1,0 +1,105 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+
+IOTSDK_ROOT_DIR = "//third_party"
+IOTSDK_DIR = "$IOTSDK_ROOT_DIR/huawei-iot"
+
+HEADER_PATH = "$IOTSDK_DIR/include"
+SRC_PATH = "$IOTSDK_DIR/src"
+
+ohos_shared_library("iotsdk") {
+  output_name = "iotsdk"
+
+  sources = [
+    "$SRC_PATH/base/hmac_sha256.c",
+    "$SRC_PATH/base/mqtt_base.c",
+    "$SRC_PATH/util/string_util.c",
+    "$SRC_PATH/third_party/cjson/cJSON.c",
+    "$SRC_PATH/util/json_util.c",
+
+    "$SRC_PATH/service/base.c",
+    "$SRC_PATH/service/callback_func.c",
+    "$SRC_PATH/service/login.c",
+    "$SRC_PATH/service/subscribe.c",
+    "$SRC_PATH/service/data_trans.c",
+
+    "$SRC_PATH/agentlite/iota_init.c",
+    "$SRC_PATH/agentlite/iota_login.c",
+    "$SRC_PATH/agentlite/iota_datatrans.c",
+  ]
+
+  include_dirs = [
+    "$HEADER_PATH/base",
+    "$HEADER_PATH/agentlite",
+    "$HEADER_PATH/util",
+    "$HEADER_PATH/openssl",
+    "$HEADER_PATH/protocol",
+    "$HEADER_PATH/service",
+    "$HEADER_PATH/third_party/zlib",
+    "$HEADER_PATH/third_party/cjson",
+  ]
+
+  cflags = [
+    "-w",
+    "-Wall",
+    "-fmessage-length=0",
+    "-fno-strict-aliasing",
+    "-fno-omit-frame-pointer",
+    "-Wall",
+    "-pipe",
+    "-fPIC",
+    "-MP",
+    "-fno-common",
+    "-fno-inline",
+    "-fno-exceptions",
+    "-Wfloat-equal",
+    "-Wshadow",
+    "-Wformat=2",
+    "-Wextra",
+    "-fstack-protector-strong",
+    "-fno-builtin",
+    "-fsigned-char",
+    "-ffunction-sections",
+    "-fdata-sections",
+    "-Wpointer-arith",
+    "-Wcast-qual",
+    "-Waggregate-return",
+    "-Winline",
+    "-Wunreachable-code",
+    "-Wcast-align",
+    "-Wundef",
+    "-Wredundant-decls",
+    "-Wstrict-prototypes",
+    "-Wmissing-prototypes",
+    "-Wnested-externs"
+  ]
+
+  deps = [
+    "//third_party/openssl:libssl_shared",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/huawei-iot/generatingLib/paho.mqtt.c-1.3.9:pahomqttas",
+    "//third_party/zlib:libz",
+  ]
+
+  defines = [
+    "LOG_TAG = \"huaweicloud-sdk\"",
+    "LOG_DOMAIN = 0xD002B02",
+  ]
+  external_deps = ["hiviewdfx_hilog_native:libhilog"]
+
+  install_enable = true
+  part_name = "netstack"
+  subsystem_name = "communication"
+}
