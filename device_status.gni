@@ -13,8 +13,6 @@
 
 import("//build/ohos.gni")
 
-device_status_feature_coordination = false
-
 ability_runtime_path = "//foundation/ability/ability_runtime"
 ability_runtime_kits_path = "${ability_runtime_path}/frameworks/kits"
 device_status_part_name = "device_status"
@@ -26,6 +24,8 @@ device_status_utils_path = "${device_status_root_path}/utils/common"
 
 device_status_default_defines = []
 
-if (device_status_feature_coordination) {
+has_libdinput_sdk = exec_script("./check_libdinput_sdk.py", [], "value")
+
+if (has_libdinput_sdk) {
   device_status_default_defines += [ "OHOS_BUILD_ENABLE_COORDINATION" ]
 }
