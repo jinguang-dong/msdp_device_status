@@ -36,14 +36,15 @@ public:
         ENABLE_COORDINATION = 32,
         START_COORDINATION = 33,
         STOP_COORDINATION = 34,
-        GET_COORDINATION_STATE = 35
+        GET_COORDINATION_STATE = 35,
+        ALLOC_SOCKET_FD = 40
     };
 
-    virtual void Subscribe(const DevicestatusDataUtils::DevicestatusType& type, \
+    virtual void Subscribe(const DeviceStatusDataUtils::DeviceStatusType& type, \
         const sptr<IdevicestatusCallback>& callback) = 0;
-    virtual void UnSubscribe(const DevicestatusDataUtils::DevicestatusType& type, \
+    virtual void Unsubscribe(const DeviceStatusDataUtils::DeviceStatusType& type, \
         const sptr<IdevicestatusCallback>& callback) = 0;
-    virtual DevicestatusDataUtils::DevicestatusData GetCache(const DevicestatusDataUtils::DevicestatusType& type) = 0;
+    virtual DeviceStatusDataUtils::DeviceStatusData GetCache(const DeviceStatusDataUtils::DeviceStatusType& type) = 0;
 
     virtual int32_t RegisterCoordinationListener() = 0;
     virtual int32_t UnregisterCoordinationListener() = 0;
@@ -53,6 +54,12 @@ public:
     virtual int32_t StopDeviceCoordination(int32_t userData) = 0;
     virtual int32_t GetInputDeviceCoordinationState(int32_t userData, const std::string &deviceId) = 0;
 
+    virtual int32_t AllocSocketFd(const std::string &programName, const int32_t moduleType,
+        int32_t &socketFd, int32_t &tokenType) = 0;
+    virtual bool IsRunning() const
+    {
+        return true;
+    }
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.Idevicestatus");
 };
 } // namespace DeviceStatus

@@ -19,23 +19,25 @@
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
-#include "devicestatus_common.h"
-
 #include "iremote_broker.h"
 #include "iremote_object.h"
 
 #include "coordination_manager_impl.h"
+#include "devicestatus_common.h"
 #include "devicestatus_define.h"
+#include "fi_log.h"
+#include "util.h"
+
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "DevicestatusClient" };
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "DeviceStatusClient" };
 } // namespace
 
-DevicestatusClient::DevicestatusClient() {}
-DevicestatusClient::~DevicestatusClient()
+DeviceStatusClient::DeviceStatusClient() {}
+DeviceStatusClient::~DeviceStatusClient()
 {
     if (devicestatusProxy_ != nullptr) {
         auto remoteObject = devicestatusProxy_->AsObject();
@@ -45,11 +47,11 @@ DevicestatusClient::~DevicestatusClient()
     }
 }
 
-ErrCode DevicestatusClient::Connect()
+ErrCode DeviceStatusClient::Connect()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (devicestatusProxy_ != nullptr) {
-        DEV_HILOGE(INNERKIT, "devicestatusProxy_ is nut nullptr");
+        DEV_HILOGD(INNERKIT, "devicestatusProxy_ is not nullptr");
         return ERR_OK;
     }
 
@@ -65,23 +67,23 @@ ErrCode DevicestatusClient::Connect()
         return E_DEVICESTATUS_GET_SERVICE_FAILED;
     }
 
-    deathRecipient_ = sptr<IRemoteObject::DeathRecipient> (new (std::nothrow) DevicestatusDeathRecipient());
+    deathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new DeviceStatusDeathRecipient());
     if (deathRecipient_ == nullptr) {
-        DEV_HILOGE(INNERKIT, "Failed to create DevicestatusDeathRecipient");
+        DEV_HILOGE(INNERKIT, "Failed to create DeviceStatusDeathRecipient");
         return ERR_NO_MEMORY;
     }
 
     if ((remoteObject_->IsProxyObject()) && (!remoteObject_->AddDeathRecipient(deathRecipient_))) {
-        DEV_HILOGE(INNERKIT, "Add death recipient to Devicestatus service failed");
+        DEV_HILOGE(INNERKIT, "Add death recipient to DeviceStatus service failed");
         return E_DEVICESTATUS_ADD_DEATH_RECIPIENT_FAILED;
     }
 
     devicestatusProxy_ = iface_cast<Idevicestatus>(remoteObject_);
-    DEV_HILOGD(INNERKIT, "Connecting DevicestatusService success");
+    DEV_HILOGD(INNERKIT, "Connecting DeviceStatusService success");
     return ERR_OK;
 }
 
-void DevicestatusClient::ResetProxy(const wptr<IRemoteObject>& remote)
+void DeviceStatusClient::ResetProxy(const wptr<IRemoteObject>& remote)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     DEVICESTATUS_RETURN_IF(devicestatusProxy_ == nullptr);
@@ -93,18 +95,18 @@ void DevicestatusClient::ResetProxy(const wptr<IRemoteObject>& remote)
     }
 }
 
-void DevicestatusClient::DevicestatusDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
+void DeviceStatusClient::DeviceStatusDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     if (remote == nullptr) {
         DEV_HILOGE(INNERKIT, "OnRemoteDied failed, remote is nullptr");
         return;
     }
 
-    DevicestatusClient::GetInstance().ResetProxy(remote);
+    DeviceStatusClient::GetInstance().ResetProxy(remote);
     DEV_HILOGD(INNERKIT, "Recv death notice");
 }
 
-void DevicestatusClient::SubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
+void DeviceStatusClient::SubscribeCallback(const DeviceStatusDataUtils::DeviceStatusType& type, \
     const sptr<IdevicestatusCallback>& callback)
 {
     DEV_HILOGD(INNERKIT, "Enter");
@@ -113,15 +115,15 @@ void DevicestatusClient::SubscribeCallback(const DevicestatusDataUtils::Devicest
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
         return;
     }
-    if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
-        && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
+    if (type > DeviceStatusDataUtils::DeviceStatusType::TYPE_INVALID
+        && type <= DeviceStatusDataUtils::DeviceStatusType::TYPE_LID_OPEN) {
         devicestatusProxy_->Subscribe(type, callback);
     }
     return;
     DEV_HILOGD(INNERKIT, "Exit");
 }
 
-void DevicestatusClient::UnSubscribeCallback(const DevicestatusDataUtils::DevicestatusType& type, \
+void DeviceStatusClient::UnsubscribeCallback(const DeviceStatusDataUtils::DeviceStatusType& type, \
     const sptr<IdevicestatusCallback>& callback)
 {
     DEV_HILOGD(INNERKIT, "Enter");
@@ -130,57 +132,57 @@ void DevicestatusClient::UnSubscribeCallback(const DevicestatusDataUtils::Device
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
         return;
     }
-    if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
-        && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
-        devicestatusProxy_->UnSubscribe(type, callback);
+    if (type > DeviceStatusDataUtils::DeviceStatusType::TYPE_INVALID
+        && type <= DeviceStatusDataUtils::DeviceStatusType::TYPE_LID_OPEN) {
+        devicestatusProxy_->Unsubscribe(type, callback);
     }
     return;
     DEV_HILOGD(INNERKIT, "Exit");
 }
 
-DevicestatusDataUtils::DevicestatusData DevicestatusClient::GetDevicestatusData(const \
-    DevicestatusDataUtils::DevicestatusType& type)
+DeviceStatusDataUtils::DeviceStatusData DeviceStatusClient::GetDeviceStatusData(const \
+    DeviceStatusDataUtils::DeviceStatusType& type)
 {
     DEV_HILOGD(INNERKIT, "Enter");
-    DevicestatusDataUtils::DevicestatusData devicestatusData;
-    devicestatusData.type = DevicestatusDataUtils::DevicestatusType::TYPE_INVALID;
-    devicestatusData.value = DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID;
+    DeviceStatusDataUtils::DeviceStatusData devicestatusData;
+    devicestatusData.type = DeviceStatusDataUtils::DeviceStatusType::TYPE_INVALID;
+    devicestatusData.value = DeviceStatusDataUtils::DeviceStatusValue::VALUE_INVALID;
 
     DEVICESTATUS_RETURN_IF_WITH_RET((Connect() != ERR_OK), devicestatusData);
     if (devicestatusProxy_ == nullptr) {
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
         return devicestatusData;
     }
-    if (type > DevicestatusDataUtils::DevicestatusType::TYPE_INVALID
-        && type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN) {
+    if (type > DeviceStatusDataUtils::DeviceStatusType::TYPE_INVALID
+        && type <= DeviceStatusDataUtils::DeviceStatusType::TYPE_LID_OPEN) {
         devicestatusData = devicestatusProxy_->GetCache(type);
     }
     DEV_HILOGD(INNERKIT, "Exit");
     return devicestatusData;
 }
 
-int32_t DevicestatusClient::RegisterCoordinationListener()
+int32_t DeviceStatusClient::RegisterCoordinationListener()
 {
     CALL_DEBUG_ENTER;
     DEVICESTATUS_RETURN_IF_WITH_RET((Connect() != ERR_OK), RET_ERR);
     return devicestatusProxy_->RegisterCoordinationListener();
 }
 
-int32_t DevicestatusClient::UnregisterCoordinationListener()
+int32_t DeviceStatusClient::UnregisterCoordinationListener()
 {
     CALL_DEBUG_ENTER;
     DEVICESTATUS_RETURN_IF_WITH_RET((Connect() != ERR_OK), RET_ERR);
     return devicestatusProxy_->UnregisterCoordinationListener();
 }
 
-int32_t DevicestatusClient::EnableInputDeviceCoordination(int32_t userData, bool enabled)
+int32_t DeviceStatusClient::EnableInputDeviceCoordination(int32_t userData, bool enabled)
 {
     CALL_DEBUG_ENTER;
     DEVICESTATUS_RETURN_IF_WITH_RET((Connect() != ERR_OK), RET_ERR);
     return devicestatusProxy_->EnableInputDeviceCoordination(userData, enabled);
 }
 
-int32_t DevicestatusClient::StartInputDeviceCoordination(int32_t userData,
+int32_t DeviceStatusClient::StartInputDeviceCoordination(int32_t userData,
     const std::string &sinkDeviceId, int32_t srcInputDeviceId)
 {
     CALL_DEBUG_ENTER;
@@ -188,19 +190,48 @@ int32_t DevicestatusClient::StartInputDeviceCoordination(int32_t userData,
     return devicestatusProxy_->StartInputDeviceCoordination(userData, sinkDeviceId, srcInputDeviceId);
 }
 
-int32_t DevicestatusClient::StopDeviceCoordination(int32_t userData)
+int32_t DeviceStatusClient::StopDeviceCoordination(int32_t userData)
 {
     CALL_DEBUG_ENTER;
     DEVICESTATUS_RETURN_IF_WITH_RET((Connect() != ERR_OK), RET_ERR);
     return devicestatusProxy_->StopDeviceCoordination(userData);
 }
 
-int32_t DevicestatusClient::GetInputDeviceCoordinationState(int32_t userData, const std::string &deviceId)
+int32_t DeviceStatusClient::GetInputDeviceCoordinationState(int32_t userData, const std::string &deviceId)
 {
     CALL_DEBUG_ENTER;
     DEVICESTATUS_RETURN_IF_WITH_RET((Connect() != ERR_OK), RET_ERR);
     return devicestatusProxy_->GetInputDeviceCoordinationState(userData, deviceId);
 }
+
+
+int32_t DeviceStatusClient::AllocSocketPair(const int32_t moduleType)
+{
+    CALL_DEBUG_ENTER;
+    DEVICESTATUS_RETURN_IF_WITH_RET((Connect() != ERR_OK), RET_ERR);
+    std::lock_guard<std::mutex> guard(mutex_);
+    if (devicestatusProxy_ == nullptr) {
+        FI_HILOGE("Client has not connect server");
+        return RET_ERR;
+    }
+
+    const std::string programName(GetProgramName());
+    int32_t result = devicestatusProxy_->AllocSocketFd(programName, moduleType, socketFd_, tokenType_);
+    if (result != RET_OK) {
+        FI_HILOGE("AllocSocketFd has error:%{public}d", result);
+        return RET_ERR;
+    }
+
+    FI_HILOGI("AllocSocketPair success. socketFd_:%{public}d tokenType_:%{public}d", socketFd_, tokenType_);
+    return RET_OK;
+}
+
+int32_t DeviceStatusClient::GetClientSocketFdOfAllocedSocketPair() const
+{
+    CALL_DEBUG_ENTER;
+    return socketFd_;
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

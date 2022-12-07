@@ -37,6 +37,10 @@ int32_t CoordinationManagerImpl::RegisterCoordinationListener(CoordinationListen
     CALL_DEBUG_ENTER;
     CHKPR(listener, RET_ERR);
     std::lock_guard<std::mutex> guard(mtx_);
+    if (!InitClient()) {
+        FI_HILOGE("Get mmi client is nullptr");
+        return RET_ERR;
+    }
     for (const auto &item : devCoordinationListener_) {
         if (item == listener) {
             FI_HILOGW("The listener already exists");
@@ -47,7 +51,7 @@ int32_t CoordinationManagerImpl::RegisterCoordinationListener(CoordinationListen
     if (!isListeningProcess_) {
         FI_HILOGI("Start monitoring");
         isListeningProcess_ = true;
-        return DevicestatusClient::GetInstance().RegisterCoordinationListener();
+        return DeviceStatusClient::GetInstance().RegisterCoordinationListener();
     }
     return RET_OK;
 }
@@ -56,6 +60,10 @@ int32_t CoordinationManagerImpl::UnregisterCoordinationListener(CoordinationList
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
+    if (!InitClient()) {
+        FI_HILOGE("Get mmi client is nullptr");
+        return RET_ERR;
+    }
     if (listener == nullptr) {
         devCoordinationListener_.clear();
         goto listenerLabel;
@@ -70,7 +78,7 @@ int32_t CoordinationManagerImpl::UnregisterCoordinationListener(CoordinationList
 listenerLabel:
     if (isListeningProcess_ && devCoordinationListener_.empty()) {
         isListeningProcess_ = false;
-        return DevicestatusClient::GetInstance().UnregisterCoordinationListener();
+        return DeviceStatusClient::GetInstance().UnregisterCoordinationListener();
     }
     return RET_OK;
 }
@@ -79,6 +87,10 @@ int32_t CoordinationManagerImpl::EnableInputDeviceCoordination(bool enabled, Fun
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
+    if (!InitClient()) {
+        FI_HILOGE("Get mmi client is nullptr");
+        return RET_ERR;
+    }
     CoordinationEvent event;
     event.msg = callback;
     if (userData_ == INT32_MAX) {
@@ -86,7 +98,7 @@ int32_t CoordinationManagerImpl::EnableInputDeviceCoordination(bool enabled, Fun
         return RET_ERR;
     }
     devCoordinationEvent_[userData_] = event;
-    return DevicestatusClient::GetInstance().EnableInputDeviceCoordination(userData_++, enabled);
+    return DeviceStatusClient::GetInstance().EnableInputDeviceCoordination(userData_++, enabled);
 }
 
 int32_t CoordinationManagerImpl::StartInputDeviceCoordination(const std::string &sinkDeviceId,
@@ -94,6 +106,10 @@ int32_t CoordinationManagerImpl::StartInputDeviceCoordination(const std::string 
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
+    if (!InitClient()) {
+        FI_HILOGE("Get mmi client is nullptr");
+        return RET_ERR;
+    }
     CoordinationEvent event;
     event.msg = callback;
     if (userData_ == INT32_MAX) {
@@ -101,7 +117,7 @@ int32_t CoordinationManagerImpl::StartInputDeviceCoordination(const std::string 
         return RET_ERR;
     }
     devCoordinationEvent_[userData_] = event;
-    return DevicestatusClient::GetInstance().StartInputDeviceCoordination(
+    return DeviceStatusClient::GetInstance().StartInputDeviceCoordination(
         userData_++, sinkDeviceId, srcInputDeviceId);
 }
 
@@ -109,6 +125,10 @@ int32_t CoordinationManagerImpl::StopDeviceCoordination(FuncCoordinationMessage 
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
+    if (!InitClient()) {
+        FI_HILOGE("Get mmi client is nullptr");
+        return RET_ERR;
+    }
     CoordinationEvent event;
     event.msg = callback;
     if (userData_ == INT32_MAX) {
@@ -116,7 +136,7 @@ int32_t CoordinationManagerImpl::StopDeviceCoordination(FuncCoordinationMessage 
         return RET_ERR;
     }
     devCoordinationEvent_[userData_] = event;
-    return DevicestatusClient::GetInstance().StopDeviceCoordination(userData_++);
+    return DeviceStatusClient::GetInstance().StopDeviceCoordination(userData_++);
 }
 
 int32_t CoordinationManagerImpl::GetInputDeviceCoordinationState(
@@ -124,6 +144,10 @@ int32_t CoordinationManagerImpl::GetInputDeviceCoordinationState(
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
+    if (!InitClient()) {
+        FI_HILOGE("Get mmi client is nullptr");
+        return RET_ERR;
+    }
     CoordinationEvent event;
     event.state = callback;
     if (userData_ == INT32_MAX) {
@@ -131,7 +155,7 @@ int32_t CoordinationManagerImpl::GetInputDeviceCoordinationState(
         return RET_ERR;
     }
     devCoordinationEvent_[userData_] = event;
-    return DevicestatusClient::GetInstance().GetInputDeviceCoordinationState(userData_++, deviceId);
+    return DeviceStatusClient::GetInstance().GetInputDeviceCoordinationState(userData_++, deviceId);
 }
 
 void CoordinationManagerImpl::OnDevCoordinationListener(const std::string deviceId, CoordinationMessage msg)
@@ -169,6 +193,22 @@ int32_t CoordinationManagerImpl::GetUserData()
 {
     std::lock_guard<std::mutex> guard(mtx_);
     return userData_;
+}
+
+bool CoordinationManagerImpl::InitClient()
+{
+    CALL_DEBUG_ENTER;
+    if (client_ != nullptr) {
+        return true;
+    }
+    client_ = std::make_shared<Client>();
+    if (!(client_->Start())) {
+        client_.reset();
+        client_ = nullptr;
+        FI_HILOGE("The client fails to start");
+        return false;
+    }
+    return true;
 }
 
 const CoordinationManagerImpl::CoordinationMsg *CoordinationManagerImpl::GetCoordinationMessageEvent(

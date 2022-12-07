@@ -39,7 +39,7 @@ ohos_unittest("test_devicestatus_service") {
 
   deps = [
     "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
-    "${device_status_frameworks_path}/js/napi:devicestatus",
+    "${device_status_frameworks_path}/js/napi:stationary",
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_service_path}:devicestatus_service",
     "//drivers/peripheral/sensor/hal:hdi_sensor",
@@ -63,7 +63,7 @@ ohos_unittest("test_devicestatus_service") {
   ]
 }
 
-ohos_unittest("DevicestatusAgentTest") {
+ohos_unittest("DeviceStatusAgentTest") {
   module_out_path = module_output_path
   include_dirs = [ "${device_status_interfaces_path}/innerkits/include" ]
 
@@ -88,7 +88,7 @@ ohos_unittest("DevicestatusAgentTest") {
   ]
 }
 
-ohos_unittest("DevicestatusClientTest") {
+ohos_unittest("DeviceStatusClientTest") {
   module_out_path = module_output_path
   include_dirs = [ "//base/msdp/devicestatus/interfaces/innerkits/include" ]
 
@@ -119,8 +119,8 @@ group("unittest") {
   deps = []
 
   deps += [
-    ":DevicestatusAgentTest",
-    ":DevicestatusClientTest",
+    ":DeviceStatusAgentTest",
+    ":DeviceStatusClientTest",
     ":test_devicestatus_service",
   ]
 }
