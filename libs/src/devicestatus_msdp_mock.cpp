@@ -37,14 +37,15 @@ DeviceStatusMsdpMock* g_msdpMock = nullptr;
 } // namespace
 
 std::vector<int32_t> DeviceStatusMsdpMock::enabledType_ =
-    std::vector<int32_t> (static_cast<int32_t>(DeviceStatusDataUtils::DeviceStatusType::TYPE_MAX),
-    static_cast<int32_t>(DeviceStatusDataUtils::Value::INVALID));
+    std::vector<int32_t> (static_cast<int32_t>(Type::TYPE_MAX),
+    static_cast<int32_t>(TypeValue::INVALID));
 
 bool DeviceStatusMsdpMock::Init()
 {
     DEV_HILOGD(SERVICE, "DeviceStatusMsdpMock: Enter");
     if (dataParse_ == nullptr) {
         dataParse_ = std::make_unique<DeviceStatusDataParse>();
+        dataParse_->CreateJsonFile();
     }
     InitMockStore();
     InitTimer();
@@ -55,47 +56,49 @@ bool DeviceStatusMsdpMock::Init()
 
 void DeviceStatusMsdpMock::InitMockStore() {}
 
-void DeviceStatusMsdpMock::RegisterCallback(std::shared_ptr<MsdpAlgorithmCallback> callback)
+ErrCode DeviceStatusMsdpMock::RegisterCallback(const std::shared_ptr<MsdpAlgoCallback>& callback)
 {
     std::lock_guard lock(mutex_);
     callback_ = callback;
+    return ERR_OK;
 }
 
-void DeviceStatusMsdpMock::UnregisterCallback()
+ErrCode DeviceStatusMsdpMock::UnregisterCallback()
 {
     std::lock_guard lock(mutex_);
     callback_ = nullptr;
+    return ERR_OK;
 }
 
-void DeviceStatusMsdpMock::Enable(DeviceStatusDataUtils::DeviceStatusType type)
+ErrCode DeviceStatusMsdpMock::Enable(Type type)
 {
     DEV_HILOGD(SERVICE, "Enter");
-    if (type < DeviceStatusDataUtils::DeviceStatusType::TYPE_HIGH_STILL ||
-        type >= DeviceStatusDataUtils::DeviceStatusType::TYPE_LID_OPEN) {
-        DEV_HILOGE(SERVICE, "Type error");
-    }
-    enabledType_[type] = static_cast<int32_t>(DeviceStatusDataUtils::Value::VALID);
+    int32_t item = int32_t(type);
+    enabledType_[item] = int32_t(TypeValue::VALID);
     Init();
     DEV_HILOGD(SERVICE, "Exit");
+    return ERR_OK;
 }
 
-void DeviceStatusMsdpMock::Disable(DeviceStatusDataUtils::DeviceStatusType type)
+ErrCode DeviceStatusMsdpMock::Disable(Type type)
 {
     DEV_HILOGD(SERVICE, "Enter");
     scFlag_ = false;
     CloseTimer();
     DEV_HILOGD(SERVICE, "Exit");
+    return ERR_OK;
 }
 
-void DeviceStatusMsdpMock::DisableCount(DeviceStatusDataUtils::DeviceStatusType type)
+ErrCode DeviceStatusMsdpMock::DisableCount(const Type& type)
 {
     DEV_HILOGD(SERVICE, "Enter");
-    enabledType_[type] = static_cast<int32_t>(DeviceStatusDataUtils::Value::INVALID);
+    enabledType_[type] = int32_t(TypeValue::INVALID);
     dataParse_->DisableCount(type);
     DEV_HILOGD(SERVICE, "Exit");
+    return ERR_OK;
 }
 
-ErrCode DeviceStatusMsdpMock::NotifyMsdpImpl(const DeviceStatusDataUtils::DeviceStatusData& data)
+ErrCode DeviceStatusMsdpMock::NotifyMsdpImpl(const Data& data)
 {
     DEV_HILOGD(SERVICE, "Enter");
     if (g_msdpMock == nullptr) {
@@ -124,6 +127,7 @@ void DeviceStatusMsdpMock::InitTimer()
         DEV_HILOGE(SERVICE, "create timer fd failed");
         close(epFd_);
         epFd_ = ERR_INVALID_FD;
+
         return;
     }
     SetTimerInterval(TIMER_INTERVAL);
@@ -177,18 +181,12 @@ void DeviceStatusMsdpMock::TimerCallback()
 
 void DeviceStatusMsdpMock::GetDeviceStatusData()
 {
-    DeviceStatusDataUtils::DeviceStatusData data;
-    for (int32_t i = int(DeviceStatusDataUtils::DeviceStatusType::TYPE_HIGH_STILL);
-        i <= DeviceStatusDataUtils::DeviceStatusType::TYPE_LID_OPEN; ++i) {
-        if (enabledType_[i] == static_cast<int32_t>(DeviceStatusDataUtils::Value::VALID)) {
-            DeviceStatusDataUtils::DeviceStatusType type = DeviceStatusDataUtils::DeviceStatusType(i);
-            DEV_HILOGE(SERVICE, "type:%{public}d", type);
-            if (dataParse_ == nullptr) {
-                DEV_HILOGE(SERVICE, "dataParse_ is nullptr");
-                return;
-            }
-            dataParse_->ParseDeviceStatusData(data, type);
-            NotifyMsdpImpl(data);
+    Data Data;
+    for (int32_t n = int(Type::TYPE_STILL); n < Type::TYPE_MAX; ++n) {
+        if (enabledType_[n] == TypeValue::VALID) {
+            Type type = Type(n);
+            dataParse_->ParseDeviceStatusData(Data, type);
+            NotifyMsdpImpl(Data);
         }
     }
 }
@@ -227,8 +225,9 @@ void DeviceStatusMsdpMock::LoopingThreadEntry()
     size_t cbct = callbacks_.size();
     struct epoll_event events[cbct];
     while (alive_) {
-        int32_t nevents = epoll_wait(epFd_, events, cbct, TIMER_INTERVAL * TIMER_MS);
-        if (nevents == -1 || nevents == 0) {
+        int32_t timeout = -1;
+        int32_t nevents = epoll_wait(epFd_, events, cbct, timeout);
+        if (nevents == -1) {
             continue;
         }
         for (int32_t n = 0; n < nevents; ++n) {
@@ -240,14 +239,14 @@ void DeviceStatusMsdpMock::LoopingThreadEntry()
     }
 }
 
-extern "C" DeviceStatusMsdpInterface *Create(void)
+extern "C" IMsdp *Create(void)
 {
     DEV_HILOGI(SERVICE, "Enter");
     g_msdpMock = new DeviceStatusMsdpMock();
     return g_msdpMock;
 }
 
-extern "C" void Destroy(const DeviceStatusMsdpInterface* algorithm)
+extern "C" void Destroy(const IMsdp* algorithm)
 {
     DEV_HILOGI(SERVICE, "Enter");
     delete algorithm;
