@@ -22,7 +22,6 @@
 #include <string>
 
 #include "napi/native_api.h"
-#include "devicestatus_data_utils.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -33,8 +32,8 @@ struct DeviceStatusEventListener {
 
 class DeviceStatusEvent {
 public:
-    explicit DeviceStatusEvent(napi_env env);
-    DeviceStatusEvent() = default;
+    DeviceStatusEvent(napi_env env);
+    DeviceStatusEvent() {};
     virtual ~DeviceStatusEvent();
 
     virtual bool On(int32_t eventType, napi_value handler, bool isOnce);
