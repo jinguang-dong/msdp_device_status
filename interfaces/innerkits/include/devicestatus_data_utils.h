@@ -102,6 +102,7 @@ static DeviceStatusJsonD DeviceStatusJson[] = {
     {Type::TYPE_LID_OPEN, "LID_OPEN"},
     {Type::TYPE_MAX, "MAX"}
 };
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
