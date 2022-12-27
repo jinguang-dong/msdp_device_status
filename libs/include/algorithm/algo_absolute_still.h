@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef IDEVICESTATUS_ALGORITHM_H
-#define IDEVICESTATUS_ALGORITHM_H
+#ifndef ALGO_ABSOLUTE_STILL_H
+#define ALGO_ABSOLUTE_STILL_H
 
-#include <iremote_broker.h>
-
-#include "idevicestatus_algorithm_callback.h"
+#include "algo_base.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class IdevicestatusAlgorithm : public IRemoteBroker {
+class AlgoAbsoluteStill : public AlgoBase {
 public:
-    virtual bool Enable() = 0;
-    virtual bool Disable() = 0;
-    virtual bool Subscribe(const sptr<IdevicestatusAlgorithmCallback>& callback) = 0;
-    virtual bool Unsubscribe(const sptr<IdevicestatusAlgorithmCallback>& callback) = 0;
+    explicit AlgoAbsoluteStill(const std::shared_ptr<SensorDataCallback> sensorCallback) : AlgoBase(sensorCallback) {};
+    ~AlgoAbsoluteStill() = default;
 
-    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.IdevicestatusAlgorithm");
+    bool Init(Type type) override;
+
+private:
+    bool StartAlgorithm(int32_t sensorTypeId, AccelData* sensorData) override;
+    void ExecuteOperation() override;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // IDEVICESTATUS_ALGORITHM_H
+#endif // ALGO_ABSOLUTE_STILL_H
