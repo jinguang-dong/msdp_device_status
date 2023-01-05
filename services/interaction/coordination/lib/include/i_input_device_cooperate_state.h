@@ -30,7 +30,7 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class IInputDeviceCooperateState {
+class IInputDeviceCooperateState { // In Out Free 三种状态的抽象基类
 public:
     IInputDeviceCooperateState();
     virtual ~IInputDeviceCooperateState() = default;

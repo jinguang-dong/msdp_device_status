@@ -58,14 +58,14 @@ InputDeviceCooperateSM::~InputDeviceCooperateSM()
 void InputDeviceCooperateSM::Init()
 {
     preparedNetworkId_ = std::make_pair("", "");
-    currentStateSM_ = std::make_shared<InputDeviceCooperateStateFree>();
-    auto* context = CooperateEventMgr->GetIContext();
+    currentStateSM_ = std::make_shared<InputDeviceCooperateStateFree>(); // 当前设备状态  自由态，自由态的成员有 StartInputDeviceCooperate 
+    auto* context = CooperateEventMgr->GetIContext(); // context 主要是多模相关的一些东西，包括委托任务处理，输入设备管理，Timer管理等，其余还包括一些多模事件相关的操作
     CHKPV(context);
     context->GetTimerManager().AddTimer(INTERVAL_MS, 1, [this]() {
-        this->InitDeviceManager();
-        DevCooperateSoftbusAdapter->Init();
+        this->InitDeviceManager(); // 初始化设备管理
+        DevCooperateSoftbusAdapter->Init(); // 软总线Adapter初始化
     });
-    devObserver_ = std::make_shared<DeviceObserver>();
+    devObserver_ = std::make_shared<DeviceObserver>(); // 设备监听 有成员函数 OnDeviceAdded, OnDeviceRemoved
     context->GetDeviceManager().AddDeviceObserver(devObserver_);
 }
 
@@ -110,7 +110,7 @@ void InputDeviceCooperateSM::Reset(bool adjustAbsolutionLocation)
     }
     isStarting_ = false;
     isStopping_ = false;
-    RemoveInterceptor();
+    RemoveInterceptor(); // 拦截器去除，这里的拦截器是啥时候加的，
 }
 
 void InputDeviceCooperateSM::OnCooperateChanged(const std::string &networkId, bool isOpen)
@@ -205,7 +205,7 @@ int32_t InputDeviceCooperateSM::StartInputDeviceCooperate(
     }
     CHKPR(currentStateSM_, ERROR_NULL_POINTER);
     isStarting_ = true;
-    DevCooperateSoftbusAdapter->OpenInputSoftbus(remoteNetworkId);
+    DevCooperateSoftbusAdapter->OpenInputSoftbus(remoteNetworkId); // 软总线开关
     int32_t ret = currentStateSM_->StartInputDeviceCooperate(remoteNetworkId, startInputDeviceId);
     if (ret != RET_OK) {
         FI_HILOGE("Start remote input fail");
@@ -250,7 +250,7 @@ void InputDeviceCooperateSM::StartRemoteCooperate(const std::string &remoteNetwo
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
-    auto *context = CooperateEventMgr->GetIContext();
+    auto *context = CooperateEventMgr->GetIContext(); // 想知道这个上下文里边究竟有什么
     CHKPV(context);
     int32_t ret = context->GetDelegateTasks().PostAsyncTask(
         std::bind(&CooperateEventManager::OnCooperateMessage, CooperateEventMgr,
@@ -259,7 +259,7 @@ void InputDeviceCooperateSM::StartRemoteCooperate(const std::string &remoteNetwo
         FI_HILOGE("Posting async task failed");
     }
     isStarting_ = true;
-    if (buttonIsPressed) {
+    if (buttonIsPressed) { // 如果按下，要进行过滤, 里边调用了多模的 AddFilter 接口
         StartPointerEventFilter();
     }
 }
@@ -303,7 +303,7 @@ void InputDeviceCooperateSM::StartRemoteCooperateResult(bool isSuccess,
         return;
     }
     if (cooperateState_ == CooperateState::STATE_FREE) {
-        SetAbsolutionLocation(MOUSE_ABS_LOCATION - xPercent, yPercent);
+        SetAbsolutionLocation(MOUSE_ABS_LOCATION - xPercent, yPercent); // 设置穿越后的鼠标位置，鼠标绘制相关的逻辑
         UpdateState(CooperateState::STATE_IN);
     }
     if (cooperateState_ == CooperateState::STATE_OUT) {
@@ -354,10 +354,10 @@ void InputDeviceCooperateSM::OnStartFinish(bool isSuccess,
     if (!isSuccess) {
         FI_HILOGE("Start distributed fail, startInputDevice: %{public}d", startInputDeviceId);
         NotifyRemoteStartFail(remoteNetworkId);
-    } else {
+    } else { // 状态机转换逻辑
         auto* context = CooperateEventMgr->GetIContext();
         CHKPV(context);
-        startDhid_ = context->GetDeviceManager().GetDhid(startInputDeviceId);
+        startDhid_ = context->GetDeviceManager().GetDhid(startInputDeviceId); // Dhid 是在 networkId的基础上拼接了一些额外的信息，和分布式协商好的，加了一些特定的信息
         NotifyRemoteStartSuccess(remoteNetworkId, startDhid_);
         if (cooperateState_ == CooperateState::STATE_FREE) {
             UpdateState(CooperateState::STATE_OUT);
@@ -410,7 +410,7 @@ void InputDeviceCooperateSM::NotifyRemoteStartSuccess(const std::string &remoteN
 {
     CALL_DEBUG_ENTER;
     DevCooperateSoftbusAdapter->StartRemoteCooperateResult(remoteNetworkId,
-        true, startDhid, mouseLocation_.first, mouseLocation_.second);
+        true, startDhid, mouseLocation_.first, mouseLocation_.second);  // 这里从 StartRemoteCooperateResult 转到执行 StartRemoteCooperateResult
     CooperateEventMgr->OnStart(CooperationMessage::INFO_SUCCESS);
 }
 
@@ -459,7 +459,7 @@ void InputDeviceCooperateSM::UpdateState(CooperateState state)
             currentStateSM_ = std::make_shared<InputDeviceCooperateStateIn>(startDhid_);
             auto interceptor = std::make_shared<InterceptorConsumer>();
             interceptorId_ = MMI::InputManager::GetInstance()->AddInterceptor(interceptor, COORDINATION_PRIORITY,
-                CapabilityToTags(MMI::INPUT_DEV_CAP_KEYBOARD));
+                CapabilityToTags(MMI::INPUT_DEV_CAP_KEYBOARD)); // 添加拦截器，干啥的
             if (interceptorId_ <= 0) {
                 FI_HILOGE("Failed to add interceptor, Error code:%{public}d", interceptorId_);
                 StopInputDeviceCooperate();
@@ -575,7 +575,7 @@ bool InputDeviceCooperateSM::HandleEvent(libinput_event *event)
 }
 
 bool InputDeviceCooperateSM::CheckPointerEvent(struct libinput_event *event)
-{
+{ // 
     std::lock_guard<std::mutex> guard(mutex_);
     if (isStopping_ || isStarting_) {
         FI_HILOGE("In transition state, not process");
@@ -623,14 +623,14 @@ bool InputDeviceCooperateSM::CheckPointerEvent(struct libinput_event *event)
 bool InputDeviceCooperateSM::InitDeviceManager()
 {
     CALL_DEBUG_ENTER;
-    initCallback_ = std::make_shared<DeviceInitCallBack>();
-    int32_t ret = DisHardware.InitDeviceManager(MMI_DINPUT_PKG_NAME, initCallback_);
+    initCallback_ = std::make_shared<DeviceInitCallBack>(); // 设备初始化回调，仅有一个成员函数，即 OnRemoteDied() 
+    int32_t ret = DisHardware.InitDeviceManager(MMI_DINPUT_PKG_NAME, initCallback_); // 分布式硬件设备管理
     if (ret != 0) {
         FI_HILOGE("Init device manager failed, ret:%{public}d", ret);
         return false;
     }
-    stateCallback_ = std::make_shared<MmiDeviceStateCallback>();
-    ret = DisHardware.RegisterDevStateCallback(MMI_DINPUT_PKG_NAME, "", stateCallback_);
+    stateCallback_ = std::make_shared<MmiDeviceStateCallback>(); // 一系列设备上下线，设备状态变化对应的毁掉OnXXX是 MmiDeviceStateCallback 的成员函数
+    ret = DisHardware.RegisterDevStateCallback(MMI_DINPUT_PKG_NAME, "", stateCallback_); // 将设备状态对应的回调注册到分布式硬件中
     if (ret != 0) {
         FI_HILOGE("Register devStateCallback failed, ret:%{public}d", ret);
         return false;
@@ -821,6 +821,7 @@ void InputDeviceCooperateSM::InterceptorConsumer::OnInputEvent(std::shared_ptr<M
     }
 }
 
+// 这一段代码是运行在sink 端 还是src 端的
 void InputDeviceCooperateSM::InterceptorConsumer::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     CALL_DEBUG_ENTER;
@@ -847,6 +848,7 @@ void InputDeviceCooperateSM::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::
 {
 }
 
+// 这一段代码是运行在sink 端 还是src 端的
 void InputDeviceCooperateSM::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     CALL_DEBUG_ENTER;

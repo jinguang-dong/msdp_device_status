@@ -89,7 +89,7 @@ napi_value JsCoordinationContext::Enable(napi_env env, napi_callback_info info)
 }
 
 napi_value JsCoordinationContext::Start(napi_env env, napi_callback_info info)
-{
+{ // 解析出env 和info 中的参数，并调用到 js_coordination_manager 层
     CALL_INFO_TRACE;
     size_t argc = 3;
     napi_value argv[3] = {};
@@ -122,14 +122,14 @@ napi_value JsCoordinationContext::Start(napi_env env, napi_callback_info info)
     CHKPP(jsDev);
     auto jsInputDeviceMgr = jsDev->GetJsInputDeviceCoordinationMgr();
     if (argc == 2) {
-        return jsInputDeviceMgr->Start(env, sinkDeviceDescriptor, srcInputDeviceId);
+        return jsInputDeviceMgr->Start(env, sinkDeviceDescriptor, srcInputDeviceId); // 对应两参数JS接口
     }
     if (!UtilNapi::TypeOf(env, argv[2], napi_function)) {
         FI_HILOGE("Thr third parameter is not function");
         THROWERR_API9(env, COMMON_PARAMETER_ERROR, "callback", "function");
         return nullptr;
     }
-    return jsInputDeviceMgr->Start(env, std::string(sinkDeviceDescriptor), srcInputDeviceId, argv[2]);
+    return jsInputDeviceMgr->Start(env, std::string(sinkDeviceDescriptor), srcInputDeviceId, argv[2]); // 对应三参数JS接口
 }
 
 napi_value JsCoordinationContext::Stop(napi_env env, napi_callback_info info)

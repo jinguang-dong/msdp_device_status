@@ -593,7 +593,7 @@ int32_t DeviceStatusService::StartInputDeviceCoordination(int32_t userData,
 {
     CALL_DEBUG_ENTER;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    int32_t pid = GetCallingPid();
+    int32_t pid = GetCallingPid(); // 获得调用JS接口的进程的pid
     int32_t ret = delegateTasks_.PostSyncTask(
         std::bind(&DeviceStatusService::OnStartInputDeviceCoordination,
         this, pid, userData, sinkDeviceId, srcInputDeviceId));
@@ -698,7 +698,7 @@ int32_t DeviceStatusService::OnStartInputDeviceCoordination(int32_t pid,
     int32_t userData, const std::string &sinkDeviceId, int32_t srcInputDeviceId)
 {
     CALL_DEBUG_ENTER;
-    auto sess = GetSession(GetClientFd(pid));
+    auto sess = GetSession(GetClientFd(pid)); // 获取客户端进程对应的用于和服务端通信的fd后，通过fd获得对应的session
     CHKPR(sess, RET_ERR);
     sptr<CooperateEventManager::EventInfo> event = new (std::nothrow) CooperateEventManager::EventInfo();
     CHKPR(event, RET_ERR);
@@ -706,7 +706,7 @@ int32_t DeviceStatusService::OnStartInputDeviceCoordination(int32_t pid,
     event->sess = sess;
     event->msgId = MmiMessageId::COOPERATION_MESSAGE;
     event->userData = userData;
-    if (InputDevCooSM->GetCurrentCooperateState() == CooperateState::STATE_OUT) {
+    if (InputDevCooSM->GetCurrentCooperateState() == CooperateState::STATE_OUT) { // GetCurrentCooperateState 得到的是哪一端的状态
         FI_HILOGW("It is currently worn out");
         NetPacket pkt(event->msgId);
         pkt << userData << "" << static_cast<int32_t>(CooperationMessage::INFO_SUCCESS);
@@ -714,14 +714,14 @@ int32_t DeviceStatusService::OnStartInputDeviceCoordination(int32_t pid,
             FI_HILOGE("Packet write data failed");
             return RET_ERR;
         }
-        if (!sess->SendMsg(pkt)) {
+        if (!sess->SendMsg(pkt)) { // 这里发到什么客户端了，是Hap吗？
             FI_HILOGE("Sending failed");
             return RET_ERR;
         }
         return RET_OK;
     }
     CooperateEventMgr->AddCooperationEvent(event);
-    int32_t ret = InputDevCooSM->StartInputDeviceCooperate(sinkDeviceId, srcInputDeviceId);
+    int32_t ret = InputDevCooSM->StartInputDeviceCooperate(sinkDeviceId, srcInputDeviceId); // 开始穿越 
     if (ret != RET_OK) {
         FI_HILOGE("OnStartInputDeviceCoordination failed, ret:%{public}d", ret);
         CooperateEventMgr->OnErrorMessage(event->type, CooperationMessage(ret));

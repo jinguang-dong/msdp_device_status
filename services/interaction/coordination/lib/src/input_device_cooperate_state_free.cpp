@@ -39,7 +39,7 @@ int32_t InputDeviceCooperateStateFree::StartInputDeviceCooperate(
         FI_HILOGE("Input Parameters error");
         return static_cast<int32_t>(CooperationMessage::COOPERATION_DEVICE_ERROR);
     }
-    int32_t ret = DevCooperateSoftbusAdapter->StartRemoteCooperate(localNetworkId, remoteNetworkId);
+    int32_t ret = DevCooperateSoftbusAdapter->StartRemoteCooperate(localNetworkId, remoteNetworkId); // 软总线开启共享
     if (ret != RET_OK) {
         FI_HILOGE("Start input device cooperate fail");
         return static_cast<int32_t>(CooperationMessage::COOPERATE_FAIL);
@@ -48,7 +48,7 @@ int32_t InputDeviceCooperateStateFree::StartInputDeviceCooperate(
     std::function<void()> handleProcessStartFunc =
         std::bind(&InputDeviceCooperateStateFree::ProcessStart, this, remoteNetworkId, startInputDeviceId);
     CHKPR(eventHandler_, RET_ERR);
-    eventHandler_->ProxyPostTask(handleProcessStartFunc, taskName, 0);
+    eventHandler_->ProxyPostTask(handleProcessStartFunc, taskName, 0);  // 真正意义上穿越的开始
     return RET_OK;
 }
 

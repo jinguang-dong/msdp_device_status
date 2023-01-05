@@ -56,7 +56,7 @@ private:
     bool CheckDeviceSessionState(const std::string &remoteDevId);
     void HandleSessionData(int32_t sessionId, const std::string& messageData);
     int32_t WaitSessionOpend(const std::string &remoteDevId, int32_t sessionId);
-    std::map<std::string, int32_t> sessionDevMap_;
+    std::map<std::string, int32_t> sessionDevMap_; // key 为 deviceID value为sessionID
     std::map<std::string, bool> channelStatusMap_;
     std::mutex operationMutex_;
     std::string localSessionName_;

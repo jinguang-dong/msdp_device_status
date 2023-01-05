@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class InputDeviceCooperateStateIn final : public IInputDeviceCooperateState {
+class InputDeviceCooperateStateIn final : public IInputDeviceCooperateState { // 穿入态
 public:
     explicit InputDeviceCooperateStateIn(const std::string &startDhid);
     int32_t StartInputDeviceCooperate(const std::string &remoteNetworkId, int32_t startInputDeviceId) override;

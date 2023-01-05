@@ -53,6 +53,7 @@ void ResponseStartRemoteCooperate(int32_t sessionId, const JsonParser& parser)
         FI_HILOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE, data type is error");
         return;
     }
+    // 此时这里作为本端，向对端也发出StartRemoteCooperate请求
     InputDevCooSM->StartRemoteCooperate(deviceId->valuestring, cJSON_IsTrue(buttonIsPressed));
 }
 
@@ -140,7 +141,7 @@ int32_t DeviceCooperateSoftbusAdapter::Init()
         .OnBytesReceived = BytesReceived,
         .OnMessageReceived = MessageReceived,
         .OnStreamReceived = StreamReceived
-    };
+    }; // 初始化sessListener, 其各个成员由本文件内的各个静态函数初始化
     std::string networkId = COOPERATE::GetLocalDeviceId();
     if (networkId.empty()) {
         FI_HILOGE("Local networkid is empty");
@@ -248,7 +249,7 @@ std::shared_ptr<DeviceCooperateSoftbusAdapter> DeviceCooperateSoftbusAdapter::Ge
 }
 
 int32_t DeviceCooperateSoftbusAdapter::StartRemoteCooperate(const std::string &localDeviceId,
-    const std::string &remoteDeviceId)
+    const std::string &remoteDeviceId) // 这边StartXXX 对端就是 ResponseStartXXX
 {
     CALL_DEBUG_ENTER;
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
@@ -259,15 +260,17 @@ int32_t DeviceCooperateSoftbusAdapter::StartRemoteCooperate(const std::string &l
     int32_t sessionId = sessionDevMap_[remoteDeviceId];
     auto pointerEvent = InputDevCooSM->GetLastPointerEvent();
     CHKPR(pointerEvent, RET_ERR);
+    // 这个是否按下会被打包到传输的信息中，如果按下了，则要在对端也模拟一个按下事件，以有相同的显示效果
     bool isPointerButtonPressed = (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) ? true : false;
     cJSON *jsonStr = cJSON_CreateObject();
+     // REMOTE_COOPERATE_START ---- 对端的Response根据这个标记匹配相应的处理函数进行后续的逻辑
     cJSON_AddItemToObject(jsonStr, MMI_SOFTBUS_KEY_CMD_TYPE, cJSON_CreateNumber(REMOTE_COOPERATE_START));
     cJSON_AddItemToObject(jsonStr, MMI_SOFTBUS_KEY_LOCAL_DEVICE_ID, cJSON_CreateString(localDeviceId.c_str()));
     cJSON_AddItemToObject(jsonStr, MMI_SOFTBUS_KEY_SESSION_ID, cJSON_CreateNumber(sessionId));
     cJSON_AddItemToObject(jsonStr, MMI_SOFTBUS_POINTER_BUTTON_IS_PRESS, cJSON_CreateBool(isPointerButtonPressed));
     char *smsg = cJSON_Print(jsonStr);
     cJSON_Delete(jsonStr);
-    int32_t ret = SendMsg(sessionId, smsg);
+    int32_t ret = SendMsg(sessionId, smsg); // 这个Send到哪里了，对端，对端这时候就会执行ResponseXXX
     cJSON_free(smsg);
     if (ret != RET_OK) {
         FI_HILOGE("Start remote cooperate send session msg failed, ret:%{public}d", ret);
@@ -392,7 +395,7 @@ void DeviceCooperateSoftbusAdapter::HandleSessionData(int32_t sessionId, const s
     FI_HILOGD("valueint: %{public}d", comType->valueint);
     switch (comType->valueint) {
         case REMOTE_COOPERATE_START: {
-            ResponseStartRemoteCooperate(sessionId, parser);
+            ResponseStartRemoteCooperate(sessionId, parser); // 作为本端，响应对端的StartRemoteCooperate
             break;
         }
         case REMOTE_COOPERATE_START_RES: {

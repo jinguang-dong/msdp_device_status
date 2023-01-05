@@ -39,14 +39,14 @@ int32_t IInputDeviceCooperateState::PrepareAndStart(const std::string &srcNetwor
     CALL_INFO_TRACE;
     auto* context = CooperateEventMgr->GetIContext();
     CHKPR(context, RET_ERR);
-    std::string sinkNetworkId = context->GetDeviceManager().GetOriginNetworkId(startInputDeviceId);
+    std::string sinkNetworkId = context->GetDeviceManager().GetOriginNetworkId(startInputDeviceId); // 本端发起穿越，那么本端就是sink端
     int32_t ret = RET_ERR;
     if (NeedPrepare(srcNetworkId, sinkNetworkId)) {
         InputDevCooSM->UpdatePreparedDevices(srcNetworkId, sinkNetworkId);
         ret = DistributedAdapter->PrepareRemoteInput(
             srcNetworkId, sinkNetworkId, [this, srcNetworkId, startInputDeviceId](bool isSuccess) {
                 this->OnPrepareDistributedInput(isSuccess, srcNetworkId, startInputDeviceId);
-            });
+            }); // 分布式输入的Adapter
         if (ret != RET_OK) {
             FI_HILOGE("Prepare remote input fail");
             InputDevCooSM->OnStartFinish(false, sinkNetworkId, startInputDeviceId);
@@ -84,7 +84,7 @@ int32_t IInputDeviceCooperateState::StartRemoteInput(int32_t startInputDeviceId)
     std::pair<std::string, std::string> networkIds = InputDevCooSM->GetPreparedDevices();
     auto* context = CooperateEventMgr->GetIContext();
     CHKPR(context, RET_ERR);
-    std::vector<std::string> dhids = context->GetDeviceManager().GetCooperateDhids(startInputDeviceId);
+    std::vector<std::string> dhids = context->GetDeviceManager().GetCooperateDhids(startInputDeviceId);  // 什么是 dhids 
     if (dhids.empty()) {
         InputDevCooSM->OnStartFinish(false, networkIds.first, startInputDeviceId);
         return static_cast<int32_t>(CooperationMessage::INPUT_DEVICE_ID_ERROR);
@@ -92,7 +92,7 @@ int32_t IInputDeviceCooperateState::StartRemoteInput(int32_t startInputDeviceId)
     int32_t ret = DistributedAdapter->StartRemoteInput(
         networkIds.first, networkIds.second, dhids, [this, src = networkIds.first, startInputDeviceId](bool isSuccess) {
             this->OnStartRemoteInput(isSuccess, src, startInputDeviceId);
-        });
+        }); // 这一行是正常处理分支，其他都是异常分支
     if (ret != RET_OK) {
         InputDevCooSM->OnStartFinish(false, networkIds.first, startInputDeviceId);
         return static_cast<int32_t>(CooperationMessage::COOPERATE_FAIL);

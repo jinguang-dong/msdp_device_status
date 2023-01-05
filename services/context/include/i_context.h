@@ -35,7 +35,7 @@ struct MouseLocation {
     int32_t physicalY { 0 };
 };
 
-class IContext {
+class IContext { // 主要是多模相关的一些东西，包括委托任务处理，输入设备管理，Timer管理等，其余还包括一些多模事件相关的操作
 public:
     IContext() = default;
     virtual ~IContext() = default;

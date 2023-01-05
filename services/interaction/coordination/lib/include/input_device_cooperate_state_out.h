@@ -21,8 +21,7 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class InputDeviceCooperateStateOut final : public IInputDeviceCooperateState {
-public:
+class InputDeviceCooperateStateOut final : public IInputDeviceCooperateState { // 穿出态
     explicit InputDeviceCooperateStateOut(const std::string &startDhid);
     int32_t StopInputDeviceCooperate(const std::string &networkId) override;
     void OnKeyboardOnline(const std::string &dhid) override;

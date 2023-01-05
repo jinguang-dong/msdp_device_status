@@ -21,7 +21,8 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class InputDeviceCooperateStateFree final : public IInputDeviceCooperateState {
+class InputDeviceCooperateStateFree final : public IInputDeviceCooperateState { // 自由态
+// 除自由态外还有穿入态和穿出态，各自都有不同的成员函数
 public:
     int32_t StartInputDeviceCooperate(const std::string &remoteNetworkId, int32_t startInputDeviceId) override;
 

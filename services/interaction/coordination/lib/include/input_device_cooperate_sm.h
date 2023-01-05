@@ -166,7 +166,7 @@ private:
 private:
     std::shared_ptr<DeviceObserver> devObserver_ { nullptr };
     std::shared_ptr<IInputDeviceCooperateState> currentStateSM_ { nullptr };
-    std::pair<std::string, std::string> preparedNetworkId_;
+    std::pair<std::string, std::string> preparedNetworkId_; // 已经准备好的sink source 端的一对id
     std::string startDhid_ ;
     std::string srcNetworkId_;
     CooperateState cooperateState_ { CooperateState::STATE_FREE };

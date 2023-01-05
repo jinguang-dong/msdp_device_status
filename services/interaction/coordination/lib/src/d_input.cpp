@@ -52,7 +52,7 @@ void DInput::EnableInputDeviceCooperate(bool enabled)
 }
 
 int32_t DInput::OnStartInputDeviceCooperate(SessionPtr sess, int32_t userData,
-    const std::string& sinkDeviceId, int32_t srcInputDeviceId)
+    const std::string& sinkDeviceId, int32_t srcInputDeviceId) // 这个函数在啥时候调用的呢
 {
     sptr<CooperateEventManager::EventInfo> event = new (std::nothrow) CooperateEventManager::EventInfo();
     CHKPR(event, RET_ERR);

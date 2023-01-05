@@ -48,7 +48,7 @@ napi_value JsCoordinationManager::Start(napi_env env, const std::string &sinkDev
     std::lock_guard<std::mutex> guard(mutex_);
     int32_t userData = CoordinationMgrImpl.GetUserData();
     napi_value result = CreateCallbackInfo(env, handle, userData);
-    auto callback = std::bind(EmitJsStart, userData, std::placeholders::_1, std::placeholders::_2);
+    auto callback = std::bind(EmitJsStart, userData, std::placeholders::_1, std::placeholders::_2);// uv_queue_work  的调用
     int32_t errCode = InteractionMgr->StartInputDeviceCoordination(sinkDeviceDescriptor, srcInputDeviceId, callback);
     HandleExecuteResult(env, errCode);
     if (errCode != RET_OK) {

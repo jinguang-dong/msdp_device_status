@@ -39,12 +39,12 @@ int32_t InputDeviceCooperateStateIn::StartInputDeviceCooperate(const std::string
         FI_HILOGE("RemoteNetworkId is empty");
         return static_cast<int32_t>(CooperationMessage::COOPERATION_DEVICE_ERROR);
     }
-    std::string localNetworkId = COOPERATE::GetLocalDeviceId();
+    std::string localNetworkId = COOPERATE::GetLocalDeviceId(); // 这个是那个 LocalDeviceId 本端设备id
     if (localNetworkId.empty() || remoteNetworkId == localNetworkId) {
         FI_HILOGE("Input Parameters error");
         return static_cast<int32_t>(CooperationMessage::COOPERATION_DEVICE_ERROR);
     }
-    int32_t ret = DevCooperateSoftbusAdapter->StartRemoteCooperate(localNetworkId, remoteNetworkId);
+    int32_t ret = DevCooperateSoftbusAdapter->StartRemoteCooperate(localNetworkId, remoteNetworkId); // 软总线开启键鼠共享
     if (ret != RET_OK) {
         FI_HILOGE("Start input device cooperate fail");
         return static_cast<int32_t>(CooperationMessage::COOPERATE_FAIL);
@@ -53,7 +53,7 @@ int32_t InputDeviceCooperateStateIn::StartInputDeviceCooperate(const std::string
     std::function<void()> handleProcessStartFunc =
         std::bind(&InputDeviceCooperateStateIn::ProcessStart, this, remoteNetworkId, startInputDeviceId);
     CHKPR(eventHandler_, RET_ERR);
-    eventHandler_->ProxyPostTask(handleProcessStartFunc, taskName, 0);
+    eventHandler_->ProxyPostTask(handleProcessStartFunc, taskName, 0); // 
     return RET_OK;
 }
 

@@ -27,7 +27,7 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "Coope
 CooperateEventManager::CooperateEventManager() {}
 CooperateEventManager::~CooperateEventManager() {}
 
-void CooperateEventManager::AddCooperationEvent(sptr<EventInfo> event)
+void CooperateEventManager::AddCooperationEvent(sptr<EventInfo> event) // 这是啥时候调用的
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(lock_);
@@ -53,18 +53,18 @@ void CooperateEventManager::RemoveCooperationEvent(sptr<EventInfo> event)
     }
 }
 
-int32_t CooperateEventManager::OnCooperateMessage(CooperationMessage msg, const std::string &deviceId)
+int32_t CooperateEventManager::OnCooperateMessage(CooperationMessage msg, const std::string &deviceId) // 本端调用
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(lock_);
-    if (remoteCooperateCallbacks_.empty()) {
+    if (remoteCooperateCallbacks_.empty()) { // remoteCooperateCallbacks_ 在 Dinput中的 OnStart OnStop 等接口中往该数据结构中修改
         FI_HILOGW("The current listener is empty, unable to invoke the listening interface");
         return RET_ERR;
     }
     for (auto it = remoteCooperateCallbacks_.begin(); it != remoteCooperateCallbacks_.end(); ++it) {
         sptr<EventInfo> info = *it;
         CHKPC(info);
-        NotifyCooperateMessage(info->sess, info->msgId, info->userData, deviceId, msg);
+        NotifyCooperateMessage(info->sess, info->msgId, info->userData, deviceId, msg); // 给对端发送通知
     }
     return RET_OK;
 }
@@ -139,7 +139,7 @@ void CooperateEventManager::NotifyCooperateMessage(
         FI_HILOGE("Packet write data failed");
         return;
     }
-    if (!sess->SendMsg(pkt)) {
+    if (!sess->SendMsg(pkt)) { // 这里发到对端 ，
         FI_HILOGE("Sending failed");
         return;
     }

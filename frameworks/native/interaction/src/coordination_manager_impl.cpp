@@ -106,7 +106,7 @@ int32_t CoordinationManagerImpl::StartInputDeviceCoordination(const std::string 
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
-    if (!InitClient()) {
+    if (!InitClient()) { // 客户端初始化， 还是这个客户端是啥客户端，device_status 的 客户端吗
         FI_HILOGE("Get mmi client is nullptr");
         return RET_ERR;
     }
@@ -117,6 +117,7 @@ int32_t CoordinationManagerImpl::StartInputDeviceCoordination(const std::string 
         return RET_ERR;
     }
     devCoordinationEvent_[userData_] = event;
+    // 下面这个客户端和上面的 InitClient 是一个 Client 吗，貌似并不是， 下面这个客户端是 device_status 的客户端
     return DeviceStatusClient::GetInstance().StartInputDeviceCoordination(
         userData_++, sinkDeviceId, srcInputDeviceId);
 }
