@@ -24,7 +24,7 @@
 
 #include "coordination_event_manager.h"
 #include "coordination_message.h"
-#include "device_coordination_softbus_adapter.h"
+#include "coordination_softbus_adapter.h"
 #include "device_profile_adapter.h"
 #include "display_info.h"
 #include "coordination_state_free.h"

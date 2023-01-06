@@ -15,7 +15,7 @@
 
 #include "coordination_state_free.h"
 
-#include "device_coordination_softbus_adapter.h"
+#include "coordination_softbus_adapter.h"
 #include "coordination_sm.h"
 #include "coordination_util.h"
 

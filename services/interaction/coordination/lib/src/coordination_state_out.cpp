@@ -17,7 +17,7 @@
 
 #include "coordination_event_manager.h"
 #include "coordination_message.h"
-#include "device_coordination_softbus_adapter.h"
+#include "coordination_softbus_adapter.h"
 #include "distributed_input_adapter.h"
 #include "coordination_sm.h"
 #include "coordination_util.h"
