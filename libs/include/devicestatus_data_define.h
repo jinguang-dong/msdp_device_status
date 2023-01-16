@@ -32,7 +32,7 @@ constexpr int32_t RESULTANT_ACC_UP_THRHD = 12;
 constexpr double ACC_VALID_THRHD = 160.0;
 constexpr double ANGLE_180_DEGREE = 180.0;
 constexpr double ANGLE_HOR_UP_THRHD = 180.1;
-constexpr double ANGLE_HOR_LOW_THRHD = 160.0;
+constexpr double ANGLE_HOR_LOW_THRHD = 170.0;
 constexpr double ANGLE_VER_UP_THRHD = 110.0;
 constexpr double ANGLE_VER_LOW_THRHD = 80.0;
 
