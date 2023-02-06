@@ -81,6 +81,7 @@ private:
     int32_t socketFd_ { -1 };
     std::map<Type, int32_t> typeMap_ = {};
     std::function<void()> deathListener_ { nullptr };
+    sptr<IRemoteDevStaCallback> callback_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp
