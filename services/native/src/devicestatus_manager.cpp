@@ -137,17 +137,6 @@ int32_t DeviceStatusManager::MsdpDataCallback(const Data& data)
     return RET_OK;
 }
 
-int32_t DeviceStatusManager::SensorDataCallback(struct SensorEvents *event)
-{
-    DEV_HILOGD(SERVICE, "Enter");
-    Data data = {Type::TYPE_ABSOLUTE_STILL, OnChangedValue::VALUE_ENTER};
-    if (!NotifyDeviceStatusChange(data)) {
-        DEV_HILOGE(SERVICE, "NotifyDeviceStatusChange is failed");
-        return RET_ERR;
-    }
-    return RET_OK;
-}
-
 int32_t DeviceStatusManager::NotifyDeviceStatusChange(const Data& devicestatusData)
 {
     DEV_HILOGD(SERVICE, "Enter");
@@ -260,26 +249,6 @@ void DeviceStatusManager::Unsubscribe(Type type, ActivityEvent event, sptr<IRemo
         DEV_HILOGI(SERVICE, "other subscribe exist");
     }
     DEV_HILOGI(SERVICE, "Unsubscribe success,Exit");
-}
-
-int32_t DeviceStatusManager::LoadAlgorithm()
-{
-    DEV_HILOGI(SERVICE, "Enter");
-    if (msdpImpl_ != nullptr) {
-        msdpImpl_->LoadAlgoLibrary();
-    }
-
-    return RET_OK;
-}
-
-int32_t DeviceStatusManager::UnloadAlgorithm()
-{
-    DEV_HILOGI(SERVICE, "Enter");
-    if (msdpImpl_ != nullptr) {
-        msdpImpl_->UnloadAlgoLibrary();
-    }
-
-    return RET_OK;
 }
 
 int32_t DeviceStatusManager::GetPackageName(AccessTokenID tokenId, std::string &packageName)
