@@ -282,6 +282,8 @@ void CoordinationSM::StartRemoteCoordinationResult(bool isSuccess,
     const std::string& startDhid, int32_t xPercent, int32_t yPercent)
 {
     CALL_INFO_TRACE;
+    FI_HILOGE("*** %{public}d, %{public}s, %{public}d, %{public}d ***",
+        (int)isSuccess, startDhid.c_str(), xPercent, yPercent);
     std::lock_guard<std::mutex> guard(mutex_);
     if (!isStarting_) {
         FI_HILOGI("Not in starting");
@@ -490,7 +492,7 @@ void CoordinationSM::UpdateState(CoordinationState state)
 
 CoordinationState CoordinationSM::GetCurrentCoordinationState() const
 {
-    CALL_DEBUG_ENTER;
+    //CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mutex_);
     return coordinationState_;
 }
@@ -756,7 +758,7 @@ void CoordinationSM::DeviceObserver::OnDeviceRemoved(std::shared_ptr<IDevice> de
 
 void CoordinationSM::InterceptorConsumer::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
-    CALL_DEBUG_ENTER;
+    //CALL_DEBUG_ENTER;
     CHKPV(keyEvent);
     int32_t keyCode = keyEvent->GetKeyCode();
     if (keyCode == MMI::KeyEvent::KEYCODE_BACK || keyCode == MMI::KeyEvent::KEYCODE_VOLUME_UP
@@ -788,7 +790,7 @@ void CoordinationSM::InterceptorConsumer::OnInputEvent(std::shared_ptr<MMI::KeyE
 
 void CoordinationSM::InterceptorConsumer::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
-    CALL_DEBUG_ENTER;
+    //CALL_DEBUG_ENTER;
     CHKPV(pointerEvent);
     CoordinationState state = CooSM->GetCurrentCoordinationState();
     if (state == CoordinationState::STATE_OUT) {
@@ -814,7 +816,7 @@ void CoordinationSM::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::KeyEvent
 
 void CoordinationSM::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
-    CALL_DEBUG_ENTER;
+    //CALL_DEBUG_ENTER;
     CHKPV(pointerEvent);
     if (callback_) {
         callback_(pointerEvent);

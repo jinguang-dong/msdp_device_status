@@ -268,19 +268,17 @@ int32_t CoordinationSoftbusAdapter::StartRemoteCoordination(const std::string &l
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_POINTER_BUTTON_IS_PRESS, cJSON_CreateBool(isPointerButtonPressed));
     char *smsg = cJSON_Print(jsonStr);
     cJSON_Delete(jsonStr);
-    int32_t ret = SendMsg(sessionId, smsg);
+    int32_t ret = SendDataPacket(sessionId, DataType::DATA_TYPE_COORDINATION, smsg, strlen(smsg));
     cJSON_free(smsg);
-    if (ret != RET_OK) {
-        FI_HILOGE("Start remote coordination send session msg failed, ret:%{public}d", ret);
-        return RET_ERR;
-    }
-    return RET_OK;
+    return ret;
 }
 
 int32_t CoordinationSoftbusAdapter::StartRemoteCoordinationResult(const std::string &remoteDeviceId,
     bool isSuccess, const std::string &startDhid, int32_t xPercent, int32_t yPercent)
 {
     CALL_DEBUG_ENTER;
+    FI_HILOGE("*** %{public}d, %{public}s, %{public}d, %{public}d ***",
+        (int)isSuccess, startDhid.c_str(), xPercent, yPercent);
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
     if (sessionDevMap_.find(remoteDeviceId) == sessionDevMap_.end()) {
         FI_HILOGE("Stop remote coordination error, not find this device");
@@ -296,9 +294,52 @@ int32_t CoordinationSoftbusAdapter::StartRemoteCoordinationResult(const std::str
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_SESSION_ID, cJSON_CreateNumber(sessionId));
     char *smsg = cJSON_Print(jsonStr);
     cJSON_Delete(jsonStr);
-    int32_t ret = SendMsg(sessionId, smsg);
+    int32_t ret = SendDataPacket(sessionId, DataType::DATA_TYPE_COORDINATION, smsg, strlen(smsg));
     cJSON_free(smsg);
     if (ret != RET_OK) {
+        return RET_ERR;
+    }
+    if (isSuccess && DragAdpt->IsDragging()) {
+        return StartDrag(sessionId);
+    }
+    return RET_OK;
+}
+
+int32_t CoordinationSoftbusAdapter::StartDrag(int32_t sessionId)
+{
+    uint8_t dstPixels[14400] = { 0 };
+    dstPixels[1] = 1;
+    dstPixels[1111] = 2;
+    dstPixels[14399] = 3;
+    DragInfo dragInfo;
+    dragInfo.pixelFormat = 1;
+    dragInfo.alphaType = 2;
+    dragInfo.width = 3;
+    dragInfo.height = 4;
+    dragInfo.allocatorType = 5;
+    dragInfo.dragState = 6;
+    dragInfo.num = 7;
+    dragInfo.buffer[1] = 8;
+    dragInfo.buffer[255] = 9;
+    dragInfo.buffer[511] = 10;
+
+    DataPacket* dataPacket = (DataPacket*)malloc(sizeof(DataPacket) + 14400);
+    if (dataPacket == nullptr) {
+        FI_HILOGE("Malloc failed");
+        return RET_ERR;
+    }
+    dataPacket->dragInfo = dragInfo;
+    dataPacket->dataType = DataType::DATA_TYPE_DRAG;
+    dataPacket->dataLen = 14400;
+    errno_t ret = memcpy_s(dataPacket->data, dataPacket->dataLen, dstPixels, dataPacket->dataLen);
+    if (ret != EOK) {
+        FI_HILOGE("memcpy_s failed");
+        free(dataPacket);
+        return RET_ERR;
+    }
+    int32_t result = SendMsg(sessionId, dataPacket, sizeof(DataPacket) + 14400);
+    free(dataPacket);
+    if (result != RET_OK) {
         FI_HILOGE("Start remote coordination result send session msg failed");
         return RET_ERR;
     }
@@ -319,13 +360,9 @@ int32_t CoordinationSoftbusAdapter::StopRemoteCoordination(const std::string &re
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_SESSION_ID, cJSON_CreateNumber(sessionId));
     char *smsg = cJSON_Print(jsonStr);
     cJSON_Delete(jsonStr);
-    int32_t ret = SendMsg(sessionId, smsg);
+    int32_t ret = SendDataPacket(sessionId, DataType::DATA_TYPE_COORDINATION, smsg, strlen(smsg));
     cJSON_free(smsg);
-    if (ret != RET_OK) {
-        FI_HILOGE("Stop remote coordination send session msg failed");
-        return RET_ERR;
-    }
-    return RET_OK;
+    return ret;
 }
 
 int32_t CoordinationSoftbusAdapter::StopRemoteCoordinationResult(const std::string &remoteDeviceId,
@@ -344,13 +381,9 @@ int32_t CoordinationSoftbusAdapter::StopRemoteCoordinationResult(const std::stri
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_SESSION_ID, cJSON_CreateNumber(sessionId));
     char *smsg = cJSON_Print(jsonStr);
     cJSON_Delete(jsonStr);
-    int32_t ret = SendMsg(sessionId, smsg);
+    int32_t ret = SendDataPacket(sessionId, DataType::DATA_TYPE_COORDINATION, smsg, strlen(smsg));
     cJSON_free(smsg);
-    if (ret != RET_OK) {
-        FI_HILOGE("Stop remote coordination result send session msg failed");
-        return RET_ERR;
-    }
-    return RET_OK;
+    return ret;
 }
 
 int32_t CoordinationSoftbusAdapter::StartCoordinationOtherResult(const std::string &remoteDeviceId,
@@ -369,13 +402,9 @@ int32_t CoordinationSoftbusAdapter::StartCoordinationOtherResult(const std::stri
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_SESSION_ID, cJSON_CreateNumber(sessionId));
     char *smsg = cJSON_Print(jsonStr);
     cJSON_Delete(jsonStr);
-    int32_t ret = SendMsg(sessionId, smsg);
+    int32_t ret = SendDataPacket(sessionId, DataType::DATA_TYPE_COORDINATION, smsg, strlen(smsg));
     cJSON_free(smsg);
-    if (ret != RET_OK) {
-        FI_HILOGE("Start coordination other result send session msg failed");
-        return RET_ERR;
-    }
-    return RET_OK;
+    return ret;
 }
 
 void CoordinationSoftbusAdapter::HandleSessionData(int32_t sessionId, const std::string& message)
@@ -422,23 +451,74 @@ void CoordinationSoftbusAdapter::HandleSessionData(int32_t sessionId, const std:
 
 void CoordinationSoftbusAdapter::OnBytesReceived(int32_t sessionId, const void *data, uint32_t dataLen)
 {
-    FI_HILOGD("dataLen:%{public}d", dataLen);
+    FI_HILOGD("*** sessionId:%{public}d, dataLen:%{public}d", sessionId, dataLen);
     if (sessionId < 0 || data == nullptr || dataLen <= 0) {
         FI_HILOGE("Param check failed");
         return;
     }
-    std::string message = std::string(static_cast<const char *>(data), dataLen);
-    HandleSessionData(sessionId, message);
+    const DataPacket* dataPacket = static_cast<const DataPacket *>(data);
+    FI_HILOGD("dataType:%{public}d", dataPacket->dataType);
+    if (dataPacket->dataType == DataType::DATA_TYPE_COORDINATION) {
+        std::string message = std::string(static_cast<const char *>(dataPacket->data), dataPacket->dataLen);
+        HandleSessionData(sessionId, message);
+    } else if (dataPacket->dataType == DataType::DATA_TYPE_DRAG) {
+        const uint8_t *dstPixels = reinterpret_cast<const uint8_t *>(dataPacket->data);
+        int num1 = *(dstPixels + 1);
+        int num2 = *(dstPixels + 1111);
+        int num3 = *(dstPixels + 14399);
+        FI_HILOGE("*** %{public}zu, %{public}d, %{public}d, %{public}d, %{public}d, %{public}d, %{public}d, "
+            "%{public}d, %{public}d, %{public}d, %{public}d, %{public}d, %{public}d, %{public}d ***",
+            dataPacket->dataLen, num1, num2, num3, dataPacket->dragInfo.pixelFormat, dataPacket->dragInfo.alphaType,
+            dataPacket->dragInfo.width, dataPacket->dragInfo.height, dataPacket->dragInfo.allocatorType,
+            dataPacket->dragInfo.dragState, dataPacket->dragInfo.num, dataPacket->dragInfo.buffer[1],
+            dataPacket->dragInfo.buffer[255], dataPacket->dragInfo.buffer[511]);
+    }
 }
 
-int32_t CoordinationSoftbusAdapter::SendMsg(int32_t sessionId, const std::string &message)
+int32_t CoordinationSoftbusAdapter::SendDataPacket(int32_t sessionId, DataType dataType, void* src, size_t count)
 {
-    CALL_DEBUG_ENTER;
-    if (message.size() > MSG_MAX_SIZE) {
-        FI_HILOGW("error:message.size() > MSG_MAX_SIZE message size:%{public}zu", message.size());
+    DataPacket* dataPacket = (DataPacket*)malloc(sizeof(DataPacket) + count);
+    if (dataPacket == nullptr) {
+        FI_HILOGE("Malloc failed");
         return RET_ERR;
     }
-    return SendBytes(sessionId, message.c_str(), strlen(message.c_str()));
+    dataPacket->dataType = dataType;
+    dataPacket->dataLen = count;
+    errno_t ret = memcpy_s(dataPacket->data, dataPacket->dataLen, src, dataPacket->dataLen);
+    if (ret != EOK) {
+        FI_HILOGE("memcpy_s failed");
+        free(dataPacket);
+        return RET_ERR;
+    }
+    int32_t result = SendMsg(sessionId, dataPacket, sizeof(DataPacket) + count);
+    free(dataPacket);
+    if (result != RET_OK) {
+        FI_HILOGE("Start remote coordination result send session msg failed");
+        return RET_ERR;
+    }
+    return RET_OK;
+}
+
+int32_t CoordinationSoftbusAdapter::SendMsg(int32_t sessionId, const DataPacket* dataPacket, size_t size)
+{
+    CALL_DEBUG_ENTER;
+    FI_HILOGD("*** sessionId:%{public}d, dataLen:%{public}d", sessionId, dataPacket->dataLen);
+    if (dataPacket->dataType == DataType::DATA_TYPE_COORDINATION && dataPacket->dataLen > MSG_MAX_SIZE) {
+        FI_HILOGW("error:message.size() > MSG_MAX_SIZE message size:%{public}zu", dataPacket->dataLen);
+        return RET_ERR;
+    }
+    FI_HILOGD("dataType:%{public}d", dataPacket->dataType);
+    if (dataPacket->dataType == DataType::DATA_TYPE_DRAG) {
+        char *pData = const_cast<char *>(dataPacket->data);
+        uint8_t *dstPixels = reinterpret_cast<uint8_t *>(pData);
+        int num1 = *(dstPixels + 1);
+        int num2 = *(dstPixels + 1111);
+        int num3 = *(dstPixels + 14399);
+        FI_HILOGE("*** %{public}zu, %{public}d, %{public}d, %{public}d ***", dataPacket->dataLen,
+            num1, num2, num3);
+    }
+    //return SendBytes(sessionId, message.c_str(), strlen(message.c_str()));
+    return SendBytes(sessionId, dataPacket, size);
 }
 
 std::string CoordinationSoftbusAdapter::FindDevice(int32_t sessionId)

@@ -31,12 +31,19 @@ namespace Msdp {
 namespace DeviceStatus {
 class DragManager {
 public:
-    DragManager() = default;
+    DragManager();
     ~DragManager() = default;
 
     int32_t StartDrag(const DragData &dragData, SessionPtr sess);
     int32_t StopDrag(int32_t result);
     int32_t GetDragTargetPid() const;
+
+    void GetDragState(int32_t &dragState) {}
+    //void SetDrapData(DragInfo &dragInfo, const uint8_t* pixelsData, int32_t pixelsDataSize) {}
+    //void GetDrapData(DragInfo &dragInfo, const uint8_t** pixelsData, int32_t &pixelsDataSize) {}
+    //void StartDrag() {}
+    //void EndDrag(int32_t dragState) {}
+
 private:
     DragState dragState_ { DragState::FREE };
     SessionPtr dragOutSession_ { nullptr };

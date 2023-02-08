@@ -22,6 +22,7 @@ ohos_shared_library("interaction_drag") {
     "${device_status_interfaces_path}/innerkits/interaction/include",
     "${device_status_utils_path}/include",
     "${device_status_service_path}/context/include",
+    "${device_status_service_path}/interaction/drag_adapter/include",
   ]
 
   sources = [
@@ -35,6 +36,7 @@ ohos_shared_library("interaction_drag") {
 
   deps = [
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_service_path}/interaction/drag_adapter:drag_adapter",
     "${device_status_utils_path}:devicestatus_util",
   ]
 
