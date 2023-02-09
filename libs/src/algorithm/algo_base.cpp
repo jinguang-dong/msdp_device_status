@@ -48,8 +48,8 @@ bool AlgoBase::GetData(int32_t sensorTypeId, AccelData* sensorData)
         return false;
     }
 
-    algoPara_.x = data->y;
-    algoPara_.y = data->x;
+    algoPara_.x = -(data->x);
+    algoPara_.y = -(data->y);
     algoPara_.z = -(data->z);
     DEV_HILOGD(SERVICE, "x:%{public}f, y:%{public}f, z:%{public}f", algoPara_.x, algoPara_.y, algoPara_.z);
     return true;
