@@ -457,9 +457,7 @@ void CoordinationSoftbusAdapter::OnBytesReceived(int32_t sessionId, const void *
         return;
     }
     const DataPacket* dataPacket = static_cast<const DataPacket *>(data);
-    dataPacket->msessageID;
-    dataPacket->data;
-    fun(dataPacket->data, dataPacket->datelen);
+    mapTmp[dataPacket->msessageID](dataPacket->data, dataPacket->datelen);
 
     FI_HILOGD("dataType:%{public}d", dataPacket->dataType);
     if (dataPacket->dataType == DataType::DATA_TYPE_COORDINATION) {

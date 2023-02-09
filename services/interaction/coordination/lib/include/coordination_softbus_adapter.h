@@ -63,7 +63,32 @@ public:
 
     int32_t StartDrag(int32_t sessionId);
 
-    int32_t SendMsg(const std::string &deviceId, SoftbusMessageId messageId, void* data, uint32_t dataLen);
+    int32_t SendMsg(const std::string &deviceId, SoftbusMessageId messageId, void* data, uint32_t dataLen)
+    {
+        // 获取sessionId
+        ....
+        // 组装DataPacket，并发送
+        DataPacket* dataPacket = (DataPacket*)malloc(sizeof(DataPacket) + dataLen);
+        if (dataPacket == nullptr) {
+            FI_HILOGE("Malloc failed");
+            return RET_ERR;
+        }
+        dataPacket->messageId = messageId;
+        dataPacket->dataLen = dataLen;
+        errno_t ret = memcpy_s(dataPacket->data, dataPacket->dataLen, data, dataPacket->dataLen);
+        if (ret != EOK) {
+            FI_HILOGE("memcpy_s failed");
+            free(dataPacket);
+            return RET_ERR;
+        }
+        int32_t result = SendMsg(sessionId, dataPacket, sizeof(DataPacket) + dataLen);
+        free(dataPacket);
+        if (result != RET_OK) {
+            FI_HILOGE("Start remote coordination result send session msg failed");
+            return RET_ERR;
+        }
+        return RET_OK;
+    }
 
     void Registerfun(SoftbusMessageId messageId, function<void* data, uint32_t dataLen>);
 
