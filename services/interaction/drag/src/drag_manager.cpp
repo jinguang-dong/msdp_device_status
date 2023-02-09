@@ -38,6 +38,8 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "DragM
 DragManager::DragManager()
 {
     DragAdpt->RegisterCallback(std::bind(&DragManager::GetDragState, this, std::placeholders::_1));
+
+    softbus->Registerfun(messageid, std::bind(&DragManager::GetDragState, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 int32_t DragManager::StartDrag(const DragData &dragData, SessionPtr sess)

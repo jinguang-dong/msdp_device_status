@@ -482,6 +482,9 @@ void CoordinationSM::UpdateState(CoordinationState state)
                 StopCoordination();
                 return;
             }
+            if (coordinationState_ == CoordinationState::STATE_FREE) {
+                subscribeFreeToOut_();
+            }
             break;
         }
         default:

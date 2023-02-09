@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-struct DragInfo{
+struct DragInfo {
     int32_t pixelFormat { 0 };
     int32_t alphaType { 0 };
     int32_t width { 0 };
@@ -36,6 +36,8 @@ struct DragInfo{
     int32_t offsetY { 0 };
     int32_t dragCount { 0 };
     uint8_t buffer[512] { 0 };
+    uint32_t dataLen;
+    int8_t data[0];
 };
 class DragAdapter {
     DECLARE_DELAYED_SINGLETON(DragAdapter);

@@ -37,7 +37,12 @@ int32_t DragAdapter::RegisterCallback(GetDragStateCallback callback)
 
 bool DragAdapter::IsDragging()
 {
-    return true;
+    int32_t dragState;
+    getDragStateCallback_(dragState);
+    if (dragState == draging) {
+        return true;
+    }
+    return false;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

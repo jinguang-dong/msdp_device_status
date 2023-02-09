@@ -457,6 +457,10 @@ void CoordinationSoftbusAdapter::OnBytesReceived(int32_t sessionId, const void *
         return;
     }
     const DataPacket* dataPacket = static_cast<const DataPacket *>(data);
+    dataPacket->msessageID;
+    dataPacket->data;
+    fun(dataPacket->data, dataPacket->datelen);
+
     FI_HILOGD("dataType:%{public}d", dataPacket->dataType);
     if (dataPacket->dataType == DataType::DATA_TYPE_COORDINATION) {
         std::string message = std::string(static_cast<const char *>(dataPacket->data), dataPacket->dataLen);
@@ -472,6 +476,7 @@ void CoordinationSoftbusAdapter::OnBytesReceived(int32_t sessionId, const void *
             dataPacket->dragInfo.width, dataPacket->dragInfo.height, dataPacket->dragInfo.allocatorType,
             dataPacket->dragInfo.dragState, dataPacket->dragInfo.num, dataPacket->dragInfo.buffer[1],
             dataPacket->dragInfo.buffer[255], dataPacket->dragInfo.buffer[511]);
+        setDrapData();
     }
 }
 

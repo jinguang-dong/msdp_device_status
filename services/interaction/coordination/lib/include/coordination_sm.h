@@ -52,6 +52,13 @@ enum class CoordinationMsg {
     COORDINATION_NULL = 10,
 };
 
+enum class EventType : int32_t {
+    FREE_TO_IN;
+    FREE_TO_OUT;
+    IN_TO_FREE;
+    OUT_TO_FREE;
+};
+
 struct PointerFilter : public MMI::IInputEventFilter {
     bool OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const override
     {
@@ -154,6 +161,9 @@ public:
     void RemoveInterceptor();
     bool IsNeedFilterOut(const std::string &deviceId, const std::shared_ptr<MMI::KeyEvent> keyEvent);
 
+    void SubscribeEvent(EventType, std::function<void()>);
+    void UnSubscribeEvent(EventType, std::function<void()>);
+
 private:
     void Reset(bool adjustAbsolutionLocation = false);
     void OnCloseCoordination(const std::string &networkId, bool isLocal);
@@ -182,6 +192,11 @@ private:
     int32_t interceptorId_ { -1 };
     int32_t monitorId_ { -1 };
     int32_t filterId_ { -1 };
+
+    std::list<std::function<void()>> freeToInGroup;
+    std::list<std::function<void()>> freeToOutGroup;
+    std::list<std::function<void()>> inToFreeGroup;
+    std::list<std::function<void()>> outToFreeGroup;
 };
 
 #define DisHardware DistributedHardware::DeviceManager::GetInstance()

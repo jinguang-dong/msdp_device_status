@@ -36,10 +36,11 @@ class CoordinationSoftbusAdapter {
         DATA_TYPE_DRAG = 2,
     };
     struct DataPacket {
-        DragInfo dragInfo;
-        DataType dataType { 0 };
-        uint32_t dataLen { 0 };
-        char data[0];
+        //DragInfo dragInfo;
+        //DataType dataType { 0 };
+        SoftbusMessageId messageId;
+        uint32_t dataLen;
+        int8_t data[0];
     };
 public:
     virtual ~CoordinationSoftbusAdapter();
@@ -62,6 +63,10 @@ public:
 
     int32_t StartDrag(int32_t sessionId);
 
+    int32_t SendMsg(const std::string &deviceId, SoftbusMessageId messageId, void* data, uint32_t dataLen);
+
+    void Registerfun(SoftbusMessageId messageId, function<void* data, uint32_t dataLen>);
+
 private:
     CoordinationSoftbusAdapter() = default;
     DISALLOW_COPY_AND_MOVE(CoordinationSoftbusAdapter);
@@ -77,6 +82,7 @@ private:
     std::string localSessionName_;
     std::condition_variable openSessionWaitCond_;
     ISessionListener sessListener_;
+    std::map<SoftbusMessageId messageId, function<void* data, uint32_t dataLen>> mapTmp;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
