@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,14 +44,49 @@ public:
         virtual ~DeviceStatusCallbackDeathRecipient() = default;
     };
 
+    class ClientInfo {
+    public:
+        ClientInfo(int32_t pid, Type type, ActivityEvent event,
+        sptr<IRemoteDevStaCallback> callback, ReportLatencyNs latency)
+            : pid_(pid), type_(type), event_(event), callback_(callback), latency_(latency) {}
+        ~ClientInfo() = default;
+
+        int32_t GetPid() const
+        {
+            return pid_;
+        }
+        Type GetType() const
+        {
+            return type_;
+        }
+        ActivityEvent GetEvent() const
+        {
+            return event_;
+        }
+        sptr<IRemoteDevStaCallback> GetCallback() const
+        {
+            return callback_;
+        }
+        ReportLatencyNs GetLatency() const
+        {
+            return latency_;
+        }
+    private:
+        int32_t pid_ { -1 };
+        Type type_ { Type::TYPE_INVALID };
+        ActivityEvent event_ { ActivityEvent::EVENT_INVALID };
+        sptr<IRemoteDevStaCallback> callback_ { nullptr };
+        ReportLatencyNs latency_ { ReportLatencyNs::Latency_INVALID };
+    };
+
     bool Init();
     bool Enable(Type type);
     bool InitAlgoMngrInterface(Type type);
     bool Disable(Type type);
     int32_t InitDataCallback();
     int32_t NotifyDeviceStatusChange(const Data &devicestatusData);
-    void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency, sptr<IRemoteDevStaCallback> callback);
-    void Unsubscribe(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback);
+    void Subscribe(std::shared_ptr<ClientInfo> clientInfo);
+    void Unsubscribe(std::shared_ptr<ClientInfo> clientInfo);
     Data GetLatestDeviceStatusData(Type type);
     int32_t SensorDataCallback(struct SensorEvents *event);
     int32_t MsdpDataCallback(const Data &data);
@@ -60,20 +95,15 @@ public:
     int32_t GetPackageName(AccessTokenID tokenId, std::string &packageName);
 
 private:
-    struct classcomp {
-        bool operator()(sptr<IRemoteDevStaCallback> left, sptr<IRemoteDevStaCallback> right) const
-        {
-            return left->AsObject() < right->AsObject();
-        }
-    };
     const wptr<DeviceStatusService> ms_;
     std::mutex mutex_;
     sptr<IRemoteObject::DeathRecipient> devicestatusCBDeathRecipient_;
     std::unique_ptr<DeviceStatusMsdpClientImpl> msdpImpl_;
     std::map<Type, OnChangedValue> msdpData_;
-    std::map<Type, std::set<const sptr<IRemoteDevStaCallback>, classcomp>> listenerMap_;
+    std::map<int32_t, std::shared_ptr<ClientInfo>> listenerMap_;
     int32_t type_ {};
     int32_t event_ {};
+    std::map<int32_t, std::vector<Type>> activeTypes_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

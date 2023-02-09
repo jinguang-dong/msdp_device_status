@@ -220,12 +220,15 @@ void DeviceStatusService::Subscribe(Type type, ActivityEvent event, ReportLatenc
     auto appInfo = std::make_shared<AppInfo>();
     appInfo->uid = GetCallingUid();
     appInfo->pid = GetCallingPid();
+    DEV_HILOGI(SERVICE, "uid:%{public}d,pid:%{public}d", appInfo->uid, appInfo->pid);
     appInfo->tokenId = GetCallingTokenID();
     devicestatusManager_->GetPackageName(appInfo->tokenId, appInfo->packageName);
     appInfo->type = type;
     appInfo->callback = callback;
     DeviceStatusDumper::GetInstance().SaveAppInfo(appInfo);
-    devicestatusManager_->Subscribe(type, event, latency, callback);
+    std::shared_ptr<DeviceStatusManager::ClientInfo> clientInfo =
+        std::make_shared<DeviceStatusManager::ClientInfo>(appInfo->pid, type, event, callback, latency);
+    devicestatusManager_->Subscribe(clientInfo);
     DEV_HILOGD(SERVICE, "Exit");
     FinishTrace(HITRACE_TAG_MSDP);
     ReportSensorSysEvent(type, true);
@@ -243,13 +246,17 @@ void DeviceStatusService::Unsubscribe(Type type, ActivityEvent event, sptr<IRemo
     auto appInfo = std::make_shared<AppInfo>();
     appInfo->uid = IPCSkeleton::GetCallingUid();
     appInfo->pid = IPCSkeleton::GetCallingPid();
+    DEV_HILOGI(SERVICE, "uid:%{public}d,pid:%{public}d", appInfo->uid, appInfo->pid);
     appInfo->tokenId = IPCSkeleton::GetCallingTokenID();
     appInfo->packageName = DeviceStatusDumper::GetInstance().GetPackageName(appInfo->tokenId);
     appInfo->type = type;
     appInfo->callback = callback;
+    std::shared_ptr<DeviceStatusManager::ClientInfo> clientInfo =
+        std::make_shared<DeviceStatusManager::ClientInfo>(appInfo->pid, type, event, callback,
+        ReportLatencyNs::Latency_INVALID);
     DeviceStatusDumper::GetInstance().RemoveAppInfo(appInfo);
     StartTrace(HITRACE_TAG_MSDP, "serviceUnSubscribeStart");
-    devicestatusManager_->Unsubscribe(type, event, callback);
+    devicestatusManager_->Unsubscribe(clientInfo);
     FinishTrace(HITRACE_TAG_MSDP);
     ReportSensorSysEvent(type, false);
     WriteUnSubscribeHiSysEvent(appInfo->uid, appInfo->packageName, type);
