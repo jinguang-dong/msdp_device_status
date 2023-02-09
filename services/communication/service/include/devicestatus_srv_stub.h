@@ -38,6 +38,8 @@ private:
     int32_t SubscribeStub(MessageParcel& data, MessageParcel& reply);
     int32_t UnsubscribeStub(MessageParcel& data, MessageParcel& reply);
     int32_t GetLatestDeviceStatusDataStub(MessageParcel& data, MessageParcel& reply);
+    int32_t CreateDataChannelStub(MessageParcel& data, MessageParcel& reply);
+    int32_t DestoryDataChannelStub(MessageParcel& data, MessageParcel& reply);
 
     int32_t RegisterCoordinationMonitorStub(MessageParcel& data, MessageParcel& reply);
     int32_t UnregisterCoordinationMonitorStub(MessageParcel& data, MessageParcel& reply);

@@ -209,7 +209,10 @@ ErrCode AlgoMgr::Disable(Type type)
         }
     }
     callAlgoNum_.erase(type);
-    UnregisterSensor(type);
+    if (callAlgoNum_.empty()) {
+        DEV_HILOGW(SERVICE, "Not algo to use the sensor data");
+        UnregisterSensor(type);
+    }
     return RET_OK;
 }
 

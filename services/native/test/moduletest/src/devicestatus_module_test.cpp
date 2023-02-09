@@ -31,6 +31,14 @@ using namespace OHOS::Msdp::DeviceStatus;
 using namespace OHOS;
 using namespace std;
 
+void DeviceStatusModuleTest::SetUpTestCase() {}
+
+void DeviceStatusModuleTest::TearDownTestCase() {}
+
+void DeviceStatusModuleTest::SetUp() {}
+
+void DeviceStatusModuleTest::TearDown() {}
+
 Type DeviceStatusModuleTest::g_moduleTest = Type::TYPE_INVALID;
 
 void DeviceStatusModuleTest::DeviceStatusModuleTestCallback::OnDeviceStatusChanged(const \
@@ -54,12 +62,15 @@ HWTEST_F (DeviceStatusModuleTest, DeviceStatusCallbackTest, TestSize.Level0)
     g_moduleTest = Type::TYPE_ABSOLUTE_STILL;
     Type type = g_moduleTest;
     auto& devicestatusClient = DeviceStatusClient::GetInstance();
-    sptr<IRemoteDevStaCallback> cb = new (std::nothrow) DeviceStatusModuleTestCallback();
+    auto cb = new (std::nothrow) DeviceStatusModuleTest::DeviceStatusModuleTestCallback();
     EXPECT_FALSE(cb == nullptr);
     GTEST_LOG_(INFO) << "Start register";
-    devicestatusClient.SubscribeCallback(type, ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG, cb);
+    devicestatusClient.CreateDataChannel(cb);
+    devicestatusClient.SubscribeCallback(type, ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG);
+
     GTEST_LOG_(INFO) << "Cancel register";
-    devicestatusClient.UnsubscribeCallback(type, ActivityEvent::ENTER_EXIT, cb);
+    devicestatusClient.UnsubscribeCallback(type, ActivityEvent::ENTER_EXIT);
+    devicestatusClient.DestoryDataChannel(cb);
 }
 
 /**

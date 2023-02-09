@@ -32,14 +32,14 @@ public:
     ~DeviceStatusSrvProxy() = default;
     DISALLOW_COPY_AND_MOVE(DeviceStatusSrvProxy);
 
-    virtual void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency,
-        sptr<IRemoteDevStaCallback> callback) override;
-    virtual void Unsubscribe(Type type, ActivityEvent event,
-        sptr<IRemoteDevStaCallback> callback) override;
+    virtual void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency) override;
+    virtual void Unsubscribe(Type type, ActivityEvent event) override;
     virtual Data GetCache(const Type& type) override;
+    virtual int32_t CreateDataChannel(sptr<IRemoteDevStaCallback> callback) override;
+    virtual int32_t DestoryDataChannel(sptr<IRemoteDevStaCallback> callback) override;
+
     int32_t AllocSocketFd(const std::string &programName, const int32_t moduleType,
         int32_t &socketFd, int32_t &tokenType) override;
-
     virtual int32_t RegisterCoordinationListener() override;
     virtual int32_t UnregisterCoordinationListener() override;
     virtual int32_t EnableCoordination(int32_t userData, bool enabled) override;

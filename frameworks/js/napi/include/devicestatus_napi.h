@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,17 +24,17 @@
 #include <uv.h>
 
 #include "devicestatus_data_utils.h"
-#include "devicestatus_callback_stub.h"
+#include "devicestatus_agent.h"
 #include "devicestatus_event.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class DeviceStatusCallback : public DeviceStatusCallbackStub {
+class DeviceStatusCallback : public DeviceStatusAgent::DeviceStatusAgentEvent {
 public:
     explicit DeviceStatusCallback(napi_env env) : env_(env) {}
     virtual ~DeviceStatusCallback() {};
-    void OnDeviceStatusChanged(const Data &devicestatusData) override;
+    bool OnEventResult(const Data &devicestatusData) override;
     static void EmitOnEvent(uv_work_t *work, int status);
 private:
     napi_env env_ = { nullptr };
@@ -59,8 +59,6 @@ public:
     static int32_t ConvertTypeToInt(const std::string &type);
     void OnDeviceStatusChangedDone(int32_t type, int32_t value, bool isOnce);
     static DeviceStatusNapi* GetDeviceStatusNapi();
-    static std::map<int32_t, sptr<IRemoteDevStaCallback>> callbackMap_;
-
 private:
     static bool CheckArguments(napi_env env, napi_callback_info info);
     static bool CheckUnsubArguments(napi_env env, napi_callback_info info);
@@ -72,6 +70,8 @@ private:
     static std::tuple<bool, napi_value, int32_t> CheckGetParam(napi_env env, napi_callback_info info);
     napi_ref callbackRef_ = { nullptr };
     static napi_ref devicestatusValueRef_;
+    static std::shared_ptr<DeviceStatusCallback> callback_;
+    static std::shared_ptr<DeviceStatusAgent> agent_;
     napi_env env_ = { nullptr };
 };
 } // namespace DeviceStatus

@@ -41,10 +41,11 @@ public:
     }
     DISALLOW_COPY_AND_MOVE(DeviceStatusClient);
 
-    int32_t SubscribeCallback(Type type, ActivityEvent event, ReportLatencyNs latency,
-        sptr<IRemoteDevStaCallback> callback);
-    int32_t UnsubscribeCallback(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback);
+    int32_t SubscribeCallback(Type type, ActivityEvent event, ReportLatencyNs latency);
+    int32_t UnsubscribeCallback(Type type, ActivityEvent event);
     Data GetDeviceStatusData(const Type type);
+    int32_t CreateDataChannel(sptr<IRemoteDevStaCallback> callback);
+    int32_t DestoryDataChannel(sptr<IRemoteDevStaCallback> callback);
     void RegisterDeathListener(std::function<void()> deathListener);
 
     int32_t RegisterCoordinationListener();

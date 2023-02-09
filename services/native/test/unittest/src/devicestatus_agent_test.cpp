@@ -161,7 +161,7 @@ HWTEST_F (DeviceStatusAgentTest, DeviceStatusAgentTest004, TestSize.Level1)
 
 HWTEST_F (DeviceStatusAgentTest, DeviceStatusAgentTest005, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "DeviceStatusAgentTest007 start";
+    GTEST_LOG_(INFO) << "DeviceStatusAgentTest005 start";
     std::shared_ptr<DeviceStatusAgentListenerMockFirstClient> agentEvent =
         std::make_shared<DeviceStatusAgentListenerMockFirstClient>();
     int32_t ret = g_agent1->SubscribeAgentEvent(Type::TYPE_INVALID, ActivityEvent::ENTER_EXIT,
@@ -176,7 +176,7 @@ HWTEST_F (DeviceStatusAgentTest, DeviceStatusAgentTest005, TestSize.Level1)
 
 HWTEST_F (DeviceStatusAgentTest, DeviceStatusAgentTest006, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "DeviceStatusAgentTest008 start";
+    GTEST_LOG_(INFO) << "DeviceStatusAgentTest006 start";
     std::shared_ptr<DeviceStatusAgentListenerMockFirstClient> agentEvent =
         std::make_shared<DeviceStatusAgentListenerMockFirstClient>();
     int32_t ret = g_agent1->SubscribeAgentEvent(static_cast<Type>(10), ActivityEvent::ENTER_EXIT,
@@ -191,7 +191,7 @@ HWTEST_F (DeviceStatusAgentTest, DeviceStatusAgentTest006, TestSize.Level1)
 
 HWTEST_F (DeviceStatusAgentTest, DeviceStatusAgentTest007, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "DeviceStatusAgentTest009 start";
+    GTEST_LOG_(INFO) << "DeviceStatusAgentTest007 start";
     g_agentTest = Type::TYPE_LID_OPEN;
     Type type = g_agentTest;
     std::shared_ptr<DeviceStatusAgentListenerMockFirstClient> agentEvent =
@@ -213,7 +213,7 @@ HWTEST_F (DeviceStatusAgentTest, DeviceStatusAgentTest007, TestSize.Level1)
 
 HWTEST_F (DeviceStatusAgentTest, DeviceStatusAgentTest008, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "DeviceStatusAgentTest010 start";
+    GTEST_LOG_(INFO) << "DeviceStatusAgentTest008 start";
     std::shared_ptr<DeviceStatusAgentListenerMockFirstClient> agentEvent = nullptr;
     int32_t ret = g_agent1->SubscribeAgentEvent(Type::TYPE_LID_OPEN, ActivityEvent::ENTER_EXIT,
         ReportLatencyNs::LONG, agentEvent);
@@ -224,7 +224,7 @@ HWTEST_F (DeviceStatusAgentTest, DeviceStatusAgentTest008, TestSize.Level1)
 
 HWTEST_F (DeviceStatusAgentTest, DeviceStatusAgentTest009, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "DeviceStatusAgentTest013 start";
+    GTEST_LOG_(INFO) << "DeviceStatusAgentTest009 start";
     g_agentTest = Type::TYPE_HORIZONTAL_POSITION;
     Type type = g_agentTest;
     std::shared_ptr<DeviceStatusAgentListenerMockFirstClient> agentEvent =
@@ -244,7 +244,7 @@ HWTEST_F (DeviceStatusAgentTest, DeviceStatusAgentTest009, TestSize.Level1)
     ret = g_agent1->UnsubscribeAgentEvent(Type::TYPE_INVALID, ActivityEvent::ENTER_EXIT);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
     ret = g_agent1->UnsubscribeAgentEvent(type, ActivityEvent::ENTER_EXIT);
-    EXPECT_TRUE(ret == RET_OK);
+    EXPECT_TRUE(ret == ERR_INVALID_VALUE);
     ret = g_agent1->UnsubscribeAgentEvent(static_cast<Type>(10), ActivityEvent::ENTER_EXIT);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "DeviceStatusAgentTest009 end";
@@ -252,7 +252,7 @@ HWTEST_F (DeviceStatusAgentTest, DeviceStatusAgentTest009, TestSize.Level1)
 
 HWTEST_F (DeviceStatusAgentTest, DeviceStatusAgentTest010, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "DeviceStatusAgentTest014 start";
+    GTEST_LOG_(INFO) << "DeviceStatusAgentTest010 start";
     g_agentTest = Type::TYPE_LID_OPEN;
     Type type = g_agentTest;
     std::shared_ptr<DeviceStatusAgentListenerMockFirstClient> agentEvent =
@@ -268,5 +268,16 @@ HWTEST_F (DeviceStatusAgentTest, DeviceStatusAgentTest010, TestSize.Level1)
     };
     callback->OnDeviceStatusChanged(devicestatusData);
     GTEST_LOG_(INFO) << "DeviceStatusAgentTest010 end";
+}
+
+HWTEST_F (DeviceStatusAgentTest, DeviceStatusAgentTest011, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DeviceStatusAgentTest011 start";
+    g_agentTest = Type::TYPE_LID_OPEN;
+    Type type = g_agentTest;
+
+    Data devicestatusData = g_agent1->GetDeviceStatusData(type);
+    EXPECT_TRUE(devicestatusData.type == Type::TYPE_LID_OPEN);
+    GTEST_LOG_(INFO) << "DeviceStatusAgentTest011 end";
 }
 }

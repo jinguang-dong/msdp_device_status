@@ -210,8 +210,7 @@ std::shared_ptr<DeviceStatusManager> DeviceStatusService::GetDeviceStatusManager
     return devicestatusManager_;
 }
 
-void DeviceStatusService::Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency,
-    sptr<IRemoteDevStaCallback> callback)
+void DeviceStatusService::Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency)
 {
     DEV_HILOGI(SERVICE, "Enter event:%{public}d,latency:%{public}d", event, latency);
     if (devicestatusManager_ == nullptr) {
@@ -221,36 +220,58 @@ void DeviceStatusService::Subscribe(Type type, ActivityEvent event, ReportLatenc
     auto appInfo = std::make_shared<AppInfo>();
     appInfo->uid = GetCallingUid();
     appInfo->pid = GetCallingPid();
+    DEV_HILOGI(SERVICE, "uid:%{public}d,pid:%{public}d", appInfo->uid, appInfo->pid);
     appInfo->tokenId = GetCallingTokenID();
     devicestatusManager_->GetPackageName(appInfo->tokenId, appInfo->packageName);
     appInfo->type = type;
-    appInfo->callback = callback;
     DeviceStatusDumper::GetInstance().SaveAppInfo(appInfo);
-    devicestatusManager_->Subscribe(type, event, latency, callback);
+    std::shared_ptr<DeviceStatusManager::ClientInfo> clientInfo =
+        std::make_shared<DeviceStatusManager::ClientInfo>(event, latency);
+    if (!devicestatusManager_->CheckEnable(type, appInfo->pid)) {
+        clientInfo->SetEnabled(true);
+        devicestatusManager_->UpdateClientInfo(appInfo->pid, type, clientInfo);
+        if (!devicestatusManager_->Enable(type)) {
+            DEV_HILOGE(SERVICE, "Failed to enable");
+            devicestatusManager_->DestoryInfo(appInfo->pid, type, clientInfo);
+            return;
+        }
+    }
     DEV_HILOGD(SERVICE, "Exit");
     FinishTrace(HITRACE_TAG_MSDP);
     ReportSensorSysEvent(type, true);
     WriteSubscribeHiSysEvent(appInfo->uid, appInfo->packageName, type);
 }
 
-void DeviceStatusService::Unsubscribe(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback)
+void DeviceStatusService::Unsubscribe(Type type, ActivityEvent event)
 {
-    DEV_HILOGE(SERVICE, "EnterUNevent: %{public}d", event);
+    DEV_HILOGI(SERVICE, "EnterUNevent: %{public}d", event);
     if (devicestatusManager_ == nullptr) {
         DEV_HILOGE(SERVICE, "Unsubscribe func is nullptr");
         return;
     }
-
     auto appInfo = std::make_shared<AppInfo>();
     appInfo->uid = IPCSkeleton::GetCallingUid();
     appInfo->pid = IPCSkeleton::GetCallingPid();
+    DEV_HILOGI(SERVICE, "uid:%{public}d,pid:%{public}d", appInfo->uid, appInfo->pid);
     appInfo->tokenId = IPCSkeleton::GetCallingTokenID();
     appInfo->packageName = DeviceStatusDumper::GetInstance().GetPackageName(appInfo->tokenId);
     appInfo->type = type;
-    appInfo->callback = callback;
     DeviceStatusDumper::GetInstance().RemoveAppInfo(appInfo);
+    std::shared_ptr<DeviceStatusManager::ClientInfo> clientInfo =
+        std::make_shared<DeviceStatusManager::ClientInfo>(event, ReportLatencyNs::Latency_INVALID);
+    if (devicestatusManager_->CheckEnable(type, appInfo->pid)) {
+        clientInfo->SetEnabled(false);
+    }
+    if (devicestatusManager_->IsOnlyCurPidSubscribe(type, appInfo->pid)) {
+        DEV_HILOGW(SERVICE, "Only current client using this algo");
+        return;
+    }
+    if (!devicestatusManager_->Disable(type)) {
+        DEV_HILOGE(SERVICE, "Failed to disable");
+        return;
+    }
+    devicestatusManager_->ClearClientInfo(type);
     StartTrace(HITRACE_TAG_MSDP, "serviceUnSubscribeStart");
-    devicestatusManager_->Unsubscribe(type, event, callback);
     FinishTrace(HITRACE_TAG_MSDP);
     ReportSensorSysEvent(type, false);
     WriteUnSubscribeHiSysEvent(appInfo->uid, appInfo->packageName, type);
@@ -266,6 +287,44 @@ Data DeviceStatusService::GetCache(const Type& type)
         return data;
     }
     return devicestatusManager_->GetLatestDeviceStatusData(type);
+}
+
+int32_t DeviceStatusService::CreateDataChannel(sptr<IRemoteDevStaCallback> callback)
+{
+    DEV_HILOGD(SERVICE, "Enter");
+    if (callback == nullptr) {
+        DEV_HILOGE(SERVICE, "callback is nullptr");
+        return RET_ERR;
+    }
+    auto pid = GetCallingPid();
+    if (devicestatusManager_ == nullptr) {
+        DEV_HILOGE(SERVICE, "devicestatusManager_ is nullptr");
+        return RET_ERR;
+    }
+    int32_t ret = devicestatusManager_->UpdateDataChannel(pid, callback);
+    if (ret != RET_OK) {
+        DEV_HILOGE(SERVICE, "Failed to update");
+    }
+    return ret;
+}
+
+int32_t DeviceStatusService::DestoryDataChannel(sptr<IRemoteDevStaCallback> callback)
+{
+    DEV_HILOGD(SERVICE, "Enter");
+    if (callback == nullptr) {
+        DEV_HILOGE(SERVICE, "callback is nullptr");
+        return RET_ERR;
+    }
+    auto pid = GetCallingPid();
+    if (devicestatusManager_ == nullptr) {
+        DEV_HILOGE(SERVICE, "devicestatusManager_ is nullptr");
+        return RET_ERR;
+    }
+    int32_t ret = devicestatusManager_->DestoryDataChannel(pid, callback);
+    if (ret != RET_OK) {
+        DEV_HILOGE(SERVICE, "Failed to destory");
+    }
+    return ret;
 }
 
 void DeviceStatusService::ReportSensorSysEvent(int32_t type, bool enable)

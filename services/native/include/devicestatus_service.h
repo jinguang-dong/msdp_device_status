@@ -54,10 +54,12 @@ public:
     IDeviceManager& GetDeviceManager() override;
     ITimerManager& GetTimerManager() override;
 
-    void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency,
-        sptr<IRemoteDevStaCallback> callback) override;
-    void Unsubscribe(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback) override;
+    void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency) override;
+    void Unsubscribe(Type type, ActivityEvent event) override;
     Data GetCache(const Type& type) override;
+    int32_t CreateDataChannel(sptr<IRemoteDevStaCallback> callback) override;
+    int32_t DestoryDataChannel(sptr<IRemoteDevStaCallback> callback) override;
+
     bool IsServiceReady() const;
     std::shared_ptr<DeviceStatusManager> GetDeviceStatusManager() const;
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
