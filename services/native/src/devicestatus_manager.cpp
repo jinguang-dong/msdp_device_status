@@ -212,9 +212,9 @@ void DeviceStatusManager::Subscribe(Type type, ActivityEvent event, ReportLatenc
         }
         listenerMap_.insert(std::make_pair(type, listeners));
     } else {
-        DEV_HILOGI(SERVICE, "callbacklist.size:%{public}zu", listenerMap_[dtTypeIter->first].size());
         auto iter = listenerMap_[dtTypeIter->first].find(callback);
         if (iter != listenerMap_[dtTypeIter->first].end()) {
+            DEV_HILOGE(SERVICE, "the client callback has exist");
             return;
         }
         if (listenerMap_[dtTypeIter->first].insert(callback).second) {
@@ -222,8 +222,11 @@ void DeviceStatusManager::Subscribe(Type type, ActivityEvent event, ReportLatenc
             object->AddDeathRecipient(devicestatusCBDeathRecipient_);
         }
     }
+    DEV_HILOGI(SERVICE, "listener type number:%{public}zu,listeners number:%{public}zu",
+        listenerMap_.size(), listenerMap_[dtTypeIter->first].size());
     if (!Enable(type)) {
         DEV_HILOGE(SERVICE, "Enable failed!");
+        listenerMap_[type].erase(callback);
         return;
     }
     DEV_HILOGI(SERVICE, "Subscribe success,Exit");
@@ -235,15 +238,14 @@ void DeviceStatusManager::Unsubscribe(Type type, ActivityEvent event, sptr<IRemo
     DEV_RET_IF_NULL(callback == nullptr);
     auto object = callback->AsObject();
     DEV_RET_IF_NULL(object == nullptr);
-    DEV_HILOGE(SERVICE, "listenerMap_.size:%{public}zu,arrs_:%{public}d", listenerMap_.size(), arrs_ [type_]);
-    DEV_HILOGE(SERVICE, "UNevent: %{public}d", event);
+    DEV_HILOGI(SERVICE, "listenerMap_.size:%{public}zu,arrs_:%{public}d", listenerMap_.size(), arrs_ [type_]);
+    DEV_HILOGI(SERVICE, "event:%{public}d", event);
     std::lock_guard lock(mutex_);
     auto dtTypeIter = listenerMap_.find(type);
     if (dtTypeIter == listenerMap_.end()) {
         DEV_HILOGE(SERVICE, "Failed to find listener for type");
         return;
     }
-    DEV_HILOGI(SERVICE, "callbacklist.size:%{public}zu", listenerMap_[dtTypeIter->first].size());
     auto iter = listenerMap_[dtTypeIter->first].find(callback);
     if (iter != listenerMap_[dtTypeIter->first].end()) {
         if (listenerMap_[dtTypeIter->first].erase(callback) != 0) {
@@ -253,7 +255,8 @@ void DeviceStatusManager::Unsubscribe(Type type, ActivityEvent event, sptr<IRemo
             }
         }
     }
-    DEV_HILOGI(SERVICE, "listenerMap_.size:%{public}zu", listenerMap_.size());
+    DEV_HILOGI(SERVICE, "listener type number:%{public}zu,listeners number:%{public}zu",
+        listenerMap_.size(), listenerMap_[dtTypeIter->first].size());
     if (listenerMap_.empty()) {
         Disable(type);
     } else {

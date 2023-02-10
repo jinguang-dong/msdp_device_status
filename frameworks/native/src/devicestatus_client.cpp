@@ -124,9 +124,19 @@ void DeviceStatusClient::SubscribeCallback(Type type, ActivityEvent event, Repor
         DEV_HILOGE(SERVICE, "devicestatusProxy_ is nullptr");
         return;
     }
-    if (type > Type::TYPE_INVALID && type <= Type::TYPE_LID_OPEN) {
-        devicestatusProxy_->Subscribe(type, event, latency, callback);
+    if ((type < TYPE_INVALID) || (type > TYPE_MAX)) {
+        DEV_HILOGE(INNERKIT, "type out of range");
+        return;
     }
+    if (event < ActivityEvent::EVENT_INVALID || event > ActivityEvent::ENTER_EXIT) {
+        DEV_HILOGE(INNERKIT, "event out of range");
+        return;
+    }
+    if (callback_ == nullptr) {
+        callback_ = callback;
+    }
+    DEV_HILOGI(INNERKIT, "Start subscribe");
+    devicestatusProxy_->Subscribe(type, event, latency, callback_);
     return;
 }
 
@@ -148,7 +158,10 @@ void DeviceStatusClient::UnsubscribeCallback(Type type, ActivityEvent event, spt
         DEV_HILOGE(INNERKIT, "event out of range");
         return;
     }
-    devicestatusProxy_->Unsubscribe(type, event, callback);
+    if (callback_ == callback) {
+        DEV_HILOGI(INNERKIT, "Start unsubscribe");
+        devicestatusProxy_->Unsubscribe(type, event, callback_);
+    }
     DEV_HILOGD(INNERKIT, "Exit");
     return;
 }
@@ -312,7 +325,6 @@ int32_t DeviceStatusClient::StopDrag(int32_t result)
     }
     return devicestatusProxy_->StopDrag(result);
 }
-
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
