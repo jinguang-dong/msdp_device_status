@@ -186,6 +186,7 @@ bool DeviceStatusService::Init()
         FI_HILOGE("DevMgr init failed");
         goto INIT_FAIL;
     }
+    InitSessionDeathMonitor();
 
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     CoordinationEventMgr->SetIContext(this);
@@ -387,6 +388,11 @@ int32_t DeviceStatusService::InitDelegateTasks()
     }
     FI_HILOGI("AddEpoll, epollfd:%{public}d,fd:%{public}d", epollFd_, delegateTasks_.GetReadFd());
     return RET_OK;
+}
+
+void DeviceStatusService::InitSessionDeathMonitor()
+{
+    AddSessionDeletedCallback(std::bind(&DragManager::OnSessionLost, &dragMgr_, std::placeholders::_1));
 }
 
 int32_t DeviceStatusService::InitTimerMgr()
@@ -645,6 +651,33 @@ int32_t DeviceStatusService::GetCoordinationState(int32_t userData, const std::s
     return RET_OK;
 }
 
+int32_t DeviceStatusService::RegisterDragListener()
+{
+    CALL_DEBUG_ENTER;
+    int32_t pid = GetCallingPid();
+    auto session = GetSession(GetClientFd(pid));
+    CHKPR(session, RET_ERR);
+    int32_t ret = delegateTasks_.PostSyncTask(
+        std::bind(&DragManager::AddListener, &dragMgr_, session));
+    if (ret != RET_OK) {
+        FI_HILOGE("AddListener failed, ret:%{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t DeviceStatusService::UnregisterDragListener()
+{
+    CALL_DEBUG_ENTER;
+    int32_t pid = GetCallingPid();
+    auto session = GetSession(GetClientFd(pid));
+    CHKPR(session, RET_ERR);
+    int32_t ret = delegateTasks_.PostSyncTask(
+        std::bind(&DragManager::RemoveListener, &dragMgr_, session));
+    if (ret != RET_OK) {
+        FI_HILOGE("RemoveListener failed, ret:%{public}d", ret);
+    }
+    return ret;
+}
 
 int32_t DeviceStatusService::StartDrag(const DragData &dragData)
 {
@@ -687,6 +720,34 @@ int32_t DeviceStatusService::GetDragTargetPid()
 {
     CALL_DEBUG_ENTER;
     return RET_OK;
+}
+
+int32_t DeviceStatusService::RegisterThumbnailDraw()
+{
+    CALL_DEBUG_ENTER;
+    int32_t pid = GetCallingPid();
+    auto sess = GetSession(GetClientFd(pid));
+    CHKPR(sess, RET_ERR);
+    int32_t ret = delegateTasks_.PostSyncTask(
+        std::bind(&DragManager::OnRegisterThumbnailDraw, dragMgr_, sess));
+    if (ret != RET_OK) {
+        FI_HILOGE("OnRegisterThumbnailDraw failed, ret:%{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t DeviceStatusService::UnregisterThumbnailDraw()
+{
+    CALL_DEBUG_ENTER;
+    int32_t pid = GetCallingPid();
+    auto sess = GetSession(GetClientFd(pid));
+    CHKPR(sess, RET_ERR);
+    int32_t ret = delegateTasks_.PostSyncTask(
+        std::bind(&DragManager::OnUnregisterThumbnailDraw, dragMgr_, sess));
+    if (ret != RET_OK) {
+        FI_HILOGE("OnUnregisterThumbnailDraw failed, ret:%{public}d", ret);
+    }
+    return ret;
 }
 
 #ifdef OHOS_BUILD_ENABLE_COORDINATION

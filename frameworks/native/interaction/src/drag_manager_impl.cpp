@@ -38,7 +38,7 @@ int32_t DragManagerImpl::UpdateDragMessage(const std::u16string &message)
     return DeviceStatusClient::GetInstance().UpdateDragMessage(message);
 }
 
-int32_t DragManagerImpl::StartDrag(const DragData &dragData, std::function<void(int32_t&)> callback)
+int32_t DragManagerImpl::StartDrag(const DragData &dragData, std::function<void(int32_t)> callback)
 {
     CALL_DEBUG_ENTER;
     if (callback == nullptr) {
@@ -68,6 +68,44 @@ int32_t DragManagerImpl::StopDrag(int32_t result)
 {
     CALL_DEBUG_ENTER;
     return DeviceStatusClient::GetInstance().StopDrag(result);
+}
+
+int32_t DragManagerImpl::RegisterThumbnailDraw(std::function<void(int32_t)> startCallback,
+    std::function<void(int32_t)> noticeCallback, std::function<void(void)> endCallback)
+{
+    CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
+    auto ret = DeviceStatusClient::GetInstance().RegisterThumbnailDraw();
+    if (ret != RET_OK) {
+        FI_HILOGE("Register thumbnail draw failed");
+        return ret;
+    }
+    hasRegisterThumbnailDraw_ = true;
+    thumbnailDrawCallback_.startCallback = startCallback;
+    thumbnailDrawCallback_.noticeCallback = noticeCallback;
+    thumbnailDrawCallback_.endCallback = endCallback;
+    return ret;
+}
+
+int32_t DragManagerImpl::UnregisterThumbnailDraw(std::function<void(void)> callback)
+{
+    CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
+    if (!hasRegisterThumbnailDraw_) {
+        FI_HILOGI("have not registered");
+        return RET_OK;
+    }
+    auto ret = DeviceStatusClient::GetInstance().UnregisterThumbnailDraw();
+    if (ret != RET_OK) {
+        FI_HILOGE("Unregister thumbnail draw failed");
+        return ret;
+    }
+    hasRegisterThumbnailDraw_ = false;
+    thumbnailDrawCallback_.startCallback = nullptr;
+    thumbnailDrawCallback_.noticeCallback = nullptr;
+    thumbnailDrawCallback_.endCallback = nullptr;
+    callback();
+    return ret;
 }
 
 int32_t DragManagerImpl::GetDragTargetPid()

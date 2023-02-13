@@ -188,7 +188,7 @@ int32_t InteractionManagerImpl::UpdateDragMessage(const std::u16string &message)
     return dragManagerImpl_.UpdateDragMessage(message);
 }
 
-int32_t InteractionManagerImpl::StartDrag(const DragData &dragData, std::function<void(int32_t&)> callback)
+int32_t InteractionManagerImpl::StartDrag(const DragData &dragData, std::function<void(int32_t)> callback)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mutex_);
@@ -209,6 +209,17 @@ int32_t InteractionManagerImpl::GetDragTargetPid()
 {
     CALL_DEBUG_ENTER;
     return dragManagerImpl_.GetDragTargetPid();
+}
+
+int32_t InteractionManagerImpl::RegisterThumbnailDraw(std::function<void(int32_t)> startCallback,
+    std::function<void(int32_t)> noticeCallback, std::function<void(void)> endCallback)
+{
+    return dragManagerImpl_.RegisterThumbnailDraw(startCallback, noticeCallback, endCallback);
+}
+    
+int32_t InteractionManagerImpl::UnregisterThumbnailDraw(std::function<void(void)> callback)
+{
+    return dragManagerImpl_.UnregisterThumbnailDraw(callback);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

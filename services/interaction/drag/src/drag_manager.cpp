@@ -41,6 +41,35 @@ DragManager::DragManager()
 
     softbus->Registerfun(messageid, std::bind(&DragManager::GetDragState, this, std::placeholders::_1, std::placeholders::_2));
 }
+void DragManager::OnSessionLost(SessionPtr session)
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(session);
+    auto info = std::make_shared<StateChangeNotify::MessageInfo>();
+    info->session = session;
+    stateNotify_.RemoveNotifyMsg(info);
+}
+
+int32_t DragManager::AddListener(SessionPtr session)
+{
+    CALL_DEBUG_ENTER;
+    CHKPR(session, RET_ERR);
+    auto info = std::make_shared<StateChangeNotify::MessageInfo>();
+    info->session = session;
+    info->msgId = MessageId::DRAG_STATE_LISTENER;
+    stateNotify_.AddNotifyMsg(info);
+    return RET_OK;
+}
+
+int32_t DragManager::RemoveListener(SessionPtr session)
+{
+    CALL_DEBUG_ENTER;
+    CHKPR(session, RET_ERR);
+    auto info = std::make_shared<StateChangeNotify::MessageInfo>();
+    info->session = session;
+    stateNotify_.RemoveNotifyMsg(info);
+    return RET_OK;
+}
 
 int32_t DragManager::StartDrag(const DragData &dragData, SessionPtr sess)
 {
@@ -71,6 +100,17 @@ int32_t DragManager::GetDragTargetPid() const
     return dragTargetPid_;
 }
 
+int32_t DragManager::OnRegisterThumbnailDraw(SessionPtr sess)
+{
+    CALL_DEBUG_ENTER;
+    return RET_OK;
+}
+
+int32_t DragManager::OnUnregisterThumbnailDraw(SessionPtr sess)
+{
+    CALL_DEBUG_ENTER;
+    return RET_OK;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

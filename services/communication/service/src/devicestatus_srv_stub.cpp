@@ -92,6 +92,12 @@ int32_t DeviceStatusSrvStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
         case GET_DRAG_TARGET_PID: {
             return StubGetDragTargetPid(data, reply);
         }
+        case REGISTER_THUMBNAIL_DRAW: {
+            return StubRegisterThumbnailDraw(data, reply);
+        }
+        case UNREGISTER_THUMBNAIL_DRAW: {
+            return StubUnregisterThumbnailDraw(data, reply);
+        }
         default: {
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
@@ -260,6 +266,26 @@ int32_t DeviceStatusSrvStub::StubGetDragTargetPid(MessageParcel& data, MessagePa
     return RET_OK;
 }
 
+int32_t DeviceStatusSrvStub::StubRegisterThumbnailDraw(MessageParcel& data, MessageParcel& reply)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = RegisterThumbnailDraw();
+    if (ret != RET_OK) {
+        FI_HILOGE("Call RegisterThumbnailDraw failed ret:%{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t DeviceStatusSrvStub::StubUnregisterThumbnailDraw(MessageParcel& data, MessageParcel& reply)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = UnregisterThumbnailDraw();
+    if (ret != RET_OK) {
+        FI_HILOGE("Call UnregisterThumbnailDraw failed ret:%{public}d", ret);
+    }
+    return ret;
+}
+
 int32_t DeviceStatusSrvStub::StubHandleAllocSocketFd(MessageParcel& data, MessageParcel& reply)
 {
     int32_t pid = GetCallingPid();
@@ -302,7 +328,7 @@ int32_t DeviceStatusSrvStub::StubStartDrag(MessageParcel& data, MessageParcel& r
     auto pixelMap = OHOS::Media::PixelMap::Unmarshalling(data);
     CHKPR(pixelMap, RET_ERR);
     DragData dragData;
-    dragData.pixelMap = std::unique_ptr<OHOS::Media::PixelMap> (pixelMap);
+    dragData.pixelMap = std::shared_ptr<OHOS::Media::PixelMap> (pixelMap);
     if (dragData.pixelMap->GetWidth() > MAX_PIXEL_MAP_WIDTH ||
         dragData.pixelMap->GetHeight() > MAX_PIXEL_MAP_HEIGHT) {
         FI_HILOGE("Too big pixelMap, width:%{public}d, height:%{public}d",
@@ -322,7 +348,8 @@ int32_t DeviceStatusSrvStub::StubStartDrag(MessageParcel& data, MessageParcel& r
     if (ret != RET_OK) {
         FI_HILOGE("Call StartDrag failed ret:%{public}d", ret);
     }
-    return RET_OK;
+    WRITEINT32(reply, ret, IPC_STUB_WRITE_PARCEL_ERR);
+    return ret;
 }
 
 int32_t DeviceStatusSrvStub::StubStopDrag(MessageParcel& data, MessageParcel& reply)
@@ -334,7 +361,8 @@ int32_t DeviceStatusSrvStub::StubStopDrag(MessageParcel& data, MessageParcel& re
     if (ret != RET_OK) {
         FI_HILOGE("Call StopDrag failed ret:%{public}d", ret);
     }
-    return RET_OK;
+    WRITEINT32(reply, ret, IPC_STUB_WRITE_PARCEL_ERR);
+    return ret;
 }
 } // namespace DeviceStatus
 } // Msdp

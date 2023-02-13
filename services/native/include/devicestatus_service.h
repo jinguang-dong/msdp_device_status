@@ -100,6 +100,8 @@ public:
     int32_t StopCoordination(int32_t userData) override;
     int32_t GetCoordinationState(int32_t userData, const std::string &deviceId) override;
 
+    int32_t RegisterDragListener();
+    int32_t UnregisterDragListener();
     int32_t StartDrag(const DragData &dragData) override;
     int32_t StopDrag(int32_t result) override;
     int32_t UpdateDragStyle(int32_t style) override;
@@ -108,6 +110,8 @@ public:
     int32_t AllocSocketFd(const std::string &programName, const int32_t moduleType,
         int32_t &toReturnClientFd, int32_t &tokenType) override;
 
+    int32_t RegisterThumbnailDraw() override;
+    int32_t UnregisterThumbnailDraw() override;
     void OnConnected(SessionPtr s) override;
     void OnDisconnected(SessionPtr s) override;
     int32_t AddEpoll(EpollEventType type, int32_t fd) override;
@@ -117,6 +121,7 @@ private:
     bool Init();
     int32_t InitDelegateTasks();
     int32_t InitTimerMgr();
+    void InitSessionDeathMonitor();
 
     void OnThread();
     void OnSignalEvent(int32_t signalFd);
