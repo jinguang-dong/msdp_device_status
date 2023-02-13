@@ -31,7 +31,7 @@ namespace Msdp {
 namespace DeviceStatus {
 class DragManager {
 public:
-    DragManager() = default;
+    DragManager();
     ~DragManager() = default;
 
     void OnSessionLost(SessionPtr session);
@@ -40,8 +40,16 @@ public:
     int32_t StartDrag(const DragData &dragData, SessionPtr sess);
     int32_t StopDrag(int32_t result);
     int32_t GetDragTargetPid() const;
+    
     int32_t OnRegisterThumbnailDraw(SessionPtr sess);
     int32_t OnUnregisterThumbnailDraw(SessionPtr sess);
+
+    void GetDragState(int32_t &dragState) {}
+    //void SetDrapData(DragInfo &dragInfo, const uint8_t* pixelsData, int32_t pixelsDataSize) {}
+    //void GetDrapData(DragInfo &dragInfo, const uint8_t** pixelsData, int32_t &pixelsDataSize) {}
+    //void StartDrag() {}
+    //void EndDrag(int32_t dragState) {}
+
 private:
     StateChangeNotify stateNotify_;
     DragState dragState_ { DragState::FREE };

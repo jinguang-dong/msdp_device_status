@@ -22,6 +22,7 @@
 #include "pointer_style.h"
 
 #include "devicestatus_define.h"
+#include "drag_adapter.h"
 #include "drag_data.h"
 #include "drag_data_adapter.h"
 #include "fi_log.h"
@@ -34,6 +35,12 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "DragManager" };
 } // namespace
 
+DragManager::DragManager()
+{
+    DragAdpt->RegisterCallback(std::bind(&DragManager::GetDragState, this, std::placeholders::_1));
+
+    softbus->Registerfun(messageid, std::bind(&DragManager::GetDragState, this, std::placeholders::_1, std::placeholders::_2));
+}
 void DragManager::OnSessionLost(SessionPtr session)
 {
     CALL_DEBUG_ENTER;

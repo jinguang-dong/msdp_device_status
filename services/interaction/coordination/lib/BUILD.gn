@@ -23,6 +23,7 @@ ohos_source_set("coordination_lib") {
     "${device_status_interfaces_path}/innerkits/interaction/include",
     "${device_status_service_path}/context/include",
     "${device_status_service_path}/interaction/coordination/interface",
+    "${device_status_service_path}/interaction/drag_adapter/include",
     "//foundation/deviceprofile/device_profile_core/interfaces/innerkits/core/include",
     "//foundation/distributedhardware/device_manager/interfaces/inner_kits/native_cpp/include",
     "//third_party/cJSON",
@@ -49,6 +50,7 @@ ohos_source_set("coordination_lib") {
 
   deps = [
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_service_path}/interaction/drag_adapter:drag_adapter",
     "${device_status_utils_path}:devicestatus_util",
     "//foundation/distributedhardware/distributed_input/interfaces/inner_kits:libdinput_sdk",
     "//third_party/cJSON:cjson",
