@@ -73,7 +73,6 @@ private:
     std::mutex mutex_;
     sptr<IRemoteObject::DeathRecipient> devicestatusCBDeathRecipient_;
     std::unique_ptr<DevicestatusMsdpClientImpl> msdpImpl_;
-    std::map<DevicestatusDataUtils::DevicestatusType, DevicestatusDataUtils::DevicestatusValue> msdpData_;
     sptr<IRemoteObject::DeathRecipient> clientDeathObserver_ = nullptr;
     std::map<DevicestatusDataUtils::DevicestatusType, std::set<const sptr<IdevicestatusCallback>, classcomp>> \
         listenerMap_;

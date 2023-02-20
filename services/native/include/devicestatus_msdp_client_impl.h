@@ -45,7 +45,7 @@ public:
     ErrCode DisableMsdpImpl(DevicestatusDataUtils::DevicestatusType type);
     ErrCode RegisterImpl(const CallbackManager& callback);
     ErrCode UnregisterImpl();
-    std::map<DevicestatusDataUtils::DevicestatusType, DevicestatusDataUtils::DevicestatusValue> GetObserverData() const;
+    DevicestatusDataUtils::DevicestatusData GetObserverData(const DevicestatusDataUtils::DevicestatusType& type);
     int32_t LoadAlgorithmLibrary();
     int32_t UnloadAlgorithmLibrary();
     int32_t LoadAlgoLib();
@@ -58,13 +58,13 @@ private:
     int32_t MsdpCallback(const DevicestatusDataUtils::DevicestatusData& data);
     ErrCode RegisterMsdp();
     ErrCode UnregisterMsdp(void);
-    DevicestatusDataUtils::DevicestatusData SaveObserverData(const DevicestatusDataUtils::DevicestatusData& data);
+    void SaveObserverData(const DevicestatusDataUtils::DevicestatusData& data);
     DevicestatusMsdpInterface* GetAlgorithmInst();
     DevicestatusMsdpInterface* GetAlgoObj();
     MsdpAlgorithmHandle mAlgorithm_;
     MsdpAlgorithmHandle algoHandler_;
     std::mutex mutex_;
-    bool notifyManagerFlag_ = false;
+    std::map<DevicestatusDataUtils::DevicestatusType, DevicestatusDataUtils::DevicestatusValue> datas_;
     void OnResult(const DevicestatusDataUtils::DevicestatusData& data) override;
 };
 } // Msdp

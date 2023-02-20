@@ -32,6 +32,20 @@ public:
         TYPE_MAX
     };
 
+    enum ActivityEvent {
+        EVENT_INVALID = 0,
+        ENTER = 1,
+        EXIT = 2,
+        ENTER_EXIT = 3
+    };
+
+    enum ReportLatencyNs {
+        Latency_INVALID = -1,
+        SHORT = 1,
+        MIDDLE = 2,
+        LONG = 3
+    };
+
     enum DevicestatusValue {
         VALUE_INVALID = -1,
         VALUE_ENTER = 1,
@@ -47,6 +61,7 @@ public:
         DevicestatusType type = TYPE_INVALID;
         DevicestatusValue value = VALUE_INVALID;
     };
+
     struct AlgoData {
         float x = 0.0;
         float y = 0.0;

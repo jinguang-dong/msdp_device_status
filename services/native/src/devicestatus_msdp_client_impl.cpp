@@ -35,7 +35,6 @@ constexpr int32_t ERR_NG = -1;
 const std::string DEVICESTATUS_SENSOR_HDI_LIB_PATH = "libdevicestatus_sensorhdi.z.so";
 const std::string DEVICESTATUS_MSDP_ALGORITHM_LIB_PATH = "libdevicestatus_msdp.z.so";
 const std::string ALGO_LIB_PATH = "libdevicestatus_algo.z.so";
-std::map<DevicestatusDataUtils::DevicestatusType, DevicestatusDataUtils::DevicestatusValue> g_devicestatusDataMap;
 DevicestatusMsdpClientImpl::CallbackManager g_callbacksMgr;
 using clientType = DevicestatusDataUtils::DevicestatusType;
 using clientValue = DevicestatusDataUtils::DevicestatusValue;
@@ -77,6 +76,10 @@ ErrCode DevicestatusMsdpClientImpl::DisableMsdpImpl(DevicestatusDataUtils::Devic
 {
     DEV_HILOGI(SERVICE, "Enter");
     std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = datas_.find(type);
+    if (iter != datas_.end()) {
+        datas_.erase(iter);
+    }
     if (g_algo == nullptr) {
         DEV_HILOGE(SERVICE, "algo object is nullptr");
         return ERR_NG;
@@ -188,37 +191,33 @@ int32_t DevicestatusMsdpClientImpl::MsdpCallback(const DevicestatusDataUtils::De
     DEV_HILOGI(SERVICE, "Enter");
     DevicestatusDumper::GetInstance().pushDeviceStatus(data);
     SaveObserverData(data);
-    if (notifyManagerFlag_) {
-        ImplCallback(data);
-        notifyManagerFlag_ = false;
-    }
+    ImplCallback(data);
     DEV_HILOGI(SERVICE, "Exit");
     return ERR_OK;
 }
 
-DevicestatusDataUtils::DevicestatusData DevicestatusMsdpClientImpl::SaveObserverData(
-    const DevicestatusDataUtils::DevicestatusData& data)
+void DevicestatusMsdpClientImpl::SaveObserverData(const DevicestatusDataUtils::DevicestatusData& data)
 {
     DEV_HILOGI(SERVICE, "Enter");
     std::lock_guard<std::mutex> lock(mutex_);
-    for (auto iter = g_devicestatusDataMap.begin(); iter != g_devicestatusDataMap.end(); ++iter) {
-        if (iter->first == data.type) {
-            iter->second = data.value;
-            notifyManagerFlag_ = true;
-            return data;
-        }
+    auto iter = datas_.find(data.type);
+    if (iter == datas_.end()) {
+        datas_.emplace(data.type, data.value);
+    } else {
+        iter->second = data.value;
     }
-
-    g_devicestatusDataMap.insert(std::make_pair(data.type, data.value));
-    notifyManagerFlag_ = true;
-
-    return data;
 }
 
-std::map<clientType, clientValue> DevicestatusMsdpClientImpl::GetObserverData() const
+DevicestatusDataUtils::DevicestatusData DevicestatusMsdpClientImpl::GetObserverData(
+    const DevicestatusDataUtils::DevicestatusType& type)
 {
     DEV_HILOGI(SERVICE, "Enter");
-    return g_devicestatusDataMap;
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = datas_.find(type);
+    if (iter == datas_.end()) {
+        return { type, DevicestatusDataUtils::VALUE_INVALID };
+    }
+    return { type, iter->second };
 }
 
 int32_t DevicestatusMsdpClientImpl::LoadAlgorithmLibrary()

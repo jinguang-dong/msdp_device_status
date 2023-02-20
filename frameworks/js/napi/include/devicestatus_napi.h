@@ -55,6 +55,8 @@ public:
     static int32_t ConvertTypeToInt(const std::string &type);
     void OnDeviceStatusChangedDone(int32_t type, int32_t value, bool isOnce);
     static DeviceStatusNapi* GetDeviceStatusNapi();
+    static napi_value EnumActivityEventConstructor(napi_env env, napi_callback_info info);
+    static napi_value DeclareEventTypeInterface(napi_env env, napi_value exports);
     static std::map<int32_t, sptr<IdevicestatusCallback>> callbackMap_;
 
 private:
