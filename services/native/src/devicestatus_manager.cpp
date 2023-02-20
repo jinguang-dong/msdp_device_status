@@ -49,22 +49,11 @@ DevicestatusDataUtils::DevicestatusData DevicestatusManager::GetLatestDevicestat
     DevicestatusDataUtils::DevicestatusType& type)
 {
     DEV_HILOGI(SERVICE, "Enter");
-    DevicestatusDataUtils::DevicestatusData data = {type, DevicestatusDataUtils::DevicestatusValue::VALUE_EXIT};
     if (msdpImpl_ == nullptr) {
         DEV_HILOGE(SERVICE, "GetObserverData func is nullptr,return default!");
-        data.value = DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID;
-        return data;
+        return { type, DevicestatusDataUtils::VALUE_INVALID };
     }
-    msdpData_ = msdpImpl_->GetObserverData();
-    for (auto iter = msdpData_.begin(); iter != msdpData_.end(); ++iter) {
-        if (data.type == iter->first) {
-            data.value = iter->second;
-            return data;
-        }
-    }
-
-    data.value = DevicestatusDataUtils::DevicestatusValue::VALUE_INVALID;
-    return data;
+    return msdpImpl_->GetObserverData(type);
 }
 
 bool DevicestatusManager::EnableMock(DevicestatusDataUtils::DevicestatusType type)

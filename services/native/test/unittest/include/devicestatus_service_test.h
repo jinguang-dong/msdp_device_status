@@ -25,7 +25,10 @@ namespace Msdp {
 const std::u16string ARGS_H = u"-h";
 class DevicestatusServiceTest : public testing::Test {
 public:
-
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
     class DevicestatusServiceTestCallback : public DevicestatusCallbackStub {
     public:
         DevicestatusServiceTestCallback() {};

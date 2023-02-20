@@ -24,7 +24,10 @@ namespace OHOS {
 namespace Msdp {
 class DevicestatusModuleTest : public testing::Test {
 public:
-
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
     class DevicestatusModuleTestCallback : public DevicestatusCallbackStub {
     public:
         DevicestatusModuleTestCallback() {};
