@@ -60,7 +60,11 @@ public:
     };
 private:
     int32_t NotifyDragResult(int32_t result);
-    OHOS::MMI::ExtraData CreateExtraData(bool appended) const;
+    MMI::ExtraData CreateExtraData(bool appended) const;
+    int32_t InitDragData(const DragData &dragData) const;
+    int32_t LaunchDrag();
+    void RestoreDrag();
+    void FetchDragTargetPid(std::shared_ptr<MMI::PointerEvent> pointerEvent);
 private:
     StateChangeNotify stateNotify_;
     DragState dragState_ { DragState::FREE };
@@ -69,7 +73,7 @@ private:
     SessionPtr dragOutSession_ { nullptr };
     std::shared_ptr<MonitorConsumer> monitorConsumer_ { nullptr };
 };
-#define INPUT_MANAGER  OHOS::MMI::InputManager::GetInstance()
+#define INPUT_MANAGER  MMI::InputManager::GetInstance()
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

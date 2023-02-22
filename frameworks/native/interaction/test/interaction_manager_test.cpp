@@ -66,7 +66,7 @@ int32_t CreatePixelMap(int32_t pixelMapWidth, int32_t pixelMapHeight, std::share
     info.colorSpace = OHOS::Media::ColorSpace::SRGB;
     pixelMap->SetImageInfo(info);
     int32_t bufferSize = pixelMapWidth * pixelMapHeight;
-    const char *buffer = static_cast<char *>(malloc(bufferSize));
+    char *buffer = static_cast<char *>(malloc(bufferSize));
     if (buffer == nullptr) {
         FI_HILOGE("Malloc buffer failed");
         return RET_ERR;
@@ -90,7 +90,7 @@ int32_t SetParam(int32_t width, int32_t height, DragData& dragData)
     dragData.pictureResourse.x = 0;
     dragData.pictureResourse.y = 0;
     dragData.buffer = std::vector<uint8_t>(MAX_BUFFER_SIZE, 0);
-    dragData.sourceType = OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE;
+    dragData.sourceType = MMI::PointerEvent::SOURCE_TYPE_MOUSE;
     dragData.pointerId = 0;
     dragData.dragNum = 1;
     return RET_OK;

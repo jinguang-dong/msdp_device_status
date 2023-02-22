@@ -119,7 +119,7 @@ void CoordinationSM::Reset(bool adjustAbsolutionLocation)
     if (hasPointer && adjustAbsolutionLocation) {
         SetAbsolutionLocation(MOUSE_ABS_LOCATION_X, MOUSE_ABS_LOCATION_Y);
     } else {
-        OHOS::MMI::InputManager::GetInstance()->SetPointerVisible(hasPointer);
+        MMI::InputManager::GetInstance()->SetPointerVisible(hasPointer);
     }
     isStarting_ = false;
     isStopping_ = false;
@@ -283,7 +283,7 @@ void CoordinationSM::StartPointerEventFilter()
     int32_t POINTER_DEFAULT_PRIORITY = 220;
     auto filter = std::make_shared<PointerFilter>();
     uint32_t touchTags = CapabilityToTags(MMI::INPUT_DEV_CAP_MAX);
-    filterId_ = OHOS::MMI::InputManager::GetInstance()->AddInputEventFilter(filter, POINTER_DEFAULT_PRIORITY,
+    filterId_ = MMI::InputManager::GetInstance()->AddInputEventFilter(filter, POINTER_DEFAULT_PRIORITY,
         touchTags);
     if (0 > filterId_) {
         FI_HILOGE("Add Event Filter Failed.");
@@ -483,7 +483,7 @@ void CoordinationSM::UpdateState(CoordinationState state)
         case CoordinationState::STATE_OUT: {
             auto* context = CoordinationEventMgr->GetIContext();
             CHKPV(context);
-            OHOS::MMI::InputManager::GetInstance()->SetPointerVisible(false);
+            MMI::InputManager::GetInstance()->SetPointerVisible(false);
             currentStateSM_ = std::make_shared<CoordinationStateOut>(startDhid_);
             auto interceptor = std::make_shared<InterceptorConsumer>();
             interceptorId_ = MMI::InputManager::GetInstance()->AddInterceptor(interceptor, COORDINATION_PRIORITY,
@@ -682,7 +682,7 @@ bool CoordinationSM::IsNeedFilterOut(const std::string &deviceId,
     const std::shared_ptr<MMI::KeyEvent> keyEvent)
 {
     CALL_DEBUG_ENTER;
-    std::vector<OHOS::MMI::KeyEvent::KeyItem> KeyItems = keyEvent->GetKeyItems();
+    std::vector<MMI::KeyEvent::KeyItem> KeyItems = keyEvent->GetKeyItems();
     std::vector<int32_t> KeyItemsForDInput;
     KeyItemsForDInput.reserve(KeyItems.size());
     for (const auto& item : KeyItems) {
@@ -745,7 +745,7 @@ void CoordinationSM::SetAbsolutionLocation(double xPercent, double yPercent)
     int32_t physicalY = static_cast<int32_t>(height * yPercent / PERCENT_CONST);
     FI_HILOGD("width:%{public}d, height:%{public}d, physicalX:%{public}d, physicalY:%{public}d",
         width, height, physicalX, physicalY);
-    OHOS::MMI::InputManager::GetInstance()->SetPointerLocation(physicalX, physicalY);
+    MMI::InputManager::GetInstance()->SetPointerLocation(physicalX, physicalY);
 }
 
 void CoordinationSM::DeviceObserver::OnDeviceAdded(std::shared_ptr<IDevice> device)
