@@ -286,7 +286,7 @@ std::tuple<bool, napi_value, int32_t, int32_t> DeviceStatusNapi::CheckUnsubscrib
     std::tuple<bool, napi_value, int32_t, int32_t> result{false, nullptr, -1, -1};
     size_t argc = ARG_3;
     napi_value args[ARG_3] = {};
-    napi_value status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
     if ((status != napi_ok) || (argc < ARG_3)) {
         ThrowErr(env, PARAM_ERROR, "Bad parameters");
         return result;
@@ -448,7 +448,7 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
     if (callbackIter != callbackMap_.end()) {
         auto unsubscribeRet = DeviceStatusClient::GetInstance().UnsubscribeCallback(Type(type),
             ActivityEvent(event), callbackIter->second);
-        if (unsubscribeRet = RET_OK) {
+        if (unsubscribeRet != RET_OK) {
             ThrowErr(env, SERVICE_EXCEPTION, "off: Failed to UnsubscribeCallback");
         }
         callbackMap_.erase(type);
@@ -463,7 +463,7 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
 napi_value DeviceStatusNapi::GetDeviceStatus(napi_env env, napi_callback_info info)
 {
     DEV_HILOGD(JS_NAPI, "Enter");
-    const auto [ret, handler, type] = CheckUnsubscribeParam(env, info);
+    const auto [ret, handler, type] = CheckGetParam(env, info);
     if (!ret) {
         return nullptr;
     }
