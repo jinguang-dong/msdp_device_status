@@ -245,36 +245,36 @@ std::tuple<bool, napi_value, std::string, int32_t, int32_t> DeviceStatusNapi::Ch
     napi_value args[ARG_4] = {};
     napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
     if ((status != napi_ok) || (argc < ARG_4)) {
-        ThrowError(env, PARAM_ERROR, "Bad parameters");
+        ThrowErr(env, PARAM_ERROR, "Bad parameters");
         return result;
     }
     if (!CheckArguments(env, info)) {
-        ThrowError(env, PARAM_ERROR, "Failed to get arguments");
+        ThrowErr(env, PARAM_ERROR, "Failed to get arguments");
         return result;
     }
     size_t modLen = 0;
     status = napi_get_value_string_utf8(env, args[ARG_0], nullptr, 0, &modLen);
     if (status != napi_ok) {
-        ThrowError(env, PARAM_ERROR, "Failed to get string item");
+        ThrowErr(env, PARAM_ERROR, "Failed to get string item");
         return result;
     }
     char mode[NAPI_BUF_LENGTH] = {};
     status = napi_get_value_string_utf8(env, args[ARG_0], mode, modLen + 1, &modLen);
     if (status != napi_ok) {
-        ThrowError(env, PARAM_ERROR, "Failed to get string item");
+        ThrowErr(env, PARAM_ERROR, "Failed to get string item");
         return result;
     }
     std::string typeMode = mode;
     int32_t eventMode = 0;
     status = napi_get_value_int32(env, args[ARG_1], &eventMode);
     if (status != napi_ok) {
-        ThrowError(env, PARAM_ERROR, "Failed to get event value item");
+        ThrowErr(env, PARAM_ERROR, "Failed to get event value item");
         return result;
     }
     int32_t latencyMode = 0;
     status = napi_get_value_int32(env, args[ARG_2], &latencyMode);
     if (status != napi_ok) {
-        ThrowError(env, PARAM_ERROR, "Failed to get latency value item");
+        ThrowErr(env, PARAM_ERROR, "Failed to get latency value item");
         return result;
     }
     return std::make_tuple(true, args[ARG_3], typeMode, eventMode, latencyMode);
@@ -288,11 +288,11 @@ std::tuple<bool, napi_value, int32_t, int32_t> DeviceStatusNapi::CheckUnsubscrib
     napi_value args[ARG_3] = {};
     napi_value status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
     if ((status != napi_ok) || (argc < ARG_3)) {
-        ThrowError(env, PARAM_ERROR, "Bad parameters");
+        ThrowErr(env, PARAM_ERROR, "Bad parameters");
         return result;
     }
     if (!CheckUnsubArguments(env, info)) {
-        ThrowError(env, PARAM_ERROR, "Failed to get unsub arguments");
+        ThrowErr(env, PARAM_ERROR, "Failed to get unsub arguments");
         return result;
     }
     size_t len;
@@ -307,7 +307,7 @@ std::tuple<bool, napi_value, int32_t, int32_t> DeviceStatusNapi::CheckUnsubscrib
         ThrowErr(env, PARAM_ERROR, "Failed to get string item");
         return result;
     }
-    int32_t type = DeviceStatusNapi::CovertTypeToInt(typeBuf.data());
+    int32_t type = DeviceStatusNapi::ConvertTypeToInt(typeBuf.data());
     if ((type < Type::TYPE_ABSOLUTE_STILL) || (type > Type::TYPE_LID_OPEN)) {
         ThrowErr(env, PARAM_ERROR, "type is illegal");
         return result;
@@ -333,28 +333,28 @@ std::tuple<bool, napi_value, int32_t> DeviceStatusNapi::CheckGetParam(napi_env e
     napi_value args[ARG_2] = {};
     napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
     if ((status != napi_ok) || (argc < ARG_2)) {
-        ThrowError(env, PARAM_ERROR, "Bad parameters");
+        ThrowErr(env, PARAM_ERROR, "Bad parameters");
         return result;
     }
     if (!CheckGetArguments(env, info)) {
-        ThrowError(env, PARAM_ERROR, "Failed to get once arguments");
+        ThrowErr(env, PARAM_ERROR, "Failed to get once arguments");
         return result;
     }
     size_t len;
     status = napi_get_value_string_utf8(env, args[0], nullptr, 0, &len);
     if (status != napi_ok) {
-        ThrowError(env, PARAM_ERROR, "Failed to get string item");
+        ThrowErr(env, PARAM_ERROR, "Failed to get string item");
         return result;
     }
     std::vector<char> typeBuf(len + 1);
     status = napi_get_value_string_utf8(env, args[0], typeBuf.data(), len + 1, &len);
     if (status != napi_ok) {
-        ThrowError(env, PARAM_ERROR, "Failed to get string item");
+        ThrowErr(env, PARAM_ERROR, "Failed to get string item");
         return result;
     }
     int32_t type = ConvertTypeToInt(typeBuf.data());
     if ((type < Type::TYPE_ABSOLUTE_STILL) || (type > Type::TYPE_LID_OPEN)) {
-        ThrowError(env, PARAM_ERROR, "type is illegal");
+        ThrowErr(env, PARAM_ERROR, "type is illegal");
         return result;
     }
     return std::make_tuple(true, args[ARG_1], type);
@@ -397,7 +397,7 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatusCallback(napi_env env, napi_ca
     auto subscribeRet = DeviceStatusClient::GetInstance().SubscribeCallback(Type(type),
         ActivityEvent(event), ReportLatencyNs(latency), callback);
     if (subscribeRet != RET_OK) {
-        ThrowError(env, SERVICE_EXCEPTION, "on: Failed to SubscribeCallback");
+        ThrowErr(env, SERVICE_EXCEPTION, "on: Failed to SubscribeCallback");
         return nullptr;
     }
     auto ret = callbackMap_.insert(std::pair<int32_t, sptr<IRemoteDevStaCallback>>(type, callback));
@@ -419,15 +419,15 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatus(napi_env env, napi_callback_i
     int32_t type = ConvertTypeToInt(typeMode);
     DEV_HILOGD(JS_NAPI, "type:%{public}d, event:%{public}d, latency:%{public}d", type, event, latency);
     if ((type < Type::TYPE_ABSOLUTE_STILL) || (type > Type::TYPE_LID_OPEN)) {
-        ThrowError(env, PARAM_ERROR, "type is illegal");
+        ThrowErr(env, PARAM_ERROR, "type is illegal");
         return nullptr;
     }
     if ((event < ActivityEvent::ENTER) || (event > ActivityEvent::ENTER_EXIT)) {
-        ThrowError(env, PARAM_ERROR, "event is illegal");
+        ThrowErr(env, PARAM_ERROR, "event is illegal");
         return nullptr;
     }
     if ((latency < ReportLatencyNs::SHORT) || (latency > ReportLatencyNs::LONG)) {
-        ThrowError(env, PARAM_ERROR, "latency is illegal");
+        ThrowErr(env, PARAM_ERROR, "latency is illegal");
         return nullptr;
     }
     return SubscribeDeviceStatusCallback(env, info, handler, type, event, latency);
@@ -449,7 +449,7 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
         auto unsubscribeRet = DeviceStatusClient::GetInstance().UnsubscribeCallback(Type(type),
             ActivityEvent(event), callbackIter->second);
         if (unsubscribeRet = RET_OK) {
-            ThrowError(env, SERVICE_EXCEPTION, "off: Failed to UnsubscribeCallback");
+            ThrowErr(env, SERVICE_EXCEPTION, "off: Failed to UnsubscribeCallback");
         }
         callbackMap_.erase(type);
     } else {
@@ -488,7 +488,7 @@ napi_value DeviceStatusNapi::GetDeviceStatus(napi_env env, napi_callback_info in
     }
     Data devicestatusData = DeviceStatusClient::GetInstance().GetDeviceStatusData(Type(type));
     if (devicestatusData.type == Type::TYPE_INVALID) {
-        ThrowError(env, SERVICE_EXCEPTION, "once: Failed to GetDeviceStatusData");
+        ThrowErr(env, SERVICE_EXCEPTION, "once: Failed to GetDeviceStatusData");
     }
     g_obj->OnDeviceStatusChangedDone(devicestatusData.type, devicestatusData.value, true);
     g_obj->OffOnce(devicestatusData.type, handler);
