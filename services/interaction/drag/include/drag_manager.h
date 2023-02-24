@@ -59,13 +59,13 @@ public:
 private:
     int32_t NotifyDragResult(int32_t result);
     MMI::ExtraData CreateExtraData(bool appended) const;
-    int32_t InitDragData(const DragData &dragData) const;
+    int32_t InitDataAdapter(const DragData &dragData) const;
     int32_t LaunchDrag();
-    void RestoreDrag();
+    int32_t RestoreDrag();
     void FetchDragTargetPid(std::shared_ptr<MMI::PointerEvent> pointerEvent);
 private:
     StateChangeNotify stateNotify_;
-    DragState dragState_ { DragState::FREE };
+    DragMessage dragState_ {DragMessage::MSG_DRAG_STATE_STOP};
     int32_t monitorId_ { -1 };
     int32_t dragTargetPid_ { -1 };
     SessionPtr dragOutSession_ { nullptr };
