@@ -72,11 +72,11 @@ int32_t DragManager::StartDrag(const DragData &dragData, SessionPtr sess)
     }
     CHKPR(sess, RET_ERR);
     dragOutSession_ = sess;
-    if (InitDataAdapter(dragData) < 0) {
+    if (InitDataAdapter(dragData) != RET_OK) {
         FI_HILOGE("InitDataAdapter failed");
         return RET_ERR;
     }
-    if (LaunchDrag() < 0) {
+    if (LaunchDrag() != RET_OK) {
         FI_HILOGE("LaunchDrag failed");
         return RET_ERR;
     }
@@ -94,7 +94,7 @@ int32_t DragManager::StopDrag(int32_t result)
         return RET_ERR;
     }
     INPUT_MANAGER->SetPointerVisible(true);
-    if (RestoreDrag() < 0) {
+    if (RestoreDrag() != RET_OK) {
         FI_HILOGE("RestoreDrag failed");
         return RET_ERR;
     }
