@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,44 +34,71 @@ void DeviceStatusAgent::DeviceStatusAgentCallback::OnDeviceStatusChanged(
         DEV_HILOGE(SERVICE, "agent is nullptr");
         return;
     }
-    agent->agentEvent_->OnEventResult(devicestatusData);
+    auto iter = agent->agentEvents_.find(devicestatusData.type);
+    if (iter == agent->agentEvents_.end()) {
+        DEV_HILOGE(INNERKIT, "Failed to find type");
+        return;
+    }
+    iter->second->OnEventResult(devicestatusData);
 }
 
 int32_t DeviceStatusAgent::SubscribeAgentEvent(const Type& type,
-    const ActivityEvent& event,
-    const ReportLatencyNs& latency,
-    const std::shared_ptr<DeviceStatusAgent::DeviceStatusAgentEvent>& agentEvent)
+    const ActivityEvent& event, const ReportLatencyNs& latency,
+    std::shared_ptr<DeviceStatusAgent::DeviceStatusAgentEvent> agentEvent)
 {
     DEV_HILOGD(INNERKIT, "Enter");
-
     if (agentEvent == nullptr) {
+        DEV_HILOGE(INNERKIT, "agentEvent is nullptr");
         return ERR_INVALID_VALUE;
     }
-    if (type > Type::TYPE_INVALID && type <= Type::TYPE_LID_OPEN && event > ActivityEvent::EVENT_INVALID
-        && event <= ActivityEvent::ENTER_EXIT) {
-        RegisterServiceEvent(type, event, latency);
-        agentEvent_ = agentEvent;
-    } else {
+    if (!IsSupportType(type)) {
+        DEV_HILOGE(INNERKIT, "Failed to support type");
         return ERR_INVALID_VALUE;
+    }
+    if (!IsSupportEvent(event)) {
+        DEV_HILOGE(INNERKIT, "Failed to support event");
+        return ERR_INVALID_VALUE;
+    }
+    RegisterServiceEvent(type, event, latency);
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = agentEvents_.find(type);
+    if (iter == agentEvents_.end()) {
+        agentEvents_.emplace(type, agentEvent);
+    } else {
+        iter->second = agentEvent;
     }
     return RET_OK;
 }
 
 int32_t DeviceStatusAgent::UnsubscribeAgentEvent(const Type& type, const ActivityEvent& event)
 {
-    if (type > Type::TYPE_INVALID && type <= Type::TYPE_LID_OPEN && event > ActivityEvent::EVENT_INVALID
-        && event <= ActivityEvent::ENTER_EXIT) {
-        UnRegisterServiceEvent(type, event);
-        return RET_OK;
+    DEV_HILOGD(INNERKIT, "Enter");
+    if (!IsSupportType(type)) {
+        DEV_HILOGE(INNERKIT, "Failed to support type");
+        return ERR_INVALID_VALUE;
     }
-    return ERR_INVALID_VALUE;
+    if (!IsSupportEvent(event)) {
+        DEV_HILOGE(INNERKIT, "Failed to support event");
+        return ERR_INVALID_VALUE;
+    }
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = agentEvents_.find(type);
+    if (iter == agentEvents_.end()) {
+        DEV_HILOGE(INNERKIT, "Failed to find type");
+        return ERR_INVALID_VALUE;
+    }
+    agentEvents_.erase(iter);
+    UnRegisterServiceEvent(type, event);
+    return RET_OK;
 }
 
 void DeviceStatusAgent::RegisterServiceEvent(const Type& type, const ActivityEvent& event,
     const ReportLatencyNs& latency)
 {
     DEV_HILOGD(INNERKIT, "Enter");
-    callback_ = new DeviceStatusAgentCallback(shared_from_this());
+    if (callback_ == nullptr) {
+        callback_ = new (std::nothrow) DeviceStatusAgentCallback(shared_from_this());
+    }
     DeviceStatusClient::GetInstance().SubscribeCallback(type, event, latency, callback_);
 }
 
@@ -80,6 +107,26 @@ void DeviceStatusAgent::UnRegisterServiceEvent(const Type& type,
 {
     DEV_HILOGD(INNERKIT, "Enter");
     DeviceStatusClient::GetInstance().UnsubscribeCallback(type, event, callback_);
+}
+
+Data DeviceStatusAgent::GetDeviceStatusData(const Type type)
+{
+    return DeviceStatusClient::GetInstance().GetDeviceStatusData(type);
+}
+
+void DeviceStatusAgent::RegisterDeathListener(std::function<void()> deathListener)
+{
+    DeviceStatusClient::GetInstance().RegisterDeathListener(deathListener);
+}
+
+bool DeviceStatusAgent::IsSupportType(const Type& type)
+{
+    return (type > Type::TYPE_INVALID && type < Type::TYPE_MAX);
+}
+
+bool DeviceStatusAgent::IsSupportEvent(const ActivityEvent& event)
+{
+    return (event > ActivityEvent::EVENT_INVALID && event <= ActivityEvent::ENTER_EXIT);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

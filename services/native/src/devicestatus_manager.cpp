@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "devicestatus_define.h"
+
 #include "devicestatus_manager.h"
+
+#include <algorithm>
+
+#include "devicestatus_define.h"
 #include "bytrace_adapter.h"
 
 namespace OHOS {
@@ -151,35 +155,28 @@ int32_t DeviceStatusManager::SensorDataCallback(struct SensorEvents *event)
 int32_t DeviceStatusManager::NotifyDeviceStatusChange(const Data& devicestatusData)
 {
     DEV_HILOGD(SERVICE, "Enter");
-    DEV_HILOGI(SERVICE, "type:%{public}d,value:%{public}d", devicestatusData.type,devicestatusData.value);
-    std::set<const sptr<IRemoteDevStaCallback>, classcomp> listeners;
-    auto iter = listenerMap_.find(devicestatusData.type);
-    if (iter == listenerMap_.end()) {
-        DEV_HILOGI(SERVICE, "type:%{public}d", devicestatusData.type);
-        return false;
-    }
-    listeners = (std::set<const sptr<IRemoteDevStaCallback>, classcomp>)(iter->second);
-    for (const auto &listener : listeners) {
-        if (listener == nullptr) {
+    std::lock_guard lock(mutex_);
+    for (const auto &item : listenerMap_) {
+        if (item.second == nullptr) {
             DEV_HILOGE(SERVICE, "Listener is nullptr");
             return false;
         }
-        DEV_HILOGI(SERVICE, "type:%{public}d,arrs_:%{public}d", devicestatusData.type, arrs_[devicestatusData.type]);
-        switch (arrs_[devicestatusData.type]) {
+        DEV_HILOGI(SERVICE, "type:%{public}d", item.second->GetType());
+        switch (arrs_[item.second->GetType()]) {
             case ENTER: {
                 if (devicestatusData.value == VALUE_ENTER) {
-                    listener->OnDeviceStatusChanged(devicestatusData);
+                    item.second->GetCallback()->OnDeviceStatusChanged(devicestatusData);
                 }
                 break;
             }
             case EXIT: {
                 if (devicestatusData.value == VALUE_EXIT) {
-                    listener->OnDeviceStatusChanged(devicestatusData);
+                    item.second->GetCallback()->OnDeviceStatusChanged(devicestatusData);
                 }
                 break;
             }
             case ENTER_EXIT: {
-                listener->OnDeviceStatusChanged(devicestatusData);
+                item.second->GetCallback()->OnDeviceStatusChanged(devicestatusData);
                 break;
             }
             default: {
@@ -191,74 +188,67 @@ int32_t DeviceStatusManager::NotifyDeviceStatusChange(const Data& devicestatusDa
     return RET_OK;
 }
 
-void DeviceStatusManager::Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency,
-    sptr<IRemoteDevStaCallback> callback)
+void DeviceStatusManager::Subscribe(std::shared_ptr<ClientInfo> clientInfo)
 {
-    DEV_RET_IF_NULL(callback == nullptr);
-    event_ = event;
-    type_ = type;
+    DEV_RET_IF_NULL(clientInfo->GetCallback() == nullptr);
+    event_ = clientInfo->GetEvent();
+    type_ = clientInfo->GetType();
     arrs_ [type_] = event_;
-    DEV_HILOGI(SERVICE, "arr save:%{public}d ,event:%{public}d", type_, event);
-    std::set<const sptr<IRemoteDevStaCallback>, classcomp> listeners;
-    DEV_HILOGI(SERVICE, "listenerMap_.size:%{public}zu", listenerMap_.size());
-    auto object = callback->AsObject();
+    DEV_HILOGI(SERVICE, "type:%{public}d,event:%{public}d", type_, event_);
+    auto object = clientInfo->GetCallback()->AsObject();
     DEV_RET_IF_NULL(object == nullptr);
-    std::lock_guard lock(mutex_);
-    auto dtTypeIter = listenerMap_.find(type);
-    if (dtTypeIter == listenerMap_.end()) {
-        if (listeners.insert(callback).second) {
-            DEV_HILOGI(SERVICE, "no found set list of type, insert success");
-            object->AddDeathRecipient(devicestatusCBDeathRecipient_);
-        }
-        listenerMap_.insert(std::make_pair(type, listeners));
-    } else {
-        DEV_HILOGI(SERVICE, "callbacklist.size:%{public}zu", listenerMap_[dtTypeIter->first].size());
-        auto iter = listenerMap_[dtTypeIter->first].find(callback);
-        if (iter != listenerMap_[dtTypeIter->first].end()) {
-            return;
-        }
-        if (listenerMap_[dtTypeIter->first].insert(callback).second) {
-            DEV_HILOGI(SERVICE, "find set list of type, insert success");
-            object->AddDeathRecipient(devicestatusCBDeathRecipient_);
-        }
-    }
-    if (!Enable(type)) {
+    object->AddDeathRecipient(devicestatusCBDeathRecipient_);
+    if (!Enable(clientInfo->GetType())) {
         DEV_HILOGE(SERVICE, "Enable failed!");
         return;
     }
+    std::lock_guard lock(mutex_);
+    auto iter = listenerMap_.find(clientInfo->GetPid());
+    if (iter == listenerMap_.end()) {
+        listenerMap_.emplace(clientInfo->GetPid(), clientInfo);
+    } else {
+        iter->second = clientInfo;
+    }
+    auto pidIter = activeTypes_.find(clientInfo->GetPid());
+    if (pidIter == activeTypes_.end()) {
+        std::vector<Type> types;
+        types.push_back(clientInfo->GetType());
+        activeTypes_.emplace(clientInfo->GetPid(), types);
+    } else {
+        pidIter->second.push_back(clientInfo->GetType());
+    }
+    DEV_HILOGI(SERVICE, "lisnteners size:%{public}zu,active type size:%{public}zu, types:%{public}zu",
+        listenerMap_.size(), activeTypes_.size(), activeTypes_[clientInfo->GetPid()].size());
     DEV_HILOGI(SERVICE, "Subscribe success,Exit");
 }
 
-void DeviceStatusManager::Unsubscribe(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback)
+void DeviceStatusManager::Unsubscribe(std::shared_ptr<ClientInfo> clientInfo)
 {
     DEV_HILOGD(SERVICE, "Enter");
-    DEV_RET_IF_NULL(callback == nullptr);
-    auto object = callback->AsObject();
+    DEV_RET_IF_NULL(clientInfo->GetCallback() == nullptr);
+    auto object = clientInfo->GetCallback()->AsObject();
     DEV_RET_IF_NULL(object == nullptr);
-    DEV_HILOGE(SERVICE, "listenerMap_.size:%{public}zu,arrs_:%{public}d", listenerMap_.size(), arrs_ [type_]);
-    DEV_HILOGE(SERVICE, "UNevent: %{public}d", event);
+    DEV_HILOGE(SERVICE, "type: %{public}d", clientInfo->GetType());
     std::lock_guard lock(mutex_);
-    auto dtTypeIter = listenerMap_.find(type);
-    if (dtTypeIter == listenerMap_.end()) {
-        DEV_HILOGE(SERVICE, "Failed to find listener for type");
-        return;
-    }
-    DEV_HILOGI(SERVICE, "callbacklist.size:%{public}zu", listenerMap_[dtTypeIter->first].size());
-    auto iter = listenerMap_[dtTypeIter->first].find(callback);
-    if (iter != listenerMap_[dtTypeIter->first].end()) {
-        if (listenerMap_[dtTypeIter->first].erase(callback) != 0) {
-            object->RemoveDeathRecipient(devicestatusCBDeathRecipient_);
-            if (listenerMap_[dtTypeIter->first].empty()) {
-                listenerMap_.erase(dtTypeIter);
-            }
+    auto pidIter = activeTypes_.find(clientInfo->GetPid());
+    if (pidIter != activeTypes_.end()) {
+        auto typeIter = std::find(pidIter->second.begin(), pidIter->second.end(), clientInfo->GetType());
+        if (typeIter != pidIter->second.end()) {
+            pidIter->second.erase(typeIter);
         }
     }
-    DEV_HILOGI(SERVICE, "listenerMap_.size:%{public}zu", listenerMap_.size());
-    if (listenerMap_.empty()) {
-        Disable(type);
-    } else {
-        DEV_HILOGI(SERVICE, "other subscribe exist");
+    if (pidIter->second.empty()) {
+        Disable(clientInfo->GetType());
+        activeTypes_.erase(pidIter);
+        auto iter = listenerMap_.find(clientInfo->GetPid());
+        if (iter == listenerMap_.end()) {
+            DEV_HILOGE(SERVICE, "Failed to find listener for type");
+            return;
+        }
+        listenerMap_.erase(iter);
     }
+    DEV_HILOGI(SERVICE, "lisnteners size:%{public}zu,active type size:%{public}zu, types:%{public}zu",
+        listenerMap_.size(), activeTypes_.size(), activeTypes_[clientInfo->GetPid()].size());
     DEV_HILOGI(SERVICE, "Unsubscribe success,Exit");
 }
 

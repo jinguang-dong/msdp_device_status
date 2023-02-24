@@ -55,8 +55,8 @@ void DeviceStatusServiceTest::DeviceStatusServiceTestCallback::OnDeviceStatusCha
 {
     GTEST_LOG_(INFO) << "DeviceStatusServiceTestCallback type: " << devicestatusData.type;
     GTEST_LOG_(INFO) << "DeviceStatusServiceTestCallback value: " << devicestatusData.value;
-    EXPECT_TRUE(devicestatusData.type == g_type && (devicestatusData.value >= OnChangedValue::VALUE_INVALID &&
-        devicestatusData.value <= OnChangedValue::VALUE_EXIT)) << "DeviceStatusServiceTestCallback failed";
+    EXPECT_TRUE(devicestatusData.value >= OnChangedValue::VALUE_INVALID &&
+        devicestatusData.value <= OnChangedValue::VALUE_EXIT) << "DeviceStatusServiceTestCallback failed";
 }
 
 /**

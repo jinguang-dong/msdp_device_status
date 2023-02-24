@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,6 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
-#include "devicestatus_client.h"
 #include "devicestatus_common.h"
 
 using namespace OHOS;
@@ -38,14 +37,15 @@ static const std::vector<std::string> vecDeviceStatusValue {
 };
 thread_local DeviceStatusNapi *g_obj = nullptr;
 } // namespace
-std::map<int32_t, sptr<IRemoteDevStaCallback>> DeviceStatusNapi::callbackMap_;
-napi_ref DeviceStatusNapi::devicestatusValueRef_ = nullptr;
 
+std::shared_ptr<DeviceStatusAgent> DeviceStatusNapi::agent_ = nullptr;
+napi_ref DeviceStatusNapi::devicestatusValueRef_ = nullptr;
+std::shared_ptr<DeviceStatusCallback> DeviceStatusNapi::callback_ = nullptr;
 struct ResponseEntity {
     OnChangedValue value;
 };
 
-void DeviceStatusCallback::OnDeviceStatusChanged(const Data& devicestatusData)
+bool DeviceStatusCallback::OnEventResult(const Data& devicestatusData)
 {
     DEV_HILOGD(JS_NAPI, "OnDeviceStatusChanged enter");
     std::lock_guard<std::mutex> guard(mutex_);
@@ -53,12 +53,12 @@ void DeviceStatusCallback::OnDeviceStatusChanged(const Data& devicestatusData)
     napi_get_uv_event_loop(env_, &loop);
     if (loop == nullptr) {
         DEV_HILOGE(JS_NAPI, "loop is nullptr");
-        return;
+        return false;
     }
     uv_work_t *work = new (std::nothrow) uv_work_t;
     if (work == nullptr) {
         DEV_HILOGE(JS_NAPI, "work is nullptr");
-        return;
+        return false;
     }
     DEV_HILOGD(JS_NAPI, "devicestatusData.type:%{public}d, devicestatusData.value:%{public}d",
         devicestatusData.type, devicestatusData.value);
@@ -67,7 +67,9 @@ void DeviceStatusCallback::OnDeviceStatusChanged(const Data& devicestatusData)
     int ret = uv_queue_work(loop, work, [] (uv_work_t *work) {}, EmitOnEvent);
     if (ret != 0) {
         DEV_HILOGE(JS_NAPI, "Failed to execute work queue");
+        return false;
     }
+    return true;
 }
 
 void DeviceStatusCallback::EmitOnEvent(uv_work_t *work, int status)
@@ -101,9 +103,8 @@ DeviceStatusNapi::DeviceStatusNapi(napi_env env) : DeviceStatusEvent(env)
     env_ = env;
     callbackRef_ = nullptr;
     devicestatusValueRef_ = nullptr;
-    DeviceStatusClient::GetInstance().RegisterDeathListener([this] {
+    agent_->RegisterDeathListener([this] {
         DEV_HILOGI(JS_NAPI, "Receive death notification");
-        callbackMap_.clear();
         ClearEventMap();
     });
 }
@@ -259,24 +260,16 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatusCallback(napi_env env, napi_ca
         DEV_HILOGE(JS_NAPI, "type:%{public}d already exists", type);
         return nullptr;
     }
-    auto callbackIter = callbackMap_.find(type);
-    if (callbackIter != callbackMap_.end()) {
-        DEV_HILOGD(JS_NAPI, "Callback exists");
+    if (callback_ == nullptr) {
+        callback_ = std::make_shared<DeviceStatusCallback>(env);
+    }
+    if (agent_ == nullptr) {
+        DEV_HILOGE(JS_NAPI, "agent_ is nullptr");
         return nullptr;
     }
-    sptr<IRemoteDevStaCallback> callback;
-    callback = new (std::nothrow) DeviceStatusCallback(env);
-    if (callback == nullptr) {
-        DEV_HILOGE(JS_NAPI, "callback is nullptr");
-        return nullptr;
-    }
-    DeviceStatusClient::GetInstance().SubscribeCallback(Type(type),
-        ActivityEvent(event), ReportLatencyNs(latency), callback);
-    auto ret = callbackMap_.insert(std::pair<int32_t, sptr<IRemoteDevStaCallback>>(type, callback));
-    if (!ret.second) {
-        DEV_HILOGE(JS_NAPI, "Failed to insert");
-        return nullptr;
-    }
+    agent_->SubscribeAgentEvent(static_cast<Type>(type), static_cast<ActivityEvent>(event),
+       static_cast<ReportLatencyNs>(latency),
+       std::static_pointer_cast<DeviceStatusAgent::DeviceStatusAgentEvent>(callback_));
     DEV_HILOGD(JS_NAPI, "Exit");
     return nullptr;
 }
@@ -366,14 +359,11 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
         DEV_HILOGE(JS_NAPI, "Not ready to Unsubscribe for type:%{public}d", type);
         return nullptr;
     }
-    auto callbackIter = callbackMap_.find(type);
-    if (callbackIter != callbackMap_.end()) {
-        DeviceStatusClient::GetInstance().UnsubscribeCallback(Type(type), ActivityEvent(event), callbackIter->second);
-        callbackMap_.erase(type);
-    } else {
-        NAPI_ASSERT(env, false, "No existed callback");
+    if (agent_ == nullptr) {
+        DEV_HILOGE(JS_NAPI, "agent_ is nullptr");
         return nullptr;
     }
+    agent_->UnsubscribeAgentEvent(static_cast<Type>(type), static_cast<ActivityEvent>(event));
     DEV_HILOGD(JS_NAPI, "Exit");
     return nullptr;
 }
@@ -422,7 +412,11 @@ napi_value DeviceStatusNapi::GetDeviceStatus(napi_env env, napi_callback_info in
         DEV_HILOGE(JS_NAPI, "type:%{public}d already exists", type);
         return nullptr;
     }
-    Data devicestatusData = DeviceStatusClient::GetInstance().GetDeviceStatusData(Type(type));
+    if (agent_ == nullptr) {
+        DEV_HILOGE(JS_NAPI, "agent_ is nullptr");
+        return nullptr;
+    }
+    Data devicestatusData = agent_->GetDeviceStatusData(static_cast<Type>(type));
     g_obj->OnDeviceStatusChangedDone(devicestatusData.type, devicestatusData.value, true);
     g_obj->OffOnce(devicestatusData.type, args[ARG_1]);
     DEV_HILOGD(JS_NAPI, "Exit");
@@ -500,6 +494,9 @@ napi_value DeviceStatusNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("once", GetDeviceStatus),
     };
     DeclareEventTypeInterface(env, exports);
+    if (agent_ == nullptr) {
+        agent_ = std::make_shared<DeviceStatusAgent>();
+    }
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     DEV_HILOGD(JS_NAPI, "Exit");
     return exports;

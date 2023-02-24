@@ -47,7 +47,7 @@ ohos_shared_library("stationary") {
   public_configs = [ ":devicestatus_callback_config" ]
 
   deps = [
-    "//base/msdp/device_status/interfaces/innerkits:devicestatus_client",
+    "../../native/src:deviceagent",
     "//foundation/arkui/napi:ace_napi",
   ]
 
