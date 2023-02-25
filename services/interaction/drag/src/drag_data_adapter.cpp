@@ -17,7 +17,6 @@
 
 #include "hitrace_meter.h"
 #include "pointer_style.h"
-#include "rs_base_render_util.h"
 
 #include "devicestatus_define.h"
 #include "drag_data.h"
