@@ -17,6 +17,7 @@
 
 #include "hitrace_meter.h"
 #include "pointer_style.h"
+#include "rs_base_render_util.h"
 
 #include "devicestatus_define.h"
 #include "drag_data.h"
@@ -35,6 +36,11 @@ DragDataAdapter::~DragDataAdapter() = default;
 void DragDataAdapter::Init(const DragData &dragData, const MMI::PointerStyle &pointerStyle)
 {
     CALL_DEBUG_ENTER;
+    FI_HILOGD("width:%{public}d, height:%{public}d, ByteCount:%{public}d",
+        dragData.pictureResourse.pixelMap->GetWidth(),
+        dragData.pictureResourse.pixelMap->GetHeight(),
+        dragData.pictureResourse.pixelMap->GetByteCount());
+    RSBaseRenderUtil::WritePixelMapToPng(*dragData);
     dragData_ = dragData;
     pointerStyle_ = pointerStyle;
 }

@@ -16,6 +16,7 @@
 #include <iostream>
 
 #include <gtest/gtest.h>
+#include "image_source.h"
 #include "pointer_event.h"
 
 #include "coordination_message.h"
@@ -30,6 +31,7 @@ using namespace testing::ext;
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "InteractionManagerTest" };
 constexpr int32_t TIME_WAIT_FOR_OP = 100;
+static const std::string IMAGE_INPUT_JPG_PATH = "/data/local/tmp/image/test.jpg";
 } // namespace
 class InteractionManagerTest : public testing::Test {
 public:
@@ -51,6 +53,30 @@ void InteractionManagerTest::TearDown()
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP));
 }
 
+int32_t CreatePixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
+{
+    uint32_t errorCode = 0;
+    Media::SourceOptions opts;
+    opts.formatHint = "image/jpg";
+    std::unique_ptr<Media::ImageSource> imageSource =
+        Media::ImageSource::CreateImageSource(IMAGE_INPUT_JPG_PATH, opts, errorCode);
+    Media::ImageInfo imageInfo;
+    imageSource->GetImageInfo(0, imageInfo);
+    FI_HILOGD("imageInfo.size.width:%{public}d, imageInfo.size.height:%{public}d", imageInfo.size.width, imageInfo.size.width);
+    if (errorCode != 0 || imageSource.get() == nullptr) {
+        FI_HILOGE("CreateImageSource failed");
+        return RET_ERR;
+    }
+    Media::DecodeOptions decodeOpts;
+    decodeOpts.allocatorType = Media::AllocatorType::SHARE_MEM_ALLOC;
+    std::unique_ptr<Media::PixelMap> uniquePixelMap = imageSource->CreatePixelMap(decodeOpts, errorCode);
+    FI_HILOGD("width:%{public}d, height:%{public}d, ByteCount:%{public}d",
+        uniquePixelMap->GetWidth(), uniquePixelMap->GetHeight(), uniquePixelMap->GetByteCount());
+    pixelMap = std::move(uniquePixelMap);
+    FI_HILOGD("width:%{public}d, height:%{public}d, ByteCount:%{public}d",
+        pixelMap->GetWidth(), pixelMap->GetHeight(), pixelMap->GetByteCount());
+    return RET_OK;
+}
 
 int32_t CreatePixelMap(int32_t pixelMapWidth, int32_t pixelMapHeight, std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
 {
@@ -79,14 +105,34 @@ int32_t CreatePixelMap(int32_t pixelMapWidth, int32_t pixelMapHeight, std::share
     return RET_OK;
 }
 
-int32_t SetParam(int32_t width, int32_t height, DragData& dragData)
+int32_t SetParam(DragData& dragData)
 {
-    auto pixelMap = std::make_shared<OHOS::Media::PixelMap>();
-    if (CreatePixelMap(width, height, pixelMap) != RET_OK) {
-        FI_HILOGE("CreatePixelMap failed");
+    uint32_t errorCode = 0;
+    Media::SourceOptions opts;
+    opts.formatHint = "image/jpg";
+    std::unique_ptr<Media::ImageSource> imageSource = 
+        Media::ImageSource::CreateImageSource(IMAGE_INPUT_JPG_PATH, opts, errorCode);
+    if (errorCode != 0 || imageSource.get() == nullptr) {
+        FI_HILOGE("CreateImageSource failed");
         return RET_ERR;
     }
-    dragData.pictureResourse.pixelMap = pixelMap;
+    Media::DecodeOptions decodeOpts;
+    decodeOpts.allocatorType = Media::AllocatorType::SHARE_MEM_ALLOC;
+    std::unique_ptr<Media::PixelMap> uniquePixelMap = imageSource->CreatePixelMap(decodeOpts, errorCode);
+    FI_HILOGD("width:%{public}d, height:%{public}d, ByteCount:%{public}d",
+        uniquePixelMap->GetWidth(), uniquePixelMap->GetHeight(), uniquePixelMap->GetByteCount());
+    if (uniquePixelMap->GetFd() == nullptr) {
+        FI_HILOGE("uniquePixelMap.context_ is nullptr");
+    }
+    dragData.pictureResourse.pixelMap = std::move(uniquePixelMap);
+
+    FI_HILOGD("width:%{public}d, height:%{public}d, ByteCount:%{public}d",
+        dragData.pictureResourse.pixelMap->GetWidth(),
+        dragData.pictureResourse.pixelMap->GetHeight(),
+        dragData.pictureResourse.pixelMap->GetByteCount());
+    if (dragData.pictureResourse.pixelMap->GetFd() == nullptr) {
+        FI_HILOGE("dragData.pictureResourse.pixelMap.context_ is nullptr");
+    }
     dragData.pictureResourse.x = 0;
     dragData.pictureResourse.y = 0;
     dragData.buffer = std::vector<uint8_t>(MAX_BUFFER_SIZE, 0);
@@ -259,7 +305,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag, TestSize.Leve
 {
     CALL_TEST_DEBUG;
     DragData dragData;
-    int32_t ret = SetParam(200, 200, dragData);
+    int32_t ret = SetParam(dragData);
     ASSERT_EQ(ret, RET_OK);
     std::function<void(int32_t)> callback = [](int32_t result) {
         FI_HILOGD("StartDrag success");
