@@ -39,7 +39,6 @@ void DragDataAdapter::Init(const DragData &dragData, const MMI::PointerStyle &po
         dragData.pictureResourse.pixelMap->GetWidth(),
         dragData.pictureResourse.pixelMap->GetHeight(),
         dragData.pictureResourse.pixelMap->GetByteCount());
-    RSBaseRenderUtil::WritePixelMapToPng(*dragData);
     dragData_ = dragData;
     pointerStyle_ = pointerStyle;
 }

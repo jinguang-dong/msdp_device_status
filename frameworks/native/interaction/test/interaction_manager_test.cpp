@@ -55,9 +55,9 @@ void InteractionManagerTest::TearDown()
 
 int32_t CreatePixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
 {
-    uint32_t errorCode = 0;
     Media::SourceOptions opts;
     opts.formatHint = "image/jpg";
+    uint32_t errorCode = 0;
     std::unique_ptr<Media::ImageSource> imageSource =
         Media::ImageSource::CreateImageSource(IMAGE_INPUT_JPG_PATH, opts, errorCode);
     Media::ImageInfo imageInfo;
