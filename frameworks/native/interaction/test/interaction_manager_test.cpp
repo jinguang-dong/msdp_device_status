@@ -308,50 +308,17 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState, Te
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
-/**
- * @tc.name: InteractionManagerTest_StartDrag
- * @tc.desc: Start Drag
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDragShare, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    DragData dragData;
-    int32_t ret = SetParamShare(dragData);
-    ASSERT_EQ(ret, RET_OK);
-    std::function<void(int32_t)> callback = [](int32_t result) {
-        FI_HILOGD("StartDrag success");
-    };
-    ret = InteractionManager::GetInstance()->StartDrag(dragData, callback);
-    ASSERT_EQ(ret, RET_OK);
-}
-
-/**
- * @tc.name: InteractionManagerTest_StopDrag
- * @tc.desc: Stop drag
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_StopDragShare, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    int32_t result = 0;
-    int32_t ret = InteractionManager::GetInstance()->StopDrag(result);
-    ASSERT_EQ(ret, RET_OK);
-}
-
 // /**
 //  * @tc.name: InteractionManagerTest_StartDrag
 //  * @tc.desc: Start Drag
 //  * @tc.type: FUNC
 //  * @tc.require:
 //  */
-// HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDragHeap, TestSize.Level1)
+// HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDragShare, TestSize.Level1)
 // {
 //     CALL_TEST_DEBUG;
 //     DragData dragData;
-//     int32_t ret = SetParamHeap(dragData);
+//     int32_t ret = SetParamShare(dragData);
 //     ASSERT_EQ(ret, RET_OK);
 //     std::function<void(int32_t)> callback = [](int32_t result) {
 //         FI_HILOGD("StartDrag success");
@@ -366,13 +333,46 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StopDragShare, TestSize.
 //  * @tc.type: FUNC
 //  * @tc.require:
 //  */
-// HWTEST_F(InteractionManagerTest, InteractionManagerTest_StopDragHeap, TestSize.Level1)
+// HWTEST_F(InteractionManagerTest, InteractionManagerTest_StopDragShare, TestSize.Level1)
 // {
 //     CALL_TEST_DEBUG;
 //     int32_t result = 0;
 //     int32_t ret = InteractionManager::GetInstance()->StopDrag(result);
 //     ASSERT_EQ(ret, RET_OK);
 // }
+
+/**
+ * @tc.name: InteractionManagerTest_StartDrag
+ * @tc.desc: Start Drag
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDragHeap, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    int32_t ret = SetParamHeap(dragData);
+    ASSERT_EQ(ret, RET_OK);
+    std::function<void(int32_t)> callback = [](int32_t result) {
+        FI_HILOGD("StartDrag success");
+    };
+    ret = InteractionManager::GetInstance()->StartDrag(dragData, callback);
+    ASSERT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: InteractionManagerTest_StopDrag
+ * @tc.desc: Stop drag
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_StopDragHeap, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    int32_t result = 0;
+    int32_t ret = InteractionManager::GetInstance()->StopDrag(result);
+    ASSERT_EQ(ret, RET_OK);
+}
 
  /**
 *  @tc.name: InteractionManagerTest_GetDragTargetPid

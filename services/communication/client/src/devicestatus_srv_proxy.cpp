@@ -331,10 +331,12 @@ int32_t DeviceStatusSrvProxy::StartDrag(const DragData &dragData)
     // if (dragData.pictureResourse.pixelMap->GetFd() == nullptr) {
     //     FI_HILOGE("context_ is nullptr");
     // }
+    FI_HILOGD("Start marshalling pixelMap");
     if (!dragData.pictureResourse.pixelMap->Marshalling(data)) {
         FI_HILOGE("Failed to marshalling pixelMap");
         return ERR_INVALID_VALUE;
     }
+    FI_HILOGD("Marshalling pixelMap finished");
     WRITEINT32(data, dragData.pictureResourse.x, ERR_INVALID_VALUE);
     WRITEINT32(data, dragData.pictureResourse.y, ERR_INVALID_VALUE);
     WRITEUINT8VECTOR(data, dragData.buffer, ERR_INVALID_VALUE);
