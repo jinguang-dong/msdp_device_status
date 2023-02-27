@@ -328,9 +328,9 @@ int32_t DeviceStatusSrvProxy::StartDrag(const DragData &dragData)
         dragData.pictureResourse.pixelMap->GetWidth(),
         dragData.pictureResourse.pixelMap->GetHeight(),
         dragData.pictureResourse.pixelMap->GetByteCount());
-    if (dragData.pictureResourse.pixelMap->GetFd() == nullptr) {
-        FI_HILOGE("context_ is nullptr");
-    }
+    // if (dragData.pictureResourse.pixelMap->GetFd() == nullptr) {
+    //     FI_HILOGE("context_ is nullptr");
+    // }
     if (!dragData.pictureResourse.pixelMap->Marshalling(data)) {
         FI_HILOGE("Failed to marshalling pixelMap");
         return ERR_INVALID_VALUE;
