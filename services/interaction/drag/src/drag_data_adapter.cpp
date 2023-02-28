@@ -35,10 +35,6 @@ DragDataAdapter::~DragDataAdapter() = default;
 void DragDataAdapter::Init(const DragData &dragData, const MMI::PointerStyle &pointerStyle)
 {
     CALL_DEBUG_ENTER;
-    FI_HILOGD("width:%{public}d, height:%{public}d, ByteCount:%{public}d",
-        dragData.pictureResourse.pixelMap->GetWidth(),
-        dragData.pictureResourse.pixelMap->GetHeight(),
-        dragData.pictureResourse.pixelMap->GetByteCount());
     dragData_ = dragData;
     pointerStyle_ = pointerStyle;
 }

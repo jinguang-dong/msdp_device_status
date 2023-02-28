@@ -31,7 +31,6 @@ using namespace testing::ext;
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "InteractionManagerTest" };
 constexpr int32_t TIME_WAIT_FOR_OP = 100;
-static const std::string IMAGE_INPUT_JPG_PATH_200 = "/data/local/tmp/image/test200.jpg";
 static const std::string IMAGE_INPUT_JPG_PATH_600 = "/data/local/tmp/image/test600.jpg";
 } // namespace
 class InteractionManagerTest : public testing::Test {
@@ -54,7 +53,7 @@ void InteractionManagerTest::TearDown()
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP));
 }
 
-int32_t CreatePixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
+std::shared_ptr<Media::PixelMap> CreatePixelMap()
 {
     Media::SourceOptions opts;
     opts.formatHint = "image/jpg";
@@ -66,17 +65,13 @@ int32_t CreatePixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
     FI_HILOGD("imageInfo.size.width:%{public}d, imageInfo.size.height:%{public}d", imageInfo.size.width, imageInfo.size.width);
     if (errorCode != 0 || imageSource.get() == nullptr) {
         FI_HILOGE("CreateImageSource failed");
-        return RET_ERR;
+        return nullptr;
     }
     Media::DecodeOptions decodeOpts;
     decodeOpts.allocatorType = Media::AllocatorType::SHARE_MEM_ALLOC;
     std::unique_ptr<Media::PixelMap> uniquePixelMap = imageSource->CreatePixelMap(decodeOpts, errorCode);
-    FI_HILOGD("width:%{public}d, height:%{public}d, ByteCount:%{public}d",
-        uniquePixelMap->GetWidth(), uniquePixelMap->GetHeight(), uniquePixelMap->GetByteCount());
-    pixelMap = std::move(uniquePixelMap);
-    FI_HILOGD("width:%{public}d, height:%{public}d, ByteCount:%{public}d",
-        pixelMap->GetWidth(), pixelMap->GetHeight(), pixelMap->GetByteCount());
-    return RET_OK;
+    std::shared_ptr<Media::PixelMap> pixelMap = std::move(uniquePixelMap);
+    return pixelMap;
 }
 
 int32_t CreatePixelMap(int32_t pixelMapWidth, int32_t pixelMapHeight, std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
@@ -92,7 +87,7 @@ int32_t CreatePixelMap(int32_t pixelMapWidth, int32_t pixelMapHeight, std::share
     info.pixelFormat = Media::PixelFormat::RGB_888;
     info.colorSpace = OHOS::Media::ColorSpace::SRGB;
     pixelMap->SetImageInfo(info);
-    int32_t bufferSize = pixelMapWidth * pixelMapHeight;
+    int32_t bufferSize = pixelMap->GetByteCount();
     char *buffer = static_cast<char *>(malloc(bufferSize));
     if (buffer == nullptr) {
         FI_HILOGE("Malloc buffer failed");
@@ -108,26 +103,12 @@ int32_t CreatePixelMap(int32_t pixelMapWidth, int32_t pixelMapHeight, std::share
 
 int32_t SetParamShare(DragData& dragData)
 {
-    uint32_t errorCode = 0;
-    Media::SourceOptions opts;
-    opts.formatHint = "image/jpg";
-    std::unique_ptr<Media::ImageSource> imageSource = 
-        Media::ImageSource::CreateImageSource(IMAGE_INPUT_JPG_PATH_600, opts, errorCode);
-    if (errorCode != 0 || imageSource.get() == nullptr) {
-        FI_HILOGE("CreateImageSource failed");
+    auto pixelMap = CreatePixelMap();
+    if (pixelMap == nullptr) {
+        FI_HILOGE("CreatePixelMap failed");
         return RET_ERR;
     }
-    Media::DecodeOptions decodeOpts;
-    decodeOpts.allocatorType = Media::AllocatorType::SHARE_MEM_ALLOC;
-    std::unique_ptr<Media::PixelMap> uniquePixelMap = imageSource->CreatePixelMap(decodeOpts, errorCode);
-    dragData.pictureResourse.pixelMap = std::move(uniquePixelMap);
-    FI_HILOGD("width:%{public}d, height:%{public}d, ByteCount:%{public}d",
-        dragData.pictureResourse.pixelMap->GetWidth(),
-        dragData.pictureResourse.pixelMap->GetHeight(),
-        dragData.pictureResourse.pixelMap->GetByteCount());
-    if (dragData.pictureResourse.pixelMap->GetFd() == nullptr) {
-        FI_HILOGE("dragData.pictureResourse.pixelMap.context_ is nullptr");
-    }
+    dragData.pictureResourse.pixelMap = pixelMap;
     dragData.pictureResourse.x = 0;
     dragData.pictureResourse.y = 0;
     dragData.buffer = std::vector<uint8_t>(MAX_BUFFER_SIZE, 0);
@@ -308,38 +289,38 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState, Te
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
-// /**
-//  * @tc.name: InteractionManagerTest_StartDrag
-//  * @tc.desc: Start Drag
-//  * @tc.type: FUNC
-//  * @tc.require:
-//  */
-// HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDragShare, TestSize.Level1)
-// {
-//     CALL_TEST_DEBUG;
-//     DragData dragData;
-//     int32_t ret = SetParamShare(dragData);
-//     ASSERT_EQ(ret, RET_OK);
-//     std::function<void(int32_t)> callback = [](int32_t result) {
-//         FI_HILOGD("StartDrag success");
-//     };
-//     ret = InteractionManager::GetInstance()->StartDrag(dragData, callback);
-//     ASSERT_EQ(ret, RET_OK);
-// }
+/**
+ * @tc.name: InteractionManagerTest_StartDrag
+ * @tc.desc: Start Drag
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_Share, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    int32_t ret = SetParamShare(dragData);
+    ASSERT_EQ(ret, RET_OK);
+    std::function<void(int32_t)> callback = [](int32_t result) {
+        FI_HILOGD("StartDrag success");
+    };
+    ret = InteractionManager::GetInstance()->StartDrag(dragData, callback);
+    ASSERT_EQ(ret, RET_OK);
+}
 
-// /**
-//  * @tc.name: InteractionManagerTest_StopDrag
-//  * @tc.desc: Stop drag
-//  * @tc.type: FUNC
-//  * @tc.require:
-//  */
-// HWTEST_F(InteractionManagerTest, InteractionManagerTest_StopDragShare, TestSize.Level1)
-// {
-//     CALL_TEST_DEBUG;
-//     int32_t result = 0;
-//     int32_t ret = InteractionManager::GetInstance()->StopDrag(result);
-//     ASSERT_EQ(ret, RET_OK);
-// }
+/**
+ * @tc.name: InteractionManagerTest_StopDrag
+ * @tc.desc: Stop drag
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_StopDrag_Share, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    int32_t result = 0;
+    int32_t ret = InteractionManager::GetInstance()->StopDrag(result);
+    ASSERT_EQ(ret, RET_OK);
+}
 
 /**
  * @tc.name: InteractionManagerTest_StartDrag
@@ -347,7 +328,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDragHeap, TestSize.Level1)
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_Heap, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     DragData dragData;
@@ -366,7 +347,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDragHeap, TestSize.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_StopDragHeap, TestSize.Level1)
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_StopDrag_Heap, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t result = 0;

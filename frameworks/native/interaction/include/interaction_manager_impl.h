@@ -50,7 +50,7 @@ public:
 
 private:
     void InitMsgHandler();
-
+    void DisconnectClient();
 private:
     std::mutex mutex_;
     IClientPtr client_ { nullptr };

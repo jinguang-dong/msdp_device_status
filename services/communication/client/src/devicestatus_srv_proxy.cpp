@@ -323,23 +323,9 @@ int32_t DeviceStatusSrvProxy::StartDrag(const DragData &dragData)
         return ERR_INVALID_VALUE;
     }
     CHKPR(dragData.pictureResourse.pixelMap, RET_ERR);
-
-    FI_HILOGD("Proxy: width:%{public}d, height:%{public}d, ByteCount:%{public}d",
-        dragData.pictureResourse.pixelMap->GetWidth(),
-        dragData.pictureResourse.pixelMap->GetHeight(),
-        dragData.pictureResourse.pixelMap->GetByteCount());
-    // if (dragData.pictureResourse.pixelMap->GetFd() == nullptr) {
-    //     FI_HILOGE("context_ is nullptr");
-    // }
-    for (int32_t i = 0; i< 100; i++) {
-        FI_HILOGE("Start marshalling pixelMap");
-    }
     if (!dragData.pictureResourse.pixelMap->Marshalling(data)) {
         FI_HILOGE("Failed to marshalling pixelMap");
         return ERR_INVALID_VALUE;
-    }
-    for (int32_t i = 0; i< 100; i++) {
-    FI_HILOGE("Marshalling pixelMap finished");
     }
     WRITEINT32(data, dragData.pictureResourse.x, ERR_INVALID_VALUE);
     WRITEINT32(data, dragData.pictureResourse.y, ERR_INVALID_VALUE);
