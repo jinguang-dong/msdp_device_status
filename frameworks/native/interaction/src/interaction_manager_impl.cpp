@@ -214,9 +214,7 @@ int32_t InteractionManagerImpl::StopDrag(int32_t result)
 {
     CALL_DEBUG_ENTER;
     int32_t ret = dragManagerImpl_.StopDrag(result);
-    if (ret == RET_OK) {
-        DisconnectClient();
-    }
+    DisconnectClient();
     return ret;
 }
 
