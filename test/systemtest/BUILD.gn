@@ -40,7 +40,6 @@ ohos_systemtest("DeviceStatusClientTest") {
     "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
     "${device_status_frameworks_path}/js/napi:stationary",
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
-    "//drivers/peripheral/sensor/hal:hdi_sensor",
     "//third_party/googletest:gtest_main",
   ]
 

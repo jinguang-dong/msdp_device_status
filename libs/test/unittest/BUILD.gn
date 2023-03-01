@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -49,7 +49,6 @@ ohos_unittest("device_status_algorithm_test") {
     "${device_status_root_path}/services:devicestatus_service",
     "//base/msdp/device_status/libs:devicestatus_algo",
     "//commonlibrary/c_utils/base:utils",
-    "//drivers/peripheral/sensor/hal:hdi_sensor",
     "//foundation/multimodalinput/input/util:libmmi-util",
     "//third_party/cJSON:cjson_static",
     "//third_party/googletest:gtest_main",
@@ -85,7 +84,6 @@ ohos_unittest("device_status_datahub_test") {
     "//base/msdp/device_status/libs:devicestatus_algo",
     "//base/msdp/device_status/libs:devicestatus_mock",
     "//commonlibrary/c_utils/base:utils",
-    "//drivers/peripheral/sensor/hal:hdi_sensor",
     "//foundation/multimodalinput/input/util:libmmi-util",
     "//third_party/cJSON:cjson_static",
     "//third_party/googletest:gtest_main",
@@ -99,6 +97,39 @@ ohos_unittest("device_status_datahub_test") {
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "sensor:sensor_interface_native",
+  ]
+}
+
+ohos_unittest("device_status_dataparse_test") {
+  module_out_path = module_output_path
+
+  sources = [ "src/device_status_dataparse_test.cpp" ]
+
+  configs = [
+    "${device_status_utils_path}:devicestatus_utils_config",
+    ":devicestatus_private_config",
+  ]
+
+  deps = [
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "${device_status_root_path}/services:devicestatus_service",
+    "../../../libs:devicestatus_algo",
+    "../../../libs:devicestatus_mock",
+    "//third_party/cJSON:cjson_static",
+    "//third_party/googletest:gtest_main",
+    "//third_party/jsoncpp",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "access_token:libaccesstoken_sdk",
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "sensor:sensor_interface_native",
@@ -121,7 +152,6 @@ ohos_unittest("device_status_mock_test") {
     "//base/msdp/device_status/libs:devicestatus_algo",
     "//base/msdp/device_status/libs:devicestatus_mock",
     "//commonlibrary/c_utils/base:utils",
-    "//drivers/peripheral/sensor/hal:hdi_sensor",
     "//foundation/multimodalinput/input/util:libmmi-util",
     "//third_party/cJSON:cjson_static",
     "//third_party/googletest:gtest_main",
@@ -149,6 +179,7 @@ group("unittest") {
   deps += [
     ":device_status_algorithm_test",
     ":device_status_datahub_test",
+    ":device_status_dataparse_test",
     ":device_status_mock_test",
   ]
 }
