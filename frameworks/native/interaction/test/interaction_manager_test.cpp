@@ -62,7 +62,8 @@ std::shared_ptr<Media::PixelMap> CreatePixelMap()
         Media::ImageSource::CreateImageSource(IMAGE_INPUT_JPG_PATH_600, opts, errorCode);
     Media::ImageInfo imageInfo;
     imageSource->GetImageInfo(0, imageInfo);
-    FI_HILOGD("imageInfo.size.width:%{public}d, imageInfo.size.height:%{public}d", imageInfo.size.width, imageInfo.size.width);
+    FI_HILOGD("imageInfo.size.width:%{public}d, imageInfo.size.height:%{public}d",
+        imageInfo.size.width, imageInfo.size.width);
     if (errorCode != 0 || imageSource.get() == nullptr) {
         FI_HILOGE("CreateImageSource failed");
         return nullptr;
@@ -121,7 +122,7 @@ int32_t SetParamShare(DragData& dragData)
 int32_t SetParamHeap(DragData& dragData)
 {
     auto pixelMap = std::make_shared<OHOS::Media::PixelMap>();
-    if (CreatePixelMap(600, 600, pixelMap) != RET_OK) {
+    if (CreatePixelMap(MAX_PIXEL_MAP_WIDTH, MAX_PIXEL_MAP_HEIGHT, pixelMap) != RET_OK) {
         FI_HILOGE("CreatePixelMap failed");
         return RET_ERR;
     }
@@ -133,7 +134,6 @@ int32_t SetParamHeap(DragData& dragData)
     dragData.pointerId = 0;
     dragData.dragNum = 1;
     return RET_OK;
-
 }
 
 /**

@@ -76,8 +76,8 @@ int32_t DragManager::StartDrag(const DragData &dragData, SessionPtr sess)
         FI_HILOGE("InitDataAdapter failed");
         return RET_ERR;
     }
-    if (LaunchDrag() != RET_OK) {
-        FI_HILOGE("LaunchDrag failed");
+    if (OnStartDrag() != RET_OK) {
+        FI_HILOGE("OnStartDrag failed");
         return RET_ERR;
     }
     INPUT_MANAGER->SetPointerVisible(false);
@@ -94,8 +94,8 @@ int32_t DragManager::StopDrag(int32_t result)
         return RET_ERR;
     }
     INPUT_MANAGER->SetPointerVisible(true);
-    if (RestoreDrag() != RET_OK) {
-        FI_HILOGE("RestoreDrag failed");
+    if (OnStopDrag() != RET_OK) {
+        FI_HILOGE("OnStopDrag failed");
         return RET_ERR;
     }
     dragState_ = DragMessage::MSG_DRAG_STATE_STOP;
@@ -154,7 +154,7 @@ void DragManager::OnDragUp(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CALL_DEBUG_ENTER;
     CHKPV(pointerEvent);
-    FetchDragTargetPid(pointerEvent);
+    SetDragTargetPid(pointerEvent);
 }
 
 void DragManager::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const
@@ -190,7 +190,7 @@ int32_t DragManager::InitDataAdapter(const DragData &dragData) const
     return RET_OK;
 }
 
-int32_t DragManager::LaunchDrag()
+int32_t DragManager::OnStartDrag()
 {
     auto extraData = CreateExtraData(true);
     INPUT_MANAGER->AppendExtraData(extraData);
@@ -204,7 +204,7 @@ int32_t DragManager::LaunchDrag()
     return RET_OK;
 }
 
-int32_t DragManager::RestoreDrag()
+int32_t DragManager::OnStopDrag()
 {
     auto extraData = CreateExtraData(false);
     INPUT_MANAGER->AppendExtraData(extraData);
@@ -217,11 +217,14 @@ int32_t DragManager::RestoreDrag()
     return RET_ERR;
 }
 
-void DragManager::FetchDragTargetPid(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+void DragManager::SetDragTargetPid(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
-    dragTargetPid_ = INPUT_MANAGER->GetWindowPid(pointerItem.GetTargetWindowId());
+    int32_t windowId = pointerItem.GetTargetWindowId();
+    FI_HILOGD("windowId:%{public}d", windowId);
+    dragTargetPid_ = INPUT_MANAGER->GetWindowPid(windowId);
+    FI_HILOGD("dragTargetPid_:%{public}d", dragTargetPid_);
 }
 
 } // namespace DeviceStatus
