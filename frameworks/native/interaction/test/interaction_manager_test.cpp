@@ -142,7 +142,6 @@ int32_t SetParamHeap(DragData& dragData)
     return RET_OK;
 }
 
-
 std::shared_ptr<MMI::PointerEvent> SetupPointerEvent(
     int32_t displayX, int32_t displayY, int32_t action, int32_t sourceType, int32_t pointerId)
 {
