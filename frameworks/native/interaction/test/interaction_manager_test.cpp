@@ -38,6 +38,12 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "Inter
 constexpr int32_t TIME_WAIT_FOR_OP = 100;
 static const std::string IMAGE_INPUT_JPG_PATH_600 = "/data/local/tmp/image/test600.jpg";
 #define INPUT_MANAGER  MMI::InputManager::GetInstance()
+static bool stopCallbackFlag { false };
+static int32_t dragSrcX { 0 };
+static int32_t dragSrcY { 0 };
+static int32_t dragDstX { 50 };
+static int32_t dragDstY { 50 };
+#define INPUT_MANAGER  MMI::InputManager::GetInstance()
 } // namespace
 class InteractionManagerTest : public testing::Test {
 public:
@@ -108,7 +114,7 @@ int32_t CreatePixelMap(int32_t pixelMapWidth, int32_t pixelMapHeight, std::share
     return RET_OK;
 }
 
-int32_t SetParamShare(DragData& dragData)
+int32_t SetParamShare(DragData& dragData, int32_t sourceType)
 {
     auto pixelMap = CreatePixelMap();
     if (pixelMap == nullptr) {
@@ -119,13 +125,13 @@ int32_t SetParamShare(DragData& dragData)
     dragData.pictureResourse.x = 0;
     dragData.pictureResourse.y = 0;
     dragData.buffer = std::vector<uint8_t>(MAX_BUFFER_SIZE, 0);
-    dragData.sourceType = MMI::PointerEvent::SOURCE_TYPE_MOUSE;
+    dragData.sourceType = sourceType;
     dragData.pointerId = 0;
     dragData.dragNum = 1;
     return RET_OK;
 }
 
-int32_t SetParamHeap(DragData& dragData)
+int32_t SetParamHeap(DragData& dragData, int32_t sourceType)
 {
     auto pixelMap = std::make_shared<OHOS::Media::PixelMap>();
     if (CreatePixelMap(MAX_PIXEL_MAP_WIDTH, MAX_PIXEL_MAP_HEIGHT, pixelMap) != RET_OK) {
@@ -136,15 +142,17 @@ int32_t SetParamHeap(DragData& dragData)
     dragData.pictureResourse.x = 0;
     dragData.pictureResourse.y = 0;
     dragData.buffer = std::vector<uint8_t>(MAX_BUFFER_SIZE, 0);
-    dragData.sourceType = MMI::PointerEvent::SOURCE_TYPE_MOUSE;
+    dragData.sourceType = sourceType;
     dragData.pointerId = 0;
     dragData.dragNum = 1;
     return RET_OK;
 }
 
 std::shared_ptr<MMI::PointerEvent> SetupPointerEvent(
-    int32_t displayX, int32_t displayY, int32_t action, int32_t sourceType, int32_t pointerId)
+    std::pair<int, int> displayLoc, int32_t action, int32_t sourceType, int32_t pointerId, bool pressed)
 {
+    int32_t displayX = displayLoc.first;
+    int32_t displayY = displayLoc.second;
     auto pointerEvent = MMI::PointerEvent::Create();
     CHKPP(pointerEvent);
     MMI::PointerEvent::PointerItem item;
@@ -158,26 +166,25 @@ std::shared_ptr<MMI::PointerEvent> SetupPointerEvent(
     item.SetPointerId(1);
     item.SetDisplayX(623);
     item.SetDisplayY(823); 
-    item.SetPressure(0);
+    item.SetPressure(5);
     item.SetDeviceId(1);
     pointerEvent->AddPointerItem(item);
 
     pointerEvent->SetPointerAction(action);
     pointerEvent->SetPointerId(pointerId);
     pointerEvent->SetSourceType(sourceType);
+    item.SetPressed(pressed);
     return pointerEvent;
 }
 
 void SimulateDown(std::pair<int, int> loc, int32_t sourceType, int32_t pointerId)
 {
-    int32_t x = loc.first;
-    int32_t y = loc.second;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = 
-        SetupPointerEvent(x, y, MMI::PointerEvent::POINTER_ACTION_DOWN, sourceType, pointerId);
-        INPUT_MANAGER->SimulateInputEvent(pointerEvent);
+        SetupPointerEvent(loc, MMI::PointerEvent::POINTER_ACTION_DOWN, sourceType, pointerId, true);
+    INPUT_MANAGER->SimulateInputEvent(pointerEvent);
 }
 
-void SimulateMove(std::pair<int, int> srcLoc, std::pair<int, int> dstLoc, int32_t sourceType, int32_t pointerId)
+void SimulateMove(std::pair<int, int> srcLoc, std::pair<int, int> dstLoc, int32_t sourceType, int32_t pointerId, bool isPressed)
 {
     int32_t srcX = srcLoc.first;
     int32_t srcY = srcLoc.second;
@@ -193,26 +200,24 @@ void SimulateMove(std::pair<int, int> srcLoc, std::pair<int, int> dstLoc, int32_
             pointers.push_back({x, srcY});
         }
     } else {
-        int32_t slope = (dstY - srcY) / (dstX - srcX);
+        double slope = static_cast<double>(dstY - srcY) / (dstX - srcX);
         for (int32_t x = srcX; x < dstX; x++) {
-            pointers.push_back({x, srcY + slope * (x - srcX)});
+            pointers.push_back({x, srcY + static_cast<int32_t>(slope * (x - srcX))});
         }
         pointers.push_back({dstX, dstY});
     }
     for (const auto& pointer : pointers) {
         std::shared_ptr<MMI::PointerEvent> pointerEvent = 
-        SetupPointerEvent(pointer.first , pointer.second, MMI::PointerEvent::POINTER_ACTION_MOVE,sourceType, pointerId);
+        SetupPointerEvent(pointer, MMI::PointerEvent::POINTER_ACTION_MOVE,sourceType, pointerId, isPressed);
         INPUT_MANAGER->SimulateInputEvent(pointerEvent);
-        usleep(10);
+        sleep(1);
     }
 }
 
 void SimulateUp(std::pair<int, int> loc, int32_t sourceType, int32_t pointerId)
 {
-    int32_t x = loc.first;
-    int32_t y = loc.second;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = 
-    SetupPointerEvent(x, y, MMI::PointerEvent::POINTER_ACTION_UP, sourceType, pointerId);
+    SetupPointerEvent(loc, MMI::PointerEvent::POINTER_ACTION_UP, sourceType, pointerId, false);
     INPUT_MANAGER->SimulateInputEvent(pointerEvent);
 }
 
@@ -379,12 +384,16 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_Share, TestSiz
 {
     CALL_TEST_DEBUG;
     DragData dragData;
-    int32_t ret = SetParamShare(dragData);
+    int32_t ret = SetParamShare(dragData, MMI::PointerEvent::SOURCE_TYPE_MOUSE);
     ASSERT_EQ(ret, RET_OK);
+    stopCallbackFlag = false;
     std::function<void(int32_t)> callback = [](int32_t result) {
-        FI_HILOGD("StartDrag success");
+        FI_HILOGD("result:%{public}d", dragParam.result);
+        stopCallbackFlag = true;
     };
+    SimulateDown({dragSrcX, dragSrcY}, MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0);
     ret = InteractionManager::GetInstance()->StartDrag(dragData, callback);
+    SimulateMove({dragSrcX, dragSrcY}, {dragDstX, dragDstY}, MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0, true);
     ASSERT_EQ(ret, RET_OK);
 }
 
@@ -398,7 +407,9 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StopDrag_Share, TestSize
 {
     CALL_TEST_DEBUG;
     int32_t result = 0;
+    SimulateUp({dragDstX, dragDstY}, MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0);
     int32_t ret = InteractionManager::GetInstance()->StopDrag(result);
+    ASSERT_TRUE(stopCallbackFlag);
     ASSERT_EQ(ret, RET_OK);
 }
 
@@ -412,12 +423,16 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_Heap, TestSize
 {
     CALL_TEST_DEBUG;
     DragData dragData;
-    int32_t ret = SetParamHeap(dragData);
+    int32_t ret = SetParamHeap(dragData, MMI::PointerEvent::SOURCE_TYPE_MOUSE);
     ASSERT_EQ(ret, RET_OK);
+    stopCallbackFlag = false;
     std::function<void(int32_t)> callback = [](int32_t result) {
-        FI_HILOGD("StartDrag success");
+        FI_HILOGD("result:%{public}d", dragParam.result);
+        stopCallbackFlag = true;
     };
+    SimulateDown({dragSrcX, dragSrcY}, MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0);
     ret = InteractionManager::GetInstance()->StartDrag(dragData, callback);
+    SimulateMove({dragSrcX, dragSrcY}, {dragDstX, dragDstY}, MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0, true);
     ASSERT_EQ(ret, RET_OK);
 }
 
@@ -431,7 +446,9 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StopDrag_Heap, TestSize.
 {
     CALL_TEST_DEBUG;
     int32_t result = 0;
+    SimulateUp({dragDstX, dragDstY}, MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0);
     int32_t ret = InteractionManager::GetInstance()->StopDrag(result);
+    ASSERT_TRUE(stopCallbackFlag);
     ASSERT_EQ(ret, RET_OK);
 }
 
