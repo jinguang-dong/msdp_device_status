@@ -14,9 +14,14 @@
  */
 
 #include <iostream>
+#include <vector>
+#include <utility>
+
+#include <unistd.h>
 
 #include <gtest/gtest.h>
 #include "image_source.h"
+#include "input_manager.h"
 #include "pointer_event.h"
 
 #include "coordination_message.h"
@@ -32,6 +37,7 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "InteractionManagerTest" };
 constexpr int32_t TIME_WAIT_FOR_OP = 100;
 static const std::string IMAGE_INPUT_JPG_PATH_600 = "/data/local/tmp/image/test600.jpg";
+#define INPUT_MANAGER  MMI::InputManager::GetInstance()
 } // namespace
 class InteractionManagerTest : public testing::Test {
 public:
@@ -134,6 +140,81 @@ int32_t SetParamHeap(DragData& dragData)
     dragData.pointerId = 0;
     dragData.dragNum = 1;
     return RET_OK;
+}
+
+
+std::shared_ptr<MMI::PointerEvent> SetupPointerEvent(
+    int32_t displayX, int32_t displayY, int32_t action, int32_t sourceType, int32_t pointerId)
+{
+    auto pointerEvent = MMI::PointerEvent::Create();
+    CHKPP(pointerEvent);
+    MMI::PointerEvent::PointerItem item;
+    item.SetPointerId(0);
+    item.SetDisplayX(displayX);
+    item.SetDisplayY(displayY);
+    item.SetPressure(5);
+    item.SetDeviceId(1);
+    pointerEvent->AddPointerItem(item);
+
+    item.SetPointerId(1);
+    item.SetDisplayX(623);
+    item.SetDisplayY(823); 
+    item.SetPressure(0);
+    item.SetDeviceId(1);
+    pointerEvent->AddPointerItem(item);
+
+    pointerEvent->SetPointerAction(action);
+    pointerEvent->SetPointerId(pointerId);
+    pointerEvent->SetSourceType(sourceType);
+    return pointerEvent;
+}
+
+void SimulateDown(std::pair<int, int> loc, int32_t sourceType, int32_t pointerId)
+{
+    int32_t x = loc.first;
+    int32_t y = loc.second;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = 
+        SetupPointerEvent(x, y, MMI::PointerEvent::POINTER_ACTION_DOWN, sourceType, pointerId);
+        INPUT_MANAGER->SimulateInputEvent(pointerEvent);
+}
+
+void SimulateMove(std::pair<int, int> srcLoc, std::pair<int, int> dstLoc, int32_t sourceType, int32_t pointerId)
+{
+    int32_t srcX = srcLoc.first;
+    int32_t srcY = srcLoc.second;
+    int32_t dstX = dstLoc.first;
+    int32_t dstY = dstLoc.second;
+    std::vector<std::pair<int32_t, int32_t>> pointers;
+    if (dstX - srcX == 0) {
+        for (int32_t y = srcY; y <= dstY; y++) {
+            pointers.push_back({srcX, y});
+        }
+    } else if (dstY - srcY == 0) {
+        for (int32_t x = srcX; x <= dstX; x++) {
+            pointers.push_back({x, srcY});
+        }
+    } else {
+        int32_t slope = (dstY - srcY) / (dstX - srcX);
+        for (int32_t x = srcX; x < dstX; x++) {
+            pointers.push_back({x, srcY + slope * (x - srcX)});
+        }
+        pointers.push_back({dstX, dstY});
+    }
+    for (const auto& pointer : pointers) {
+        std::shared_ptr<MMI::PointerEvent> pointerEvent = 
+        SetupPointerEvent(pointer.first , pointer.second, MMI::PointerEvent::POINTER_ACTION_MOVE,sourceType, pointerId);
+        INPUT_MANAGER->SimulateInputEvent(pointerEvent);
+        usleep(10);
+    }
+}
+
+void SimulateUp(std::pair<int, int> loc, int32_t sourceType, int32_t pointerId)
+{
+    int32_t x = loc.first;
+    int32_t y = loc.second;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = 
+    SetupPointerEvent(x, y, MMI::PointerEvent::POINTER_ACTION_UP, sourceType, pointerId);
+    INPUT_MANAGER->SimulateInputEvent(pointerEvent);
 }
 
 /**
