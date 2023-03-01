@@ -230,9 +230,10 @@ void DeviceStatusService::Subscribe(Type type, ActivityEvent event, ReportLatenc
     appInfo->type = type;
     appInfo->callback = callback;
     DeviceStatusDumper::GetInstance().SaveAppInfo(appInfo);
+    StartTrace(HITRACE_TAG_MSDP, "serviceSubscribeStart");
     devicestatusManager_->Subscribe(type, event, latency, callback);
-    DEV_HILOGD(SERVICE, "Exit");
     FinishTrace(HITRACE_TAG_MSDP);
+    DEV_HILOGD(SERVICE, "Exit");
     ReportSensorSysEvent(type, true);
     WriteSubscribeHiSysEvent(appInfo->uid, appInfo->packageName, type);
 }
@@ -252,7 +253,6 @@ void DeviceStatusService::Unsubscribe(Type type, ActivityEvent event, sptr<IRemo
     appInfo->packageName = DeviceStatusDumper::GetInstance().GetPackageName(appInfo->tokenId);
     appInfo->type = type;
     appInfo->callback = callback;
-    DeviceStatusDumper::GetInstance().RemoveAppInfo(appInfo);
     StartTrace(HITRACE_TAG_MSDP, "serviceUnSubscribeStart");
     devicestatusManager_->Unsubscribe(type, event, callback);
     FinishTrace(HITRACE_TAG_MSDP);

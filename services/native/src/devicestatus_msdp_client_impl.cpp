@@ -24,6 +24,7 @@
 #include <sys/epoll.h>
 #include <sys/timerfd.h>
 
+#include "hitrace_meter.h"
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
 
@@ -97,6 +98,7 @@ ErrCode DeviceStatusMsdpClientImpl::AlgoHandle(Type type)
         DEV_HILOGE(SERVICE, "Algo Library is not support");
         return RET_ERR;
     }
+    StartTrace(HITRACE_TAG_MSDP, "AlgorithmStart");
     if (StartAlgo(type) == RET_ERR) {
         DEV_HILOGE(SERVICE, "Start algo Library failed");
         return RET_ERR;
@@ -117,6 +119,7 @@ ErrCode DeviceStatusMsdpClientImpl::AlgoHandle(Type type)
         iter->second++;
     }
     RegisterAlgo();
+    FinishTrace(HITRACE_TAG_MSDP);
     DEV_HILOGI(SERVICE, "algoCallCount_ %{public}d", algoCallCount_[type]);
     return RET_OK;
 }

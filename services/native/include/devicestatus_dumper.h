@@ -65,6 +65,7 @@ public:
     void ExecutDump(int32_t fd, const std::vector<Data> &datas, int32_t info);
     void DumpHelpInfo(int32_t fd) const;
     void DumpDeviceStatusSubscriber(int32_t fd);
+    void DumpDeviceStatusUnsubscriber(int32_t fd);
     void DumpDeviceStatusChanges(int32_t fd);
     void DumpDeviceStatusCurrentStatus(int32_t fd, const std::vector<Data> &datas) const;
     void SaveAppInfo(std::shared_ptr<AppInfo> appInfo);

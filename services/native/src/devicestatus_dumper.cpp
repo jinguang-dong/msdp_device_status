@@ -56,6 +56,7 @@ void DeviceStatusDumper::ParseLong(int32_t fd, const std::vector<std::string> &a
     struct option dumpOptions[] = {
         { "help", no_argument, 0, 'h' },
         { "subscribe", no_argument, 0, 's' },
+        { "unsubscribe", no_argument, 0, 'u' },
         { "list", no_argument, 0, 'l' },
         { "current", no_argument, 0, 'c' },
         { "coordination", no_argument, 0, 'o' },
@@ -83,7 +84,7 @@ void DeviceStatusDumper::ParseLong(int32_t fd, const std::vector<std::string> &a
             goto RELEASE_RES;
         }
     }
-    while ((c = getopt_long(args.size(), argv, "hslcod", dumpOptions, &optionIndex)) != -1) {
+    while ((c = getopt_long(args.size(), argv, "hsulcod", dumpOptions, &optionIndex)) != -1) {
         ExecutDump(fd, datas, c);
     }
     RELEASE_RES:
@@ -104,6 +105,10 @@ void DeviceStatusDumper::ExecutDump(int32_t fd, const std::vector<Data> &datas, 
         }
         case 's': {
             DumpDeviceStatusSubscriber(fd);
+            break;
+        }
+        case 'u': {
+            DumpDeviceStatusUnsubscriber(fd);
             break;
         }
         case 'l': {
@@ -134,6 +139,25 @@ void DeviceStatusDumper::ExecutDump(int32_t fd, const std::vector<Data> &datas, 
 }
 
 void DeviceStatusDumper::DumpDeviceStatusSubscriber(int32_t fd)
+{
+    DEV_HILOGD(SERVICE, "start");
+    if (appInfoMap_.empty()) {
+        DEV_HILOGE(SERVICE, "appInfoMap_ is empty");
+        return;
+    }
+    std::string startTime;
+    DumpCurrentTime(startTime);
+    dprintf(fd, "Current time: %s \n", startTime.c_str());
+    for (const auto &item : appInfoMap_) {
+        for (auto appInfo : item.second) {
+            dprintf(fd, "startTime:%s | uid:%d | pid:%d | type:%s | packageName:%s\n",
+                appInfo->startTime.c_str(), appInfo->uid, appInfo->pid, GetStatusType(appInfo->type).c_str(),
+                appInfo->packageName.c_str());
+        }
+    }
+}
+
+void DeviceStatusDumper::DumpDeviceStatusUnsubscriber(int32_t fd)
 {
     DEV_HILOGD(SERVICE, "start");
     if (appInfoMap_.empty()) {
@@ -271,6 +295,7 @@ void DeviceStatusDumper::DumpHelpInfo(int32_t fd) const
     dprintf(fd, "Usage:\n");
     dprintf(fd, "      -h: dump help\n");
     dprintf(fd, "      -s: dump the subscribers\n");
+    dprintf(fd, "      -u: dump the unsubscribers\n");
     dprintf(fd, "      -l: dump the last 10 device status change\n");
     dprintf(fd, "      -c: dump the current device status\n");
     dprintf(fd, "      -o: dump the coordination status\n");
