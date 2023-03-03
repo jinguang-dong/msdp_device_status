@@ -42,11 +42,6 @@ struct DragData {
     int32_t pointerId { -1 };
 };
 
-enum class DragState {
-    FREE = 0,
-    DRAGGING = 1
-};
-
 enum class DragCursorStyle {
     FORBIDDEN,
     ALLOWABLE

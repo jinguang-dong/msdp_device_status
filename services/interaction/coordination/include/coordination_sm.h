@@ -64,7 +64,7 @@ struct PointerFilter : public MMI::IInputEventFilter {
             return false;
         }
         if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-            OHOS::MMI::InputManager::GetInstance()->RemoveInputEventFilter(filterId_);
+            MMI::InputManager::GetInstance()->RemoveInputEventFilter(filterId_);
             filterId_ = -1;
             return true;
         }

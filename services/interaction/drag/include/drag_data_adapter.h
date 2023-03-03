@@ -40,7 +40,7 @@ public:
 
 private:
     DragData dragData_;
-    OHOS::MMI::PointerStyle pointerStyle_;
+    MMI::PointerStyle pointerStyle_;
     int32_t dragStyle_ { -1 };
     std::u16string dragMessage_;
 };
