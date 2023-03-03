@@ -155,6 +155,8 @@ void DragManager::OnDragUp(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     CALL_DEBUG_ENTER;
     CHKPV(pointerEvent);
     SetDragTargetPid(pointerEvent);
+    auto extraData = CreateExtraData(false);
+    INPUT_MANAGER->AppendExtraData(extraData);
 }
 
 void DragManager::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const
@@ -206,8 +208,6 @@ int32_t DragManager::OnStartDrag()
 
 int32_t DragManager::OnStopDrag()
 {
-    auto extraData = CreateExtraData(false);
-    INPUT_MANAGER->AppendExtraData(extraData);
     if ((monitorId_ > 0) && (monitorId_ < std::numeric_limits<int32_t>::max())) {
         INPUT_MANAGER->RemoveMonitor(monitorId_);
         monitorId_ = -1;
