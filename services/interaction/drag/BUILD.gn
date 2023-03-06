@@ -46,7 +46,7 @@ ohos_shared_library("interaction_drag") {
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "multimedia_image_framework:image_native",
     "window_manager:libdm",
   ]

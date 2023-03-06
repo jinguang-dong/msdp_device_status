@@ -208,6 +208,7 @@ bool SensorDataCallback::UnregisterCallbackSensor(int32_t sensorTypeId)
 
 void SensorDataCallback::AlgorithmLoop()
 {
+    SetThreadName(std::string(" sensor_data_cb"));
     DEV_HILOGD(SERVICE, "enter");
     while (alive_) {
         sem_wait(&sem_);

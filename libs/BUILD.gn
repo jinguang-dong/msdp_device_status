@@ -81,7 +81,7 @@ ohos_shared_library("devicestatus_algo") {
     "ability_base:base",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "sensor:sensor_interface_native",

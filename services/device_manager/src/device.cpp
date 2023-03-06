@@ -26,6 +26,7 @@
 #include <sys/ioctl.h>
 
 #include <openssl/sha.h>
+#include "secure.h"
 
 #include "devicestatus_define.h"
 #include "devicestatus_errors.h"
@@ -119,7 +120,7 @@ void Device::QueryDeviceInfo()
 {
     CALL_DEBUG_ENTER;
     char buffer[PATH_MAX];
-    memset(buffer, 0, sizeof(buffer));
+    memset_s(buffer,  sizeof(buffer),0, sizeof(buffer));
     int32_t rc = ioctl(fd_, EVIOCGNAME(sizeof(buffer) - 1), &buffer);
     if (rc < 0) {
         FI_HILOGE("Could not get device name: %{public}s", strerror(errno));

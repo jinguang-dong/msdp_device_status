@@ -223,6 +223,7 @@ void DeviceStatusMsdpMock::StartThread()
 
 void DeviceStatusMsdpMock::LoopingThreadEntry()
 {
+    SetThreadName(std::string("dev_msdp_mock"));
     if (callbacks_.empty()) {
         DEV_HILOGD(SERVICE, "callbacks_ is empty");
         return;
