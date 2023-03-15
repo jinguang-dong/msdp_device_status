@@ -50,6 +50,8 @@ int32_t DeviceStatusSrvStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
         {Idevicestatus::DEVICESTATUS_SUBSCRIBE, &DeviceStatusSrvStub::SubscribeStub},
         {Idevicestatus::DEVICESTATUS_UNSUBSCRIBE, &DeviceStatusSrvStub::UnsubscribeStub},
         {Idevicestatus::DEVICESTATUS_GETCACHE, &DeviceStatusSrvStub::GetLatestDeviceStatusDataStub},
+        {Idevicestatus::CREATE_DATA_CHANNEL, &DeviceStatusSrvStub::CreateDataChannelStub},
+        {Idevicestatus::DESTORY_DATA_CHANNEL, &DeviceStatusSrvStub::DestoryDataChannelStub},
         {Idevicestatus::REGISTER_COORDINATION_MONITOR, &DeviceStatusSrvStub::RegisterCoordinationMonitorStub},
         {Idevicestatus::UNREGISTER_COORDINATION_MONITOR, &DeviceStatusSrvStub::UnregisterCoordinationMonitorStub},
         {Idevicestatus::ENABLE_COORDINATION, &DeviceStatusSrvStub::EnableCoordinationStub},
@@ -86,13 +88,7 @@ int32_t DeviceStatusSrvStub::SubscribeStub(MessageParcel& data, MessageParcel& r
     int32_t latency = -1;
     READINT32(data, latency, E_DEVICESTATUS_READ_PARCEL_ERROR);
     DEV_HILOGD(SERVICE, "Read latency successfully");
-    sptr<IRemoteObject> obj = data.ReadRemoteObject();
-    DEV_RET_IF_NULL_WITH_RET((obj == nullptr), E_DEVICESTATUS_READ_PARCEL_ERROR);
-    DEV_HILOGI(SERVICE, "Read remote obj successfully");
-    sptr<IRemoteDevStaCallback> callback = iface_cast<IRemoteDevStaCallback>(obj);
-    DEV_RET_IF_NULL_WITH_RET((callback == nullptr), E_DEVICESTATUS_READ_PARCEL_ERROR);
-    DEV_HILOGI(SERVICE, "Read callback successfully");
-    Subscribe(Type(type), ActivityEvent(event), ReportLatencyNs(latency), callback);
+    Subscribe(Type(type), ActivityEvent(event), ReportLatencyNs(latency));
     return RET_OK;
 }
 
@@ -103,12 +99,8 @@ int32_t DeviceStatusSrvStub::UnsubscribeStub(MessageParcel& data, MessageParcel&
     READINT32(data, type, E_DEVICESTATUS_READ_PARCEL_ERROR);
     int32_t event = -1;
     READINT32(data, event, E_DEVICESTATUS_READ_PARCEL_ERROR);
-    DEV_HILOGE(SERVICE, "UNevent: %{public}d", event);
-    sptr<IRemoteObject> obj = data.ReadRemoteObject();
-    DEV_RET_IF_NULL_WITH_RET((obj == nullptr), E_DEVICESTATUS_READ_PARCEL_ERROR);
-    sptr<IRemoteDevStaCallback> callback = iface_cast<IRemoteDevStaCallback>(obj);
-    DEV_RET_IF_NULL_WITH_RET((callback == nullptr), E_DEVICESTATUS_READ_PARCEL_ERROR);
-    Unsubscribe(Type(type), ActivityEvent(event), callback);
+    DEV_HILOGE(SERVICE, "event:%{public}d", event);
+    Unsubscribe(Type(type), ActivityEvent(event));
     return RET_OK;
 }
 
@@ -124,6 +116,32 @@ int32_t DeviceStatusSrvStub::GetLatestDeviceStatusDataStub(MessageParcel& data, 
     WRITEINT32(reply, devicestatusData.value, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
     DEV_HILOGD(SERVICE, "Exit");
     return RET_OK;
+}
+
+int32_t DeviceStatusSrvStub::CreateDataChannelStub(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<IRemoteObject> obj = data.ReadRemoteObject();
+    DEV_RET_IF_NULL_WITH_RET((obj == nullptr), E_DEVICESTATUS_READ_PARCEL_ERROR);
+    sptr<IRemoteDevStaCallback> callback = iface_cast<IRemoteDevStaCallback>(obj);
+    DEV_RET_IF_NULL_WITH_RET((callback == nullptr), E_DEVICESTATUS_READ_PARCEL_ERROR);
+    int32_t ret = CreateDataChannel(callback);
+    if (ret != RET_OK) {
+        DEV_HILOGE(SERVICE, "Call CreateDataChannelStub failed ret:%{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t DeviceStatusSrvStub::DestoryDataChannelStub(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<IRemoteObject> obj = data.ReadRemoteObject();
+    DEV_RET_IF_NULL_WITH_RET((obj == nullptr), E_DEVICESTATUS_READ_PARCEL_ERROR);
+    sptr<IRemoteDevStaCallback> callback = iface_cast<IRemoteDevStaCallback>(obj);
+    DEV_RET_IF_NULL_WITH_RET((callback == nullptr), E_DEVICESTATUS_READ_PARCEL_ERROR);
+    int32_t ret = DestoryDataChannel(callback);
+    if (ret != RET_OK) {
+        DEV_HILOGE(SERVICE, "Call DestoryDataChannelStub failed ret:%{public}d", ret);
+    }
+    return ret;
 }
 
 int32_t DeviceStatusSrvStub::RegisterCoordinationMonitorStub(MessageParcel& data, MessageParcel& reply)

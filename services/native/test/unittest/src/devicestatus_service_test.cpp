@@ -43,9 +43,13 @@ sptr<IRemoteDevStaCallback> DeviceStatusServiceTest::devCallback_ = nullptr;
 void DeviceStatusServiceTest::SetUpTestCase()
 {
     devCallback_ = new (std::nothrow) DeviceStatusServiceTestCallback();
+    g_client.CreateDataChannel(devCallback_);
 }
 
-void DeviceStatusServiceTest::TearDownTestCase() {}
+void DeviceStatusServiceTest::TearDownTestCase()
+{
+    g_client.DestoryDataChannel(devCallback_);
+}
 
 void DeviceStatusServiceTest::SetUp() {}
 
@@ -55,8 +59,8 @@ void DeviceStatusServiceTest::DeviceStatusServiceTestCallback::OnDeviceStatusCha
 {
     GTEST_LOG_(INFO) << "DeviceStatusServiceTestCallback type: " << devicestatusData.type;
     GTEST_LOG_(INFO) << "DeviceStatusServiceTestCallback value: " << devicestatusData.value;
-    EXPECT_TRUE(devicestatusData.type == g_type && (devicestatusData.value >= OnChangedValue::VALUE_INVALID &&
-        devicestatusData.value <= OnChangedValue::VALUE_EXIT)) << "DeviceStatusServiceTestCallback failed";
+    EXPECT_TRUE(devicestatusData.value >= OnChangedValue::VALUE_INVALID &&
+        devicestatusData.value <= OnChangedValue::VALUE_EXIT) << "DeviceStatusServiceTestCallback failed";
 }
 
 /**
@@ -70,7 +74,7 @@ HWTEST_F (DeviceStatusServiceTest, DeviceStatusCallbackTest001, TestSize.Level0)
     g_type = Type::TYPE_ABSOLUTE_STILL;
     EXPECT_FALSE(devCallback_ == nullptr);
     GTEST_LOG_(INFO) << "Start register";
-    g_client.SubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG, devCallback_);
+    g_client.SubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG);
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
     DEV_HILOGI(SERVICE, "GetDeviceStatusDataTest001 end");
 }
@@ -104,7 +108,7 @@ HWTEST_F (DeviceStatusServiceTest, GetDeviceStatusDataTest003, TestSize.Level0)
     g_type = Type::TYPE_ABSOLUTE_STILL;
     EXPECT_FALSE(devCallback_ == nullptr);
     GTEST_LOG_(INFO) << "Cancel register";
-    g_client.UnsubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, devCallback_);
+    g_client.UnsubscribeCallback(g_type, ActivityEvent::ENTER_EXIT);
     DEV_HILOGI(SERVICE, "GetDeviceStatusDataTest003 end");
 }
 
@@ -119,7 +123,7 @@ HWTEST_F (DeviceStatusServiceTest, DeviceStatusCallbackTest004, TestSize.Level0)
     g_type = Type::TYPE_CAR_BLUETOOTH;
     EXPECT_FALSE(devCallback_ == nullptr);
     GTEST_LOG_(INFO) << "Start register";
-    g_client.SubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG, devCallback_);
+    g_client.SubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG);
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
     DEV_HILOGI(SERVICE, "GetDeviceStatusDataTest004 end");
 }
@@ -153,7 +157,7 @@ HWTEST_F (DeviceStatusServiceTest, GetDeviceStatusDataTest006, TestSize.Level0)
     g_type = Type::TYPE_CAR_BLUETOOTH;
     EXPECT_FALSE(devCallback_ == nullptr);
     GTEST_LOG_(INFO) << "Cancel register";
-    g_client.UnsubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, devCallback_);
+    g_client.UnsubscribeCallback(g_type, ActivityEvent::ENTER_EXIT);
     DEV_HILOGI(SERVICE, "GetDeviceStatusDataTest006 end");
 }
 
@@ -168,7 +172,7 @@ HWTEST_F (DeviceStatusServiceTest, DeviceStatusCallbackTest007, TestSize.Level0)
     g_type = Type::TYPE_HORIZONTAL_POSITION;
     EXPECT_FALSE(devCallback_ == nullptr);
     GTEST_LOG_(INFO) << "Start register";
-    g_client.SubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG, devCallback_);
+    g_client.SubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG);
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
     DEV_HILOGI(SERVICE, "GetDeviceStatusDataTest007 end");
 }
@@ -202,7 +206,7 @@ HWTEST_F (DeviceStatusServiceTest, GetDeviceStatusDataTest009, TestSize.Level0)
     g_type = Type::TYPE_HORIZONTAL_POSITION;
     EXPECT_FALSE(devCallback_ == nullptr);
     GTEST_LOG_(INFO) << "Cancel register";
-    g_client.UnsubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, devCallback_);
+    g_client.UnsubscribeCallback(g_type, ActivityEvent::ENTER_EXIT);
     DEV_HILOGI(SERVICE, "GetDeviceStatusDataTest009 end");
 }
 
@@ -217,7 +221,7 @@ HWTEST_F (DeviceStatusServiceTest, DeviceStatusCallbackTest010, TestSize.Level0)
     g_type = Type::TYPE_RELATIVE_STILL;
     EXPECT_FALSE(devCallback_ == nullptr);
     GTEST_LOG_(INFO) << "Start register";
-    g_client.SubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG, devCallback_);
+    g_client.SubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG);
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
     DEV_HILOGI(SERVICE, "GetDeviceStatusDataTest010 end");
 }
@@ -251,7 +255,7 @@ HWTEST_F (DeviceStatusServiceTest, GetDeviceStatusDataTest012, TestSize.Level0)
     g_type = Type::TYPE_RELATIVE_STILL;
     EXPECT_FALSE(devCallback_ == nullptr);
     GTEST_LOG_(INFO) << "Cancel register";
-    g_client.UnsubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, devCallback_);
+    g_client.UnsubscribeCallback(g_type, ActivityEvent::ENTER_EXIT);
     DEV_HILOGI(SERVICE, "GetDeviceStatusDataTest012 end");
 }
 
@@ -266,7 +270,7 @@ HWTEST_F (DeviceStatusServiceTest, DeviceStatusCallbackTest013, TestSize.Level0)
     g_type = Type::TYPE_STILL;
     EXPECT_FALSE(devCallback_ == nullptr);
     GTEST_LOG_(INFO) << "Start register";
-    g_client.SubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG, devCallback_);
+    g_client.SubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG);
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
     DEV_HILOGI(SERVICE, "GetDeviceStatusDataTest013 end");
 }
@@ -301,7 +305,7 @@ HWTEST_F (DeviceStatusServiceTest, GetDeviceStatusDataTest015, TestSize.Level0)
     g_type = Type::TYPE_STILL;
     EXPECT_FALSE(devCallback_ == nullptr);
     GTEST_LOG_(INFO) << "Cancel register";
-    g_client.UnsubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, devCallback_);
+    g_client.UnsubscribeCallback(g_type, ActivityEvent::ENTER_EXIT);
     DEV_HILOGI(SERVICE, "GetDeviceStatusDataTest015 end");
 }
 
@@ -316,7 +320,7 @@ HWTEST_F (DeviceStatusServiceTest, DeviceStatusCallbackTest016, TestSize.Level0)
     g_type = Type::TYPE_VERTICAL_POSITION;
     EXPECT_FALSE(devCallback_ == nullptr);
     GTEST_LOG_(INFO) << "Start register";
-    g_client.SubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG, devCallback_);
+    g_client.SubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG);
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
     DEV_HILOGI(SERVICE, "GetDeviceStatusDataTest016 end");
 }
@@ -350,6 +354,6 @@ HWTEST_F (DeviceStatusServiceTest, GetDeviceStatusDataTest018, TestSize.Level0)
     g_type = Type::TYPE_VERTICAL_POSITION;
     EXPECT_FALSE(devCallback_ == nullptr);
     GTEST_LOG_(INFO) << "Cancel register";
-    g_client.UnsubscribeCallback(g_type, ActivityEvent::ENTER_EXIT, devCallback_);
+    g_client.UnsubscribeCallback(g_type, ActivityEvent::ENTER_EXIT);
     DEV_HILOGI(SERVICE, "GetDeviceStatusDataTest018 end");
 }

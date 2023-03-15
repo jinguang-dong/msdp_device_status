@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <set>
 #include <map>
+#include <list>
 
 #include "sensor_if.h"
 #include "devicestatus_data_utils.h"
@@ -44,36 +45,57 @@ public:
         virtual ~DeviceStatusCallbackDeathRecipient() = default;
     };
 
+    class ClientInfo {
+    public:
+        ClientInfo(ActivityEvent event, ReportLatencyNs latency)
+            : event_(event), latency_(latency) {}
+        ~ClientInfo() = default;
+        ActivityEvent GetEvent() const;
+        ReportLatencyNs GetLatency() const;
+        void SetEvent(ActivityEvent event);
+        void SetLatency(ReportLatencyNs latency);
+        void SetEnabled(bool enabled);
+        bool GetEnabled() const;
+    private:
+        ActivityEvent event_ { ActivityEvent::EVENT_INVALID };
+        ReportLatencyNs latency_ { ReportLatencyNs::Latency_INVALID };
+        bool enabled_ { false };
+    };
+
     bool Init();
-    bool Enable(Type type);
-    bool InitAlgoMngrInterface(Type type);
-    bool Disable(Type type);
-    int32_t InitDataCallback();
-    int32_t NotifyDeviceStatusChange(const Data &devicestatusData);
-    void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency, sptr<IRemoteDevStaCallback> callback);
-    void Unsubscribe(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback);
+    int32_t UpdateDataChannel(int32_t pid, sptr<IRemoteDevStaCallback> callback);
+    int32_t DestoryDataChannel(int32_t pid, sptr<IRemoteDevStaCallback> callback);
+    bool UpdateClientInfo(int32_t pid, Type type, std::shared_ptr<ClientInfo> clientInfo);
+    bool DestoryInfo(int32_t pid, Type type, std::shared_ptr<ClientInfo> clientInfo);
     Data GetLatestDeviceStatusData(Type type);
-    int32_t SensorDataCallback(struct SensorEvents *event);
-    int32_t MsdpDataCallback(const Data &data);
+    bool OnlyCurPidSubscribe(Type type, int32_t pid);
+    bool ClearClientInfo(Type type);
+    bool ClearCurPidClientInfo(Type type, int32_t pid);
+    bool IsOnlyCurPidSubscribe(Type type, int32_t pid);
+    std::list<sptr<IRemoteDevStaCallback>> GetChannels(Type type);
+    std::shared_ptr<ClientInfo> GetClientInfo(Type type, int32_t pid);
     int32_t LoadAlgorithm();
     int32_t UnloadAlgorithm();
     int32_t GetPackageName(AccessTokenID tokenId, std::string &packageName);
-
+    bool Enable(Type type);
+    bool Disable(Type type);
+    bool CheckEnable(Type type, int32_t pid);
 private:
-    struct classcomp {
-        bool operator()(sptr<IRemoteDevStaCallback> left, sptr<IRemoteDevStaCallback> right) const
-        {
-            return left->AsObject() < right->AsObject();
-        }
-    };
+    bool InitAlgoMngrInterface(Type type);
+    int32_t InitDataCallback();
+    int32_t NotifyDeviceStatusChange(const Data &devicestatusData);
+    int32_t SensorDataCallback(struct SensorEvents *event);
+    int32_t MsdpDataCallback(const Data &data);
+
     const wptr<DeviceStatusService> ms_;
     std::mutex mutex_;
+    std::mutex channelMutex_;
+    std::mutex clientInfoMutex_;
     sptr<IRemoteObject::DeathRecipient> devicestatusCBDeathRecipient_;
     std::unique_ptr<DeviceStatusMsdpClientImpl> msdpImpl_;
     std::map<Type, OnChangedValue> msdpData_;
-    std::map<Type, std::set<const sptr<IRemoteDevStaCallback>, classcomp>> listenerMap_;
-    int32_t type_ {};
-    int32_t event_ {};
+    std::map<int32_t, sptr<IRemoteDevStaCallback>> dataChannels_;
+    std::map<int32_t, std::map<int32_t, std::shared_ptr<ClientInfo>>> clientInfos_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

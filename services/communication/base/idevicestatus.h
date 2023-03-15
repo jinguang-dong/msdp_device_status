@@ -32,6 +32,8 @@ public:
         DEVICESTATUS_SUBSCRIBE = 0,
         DEVICESTATUS_UNSUBSCRIBE,
         DEVICESTATUS_GETCACHE,
+        CREATE_DATA_CHANNEL,
+        DESTORY_DATA_CHANNEL,
         REGISTER_COORDINATION_MONITOR = 10,
         UNREGISTER_COORDINATION_MONITOR,
         ENABLE_COORDINATION,
@@ -48,14 +50,11 @@ public:
         ALLOC_SOCKET_FD = 40
     };
 
-    virtual void Subscribe(Type type,
-        ActivityEvent event,
-        ReportLatencyNs latency,
-        sptr<IRemoteDevStaCallback> callback) = 0;
-    virtual void Unsubscribe(Type type,
-        ActivityEvent event,
-        sptr<IRemoteDevStaCallback> callback) = 0;
+    virtual void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency) = 0;
+    virtual void Unsubscribe(Type type, ActivityEvent event) = 0;
     virtual Data GetCache(const Type& type) = 0;
+    virtual int32_t CreateDataChannel(sptr<IRemoteDevStaCallback> callback) = 0;
+    virtual int32_t DestoryDataChannel(sptr<IRemoteDevStaCallback> callback) = 0;
 
     virtual int32_t RegisterCoordinationListener() = 0;
     virtual int32_t UnregisterCoordinationListener() = 0;

@@ -41,8 +41,8 @@ void DeviceStatusClientFuzzer::TestSubscribeCallback(const uint8_t* data)
     if ((memcpy_s(type, sizeof(type), data, idSize)) != EOK) {
         return;
     }
-
-    client_.SubscribeCallback(static_cast<Type>(type[0]), ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG, cb);
+    client_.CreateDataChannel(cb);
+    client_.SubscribeCallback(static_cast<Type>(type[0]), ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_TIME));
     TestGetDevicestatusData(static_cast<Type>(type[0]));
@@ -61,7 +61,8 @@ void DeviceStatusClientFuzzer::TestUnSubscribeCallback(Type type)
 {
     std::cout << "TestUnSubscribeCallback: Enter " << std::endl;
 
-    client_.UnsubscribeCallback(type, ActivityEvent::ENTER_EXIT, cb);
+    client_.UnsubscribeCallback(type, ActivityEvent::ENTER_EXIT);
+    client_.DestoryDataChannel(cb);
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)

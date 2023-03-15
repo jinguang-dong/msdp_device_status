@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,8 +24,15 @@ using namespace OHOS::Msdp::DeviceStatus;
 using namespace OHOS;
 using namespace std;
 
+namespace {
+sptr<IRemoteDevStaCallback> g_cb = nullptr;
+}
 class DeviceStatusClientTest : public testing::Test {
 public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
     class DeviceStatusClientTestCallback : public DeviceStatusCallbackStub {
     public:
         DeviceStatusClientTestCallback() {};
@@ -33,6 +40,23 @@ public:
         virtual void OnDeviceStatusChanged(const Data& devicestatusData);
     };
 };
+
+void DeviceStatusClientTest::SetUpTestCase()
+{
+    auto& devicestatusClient = DeviceStatusClient::GetInstance();
+    g_cb = new (std::nothrow) DeviceStatusClientTestCallback();
+    devicestatusClient.CreateDataChannel(g_cb);
+}
+
+void DeviceStatusClientTest::TearDownTestCase()
+{
+    auto& devicestatusClient = DeviceStatusClient::GetInstance();
+    devicestatusClient.DestoryDataChannel(g_cb);
+}
+
+void DeviceStatusClientTest::SetUp() {}
+
+void DeviceStatusClientTest::TearDown() {}
 
 void DeviceStatusClientTest::DeviceStatusClientTestCallback::OnDeviceStatusChanged(const
     Data& devicestatusData)
@@ -55,11 +79,10 @@ HWTEST_F(DeviceStatusClientTest, DeviceStatusCallbackTest001, TestSize.Level0)
     ActivityEvent event = ActivityEvent::EVENT_INVALID;
     ReportLatencyNs latency = ReportLatencyNs::Latency_INVALID;
     auto& devicestatusClient = DeviceStatusClient::GetInstance();
-    sptr<IRemoteDevStaCallback> cb = new DeviceStatusClientTestCallback();
     GTEST_LOG_(INFO) << "Start register";
-    devicestatusClient.SubscribeCallback(type, event, latency, cb);
+    devicestatusClient.SubscribeCallback(type, event, latency);
     GTEST_LOG_(INFO) << "Cancell register";
-    devicestatusClient.UnsubscribeCallback(type, event, cb);
+    devicestatusClient.UnsubscribeCallback(type, event);
     DEV_HILOGD(SERVICE, "GetDeviceStatusDataTest001 end");
 }
 
@@ -75,11 +98,10 @@ HWTEST_F(DeviceStatusClientTest, DeviceStatusCallbackTest002, TestSize.Level0)
     ActivityEvent event = ActivityEvent::EVENT_INVALID;
     ReportLatencyNs latency = ReportLatencyNs::Latency_INVALID;
     auto& devicestatusClient = DeviceStatusClient::GetInstance();
-    sptr<IRemoteDevStaCallback> cb = new DeviceStatusClientTestCallback();
     GTEST_LOG_(INFO) << "Start register";
-    devicestatusClient.SubscribeCallback(type, event, latency, cb);
+    devicestatusClient.SubscribeCallback(type, event, latency);
     GTEST_LOG_(INFO) << "Cancell register";
-    devicestatusClient.UnsubscribeCallback(type, event, cb);
+    devicestatusClient.UnsubscribeCallback(type, event);
     DEV_HILOGD(SERVICE, "GetDeviceStatusDataTest002 end");
 }
 
@@ -95,11 +117,10 @@ HWTEST_F(DeviceStatusClientTest, DeviceStatusCallbackTest003, TestSize.Level0)
     ActivityEvent event = ActivityEvent::EVENT_INVALID;
     ReportLatencyNs latency = ReportLatencyNs::Latency_INVALID;
     auto& devicestatusClient = DeviceStatusClient::GetInstance();
-    sptr<IRemoteDevStaCallback> cb = new DeviceStatusClientTestCallback();
     GTEST_LOG_(INFO) << "Start register";
-    devicestatusClient.SubscribeCallback(type, event, latency, cb);
+    devicestatusClient.SubscribeCallback(type, event, latency);
     GTEST_LOG_(INFO) << "Cancell register";
-    devicestatusClient.UnsubscribeCallback(type, event, cb);
+    devicestatusClient.UnsubscribeCallback(type, event);
     DEV_HILOGD(SERVICE, "GetDeviceStatusDataTest003 end");
 }
 
@@ -115,11 +136,10 @@ HWTEST_F(DeviceStatusClientTest, DeviceStatusCallbackTest004, TestSize.Level0)
     ActivityEvent event = ActivityEvent::EVENT_INVALID;
     ReportLatencyNs latency = ReportLatencyNs::Latency_INVALID;
     auto& devicestatusClient = DeviceStatusClient::GetInstance();
-    sptr<IRemoteDevStaCallback> cb = new DeviceStatusClientTestCallback();
     GTEST_LOG_(INFO) << "Start register";
-    devicestatusClient.SubscribeCallback(type, event, latency, cb);
+    devicestatusClient.SubscribeCallback(type, event, latency);
     GTEST_LOG_(INFO) << "Cancell register";
-    devicestatusClient.UnsubscribeCallback(type, event, cb);
+    devicestatusClient.UnsubscribeCallback(type, event);
     DEV_HILOGD(SERVICE, "GetDeviceStatusDataTest004 end");
 }
 
@@ -135,11 +155,10 @@ HWTEST_F(DeviceStatusClientTest, DeviceStatusCallbackTest005, TestSize.Level0)
     ActivityEvent event = ActivityEvent::EVENT_INVALID;
     ReportLatencyNs latency = ReportLatencyNs::Latency_INVALID;
     auto& devicestatusClient = DeviceStatusClient::GetInstance();
-    sptr<IRemoteDevStaCallback> cb = new DeviceStatusClientTestCallback();
     GTEST_LOG_(INFO) << "Start register";
-    devicestatusClient.SubscribeCallback(type, event, latency, cb);
+    devicestatusClient.SubscribeCallback(type, event, latency);
     GTEST_LOG_(INFO) << "Cancell register";
-    devicestatusClient.UnsubscribeCallback(type, event, cb);
+    devicestatusClient.UnsubscribeCallback(type, event);
     DEV_HILOGD(SERVICE, "GetDeviceStatusDataTest005 end");
 }
 
@@ -155,11 +174,10 @@ HWTEST_F(DeviceStatusClientTest, DeviceStatusCallbackTest006, TestSize.Level0)
     ActivityEvent event = ActivityEvent::EVENT_INVALID;
     ReportLatencyNs latency = ReportLatencyNs::Latency_INVALID;
     auto& devicestatusClient = DeviceStatusClient::GetInstance();
-    sptr<IRemoteDevStaCallback> cb = new DeviceStatusClientTestCallback();
     GTEST_LOG_(INFO) << "Start register";
-    devicestatusClient.SubscribeCallback(type, event, latency, cb);
+    devicestatusClient.SubscribeCallback(type, event, latency);
     GTEST_LOG_(INFO) << "Cancell register";
-    devicestatusClient.UnsubscribeCallback(type, event, cb);
+    devicestatusClient.UnsubscribeCallback(type, event);
     DEV_HILOGD(SERVICE, "GetDeviceStatusDataTest006 end");
 }
 

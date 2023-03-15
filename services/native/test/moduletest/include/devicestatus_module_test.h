@@ -26,7 +26,10 @@ namespace Msdp {
 namespace DeviceStatus {
 class DeviceStatusModuleTest : public testing::Test {
 public:
-
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
     class DeviceStatusModuleTestCallback : public DeviceStatusCallbackStub {
     public:
         DeviceStatusModuleTestCallback() {};
