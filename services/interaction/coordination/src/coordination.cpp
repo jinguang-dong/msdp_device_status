@@ -15,10 +15,11 @@
 
 #include "coordination.h"
 
+#include "coordination_device_manager.h"
 #include "coordination_event_manager.h"
-#include "distributed_input_adapter.h"
 #include "coordination_sm.h"
 #include "coordination_util.h"
+#include "distributed_input_adapter.h"
 #include "proto.h"
 
 namespace OHOS {
@@ -28,24 +29,55 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "Coordination" };
 } // namespace
 
-void Coordination::EnableCoordination(bool enabled)
+int32_t Coordination::EnableCoordination(SessionPtr sess, int32_t userData, bool enabled)
 {
+    CALL_DEBUG_ENTER;
+    CHKPR(sess, RET_ERR);
     CooSM->EnableCoordination(enabled);
+    std::string deviceId =  "";
+    CoordinationMessage msg = enabled ? CoordinationMessage::OPEN_SUCCESS : CoordinationMessage::CLOSE_SUCCESS;
+    NetPacket pkt(MessageId::COORDINATION_MESSAGE);
+    pkt << userData << deviceId << static_cast<int32_t>(msg);
+    if (pkt.ChkRWError()) {
+        FI_HILOGE("Packet write data failed");
+        return RET_ERR;
+    }
+    if (!sess->SendMsg(pkt)) {
+        FI_HILOGE("Sending failed");
+        return MSG_SEND_FAIL;
+    }
+    return RET_OK;
 }
 
-int32_t Coordination::StartCoordination(SessionPtr sess, int32_t userData,
-    const std::string& sinkDeviceId, int32_t srcDeviceId)
+int32_t Coordination::StartCoordination(SessionPtr sess, int32_t userData, const std::string& sinkDeviceId,
+    int32_t srcDeviceId)
 {
+    CALL_DEBUG_ENTER;
+    CHKPR(sess, RET_ERR);
     sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
     CHKPR(event, RET_ERR);
     event->type = CoordinationEventManager::EventType::START;
     event->sess = sess;
     event->msgId = MessageId::COORDINATION_MESSAGE;
     event->userData = userData;
+    if (CooSM->GetCurrentCoordinationState() == CoordinationState::STATE_OUT) {
+        FI_HILOGW("It is currently worn out");
+        NetPacket pkt(event->msgId);
+        pkt << userData << "" << static_cast<int32_t>(CoordinationMessage::INFO_SUCCESS);
+        if (pkt.ChkRWError()) {
+            FI_HILOGE("Packet write data failed");
+            return RET_ERR;
+        }
+        if (!sess->SendMsg(pkt)) {
+            FI_HILOGE("Sending failed");
+            return RET_ERR;
+        }
+        return RET_OK;
+    }
     CoordinationEventMgr->AddCoordinationEvent(event);
     int32_t ret = CooSM->StartCoordination(sinkDeviceId, srcDeviceId);
     if (ret != RET_OK) {
-        FI_HILOGE("StartCoordination failed, ret:%{public}d", ret);
+        FI_HILOGE("OnStartCoordination failed, ret:%{public}d", ret);
         CoordinationEventMgr->OnErrorMessage(event->type, CoordinationMessage(ret));
         return ret;
     }
@@ -54,6 +86,8 @@ int32_t Coordination::StartCoordination(SessionPtr sess, int32_t userData,
 
 int32_t Coordination::StopCoordination(SessionPtr sess, int32_t userData)
 {
+    CALL_DEBUG_ENTER;
+    CHKPR(sess, RET_ERR);
     sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
     CHKPR(event, RET_ERR);
     event->type = CoordinationEventManager::EventType::STOP;
@@ -63,7 +97,7 @@ int32_t Coordination::StopCoordination(SessionPtr sess, int32_t userData)
     CoordinationEventMgr->AddCoordinationEvent(event);
     int32_t ret = CooSM->StopCoordination();
     if (ret != RET_OK) {
-        FI_HILOGE("StopCoordination failed, ret:%{public}d", ret);
+        FI_HILOGE("OnStopCoordination failed, ret:%{public}d", ret);
         CoordinationEventMgr->OnErrorMessage(event->type, CoordinationMessage(ret));
         return ret;
     }
@@ -72,6 +106,8 @@ int32_t Coordination::StopCoordination(SessionPtr sess, int32_t userData)
 
 int32_t Coordination::GetCoordinationState(SessionPtr sess, int32_t userData, const std::string &deviceId)
 {
+    CALL_DEBUG_ENTER;
+    CHKPR(sess, RET_ERR);
     sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
     CHKPR(event, RET_ERR);
     event->type = CoordinationEventManager::EventType::STATE;
@@ -85,6 +121,8 @@ int32_t Coordination::GetCoordinationState(SessionPtr sess, int32_t userData, co
 
 int32_t Coordination::RegisterCoordinationListener(SessionPtr sess)
 {
+    CALL_DEBUG_ENTER;
+    CHKPR(sess, RET_ERR);
     sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
     CHKPR(event, RET_ERR);
     event->type = CoordinationEventManager::EventType::LISTENER;
@@ -96,6 +134,8 @@ int32_t Coordination::RegisterCoordinationListener(SessionPtr sess)
 
 int32_t Coordination::UnregisterCoordinationListener(SessionPtr sess)
 {
+    CALL_DEBUG_ENTER;
+    CHKPR(sess, RET_ERR);
     sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
     CHKPR(event, RET_ERR);
     event->type = CoordinationEventManager::EventType::LISTENER;
@@ -109,19 +149,34 @@ void Coordination::Dump(int32_t fd)
     CooSM->Dump(fd);
 }
 
-ICoordination* CreateICoordination(IContext *context)
+void Coordination::OnSessionLost(SessionPtr session)
+{
+    CooSM->OnSessionLost(session);
+}
+
+ICoordination* CreateCoordination(IContext *context)
 {
     if (context == nullptr) {
         FI_HILOGE("Parameter error");
         return nullptr;
     }
     CoordinationEventMgr->SetIContext(context);
-    ICoordination *coord = new (std::nothrow) Coordination();
-    if (coord == nullptr) {
+    ICoordination *coor = new (std::nothrow) Coordination();
+    if (coor == nullptr) {
         FI_HILOGE("Create ICoordination failed");
         return nullptr;
     }
-    return coord;
+    CooSM->Init();
+    return coor;
+}
+
+void ReleaseCoordination(ICoordination* coor)
+{
+    CooDevMgr->RemoveObserver();
+    if (coor != nullptr) {
+        delete coor;
+    }
+    return;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

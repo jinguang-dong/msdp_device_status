@@ -29,6 +29,11 @@
 
 namespace OHOS {
 namespace Msdp {
+enum ClientSessionType {
+    MSDP_COORDINATION = 0,
+    MSDP_DRAG = 1,
+    INVALID,
+};
 class StreamSession;
 using SessionPtr = std::shared_ptr<StreamSession>;
 class StreamSession : public std::enable_shared_from_this<StreamSession> {
@@ -87,6 +92,15 @@ public:
         return tokenType_;
     }
 
+    ClientSessionType GetClientSessionType() const
+    {
+        return clientSessionType_;
+    }
+
+    void SetClientSessionType(ClientSessionType clientSessionType)
+    {
+        clientSessionType_ = clientSessionType;
+    }
     void UpdateDescript();
 protected:
     struct EventTime {
@@ -102,6 +116,7 @@ protected:
     const int32_t uid_ { -1 };
     const int32_t pid_ { -1 };
     int32_t tokenType_ { TokenType::TOKEN_INVALID };
+    ClientSessionType clientSessionType_ { ClientSessionType::INVALID };
 };
 } // namespace Msdp
 } // namespace OHOS

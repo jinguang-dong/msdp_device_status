@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "stream_server.h"
 
 #include <cinttypes>
@@ -338,18 +337,35 @@ void StreamServer::DelSession(int32_t fd)
     DumpSession("DelSession");
 }
 
-void StreamServer::AddSessionDeletedCallback(std::function<void(SessionPtr)> callback)
+void StreamServer::AddSessionDeletedCallback(ClientSessionType clientSessionType, std::function<void(SessionPtr)> callback)
 {
     CALL_DEBUG_ENTER;
-    callbacks_.push_back(callback);
+    callbacks_.insert_or_assign(clientSessionType, callback);
+}
+
+void StreamServer::RemoveSessionDeletedCallback(ClientSessionType clientSessionType)
+{
+    CALL_DEBUG_ENTER;
+    auto iter = callbacks_.find(clientSessionType);
+    if (iter == callbacks_.end()) {
+        FI_HILOGE("The sessType :%{public}d cannot be found", clientSessionType);
+        return;
+    }
+    callbacks_.erase(iter);
 }
 
 void StreamServer::NotifySessionDeleted(SessionPtr ses)
 {
     CALL_DEBUG_ENTER;
-    for (const auto &callback : callbacks_) {
-        callback(ses);
+    ClientSessionType sessType = ses->GetClientSessionType();
+    FI_HILOGD("NotifySessionDeleted callbacks size:%{public}zu", callbacks_.size());
+    auto iter = callbacks_.find(sessType);
+    if(iter == callbacks_.end()) {
+        FI_HILOGW("The sessType:%{public}d was not found", sessType);
+        return;
     }
+    iter->second(ses);
+    NotifyPluginUinstall(sessType);
 }
 } // namespace Msdp
 } // namespace OHOS

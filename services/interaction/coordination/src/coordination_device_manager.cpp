@@ -192,8 +192,17 @@ void CoordinationDeviceManager::Init()
     auto* context = CoordinationEventMgr->GetIContext();
     CHKPV(context);
     devObserver_ = std::make_shared<DeviceObserver>(*this);
-    context->GetDeviceManager().AddDeviceObserver(devObserver_);
-    context->GetDeviceManager().RetriggerHotplug(devObserver_);
+    context->GetPluginManager().GetDeviceManager()->AddDeviceObserver(devObserver_);
+    context->GetPluginManager().GetDeviceManager()->RetriggerHotplug(devObserver_);
+}
+
+void CoordinationDeviceManager::RemoveObserver()
+{
+    CALL_INFO_TRACE;
+    auto* context = CoordinationEventMgr->GetIContext();
+    CHKPV(context);
+    CHKPV(devObserver_);
+    context->GetPluginManager().GetDeviceManager()->RemoveDeviceObserver(devObserver_);
 }
 
 bool CoordinationDeviceManager::IsRemote(int32_t id)

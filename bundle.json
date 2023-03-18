@@ -41,6 +41,8 @@
           "//base/msdp/device_status/libs:devicestatus_algo",
           "//base/msdp/device_status/libs:devicestatus_mock",
           "//base/msdp/device_status/services:devicestatus_service",
+          "//base/msdp/device_status/services/device_manager:msdp_device_manager",
+          "//base/msdp/device_status/services/interaction/coordination:msdp_coordination",
           "//base/msdp/device_status/frameworks/native/src:deviceagent",
           "//base/msdp/device_status/sa_profile:devicestatus_sa_profile"
         ]

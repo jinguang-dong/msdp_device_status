@@ -33,6 +33,7 @@
 #include "drag_manager.h"
 #include "i_context.h"
 #include "idevicestatus_callback.h"
+#include "plugin_manager.h"
 #include "stream_server.h"
 #include "timer_manager.h"
 
@@ -52,8 +53,10 @@ public:
     virtual void OnStop() override;
 
     IDelegateTasks& GetDelegateTasks() override;
-    IDeviceManager& GetDeviceManager() override;
+    IPluginManager& GetPluginManager() override;
     ITimerManager& GetTimerManager() override;
+    void EnableDeviceMananger() override;
+    void DisableDeviceManager() override;
 
     void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency,
         sptr<IRemoteDevStaCallback> callback) override;
@@ -78,7 +81,7 @@ public:
     int32_t GetDragTargetPid() override;
     int32_t AddDraglistener() override;
     int32_t RemoveDraglistener() override;
-
+    void NotifyPluginUinstall(ClientSessionType clientSessionType) override;
     int32_t AllocSocketFd(const std::string &programName, const int32_t moduleType,
         int32_t &toReturnClientFd, int32_t &tokenType) override;
     void OnConnected(SessionPtr s) override;
@@ -107,8 +110,7 @@ private:
     int32_t OnRegisterCoordinationListener(int32_t pid);
     int32_t OnUnregisterCoordinationListener(int32_t pid);
     int32_t OnEnableCoordination(int32_t pid, int32_t userData, bool enabled);
-    int32_t OnStartCoordination(int32_t pid, int32_t userData, const std::string &sinkDeviceId,
-        int32_t srcDeviceId);
+    int32_t OnStartCoordination(int32_t pid, int32_t userData, const std::string &sinkDeviceId, int32_t srcDeviceId);
     int32_t OnStopCoordination(int32_t pid, int32_t userData);
     int32_t OnGetCoordinationState(int32_t pid, int32_t userData, const std::string &deviceId);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
@@ -117,8 +119,8 @@ private:
     std::atomic<ServiceRunningState> state_ { ServiceRunningState::STATE_NOT_START };
     std::thread t_;
     DelegateTasks delegateTasks_;
-    DeviceManager devMgr_;
     TimerManager timerMgr_;
+    PluginManager pluginMgr_;
     std::atomic<bool> ready_ = false;
     std::shared_ptr<DeviceStatusManager> devicestatusManager_;
     std::shared_ptr<DeviceStatusMsdpClientImpl> msdpImpl_;

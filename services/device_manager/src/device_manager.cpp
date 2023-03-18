@@ -23,9 +23,6 @@
 #include <sys/epoll.h>
 #include <sys/stat.h>
 
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#include "coordination_util.h"
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 #include "device.h"
 #include "devicestatus_define.h"
 #include "fi_log.h"
@@ -432,7 +429,7 @@ void DeviceManager::RemoveDeviceObserver(std::weak_ptr<IDeviceObserver> observer
 {
     CALL_INFO_TRACE;
     CHKPV(context_);
-    int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask(
         std::bind(&DeviceManager::OnRemoveDeviceObserver, this, observer));
     if (ret != RET_OK) {
         FI_HILOGE("Post task failed");
@@ -445,6 +442,32 @@ int32_t DeviceManager::OnRemoveDeviceObserver(std::weak_ptr<IDeviceObserver> obs
     CHKPR(observer, RET_ERR);
     observers_.erase(observer);
     return RET_OK;
+}
+
+IDeviceManager* CreateDeviceManager(IContext *context)
+{
+    if (context == nullptr) {
+        FI_HILOGE("Parameter error");
+        return nullptr;
+    }
+    DeviceManager* deviceManager = new (std::nothrow) DeviceManager();
+    if (deviceManager == nullptr) {
+        FI_HILOGE("Create IDeviceManager failed");
+        return nullptr;
+    }
+    deviceManager->Init(context);
+    return deviceManager;
+}
+
+void ReleaseDeviceManager(IDeviceManager* deviceManager, IContext *context)
+{
+    if (deviceManager != nullptr) {
+        if (context != nullptr) {
+            context->DisableDeviceManager();
+        }
+        delete deviceManager;
+    }
+    deviceManager = nullptr;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

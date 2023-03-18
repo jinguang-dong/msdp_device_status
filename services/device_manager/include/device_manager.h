@@ -41,9 +41,8 @@ public:
     DISALLOW_COPY_AND_MOVE(DeviceManager);
 
     int32_t Init(IContext *context);
-    int32_t Enable();
-    int32_t Disable();
-    
+    int32_t Enable() override;
+    int32_t Disable() override;
     int32_t GetFd() const override;
     void Dispatch(const struct epoll_event &ev) override;
     std::shared_ptr<IDevice> GetDevice(int32_t id) const override;
@@ -70,7 +69,6 @@ private:
     int32_t OnEnable();
     int32_t OnDisable();
     int32_t OnEpollDispatch();
-
     int32_t ParseDeviceId(const std::string &devNode);
     std::shared_ptr<IDevice> AddDevice(const std::string &devNode);
     std::shared_ptr<IDevice> RemoveDevice(const std::string &devNode);
@@ -105,6 +103,8 @@ inline int32_t DeviceManager::GetFd() const
 {
     return epollFd_;
 }
+extern "C" IDeviceManager* CreateDeviceManager(IContext* context);
+extern "C" void ReleaseDeviceManager(IDeviceManager* deviceManager, IContext *context);
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

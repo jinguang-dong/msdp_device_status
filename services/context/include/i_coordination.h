@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef I_COORDINATION_H
 #define I_COORDINATION_H
 
@@ -20,8 +19,6 @@
 #include <memory>
 #include <vector>
 
-#include "i_context.h"
-#include "key_event.h"
 #include "stream_session.h"
 
 namespace OHOS {
@@ -29,17 +26,19 @@ namespace Msdp {
 namespace DeviceStatus {
 class ICoordination {
 public:
-    virtual void EnableCoordination(bool enabled) = 0;
-    virtual int32_t StartCoordination(SessionPtr sess, int32_t userData,
-        const std::string &sinkDeviceId, int32_t srcDeviceId) = 0;
+    ICoordination() = default;
+    virtual ~ICoordination() = default;
+
+    virtual int32_t EnableCoordination(SessionPtr sess, int32_t userData, bool enabled) = 0;
+    virtual int32_t StartCoordination(SessionPtr sess, int32_t userData, const std::string &sinkDeviceId,
+        int32_t srcDeviceId) = 0;
     virtual int32_t StopCoordination(SessionPtr sess, int32_t userData) = 0;
     virtual int32_t GetCoordinationState(SessionPtr sess, int32_t userData, const std::string &deviceId) = 0;
     virtual int32_t RegisterCoordinationListener(SessionPtr sess) = 0;
     virtual int32_t UnregisterCoordinationListener(SessionPtr sess) = 0;
     virtual void Dump(int32_t fd) = 0;
+    virtual void OnSessionLost(SessionPtr session) = 0;
 };
-
-extern "C" ICoordination* CreateICoordination(IContext *context);
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
