@@ -51,7 +51,8 @@ public:
     void Dump(int32_t fd, const std::vector<std::string> &args);
     int32_t GetClientFd(int32_t pid) const;
     int32_t GetClientPid(int32_t fd) const;
-    void AddSessionDeletedCallback(std::function<void(SessionPtr)> callback);
+    void AddSessionDeletedCallback(ClientSessionType clientSessionType, std::function<void(SessionPtr)> callback);
+    void RemoveSessionDeletedCallback(ClientSessionType clientSessionType);
     int32_t AddSocketPairInfo(const std::string& programName, const int32_t moduleType, const int32_t uid,
         const int32_t pid, int32_t& serverFd, int32_t& toReturnClientFd, int32_t& tokenType) override;
 
@@ -62,6 +63,7 @@ protected:
     virtual void OnConnected(SessionPtr s);
     virtual void OnDisconnected(SessionPtr s);
     virtual int32_t AddEpoll(EpollEventType type, int32_t fd);
+    virtual void NotifyPluginUinstall(ClientSessionType clientSessionType) {};
 
     void SetRecvFun(MsgServerFunCallback fun);
     void ReleaseSession(int32_t fd, epoll_event& ev);
@@ -78,7 +80,7 @@ protected:
     std::map<int32_t, SessionPtr> sessionsMap_;
     std::map<int32_t, int32_t> idxPidMap_;
     std::map<int32_t, CircleStreamBuffer> circleBufMap_;
-    std::list<std::function<void(SessionPtr)>> callbacks_;
+    std::map<ClientSessionType, std::function<void(SessionPtr)>> callbacks_;
 };
 } // namespace Msdp
 } // namespace OHOS

@@ -21,6 +21,7 @@ ohos_shared_library("interaction_across") {
   include_dirs = [
     "${device_status_service_path}/context/include",
     "${device_status_utils_path}/include",
+    "${device_status_root_path}/utils/ipc/include",
   ]
 
   sources = [ "src/across_device_drag.cpp" ]
@@ -29,10 +30,10 @@ ohos_shared_library("interaction_across") {
 
   defines = device_status_default_defines
 
-  deps = []
+  deps = ["${device_status_root_path}/utils/ipc:devicestatus_ipc",]
 
   if (fusion_interaction_coordination) {
-    deps += [ "../coordination:coordination" ]
+    deps += [ "../coordination:msdp_coordination" ]
   }
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]

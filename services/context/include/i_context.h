@@ -19,6 +19,7 @@
 #include "i_delegate_tasks.h"
 #include "i_device_manager.h"
 #include "i_timer_manager.h"
+#include "i_plugin_manager.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -33,8 +34,11 @@ public:
     IContext() = default;
     virtual ~IContext() = default;
 
+    virtual void EnableDeviceMananger() = 0;
+    virtual void DisableDeviceManager() = 0;
+
     virtual IDelegateTasks& GetDelegateTasks() = 0;
-    virtual IDeviceManager& GetDeviceManager() = 0;
+    virtual IPluginManager& GetPluginManager() = 0;
     virtual ITimerManager& GetTimerManager() = 0;
 };
 } // namespace DeviceStatus

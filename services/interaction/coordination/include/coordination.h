@@ -16,6 +16,7 @@
 #ifndef COORDINATION_H
 #define COORDINATION_H
 
+#include "i_context.h"
 #include "i_coordination.h"
 
 namespace OHOS {
@@ -26,15 +27,18 @@ public:
     Coordination() = default;
     virtual ~Coordination() = default;
 
-    void EnableCoordination(bool enabled);
+    int32_t EnableCoordination(SessionPtr sess, int32_t userData, bool enabled) override;
     int32_t StartCoordination(SessionPtr sess, int32_t userData,
-        const std::string &sinkDeviceId, int32_t srcDeviceId);
-    int32_t StopCoordination(SessionPtr sess, int32_t userData);
-    int32_t GetCoordinationState(SessionPtr sess, int32_t userData, const std::string &deviceId);
-    int32_t RegisterCoordinationListener(SessionPtr sess);
-    int32_t UnregisterCoordinationListener(SessionPtr sess);
-    void Dump(int32_t fd);
+        const std::string &sinkDeviceId, int32_t srcDeviceId) override;
+    int32_t StopCoordination(SessionPtr sess, int32_t userData) override;
+    int32_t GetCoordinationState(SessionPtr sess, int32_t userData, const std::string &deviceId) override;
+    int32_t RegisterCoordinationListener(SessionPtr sess) override;
+    int32_t UnregisterCoordinationListener(SessionPtr sess) override;
+    void Dump(int32_t fd) override;
+    void OnSessionLost(SessionPtr session) override;
 };
+extern "C" ICoordination* CreateCoordination(IContext *context);
+extern "C" void ReleaseCoordination(ICoordination* coor);
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

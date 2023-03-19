@@ -81,11 +81,6 @@ private:
 
 class CoordinationSM final {
     DECLARE_DELAYED_SINGLETON(CoordinationSM);
-
-    class DeviceInitCallBack : public DistributedHardware::DmInitCallback {
-        void OnRemoteDied() override;
-    };
-
     class DmDeviceStateCallback : public DistributedHardware::DeviceStateCallback {
         void OnDeviceOnline(const DistributedHardware::DmDeviceInfo &deviceInfo) override;
         void OnDeviceChanged(const DistributedHardware::DmDeviceInfo &deviceInfo) override;
