@@ -560,16 +560,12 @@ void DeviceStatusService::DisableDevMgr()
 void DeviceStatusService::NotifyPluginUinstall(ClientSessionType clientSessionType)
 {
     CALL_INFO_TRACE;
-    switch (clientSessionType) {
-        case MSDP_COORDINATION: {
-            pluginMgr_.UninstallCoordination();
-            pluginMgr_.UninstallDeviceManager();
-            break;
-        }
-        default: {
-            FI_HILOGW("Unknow SessionType:%{public}d", clientSessionType);
-        }
+    if (clientSessionType != MSDP_COORDINATION) {
+        FI_HILOGW("Unknow SessionType:%{public}d", clientSessionType);
+		return;
     }
+    pluginMgr_.UninstallCoordination();
+    pluginMgr_.UninstallDeviceManager();
 }
 
 int32_t DeviceStatusService::RegisterCoordinationListener()
@@ -769,11 +765,7 @@ int32_t DeviceStatusService::OnRegisterCoordinationListener(int32_t pid)
     sess->SetClientSessionType(MSDP_COORDINATION);
     ICoordination* coordination = pluginMgr_.GetCoordination();
     CHKPR(coordination, RET_ERR);
-    ret = coordination->RegisterCoordinationListener(sess);
-    if (ret == RET_OK) {
-        FI_HILOGD("");
-    }
-    return ret;
+    return coordination->RegisterCoordinationListener(sess);
 }
 
 int32_t DeviceStatusService::OnUnregisterCoordinationListener(int32_t pid)

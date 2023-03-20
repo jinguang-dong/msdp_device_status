@@ -446,27 +446,22 @@ int32_t DeviceManager::OnRemoveDeviceObserver(std::weak_ptr<IDeviceObserver> obs
 
 IDeviceManager* CreateDeviceManager(IContext *context)
 {
-    if (context == nullptr) {
-        FI_HILOGE("Parameter error");
-        return nullptr;
-    }
+    CALL_DEBUG_ENTER;
+    CHKPP(context);
     DeviceManager* deviceManager = new (std::nothrow) DeviceManager();
-    if (deviceManager == nullptr) {
-        FI_HILOGE("Create IDeviceManager failed");
-        return nullptr;
-    }
+    CHKPP(deviceManager);
     deviceManager->Init(context);
     return deviceManager;
 }
 
 void ReleaseDeviceManager(IDeviceManager* deviceManager, IContext *context)
 {
-    if (deviceManager != nullptr) {
-        if (context != nullptr) {
-            context->DisableDeviceManager();
-        }
-        delete deviceManager;
+    CALL_DEBUG_ENTER;
+    CHKPV(deviceManager);
+    if (context != nullptr) {
+        context->DisableDeviceManager();
     }
+    delete deviceManager;
     deviceManager = nullptr;
 }
 } // namespace DeviceStatus

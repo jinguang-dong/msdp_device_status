@@ -172,6 +172,11 @@ void StreamServer::OnDisconnected(SessionPtr sess)
     FI_HILOGI("Session desc:%{public}s", sess->GetDescript().c_str());
 }
 
+void StreamServer::NotifyPluginUinstall(ClientSessionType clientSessionType)
+{
+    CALL_DEBUG_ENTER;
+}
+
 int32_t StreamServer::AddEpoll(EpollEventType type, int32_t fd)
 {
     FI_HILOGE("This information should not exist. Subclasses should implement this function.");
@@ -358,7 +363,6 @@ void StreamServer::NotifySessionDeleted(SessionPtr ses)
 {
     CALL_DEBUG_ENTER;
     ClientSessionType sessType = ses->GetClientSessionType();
-    FI_HILOGD("NotifySessionDeleted callbacks size:%{public}zu", callbacks_.size());
     auto iter = callbacks_.find(sessType);
     if(iter == callbacks_.end()) {
         FI_HILOGW("The sessType:%{public}d was not found", sessType);

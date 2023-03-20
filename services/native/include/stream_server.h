@@ -62,9 +62,8 @@ public:
 protected:
     virtual void OnConnected(SessionPtr s);
     virtual void OnDisconnected(SessionPtr s);
+    virtual void NotifyPluginUinstall(ClientSessionType clientSessionType);
     virtual int32_t AddEpoll(EpollEventType type, int32_t fd);
-    virtual void NotifyPluginUinstall(ClientSessionType clientSessionType) {};
-
     void SetRecvFun(MsgServerFunCallback fun);
     void ReleaseSession(int32_t fd, epoll_event& ev);
     void OnPacket(int32_t fd, NetPacket& pkt);

@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//base/msdp/device_status/device_status.gni")
-#import("//foundation/distributeddatamgr/relational_store/relational_store.gni")
 
 config("coordination_device_public_config") {
   include_dirs = [ "include" ]
@@ -22,9 +21,6 @@ ohos_shared_library("msdp_device_manager") {
   include_dirs = [
     "${device_status_service_path}/context/include",
     "${device_status_service_path}/interaction/coordination/include/",
-    "context/include",
-    "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
-    "//foundation/multimodalinput/input/interfaces/native/innerkits/proxy/include",
   ]
 
   sources = [
@@ -42,19 +38,11 @@ ohos_shared_library("msdp_device_manager") {
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
     "${device_status_utils_path}:devicestatus_util",
-    "//third_party/cJSON:cjson",
-    "//drivers/peripheral/sensor/hal:hdi_sensor",
     "//third_party/openssl:libcrypto_shared",
   ]
 
   external_deps = [
-    "access_token:libaccesstoken_sdk",
-    "c_utils:utils",
-    "hisysevent_native:libhisysevent",
-    "hitrace_native:hitrace_meter",
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
-    "safwk:system_ability_fwk",
+    "hiviewdfx_hilog_native:libhilog"
   ]
 
   subsystem_name = "msdp"

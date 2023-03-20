@@ -34,7 +34,7 @@ int32_t Coordination::EnableCoordination(SessionPtr sess, int32_t userData, bool
     CALL_DEBUG_ENTER;
     CHKPR(sess, RET_ERR);
     CooSM->EnableCoordination(enabled);
-    std::string deviceId =  "";
+    std::string deviceId;
     CoordinationMessage msg = enabled ? CoordinationMessage::OPEN_SUCCESS : CoordinationMessage::CLOSE_SUCCESS;
     NetPacket pkt(MessageId::COORDINATION_MESSAGE);
     pkt << userData << deviceId << static_cast<int32_t>(msg);
@@ -77,7 +77,7 @@ int32_t Coordination::StartCoordination(SessionPtr sess, int32_t userData, const
     CoordinationEventMgr->AddCoordinationEvent(event);
     int32_t ret = CooSM->StartCoordination(sinkDeviceId, srcDeviceId);
     if (ret != RET_OK) {
-        FI_HILOGE("OnStartCoordination failed, ret:%{public}d", ret);
+        FI_HILOGE("StartCoordination failed, ret:%{public}d", ret);
         CoordinationEventMgr->OnErrorMessage(event->type, CoordinationMessage(ret));
         return ret;
     }
@@ -97,7 +97,7 @@ int32_t Coordination::StopCoordination(SessionPtr sess, int32_t userData)
     CoordinationEventMgr->AddCoordinationEvent(event);
     int32_t ret = CooSM->StopCoordination();
     if (ret != RET_OK) {
-        FI_HILOGE("OnStopCoordination failed, ret:%{public}d", ret);
+        FI_HILOGE("StopCoordination failed, ret:%{public}d", ret);
         CoordinationEventMgr->OnErrorMessage(event->type, CoordinationMessage(ret));
         return ret;
     }
@@ -176,7 +176,6 @@ void ReleaseCoordination(ICoordination* coor)
     if (coor != nullptr) {
         delete coor;
     }
-    return;
 }
 } // namespace DeviceStatus
 } // namespace Msdp
