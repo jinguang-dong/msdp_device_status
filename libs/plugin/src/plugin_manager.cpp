@@ -47,7 +47,7 @@ int32_t PluginManager::LoadDeviceManager()
 {
     CALL_DEBUG_ENTER;
     if (deviceManager_ != nullptr) {
-        FI_HILOGD("deviceManager_ has been loaded");
+        FI_HILOGW("deviceManager_ has been loaded");
         return RET_OK;
     }
     deviceManagerHandle_ = dlopen(deviceLib.data(), RTLD_NOW);
@@ -60,6 +60,7 @@ int32_t PluginManager::LoadDeviceManager()
         FI_HILOGE("Dlsym msg:%{public}s", dlerror());
         return RET_ERR;
     }
+    CHKPR(context_, RET_ERR);
     deviceManager_ = func(context_);
     CHKPR(deviceManager_, RET_ERR);
     context_->EnableDeviceMananger();
@@ -76,6 +77,10 @@ int32_t PluginManager::UninstallDeviceManager()
     }
     auto releasePlugin = (void(*)(IDeviceManager*, IContext *context))dlsym(deviceManagerHandle_,
         "ReleaseDeviceManager");
+    if (releasePlugin == nullptr) {
+        FI_HILOGE("Dlsym msg:%{public}s", dlerror());
+        return RET_ERR;
+    }
     releasePlugin(deviceManager_, context_);
     dlclose(deviceManagerHandle_);
     deviceManager_ = nullptr;
@@ -94,7 +99,7 @@ int32_t PluginManager::LoadCoordination()
     CALL_DEBUG_ENTER;
     coordinationHandle_ = dlopen(coordinationLib.data(), RTLD_NOW);
     if (coordinationHandle_ == nullptr) {
-        FI_HILOGE("Open plugin failed, so name:%{public}s, msg:%{public}s", coordinationLib.data(), dlerror());
+        FI_HILOGE("Open plugin failed, plugin name:%{public}s, msg:%{public}s", coordinationLib.data(), dlerror());
         return RET_ERR;
     }
     auto func = (CoordinationPlugin*) dlsym(coordinationHandle_, "CreateCoordination");
@@ -114,7 +119,7 @@ int32_t PluginManager::UninstallCoordination()
 {
     CALL_DEBUG_ENTER;
     if (coordinationHandle_ == nullptr) {
-        FI_HILOGE("Open plugin failed, so name:%{public}s, msg:%{public}s", coordinationLib.data(), dlerror());
+        FI_HILOGE("Open plugin failed, plugin name:%{public}s, msg:%{public}s", coordinationLib.data(), dlerror());
         return RET_ERR;
     }
     auto releasePlugin = (void(*)(ICoordination*))dlsym(coordinationHandle_, "ReleaseCoordination");

@@ -27,6 +27,8 @@ typedef IDeviceManager* DeviceMangerPlugin(IContext* context);
 typedef ICoordination* CoordinationPlugin(IContext* context);
 class PluginManager : public IPluginManager {
 public:
+    DISALLOW_COPY_AND_MOVE(PluginManager);
+
     PluginManager() = default;
     ~PluginManager() = default;
     int32_t Init(IContext* context, StreamServer* streamServer);
