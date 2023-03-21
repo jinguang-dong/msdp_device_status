@@ -81,8 +81,8 @@ void CoordinationSM::OnSessionLost(SessionPtr session)
     RemoveMonitor();
     RemoveInterceptor();
     int32_t ret = DisHardware.UnRegisterDevStateCallback(FI_PKG_NAME);
-    if (ret != 0) {
-        FI_HILOGE("Register devStateCallback failed, ret:%{public}d", ret);
+    if (ret != RET_OK) {
+        FI_HILOGE("Unregister devStateCallback failed, ret:%{public}d", ret);
     }
 }
 
@@ -727,7 +727,7 @@ void CoordinationSM::InterceptorConsumer::OnInputEvent(std::shared_ptr<MMI::KeyE
         return;
     }
     CoordinationState state = CooSM->GetCurrentCoordinationState();
-    FI_HILOGD("Current coordination state is %{public}d", state);
+    FI_HILOGD("Current coordination state:%{public}d", state);
     if (state == CoordinationState::STATE_IN) {
         int32_t deviceId = keyEvent->GetDeviceId();
         if (CooDevMgr->IsRemote(deviceId)) {
@@ -751,7 +751,7 @@ void CoordinationSM::InterceptorConsumer::OnInputEvent(std::shared_ptr<MMI::Poin
     CALL_DEBUG_ENTER;
     CHKPV(pointerEvent);
     CoordinationState state = CooSM->GetCurrentCoordinationState();
-    FI_HILOGD("Current coordination state is %{public}d", state);
+    FI_HILOGD("Current coordination state:%{public}d", state);
     if (state == CoordinationState::STATE_OUT) {
         int32_t deviceId = pointerEvent->GetDeviceId();
         std::string dhid = CooDevMgr->GetDhid(deviceId);
@@ -785,7 +785,7 @@ void CoordinationSM::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::PointerE
         CooSM->displayY_ = pointerItem.GetDisplayY();
     }
     CoordinationState state = CooSM->GetCurrentCoordinationState();
-    FI_HILOGD("Current coordination state is %{public}d", state);
+    FI_HILOGD("Current coordination state:%{public}d", state);
     if (state == CoordinationState::STATE_IN) {
         int32_t deviceId = pointerEvent->GetDeviceId();
         if (!CooDevMgr->IsRemote(deviceId)) {

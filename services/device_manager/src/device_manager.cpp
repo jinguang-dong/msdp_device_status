@@ -454,7 +454,7 @@ IDeviceManager* CreateDeviceManager(IContext *context)
     return deviceManager;
 }
 
-void ReleaseDeviceManager(IDeviceManager* deviceManager, IContext *context)
+void ReleaseDeviceManager(IDeviceManager* deviceManager, IContext* context)
 {
     CALL_DEBUG_ENTER;
     CHKPV(deviceManager);

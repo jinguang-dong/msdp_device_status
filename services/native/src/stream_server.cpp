@@ -353,7 +353,7 @@ void StreamServer::RemoveSessionDeletedCallback(ClientSessionType clientSessionT
     CALL_DEBUG_ENTER;
     auto iter = callbacks_.find(clientSessionType);
     if (iter == callbacks_.end()) {
-        FI_HILOGE("The sessType :%{public}d cannot be found", clientSessionType);
+        FI_HILOGE("The sessType:%{public}d cannot be found", clientSessionType);
         return;
     }
     callbacks_.erase(iter);
@@ -362,6 +362,7 @@ void StreamServer::RemoveSessionDeletedCallback(ClientSessionType clientSessionT
 void StreamServer::NotifySessionDeleted(SessionPtr ses)
 {
     CALL_DEBUG_ENTER;
+    CHKPV(ses);
     ClientSessionType sessType = ses->GetClientSessionType();
     auto iter = callbacks_.find(sessType);
     if(iter == callbacks_.end()) {

@@ -30,9 +30,9 @@
 namespace OHOS {
 namespace Msdp {
 enum ClientSessionType {
+    INVALID = -1,
     MSDP_COORDINATION = 0,
     MSDP_DRAG = 1,
-    INVALID,
 };
 class StreamSession;
 using SessionPtr = std::shared_ptr<StreamSession>;

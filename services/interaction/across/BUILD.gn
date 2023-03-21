@@ -30,7 +30,7 @@ ohos_shared_library("interaction_across") {
 
   defines = device_status_default_defines
 
-  deps = ["${device_status_root_path}/utils/ipc:devicestatus_ipc",]
+  deps = [ "${device_status_root_path}/utils/ipc:devicestatus_ipc" ]
 
   if (fusion_interaction_coordination) {
     deps += [ "../coordination:msdp_coordination" ]

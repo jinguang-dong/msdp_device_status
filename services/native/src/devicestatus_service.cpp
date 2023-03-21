@@ -826,8 +826,8 @@ int32_t DeviceStatusService::OnStartDrag(const DragData &dragData, int32_t pid)
 {
     CALL_DEBUG_ENTER;
     auto sess = GetSession(GetClientFd(pid));
-    sess->SetClientSessionType(MSDP_DRAG);
     CHKPR(sess, RET_ERR);
+    sess->SetClientSessionType(MSDP_DRAG);
     int32_t ret = dragMgr_.StartDrag(dragData, sess);
     if (ret != RET_OK) {
         FI_HILOGE("StartDrag failed, ret:%{public}d", ret);

@@ -104,7 +104,7 @@ inline int32_t DeviceManager::GetFd() const
     return epollFd_;
 }
 extern "C" IDeviceManager* CreateDeviceManager(IContext* context);
-extern "C" void ReleaseDeviceManager(IDeviceManager* deviceManager, IContext *context);
+extern "C" void ReleaseDeviceManager(IDeviceManager* deviceManager, IContext* context);
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
