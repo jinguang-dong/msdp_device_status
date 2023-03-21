@@ -44,7 +44,7 @@ config("devicestatus_services_public_config") {
     "delegate_task/include",
     "native/include",
     "timer_manager/include",
-    "//base/msdp/device_status/libs/plugin/include",
+    "../libs/plugin/include",
     "interaction/drag/include",
     "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
     "//foundation/multimodalinput/input/interfaces/native/innerkits/proxy/include",
