@@ -52,7 +52,7 @@ int32_t PluginManager::LoadDeviceManager()
     }
     deviceManagerHandle_ = dlopen(deviceLib.data(), RTLD_NOW);
     if (deviceManagerHandle_ == nullptr) {
-        FI_HILOGE("Open plugin failed, so name:%{public}s, msg:%{public}s", deviceLib.data(), dlerror());
+        FI_HILOGE("Open plugin failed, plugin name:%{public}s, msg:%{public}s", deviceLib.data(), dlerror());
         return RET_ERR;
     }
     auto func = (DeviceManagerPlugin*)dlsym(deviceManagerHandle_, "CreateDeviceManager");
