@@ -55,7 +55,7 @@ int32_t PluginManager::LoadDeviceManager()
         FI_HILOGE("Open plugin failed, so name:%{public}s, msg:%{public}s", deviceLib.data(), dlerror());
         return RET_ERR;
     }
-    auto func = (DeviceMangerPlugin*) dlsym(deviceManagerHandle_, "CreateDeviceManager");
+    auto func = (DeviceManagerPlugin*) dlsym(deviceManagerHandle_, "CreateDeviceManager");
     if (func == nullptr) {
         FI_HILOGE("Dlsym msg:%{public}s", dlerror());
         return RET_ERR;

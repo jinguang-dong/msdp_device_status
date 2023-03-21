@@ -23,7 +23,7 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-typedef IDeviceManager* DeviceMangerPlugin(IContext* context);
+typedef IDeviceManager* DeviceManagerPlugin(IContext* context);
 typedef ICoordination* CoordinationPlugin(IContext* context);
 class PluginManager : public IPluginManager {
 public:
