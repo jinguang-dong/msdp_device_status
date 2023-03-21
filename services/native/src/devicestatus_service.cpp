@@ -562,7 +562,7 @@ void DeviceStatusService::NotifyPluginUinstall(ClientSessionType clientSessionTy
     CALL_INFO_TRACE;
     if (clientSessionType != MSDP_COORDINATION) {
         FI_HILOGW("Unknow SessionType:%{public}d", clientSessionType);
-		return;
+        return;
     }
     pluginMgr_.UninstallCoordination();
     pluginMgr_.UninstallDeviceManager();
