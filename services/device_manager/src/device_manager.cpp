@@ -462,7 +462,6 @@ void ReleaseDeviceManager(IDeviceManager* deviceManager, IContext* context)
         context->DisableDeviceManager();
     }
     delete deviceManager;
-    deviceManager = nullptr;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

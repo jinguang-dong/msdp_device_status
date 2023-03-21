@@ -146,32 +146,30 @@ int32_t Coordination::UnregisterCoordinationListener(SessionPtr sess)
 
 void Coordination::Dump(int32_t fd)
 {
+    CALL_DEBUG_ENTER;
     CooSM->Dump(fd);
 }
 
 void Coordination::OnSessionLost(SessionPtr session)
 {
+    CALL_DEBUG_ENTER;
     CooSM->OnSessionLost(session);
 }
 
 ICoordination* CreateCoordination(IContext *context)
 {
-    if (context == nullptr) {
-        FI_HILOGE("Parameter error");
-        return nullptr;
-    }
+    CALL_DEBUG_ENTER;
+    CHKPP(context);
     CoordinationEventMgr->SetIContext(context);
     ICoordination *coor = new (std::nothrow) Coordination();
-    if (coor == nullptr) {
-        FI_HILOGE("Create ICoordination failed");
-        return nullptr;
-    }
+    CHKPP(coor);
     CooSM->Init();
     return coor;
 }
 
 void ReleaseCoordination(ICoordination* coor)
 {
+    CALL_DEBUG_ENTER;
     CooDevMgr->RemoveObserver();
     if (coor != nullptr) {
         delete coor;
