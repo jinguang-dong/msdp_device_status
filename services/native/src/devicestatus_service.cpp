@@ -181,6 +181,9 @@ bool DeviceStatusService::Init()
         FI_HILOGE("CooPluginManager init failed");
         goto INIT_FAIL;
     }
+    if (acrossDeviceDrag_.Init(this) != RET_OK) {
+        FI_HILOGE("Drag adapter init failed");
+    }
     InitSessionDeathMonitor();
     return true;
 
