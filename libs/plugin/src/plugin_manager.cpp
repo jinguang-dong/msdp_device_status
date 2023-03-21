@@ -55,7 +55,7 @@ int32_t PluginManager::LoadDeviceManager()
         FI_HILOGE("Open plugin failed, so name:%{public}s, msg:%{public}s", deviceLib.data(), dlerror());
         return RET_ERR;
     }
-    auto func = (DeviceManagerPlugin*) dlsym(deviceManagerHandle_, "CreateDeviceManager");
+    auto func = (DeviceManagerPlugin*)dlsym(deviceManagerHandle_, "CreateDeviceManager");
     if (func == nullptr) {
         FI_HILOGE("Dlsym msg:%{public}s", dlerror());
         return RET_ERR;
@@ -102,14 +102,14 @@ int32_t PluginManager::LoadCoordination()
         FI_HILOGE("Open plugin failed, plugin name:%{public}s, msg:%{public}s", coordinationLib.data(), dlerror());
         return RET_ERR;
     }
-    auto func = (CoordinationPlugin*) dlsym(coordinationHandle_, "CreateCoordination");
+    auto func = (CoordinationPlugin*)dlsym(coordinationHandle_, "CreateCoordination");
     if (func == nullptr) {
         FI_HILOGE("Dlsym msg:%{public}s", dlerror());
         return RET_ERR;
     }
     coordination_ = func(context_);
     CHKPR(coordination_, RET_ERR);
-
+    CHKPR(streamServer_, RET_ERR);
     streamServer_->AddSessionDeletedCallback(MSDP_COORDINATION,
         std::bind(&ICoordination::OnSessionLost, coordination_, std::placeholders::_1));
     return RET_OK;
@@ -127,6 +127,7 @@ int32_t PluginManager::UninstallCoordination()
         FI_HILOGE("Dlsym msg:%{public}s", dlerror());
         return RET_ERR;
     }
+    CHKPR(streamServer_, RET_ERR);
     streamServer_->RemoveSessionDeletedCallback(MSDP_COORDINATION);
     CHKPR(coordination_, RET_ERR);
     CHKPR(coordinationHandle_, RET_ERR);

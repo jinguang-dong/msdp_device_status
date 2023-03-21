@@ -38,6 +38,7 @@ public:
     int32_t UninstallCoordination();
     int32_t LoadDeviceManager();
     int32_t LoadCoordination();
+    
 private:
     IContext *context_ { nullptr };
     void *deviceManagerHandle_ { nullptr };
