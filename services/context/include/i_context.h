@@ -18,8 +18,8 @@
 
 #include "i_delegate_tasks.h"
 #include "i_device_manager.h"
-#include "i_timer_manager.h"
 #include "i_plugin_manager.h"
+#include "i_timer_manager.h"
 
 namespace OHOS {
 namespace Msdp {
