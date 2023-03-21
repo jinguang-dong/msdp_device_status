@@ -314,7 +314,7 @@ void DeviceManager::Dispatch(const struct epoll_event &ev)
     CALL_DEBUG_ENTER;
     if ((ev.events & EPOLLIN) == EPOLLIN) {
         CHKPV(context_);
-        int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
+        int32_t ret = context_->GetDelegateTasks().PostSyncTask(
             std::bind(&DeviceManager::OnEpollDispatch, this));
         if (ret != RET_OK) {
             FI_HILOGE("PostAsyncTask failed");
@@ -379,7 +379,7 @@ void DeviceManager::RetriggerHotplug(std::weak_ptr<IDeviceObserver> observer)
 {
     CALL_INFO_TRACE;
     CHKPV(context_);
-    int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask(
         std::bind(&DeviceManager::OnRetriggerHotplug, this, observer));
     if (ret != RET_OK) {
         FI_HILOGE("Post task failed");
@@ -406,7 +406,7 @@ int32_t DeviceManager::AddDeviceObserver(std::weak_ptr<IDeviceObserver> observer
 {
     CALL_INFO_TRACE;
     CHKPR(context_, RET_ERR);
-    int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask(
         std::bind(&DeviceManager::OnAddDeviceObserver, this, observer));
     if (ret != RET_OK) {
         FI_HILOGE("Post task failed");
