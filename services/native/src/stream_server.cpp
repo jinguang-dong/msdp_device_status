@@ -179,6 +179,11 @@ int32_t StreamServer::AddEpoll(EpollEventType type, int32_t fd)
     return RET_ERR;
 }
 
+void StreamServer::DoExtraTask(int32_t fd)
+{
+    FI_HILOGE("This information should not exist. Subclasses should implement this function.");
+}
+
 void StreamServer::SetRecvFun(MsgServerFunCallback fun)
 {
     recvFun_ = fun;
@@ -255,6 +260,7 @@ void StreamServer::OnEpollEvent(epoll_event& ev)
     if ((ev.events & EPOLLERR) || (ev.events & EPOLLHUP)) {
         FI_HILOGI("EPOLLERR or EPOLLHUP fd:%{public}d,ev.events:0x%{public}x", fd, ev.events);
         ReleaseSession(fd, ev);
+        DoExtraTask(fd);
     } else if (ev.events & EPOLLIN) {
         OnEpollRecv(fd, ev);
     }

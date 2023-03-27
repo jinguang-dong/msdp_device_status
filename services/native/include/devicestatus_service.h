@@ -87,6 +87,7 @@ public:
     void OnDisconnected(SessionPtr s) override;
     int32_t AddEpoll(EpollEventType type, int32_t fd) override;
     int32_t DelEpoll(EpollEventType type, int32_t fd);
+    void DoExtraTask(int32_t fd) override;
     bool IsRunning() const override;
 private:
     bool Init();

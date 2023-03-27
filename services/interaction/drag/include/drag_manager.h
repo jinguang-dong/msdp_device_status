@@ -54,6 +54,7 @@ public:
     void OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     int32_t OnSetDragWindowVisible(bool visible);
     int32_t OnGetShadowOffset(int32_t& offsetX, int32_t& offsetY);
+    void UpdateDragState(int32_t fd);
     class InterceptorConsumer final : public MMI::IInputEventConsumer {
     public:
         InterceptorConsumer(IContext *context,
