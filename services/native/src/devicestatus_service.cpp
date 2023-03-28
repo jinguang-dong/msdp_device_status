@@ -377,6 +377,12 @@ int32_t DeviceStatusService::DelEpoll(EpollEventType type, int32_t fd)
     return RET_OK;
 }
 
+void DeviceStatusService::DoExtraTask(int32_t fd)
+{
+    CALL_DEBUG_ENTER;
+    dragMgr_.UpdateDragState(fd);
+}
+
 bool DeviceStatusService::IsRunning() const
 {
     return (state_ == ServiceRunningState::STATE_RUNNING);

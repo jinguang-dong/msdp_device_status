@@ -37,7 +37,8 @@ int32_t DragManagerImpl::UpdateDragStyle(DragCursorStyle style)
     return DeviceStatusClient::GetInstance().UpdateDragStyle(style);
 }
 
-int32_t DragManagerImpl::StartDrag(const DragData &dragData, std::function<void(const DragNotifyMsg&)> callback)
+int32_t DragManagerImpl::StartDrag(const DragData &dragData, std::function<void(const DragNotifyMsg&)> callback,
+    std::function<void()> disconnectCallback)
 {
     CALL_DEBUG_ENTER;
     CHKPR(callback, RET_ERR);
@@ -55,11 +56,13 @@ int32_t DragManagerImpl::StartDrag(const DragData &dragData, std::function<void(
             dragData.dragNum, dragData.buffer.size(), dragData.displayX, dragData.displayY, dragData.displayId);
         return RET_ERR;
     }
-    {
+    int32_t ret = DeviceStatusClient::GetInstance().StartDrag(dragData);
+    if (ret == RET_OK) {
         std::lock_guard<std::mutex> guard(mtx_);
         stopCallback_ = callback;
+        disconnectCallback_ = disconnectCallback;
     }
-    return DeviceStatusClient::GetInstance().StartDrag(dragData);
+    return ret;
 }
 
 int32_t DragManagerImpl::StopDrag(DragResult result, bool hasCustomAnimation)
@@ -93,6 +96,10 @@ int32_t DragManagerImpl::OnNotifyResult(const StreamClient& client, NetPacket& p
     std::lock_guard<std::mutex> guard(mtx_);
     CHKPR(stopCallback_, RET_ERR);
     stopCallback_(notifyMsg);
+    StreamClient &streamClient = const_cast<StreamClient &>(client);
+    streamClient.Stop();
+    CHKPR(disconnectCallback_, RET_ERR);
+    disconnectCallback_();
     return RET_OK;
 }
 

@@ -373,6 +373,21 @@ int32_t DragManager::OnGetShadowOffset(int32_t& offsetX, int32_t& offsetY)
 {
     return DataAdapter.GetShadowOffset(offsetX, offsetY);
 }
+
+void DragManager::UpdateDragState(int32_t fd)
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(dragOutSession_);
+    if (fd != dragOutSession_->GetFd()) {
+        FI_HILOGE("Current fd:%{public}d can not match dragOutSession", fd);
+        return;
+    }
+    if (dragState_ == DragMessage::MSG_DRAG_STATE_START) {
+        FI_HILOGE("The caller of the dragged interface quit abnormally");
+        return;
+    }
+    dragState_ = DragMessage::MSG_DRAG_STATE_STOP;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

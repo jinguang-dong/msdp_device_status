@@ -62,6 +62,7 @@ protected:
     virtual void OnConnected(SessionPtr s);
     virtual void OnDisconnected(SessionPtr s);
     virtual int32_t AddEpoll(EpollEventType type, int32_t fd);
+    virtual void DoExtraTask(int32_t fd);
 
     void SetRecvFun(MsgServerFunCallback fun);
     void ReleaseSession(int32_t fd, epoll_event& ev);
