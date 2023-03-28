@@ -25,7 +25,7 @@ namespace DeviceStatus {
 class IPluginManager {
 public:
     IPluginManager() = default;
-    virtual ~IPluginManager() = default;
+    ~IPluginManager() = default;
 
     virtual IDeviceManager* GetDeviceManager() = 0;
     virtual ICoordination* GetCoordination() = 0;

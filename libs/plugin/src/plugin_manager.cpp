@@ -24,13 +24,13 @@ namespace DeviceStatus {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, MSDP_DOMAIN_ID, "PluginManager"};
 
-#if defined(__aarch64__)
+#ifdef __aarch64__
 const std::string deviceLib = "/system/lib64/libmsdp_device_manager.z.so";
 const std::string coordinationLib = "/system/lib64/libmsdp_coordination.z.so";
 #else
 const std::string deviceLib = "/system/lib/libmsdp_device_manager.z.so";
 const std::string coordinationLib = "/system/lib/libmsdp_coordination.z.so";
-#endif // #if defined(__aarch64__)
+#endif // #ifdef __aarch64__
 }
 
 int32_t PluginManager::Init(IContext* context, StreamServer* streamServer)
