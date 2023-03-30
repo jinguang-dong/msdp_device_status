@@ -26,6 +26,7 @@
 #include "drag_data.h"
 #include "i_coordination_listener.h"
 #include "idevicestatus.h"
+#include "i_drag_stop_callback.h"
 #include "idevicestatus_callback.h"
 
 namespace OHOS {
@@ -54,7 +55,7 @@ public:
     int32_t StopCoordination(int32_t userData);
     int32_t GetCoordinationState(int32_t userData, const std::string &deviceId);
 
-    int32_t StartDrag(const DragData &dragData);
+    int32_t StartDrag(const DragData &dragData, sptr<IDragStopCallback> callback);
     int32_t StopDrag(DragResult result, bool hasCustomAnimation);
     int32_t UpdateDragStyle(DragCursorStyle style);
     int32_t GetDragTargetPid();

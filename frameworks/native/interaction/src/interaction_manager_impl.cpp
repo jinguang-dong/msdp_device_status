@@ -59,8 +59,6 @@ void InteractionManagerImpl::InitMsgHandler()
         {MessageId::COORDINATION_GET_STATE,
             MsgCallbackBind2(&CoordinationManagerImpl::OnCoordinationState, &coordinationManagerImpl_)},
 #endif // OHOS_BUILD_ENABLE_COORDINATION
-        {MessageId::DRAG_NOTIFY_RESULT,
-            MsgCallbackBind2(&DragManagerImpl::OnNotifyResult, &dragManagerImpl_)},
         {MessageId::DRAG_STATE_LISTENER,
             MsgCallbackBind2(&DragManagerImpl::OnStateChangedMessage, &dragManagerImpl_)}
     };
@@ -190,10 +188,6 @@ int32_t InteractionManagerImpl::StartDrag(const DragData &dragData, std::functio
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mutex_);
-    if (!InitClient()) {
-        FI_HILOGE("Get client is nullptr");
-        return RET_ERR;
-    }
     return dragManagerImpl_.StartDrag(dragData, callback);
 }
 

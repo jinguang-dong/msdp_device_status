@@ -282,6 +282,7 @@ int32_t DeviceStatusSrvStub::StartDragStub(MessageParcel& data, MessageParcel& r
     READINT32(data, dragData.displayY, E_DEVICESTATUS_READ_PARCEL_ERROR);
     READINT32(data, dragData.displayId, E_DEVICESTATUS_READ_PARCEL_ERROR);
     READBOOL(data, dragData.hasCanceledAnimation, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    sptr<IRemoteObject> obj = data.ReadRemoteObject();
     if (dragData.dragNum <= 0 || dragData.buffer.size() > MAX_BUFFER_SIZE ||
         dragData.displayX < 0 || dragData.displayY < 0 || dragData.displayId < 0) {
         FI_HILOGE("Invalid parameter, dragNum:%{public}d, bufferSize:%{public}zu, "
@@ -289,7 +290,12 @@ int32_t DeviceStatusSrvStub::StartDragStub(MessageParcel& data, MessageParcel& r
             dragData.dragNum, dragData.buffer.size(), dragData.displayX, dragData.displayY, dragData.displayId);
         return RET_ERR;
     }
-    int32_t ret = StartDrag(dragData);
+    CHKPR(obj, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    FI_HILOGD("Read remote obj successfully");
+    sptr<IDragStopCallback> callback = iface_cast<IDragStopCallback>(obj);
+    CHKPR(callback, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    FI_HILOGD("Read callback successfully");
+    int32_t ret = StartDrag(dragData, callback);
     if (ret != RET_OK) {
         FI_HILOGE("Call StartDrag failed, ret:%{public}d", ret);
     }

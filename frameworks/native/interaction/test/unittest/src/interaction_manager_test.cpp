@@ -101,7 +101,7 @@ std::shared_ptr<MMI::InputDevice> InteractionManagerTest::GetDevice(int32_t devi
     };
     int32_t ret = INPUT_MANAGER->GetDevice(deviceId, callback);
     if (ret != RET_OK || inputDevice == nullptr) {
-        FI_HILOGE("GetMouse failed");
+        FI_HILOGE("GetDevice failed");
         return nullptr;
     }
     return inputDevice;

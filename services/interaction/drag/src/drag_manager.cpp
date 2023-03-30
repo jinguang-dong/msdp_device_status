@@ -41,6 +41,7 @@ int32_t DragManager::Init(IContext* context)
     CALL_INFO_TRACE;
     CHKPR(context, RET_ERR);
     context_ = context;
+    InitDeathRecipient();
     return RET_OK;
 }
 
@@ -50,6 +51,26 @@ void DragManager::OnSessionLost(SessionPtr session)
     if (RemoveListener(session) != RET_OK) {
         FI_HILOGE("Failed to clear client listener");
     }
+}
+
+void DragManager::InitDeathRecipient()
+{
+    if (stopCallbackCBDeathRecipient_ == nullptr) {
+        stopCallbackCBDeathRecipient_ = new (std::nothrow) DragStopCallbackDeathRecipient(*const_cast<DragManager *>(this));
+        if (stopCallbackCBDeathRecipient_ == nullptr) {
+            FI_HILOGE("Failed to get stopCallbackCBDeathRecipient_");
+        }
+    }
+}
+
+void DragManager::ProcessDeathObserver(wptr<IRemoteObject> remote)
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(remote);
+    sptr<IRemoteObject> client = remote.promote();
+    CHKPV(client);
+    client->RemoveDeathRecipient(stopCallbackCBDeathRecipient_);
+    stopCallback_ = nullptr;
 }
 
 int32_t DragManager::AddListener(SessionPtr session)
@@ -73,16 +94,17 @@ int32_t DragManager::RemoveListener(SessionPtr session)
     return RET_OK;
 }
 
-int32_t DragManager::StartDrag(const DragData &dragData, SessionPtr sess)
+int32_t DragManager::StartDrag(const DragData &dragData, sptr<IDragStopCallback> callback)
 {
     CALL_DEBUG_ENTER;
     if (dragState_ == DragMessage::MSG_DRAG_STATE_START) {
         FI_HILOGE("Drag instance is running, can not start drag again");
         return RET_ERR;
     }
-    CHKPR(sess, RET_ERR);
-    dragOutSession_ = sess;
-    dragTargetPid_ = -1;
+    if (AddStopCallback(callback) != RET_OK) {
+        FI_HILOGE("AddStopCallback failed");
+        return RET_ERR;
+    }
     if (InitDataAdapter(dragData) != RET_OK) {
         FI_HILOGE("InitDataAdapter failed");
         return RET_ERR;
@@ -91,6 +113,7 @@ int32_t DragManager::StartDrag(const DragData &dragData, SessionPtr sess)
         FI_HILOGE("OnStartDrag failed");
         return RET_ERR;
     }
+    dragTargetPid_ = -1;
     dragState_ = DragMessage::MSG_DRAG_STATE_START;
     stateNotify_.StateChangedNotify(DragMessage::MSG_DRAG_STATE_START);
     return RET_OK;
@@ -109,19 +132,18 @@ int32_t DragManager::StopDrag(DragResult result, bool hasCustomAnimation)
     }
     if (OnStopDrag(result, hasCustomAnimation) != RET_OK) {
         FI_HILOGE("OnStopDrag failed");
-        return RET_ERR;
+    }
+    if (OnStopCallback(result) != RET_OK) {
+        FI_HILOGE("OnStopCallback failed");
     }
     dragState_ = DragMessage::MSG_DRAG_STATE_STOP;
     stateNotify_.StateChangedNotify(DragMessage::MSG_DRAG_STATE_STOP);
-    if (NotifyDragResult(result) != RET_OK) {
-        FI_HILOGE("NotifyDragResult failed");
-        return RET_ERR;
-    }
     return RET_OK;
 }
 
 int32_t DragManager::GetDragTargetPid() const
 {
+    CALL_DEBUG_ENTER;
     return dragTargetPid_;
 }
 
@@ -140,29 +162,6 @@ int32_t DragManager::UpdateDragStyle(DragCursorStyle style)
     }
     DataAdapter.SetDragStyle(style);
     dragDrawing_.UpdateDragStyle(style);
-    return RET_OK;
-}
-
-int32_t DragManager::NotifyDragResult(DragResult result)
-{
-    CALL_DEBUG_ENTER;
-    DragData dragData = DataAdapter.GetDragData();
-    int32_t targetPid = GetDragTargetPid();
-    NetPacket pkt(MessageId::DRAG_NOTIFY_RESULT);
-    if (result < DragResult::DRAG_SUCCESS || result > DragResult::DRAG_EXCEPTION) {
-        FI_HILOGE("Invalid result:%{public}d", static_cast<int32_t>(result));
-        return RET_ERR;
-    }
-    pkt << dragData.displayX << dragData.displayY << static_cast<int32_t>(result) << targetPid;
-    if (pkt.ChkRWError()) {
-        FI_HILOGE("Packet write data failed");
-        return RET_ERR;
-    }
-    CHKPR(dragOutSession_, RET_ERR);
-    if (!dragOutSession_->SendMsg(pkt)) {
-        FI_HILOGE("Send message failed");
-        return MSG_SEND_FAIL;
-    }
     return RET_OK;
 }
 
@@ -293,6 +292,7 @@ int32_t DragManager::AddDragEventInterceptor(int32_t sourceType)
 
 int32_t DragManager::OnStartDrag()
 {
+    CALL_DEBUG_ENTER;
     auto extraData = CreateExtraData(true);
     INPUT_MANAGER->AppendExtraData(extraData);
     DragData dragData = DataAdapter.GetDragData();
@@ -377,6 +377,48 @@ int32_t DragManager::OnGetShadowOffset(int32_t& offsetX, int32_t& offsetY, int32
 {
     return DataAdapter.GetShadowOffset(offsetX, offsetY, width, height);
 }
+
+void DragManager::RemoveExpiredDeathObserver()
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(stopCallback_);
+    auto object = stopCallback_->AsObject();
+    CHKPV(object);
+    object->RemoveDeathRecipient(stopCallbackCBDeathRecipient_);
+    stopCallback_ = nullptr;
+}
+
+int32_t DragManager::AddStopCallback(sptr<IDragStopCallback> callback)
+{
+    CALL_DEBUG_ENTER;
+    RemoveExpiredDeathObserver();
+    CHKPR(callback, RET_ERR);
+    stopCallback_ = callback;
+    auto object = callback->AsObject();
+    CHKPR(object, RET_ERR);
+    object->AddDeathRecipient(stopCallbackCBDeathRecipient_);
+    return RET_OK;
+}
+
+int32_t DragManager::OnStopCallback(DragResult dragResult)
+{
+    CALL_DEBUG_ENTER;
+    DragData dragData = DataAdapter.GetDragData();
+    int32_t targetPid = GetDragTargetPid();
+    DragNotifyMsg notifyMsg {
+        dragData.displayX,
+        dragData.displayY,
+        targetPid,
+        dragResult,
+    };
+    CHKPR(stopCallback_, RET_ERR);
+    int32_t ret = stopCallback_->OnDragChanged(notifyMsg);
+    if (ret != RET_OK) {
+        FI_HILOGE("OnDragChanged failed, ret:%{public}d", ret);
+    }
+    return ret;
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

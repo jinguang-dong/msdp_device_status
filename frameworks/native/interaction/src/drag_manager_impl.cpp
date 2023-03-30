@@ -19,6 +19,7 @@
 #include "devicestatus_define.h"
 #include "drag_data.h"
 #include "drag_message.h"
+#include "drag_stop_callback.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -55,45 +56,28 @@ int32_t DragManagerImpl::StartDrag(const DragData &dragData, std::function<void(
             dragData.dragNum, dragData.buffer.size(), dragData.displayX, dragData.displayY, dragData.displayId);
         return RET_ERR;
     }
-    {
-        std::lock_guard<std::mutex> guard(mtx_);
-        stopCallback_ = callback;
+    std::lock_guard<std::mutex> guard(mtx_);
+    auto lastCallback = stopCallback_;
+    stopCallback_ = new (std::nothrow) DragStopCallback(callback);
+    int32_t ret = DeviceStatusClient::GetInstance().StartDrag(dragData, stopCallback_);
+    if (ret != RET_OK) {
+        stopCallback_ = lastCallback;
     }
-    return DeviceStatusClient::GetInstance().StartDrag(dragData);
+    return ret;
 }
 
 int32_t DragManagerImpl::StopDrag(DragResult result, bool hasCustomAnimation)
 {
     CALL_DEBUG_ENTER;
-    return DeviceStatusClient::GetInstance().StopDrag(result, hasCustomAnimation);
+    std::lock_guard<std::mutex> guard(mtx_);
+    int32_t ret = DeviceStatusClient::GetInstance().StopDrag(result, hasCustomAnimation);
+    return ret;
 }
 
 int32_t DragManagerImpl::GetDragTargetPid()
 {
     CALL_DEBUG_ENTER;
     return DeviceStatusClient::GetInstance().GetDragTargetPid();
-}
-
-int32_t DragManagerImpl::OnNotifyResult(const StreamClient& client, NetPacket& pkt)
-{
-    CALL_DEBUG_ENTER;
-    DragNotifyMsg notifyMsg;
-    int32_t result = 0;
-    pkt >> notifyMsg.displayX >> notifyMsg.displayY >> result >> notifyMsg.targetPid;
-    if (pkt.ChkRWError()) {
-        FI_HILOGE("Packet read drag msg failed");
-        return RET_ERR;
-    }
-    if (result < static_cast<int32_t>(DragResult::DRAG_SUCCESS) ||
-        result > static_cast<int32_t>(DragResult::DRAG_EXCEPTION)) {
-        FI_HILOGE("Invalid result:%{public}d", result);
-        return RET_ERR;
-    }
-    notifyMsg.result = static_cast<DragResult>(result);
-    std::lock_guard<std::mutex> guard(mtx_);
-    CHKPR(stopCallback_, RET_ERR);
-    stopCallback_(notifyMsg);
-    return RET_OK;
 }
 
 int32_t DragManagerImpl::OnStateChangedMessage(const StreamClient& client, NetPacket& pkt)

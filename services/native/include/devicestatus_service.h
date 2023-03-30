@@ -32,6 +32,7 @@
 #include "drag_data.h"
 #include "drag_manager.h"
 #include "i_context.h"
+#include "i_drag_stop_callback.h"
 #include "idevicestatus_callback.h"
 #include "stream_server.h"
 #include "timer_manager.h"
@@ -72,7 +73,7 @@ public:
     int32_t StopCoordination(int32_t userData) override;
     int32_t GetCoordinationState(int32_t userData, const std::string &deviceId) override;
 
-    int32_t StartDrag(const DragData &dragData) override;
+    int32_t StartDrag(const DragData &dragData, sptr<IDragStopCallback> callback) override;
     int32_t StopDrag(DragResult result, bool hasCustomAnimation) override;
     int32_t UpdateDragStyle(DragCursorStyle style) override;
     int32_t GetDragTargetPid() override;
@@ -102,7 +103,7 @@ private:
     int32_t EnableDevMgr(int32_t nRetries);
     void DisableDevMgr();
 
-    int32_t OnStartDrag(const DragData &dragData, int32_t pid);
+    int32_t OnStartDrag(const DragData &dragData, sptr<IDragStopCallback> callback);
     int32_t OnStopDrag(DragResult result, bool hasCustomAnimation);
 
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
