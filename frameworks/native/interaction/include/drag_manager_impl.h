@@ -51,7 +51,7 @@ private:
     std::mutex mtx_;
     std::atomic_bool hasRegistered_ { false };
     std::list<DragListenerPtr> dragListener_;
-    sptr<IDragStopCallback> stopCallback_;
+    sptr<IDragStopCallback> stopCallback_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp
