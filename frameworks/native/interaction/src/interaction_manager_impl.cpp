@@ -203,6 +203,12 @@ int32_t InteractionManagerImpl::GetDragTargetPid()
     return dragManagerImpl_.GetDragTargetPid();
 }
 
+int32_t InteractionManagerImpl::GetUdKey(std::string &udKey)
+{
+    CALL_DEBUG_ENTER;
+    return dragManagerImpl_.GetUdKey(udKey);
+}
+
 int32_t InteractionManagerImpl::AddDraglistener(DragListenerPtr listener)
 {
     CALL_DEBUG_ENTER;
