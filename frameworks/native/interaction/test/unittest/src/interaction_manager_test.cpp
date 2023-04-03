@@ -150,8 +150,7 @@ std::shared_ptr<Media::PixelMap> InteractionManagerTest::CreatePixelMap(int32_t 
     OHOS::Media::InitializationOptions opts;
     opts.size.width = width;
     opts.size.height = height;
-    std::unique_ptr<Media::PixelMap> uniquePixelMap = Media::PixelMap::Create(opts);
-    std::shared_ptr<Media::PixelMap> pixelMap = std::move(uniquePixelMap);
+    std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(opts);
     return pixelMap;
 }
 
