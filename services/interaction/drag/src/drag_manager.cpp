@@ -132,20 +132,22 @@ int32_t DragManager::StopDrag(DragResult result, bool hasCustomAnimation)
         FI_HILOGE("No drag instance running, can not stop drag");
         return RET_ERR;
     }
-    if (result != DragResult::DRAG_EXCEPTION) {
-        CHKPR(context_, RET_ERR);
+    if (result != DragResult::DRAG_EXCEPTION && context_ != nullptr) {
         context_->GetTimerManager().RemoveTimer(timerId_);
     }
+    int32_t ret = RET_OK;
     if (OnStopDrag(result, hasCustomAnimation) != RET_OK) {
         FI_HILOGE("OnStopDrag failed");
+        ret = RET_ERR;
     }
     if (OnStopCallback(result) != RET_OK) {
         FI_HILOGE("OnStopCallback failed");
+        ret = RET_ERR;
     }
     dragState_ = DragMessage::MSG_DRAG_STATE_STOP;
     stateNotify_.StateChangedNotify(DragMessage::MSG_DRAG_STATE_STOP);
     DataAdapter.ResetDragData();
-    return RET_OK;
+    return ret;
 }
 
 int32_t DragManager::GetDragTargetPid() const
@@ -188,8 +190,6 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CALL_DEBUG_ENTER;
     CHKPV(pointerEvent);
-    MMI::PointerEvent::PointerItem pointerItem;
-    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     int32_t pointerAction = pointerEvent->GetPointerAction();
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
         OnDragMove(pointerEvent);
