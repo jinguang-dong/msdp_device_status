@@ -321,6 +321,32 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
         DEV_HILOGE(JS_NAPI, "g_obj is nullptr");
         return nullptr;
     }
+    const auto [ret, handler, type, event] = CheckUnsubscribeParam(env,info);
+    if (!ret) {
+        DEV_HILOGE(JS_NAPI, "off:UnsubscribeDeviceStatus is failed");
+        return nullptr;
+    }
+    if (!g_obj->Off(type, handler)) {
+        DEV_HILOGE(JS_NAPI, "Not ready to Unsubscribe for type:%{public}d", type);
+        return nullptr;
+    }
+    auto callbackIter = callbackMap_.find(type);
+    if (callbackIter != callbackMap_.end()) {
+        DevicestatusClient::GetInstance().UnSubscribeCallback(DevicestatusDataUtils::DevicestatusType(type),
+            callbackIter->second);
+        callbackMap_.erase(type);
+    } else {
+        NAPI_ASSERT(env, false, "No existed callback");
+        return nullptr;
+    }
+    DEV_HILOGD(JS_NAPI, "Exit");
+    return nullptr;
+}
+
+std::tuple<bool, napi_value, int32_t, int32_t> DeviceStatusNapi::CheckUnsubscribeParam(napi_env env,
+    napi_callback_info info)
+{
+    std::tuple<bool, napi_value, int32_t, int32_t> result {false, nullptr, -1, -1};
     size_t argc = ARG_3;
     napi_value args[ARG_3] = {};
     napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
@@ -352,21 +378,7 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
     }
     int32_t event = eventMode;
     DEV_HILOGD(JS_NAPI, "type:%{public}d, event:%{public}d", type, event);
-    if (!g_obj->Off(type, args[ARG_2])) {
-        DEV_HILOGE(JS_NAPI, "Not ready to Unsubscribe for type:%{public}d", type);
-        return nullptr;
-    }
-    auto callbackIter = callbackMap_.find(type);
-    if (callbackIter != callbackMap_.end()) {
-        DevicestatusClient::GetInstance().UnSubscribeCallback(DevicestatusDataUtils::DevicestatusType(type),
-            callbackIter->second);
-        callbackMap_.erase(type);
-    } else {
-        NAPI_ASSERT(env, false, "No existed callback");
-        return nullptr;
-    }
-    DEV_HILOGD(JS_NAPI, "Exit");
-    return nullptr;
+    return std::make_tuple(true, args[ARG_2], type, event);
 }
 
 napi_value DeviceStatusNapi::GetDeviceStatus(napi_env env, napi_callback_info info)
