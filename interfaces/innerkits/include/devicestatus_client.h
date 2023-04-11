@@ -43,11 +43,11 @@ public:
 
     /*
     * @name: SubscribeCallback
-    * @function: 订阅设备状态回调
+    * @function: 订阅设备状态
     * @parameter: type 设备状态类型
-    * @parameter: event 对应类型的激活状态
+    * @parameter: event 订阅的事件（进入/退出/进入和退出）
     * @parameter: latency 上报周期
-    * @parameter: callback 用于接收设备状态变化的回调
+    * @parameter: callback 用于接收设备状态事件变化的回调
     * @return: 订阅结果
     */
     int32_t SubscribeCallback(Type type, ActivityEvent event, ReportLatencyNs latency,
@@ -55,17 +55,17 @@ public:
 
     /*
     * @name: UnsubscribeCallback
-    * @function: 取消订阅设备状态回调
+    * @function: 取消订阅设备状态
     * @parameter: type 设备状态类型
-    * @parameter: event 对应类型的激活状态
-    * @parameter: callback 用于接收设备状态变化的回调
+    * @parameter: event 订阅的事件（进入/退出/进入和退出）
+    * @parameter: callback 用于接收设备状态事件变化的回调
     * @return: 取消订阅结果
     */
     int32_t UnsubscribeCallback(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback);
 
     /*
     * @name: GetDeviceStatusData
-    * @function: 获取最近一次的设备状态数据
+    * @function: 获取当前设备状态数据
     * @parameter: type 设备状态类型
     * @return: 设备状态数据
     */
@@ -102,6 +102,7 @@ public:
     /*
     * @name: StartCoordination
     * @function: 开始键鼠穿越
+    * @parameter: userData 用户数据
     * @parameter: remoteNetworkId 远端网络ID
     * @parameter: startDeviceId 源设备ID
     * @return: 开始结果
