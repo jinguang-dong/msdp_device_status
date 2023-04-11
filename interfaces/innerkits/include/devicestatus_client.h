@@ -80,122 +80,124 @@ public:
 
     /*
     * @name: RegisterCoordinationListener
-    * @function: 注册键鼠穿越监听
+    * @function: 注册键鼠穿越管理事件监听
+    * @return: 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败
     */
     int32_t RegisterCoordinationListener();
 
     /*
     * @name: UnregisterCoordinationListener
-    * @function: 取消注册键鼠穿越监听
+    * @function: 注销键鼠穿越管理事件监听
+    * @return: 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败。
     */
     int32_t UnregisterCoordinationListener();
 
     /*
     * @name: EnableCoordination
-    * @function: 使能键鼠穿越能力
+    * @function: 开启/关闭键鼠穿越管理接口
     * @parameter: userData 用户数据
-    * @parameter: enabled 使能状态
-    * @return: 使能结果
+    * @parameter: enabled 开启/关闭
+    * @return: 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败
     */
     int32_t EnableCoordination(int32_t userData, bool enabled);
 
     /*
     * @name: StartCoordination
-    * @function: 开始键鼠穿越
+    * @function: 启动跨设备键鼠穿越
     * @parameter: userData 用户数据
-    * @parameter: remoteNetworkId 远端网络ID
-    * @parameter: startDeviceId 源设备ID
-    * @return: 开始结果
+    * @parameter: remoteNetworkId 键鼠穿越目标设备描述符（networkID）
+    * @parameter: startDeviceId 键鼠穿越待穿越输入外设标识符（设备ID句柄）
+    * @return: 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败
     */
     int32_t StartCoordination(int32_t userData, const std::string &remoteNetworkId, int32_t startDeviceId);
 
     /*
     * @name: StopCoordination
-    * @function: 停止键鼠穿越
+    * @function: 停止跨设备键鼠穿越
     * @parameter: userData 用户数据
-    * @return: 停止结果
+    * @return: 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败
     */
     int32_t StopCoordination(int32_t userData);
 
     /*
     * @name: GetCoordinationState
-    * @function: 获取键鼠穿越状态
+    * @function: 获取指定设备键鼠穿越状态
     * @parameter: userData 用户数据
-    * @parameter: deviceId 设备ID
+    * @parameter: deviceId 指定设备描述符
     * @return: 键鼠穿越状态
     */
     int32_t GetCoordinationState(int32_t userData, const std::string &deviceId);
 
     /*
     * @name: StartDrag
-    * @function: 开始拖拽
-    * @parameter: dragData 拖拽数据
-    * @return: 开始拖拽结果
+    * @function: 开始拖拽目标
+    * @parameter: dragData 拖拽附加数据
+    * @return: 返回0表示调用成功，否则，表示调用失败
     */
     int32_t StartDrag(const DragData &dragData);
 
     /*
     * @name: StopDrag
-    * @function: 停止拖拽
-    * @parameter: result 拖拽结果
-    * @parameter: hasCustomAnimation 是否有自定义动画
-    * @return: 停止拖拽结果
+    * @function: 结束拖拽
+    * @parameter: result 标识拖拽调用结果 0-成功,1-失败,2-取消
+    * @parameter: hasCustomAnimation 标识是否在拖拽成功时做默认动效，true表示做应用自定义动效，false表示做默认动效
+    * @return: 返回0表示调用成功，否则，表示调用失败
     */
     int32_t StopDrag(DragResult result, bool hasCustomAnimation);
 
     /*
     * @name: UpdateDragStyle
-    * @function: 更新拖拽样式
-    * @parameter: style 拖拽样式
-    * @return: 更新结果
+    * @function: 更新拖拽中的光标样式
+    * @parameter: style 指定光标样式
+    * @return: 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败
     */
     int32_t UpdateDragStyle(DragCursorStyle style);
 
     /*
     * @name: GetDragTargetPid
-    * @function: 获取拖拽目标进程号
-    * @return: 进程号
+    * @function: 获取拖拽目标窗口PID
+    * @return: 返回值如果是-1则是无效值，为大于等于0的值为正确值
     */
     int32_t GetDragTargetPid();
 
     /*
     * @name: GetUdKey
-    * @function: 获取UdKey
-    * @parameter: udKey udKey
-    * @return: Udkey
+    * @function: 获取拖拽目标窗口UdKey
+    * @parameter: udKey 拖拽目标窗口统一数据密钥
+    * @return: 返回值如果是-1则是无效值，为大于等于0的值为正确值
     */
     int32_t GetUdKey(std::string &udKey);
 
     /*
     * @name: AddDraglistener
-    * @function: 添加拖拽监听
-    * @return: 添加结果
+    * @function: 注册拖拽状态监听
+    * @return: 返回值0表示接口调用成功，否则，表示接口调用失败
     */
     int32_t AddDraglistener();
 
     /*
     * @name: RemoveDraglistener
-    * @function: 移除拖拽监听
-    * @return: 移除结果
+    * @function: 取消注册拖拽状态监听
+    * @return: 返回值0表示接口调用成功，否则，表示接口调用失败
     */
     int32_t RemoveDraglistener();
 
     /*
     * @name: SetDragWindowVisible
-    * @function: 设置拖拽窗口可见性
-    * @parameter: visible 是否可见
-    * @return: 设置结果
+    * @function: 设置拖拽窗口显示或者隐藏
+    * @parameter: visible 设置拖拽窗口的是否显示，true表示显示，false表示隐藏。
+    * @return: 返回值0表示接口调用成功，否则，表示接口调用失败
     */
     int32_t SetDragWindowVisible(bool visible);
 
     /*
     * @name: GetShadowOffset
-    * @function: 获取阴影偏移量
-    * @parameter: offsetX X轴偏移量
-    * @parameter: offsetY Y轴偏移量
-    * @parameter: width 宽
-    * @parameter: height 高
-    * @return: 阴影偏移量
+    * @function: 获取触控点或鼠标光标相对于阴影缩略图左上角的位置
+    * @parameter: offsetX 要查询的x值
+    * @parameter: offsetY 要查询的y值
+    * @parameter: width 要查询缩略图的宽
+    * @parameter: height 要查询缩略图的高
+    * @return: 返回值0表示接口调用成功，否则，表示接口调用失败
     */
     int32_t GetShadowOffset(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height);
 
