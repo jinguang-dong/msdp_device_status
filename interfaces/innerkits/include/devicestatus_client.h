@@ -103,18 +103,17 @@ public:
     /*
     * @name: StartCoordination
     * @function: 开始键鼠穿越
-    * @parameter: userData 用户数据
-    * @parameter: sinkDeviceId 设备ID
-    * @parameter: srcDeviceId 源设备ID
-    * @return: 开始键鼠穿越结果
+    * @parameter: remoteNetworkId 远端网络ID
+    * @parameter: startDeviceId 源设备ID
+    * @return: 开始结果
     */
-    int32_t StartCoordination(int32_t userData, const std::string &sinkDeviceId, int32_t srcDeviceId);
+    int32_t StartCoordination(int32_t userData, const std::string &remoteNetworkId, int32_t startDeviceId);
 
     /*
     * @name: StopCoordination
     * @function: 停止键鼠穿越
     * @parameter: userData 用户数据
-    * @return: 停止键鼠穿越结果
+    * @return: 停止结果
     */
     int32_t StopCoordination(int32_t userData);
 
@@ -131,7 +130,7 @@ public:
     /*
     * @name: StartDrag
     * @function: 开始拖拽
-    * @parameter: dragData DragData
+    * @parameter: dragData 拖拽数据
     * @return: 开始拖拽结果
     */
     int32_t StartDrag(const DragData &dragData);
@@ -139,8 +138,8 @@ public:
     /*
     * @name: StopDrag
     * @function: 停止拖拽
-    * @parameter: result DragResult
-    * @parameter: hasCustomAnimation hasCustomAnimation
+    * @parameter: result 拖拽结果
+    * @parameter: hasCustomAnimation 是否有自定义动画
     * @return: 停止拖拽结果
     */
     int32_t StopDrag(DragResult result, bool hasCustomAnimation);
@@ -148,7 +147,7 @@ public:
     /*
     * @name: UpdateDragStyle
     * @function: 更新拖拽样式
-    * @parameter: style DragCursorStyle
+    * @parameter: style 拖拽样式
     * @return: 更新结果
     */
     int32_t UpdateDragStyle(DragCursorStyle style);
@@ -161,23 +160,31 @@ public:
     int32_t GetDragTargetPid();
 
     /*
+    * @name: GetUdKey
+    * @function: 获取UdKey
+    * @parameter: udKey udKey
+    * @return: Udkey
+    */
+    int32_t GetUdKey(std::string &udKey);
+
+    /*
     * @name: AddDraglistener
-    * @function: 增加拖拽监听
-    * @return: the result for add listener
+    * @function: 添加拖拽监听
+    * @return: 添加结果
     */
     int32_t AddDraglistener();
 
     /*
     * @name: RemoveDraglistener
     * @function: 移除拖拽监听
-    * @return: the result for remove listener
+    * @return: 移除结果
     */
     int32_t RemoveDraglistener();
 
     /*
     * @name: SetDragWindowVisible
     * @function: 设置拖拽窗口可见性
-    * @parameter: visible visible
+    * @parameter: visible 是否可见
     * @return: 设置结果
     */
     int32_t SetDragWindowVisible(bool visible);

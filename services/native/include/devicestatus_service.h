@@ -21,6 +21,7 @@
 #include <iremote_object.h>
 #include <system_ability.h>
 
+#include "across_device_drag.h"
 #include "delegate_tasks.h"
 #include "device_manager.h"
 #include "devicestatus_srv_stub.h"
@@ -28,7 +29,6 @@
 #include "devicestatus_dumper.h"
 #include "devicestatus_manager.h"
 #include "devicestatus_delayed_sp_singleton.h"
-#include "across_device_drag.h"
 #include "drag_data.h"
 #include "drag_manager.h"
 #include "i_context.h"
@@ -54,6 +54,7 @@ public:
     IDelegateTasks& GetDelegateTasks() override;
     IDeviceManager& GetDeviceManager() override;
     ITimerManager& GetTimerManager() override;
+    const IDragManager& GetDragManager() const override;
 
     void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency,
         sptr<IRemoteDevStaCallback> callback) override;
@@ -67,8 +68,7 @@ public:
     int32_t RegisterCoordinationListener() override;
     int32_t UnregisterCoordinationListener() override;
     int32_t EnableCoordination(int32_t userData, bool enable) override;
-    int32_t StartCoordination(int32_t userData, const std::string &sinkDeviceId,
-        int32_t srcDeviceId) override;
+    int32_t StartCoordination(int32_t userData, const std::string &remoteNetworkId, int32_t startDeviceId) override;
     int32_t StopCoordination(int32_t userData) override;
     int32_t GetCoordinationState(int32_t userData, const std::string &deviceId) override;
 
@@ -76,6 +76,7 @@ public:
     int32_t StopDrag(DragResult result, bool hasCustomAnimation) override;
     int32_t UpdateDragStyle(DragCursorStyle style) override;
     int32_t GetDragTargetPid() override;
+    int32_t GetUdKey(std::string &udKey) override;
     int32_t AddDraglistener() override;
     int32_t RemoveDraglistener() override;
     int32_t SetDragWindowVisible(bool visible) override;
@@ -109,8 +110,8 @@ private:
     int32_t OnRegisterCoordinationListener(int32_t pid);
     int32_t OnUnregisterCoordinationListener(int32_t pid);
     int32_t OnEnableCoordination(int32_t pid, int32_t userData, bool enabled);
-    int32_t OnStartCoordination(int32_t pid, int32_t userData, const std::string &sinkDeviceId,
-        int32_t srcDeviceId);
+    int32_t OnStartCoordination(int32_t pid, int32_t userData, const std::string &remoteNetworkId,
+        int32_t startDeviceId);
     int32_t OnStopCoordination(int32_t pid, int32_t userData);
     int32_t OnGetCoordinationState(int32_t pid, int32_t userData, const std::string &deviceId);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
@@ -126,6 +127,7 @@ private:
     std::shared_ptr<DeviceStatusMsdpClientImpl> msdpImpl_;
     DragManager dragMgr_;
     AcrossDeviceDrag acrossDeviceDrag_;
+    DeviceStatusDumper deviceStatusDumper_;
 };
 
 } // namespace DeviceStatus

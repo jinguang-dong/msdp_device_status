@@ -61,6 +61,7 @@ int32_t DeviceStatusSrvStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
         {Idevicestatus::STOP_DRAG, &DeviceStatusSrvStub::StopDragStub},
         {Idevicestatus::UPDATED_DRAG_STYLE, &DeviceStatusSrvStub::UpdateDragStyleStub},
         {Idevicestatus::GET_DRAG_TARGET_PID, &DeviceStatusSrvStub::GetDragTargetPidStub},
+        {Idevicestatus::GET_DRAG_TARGET_UDKEY, &DeviceStatusSrvStub::GetUdKeyStub},
         {Idevicestatus::REGISTER_DRAG_MONITOR, &DeviceStatusSrvStub::AddDraglistenerStub},
         {Idevicestatus::UNREGISTER_DRAG_MONITOR, &DeviceStatusSrvStub::RemoveDraglistenerStub},
         {Idevicestatus::SET_DRAG_WINDOW_VISIBLE, &DeviceStatusSrvStub::SetDragWindowVisibleStub},
@@ -166,11 +167,11 @@ int32_t DeviceStatusSrvStub::StartCoordinationStub(MessageParcel& data, MessageP
     CALL_DEBUG_ENTER;
     int32_t userData;
     READINT32(data, userData, E_DEVICESTATUS_READ_PARCEL_ERROR);
-    std::string sinkDeviceId;
-    READSTRING(data, sinkDeviceId, E_DEVICESTATUS_READ_PARCEL_ERROR);
-    int32_t srcDeviceId;
-    READINT32(data, srcDeviceId, E_DEVICESTATUS_READ_PARCEL_ERROR);
-    int32_t ret = StartCoordination(userData, sinkDeviceId, srcDeviceId);
+    std::string remoteNetworkId;
+    READSTRING(data, remoteNetworkId, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    int32_t startDeviceId;
+    READINT32(data, startDeviceId, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    int32_t ret = StartCoordination(userData, remoteNetworkId, startDeviceId);
     if (ret != RET_OK) {
         FI_HILOGE("Call StartCoordination failed, ret:%{public}d", ret);
     }
@@ -220,6 +221,19 @@ int32_t DeviceStatusSrvStub::GetDragTargetPidStub(MessageParcel& data, MessagePa
     CALL_DEBUG_ENTER;
     int32_t pid = GetDragTargetPid();
     WRITEINT32(reply, pid, IPC_STUB_WRITE_PARCEL_ERR);
+    return RET_OK;
+}
+
+int32_t DeviceStatusSrvStub::GetUdKeyStub(MessageParcel& data, MessageParcel& reply)
+{
+    CALL_DEBUG_ENTER;
+    std::string udKey;
+    int32_t ret = GetUdKey(udKey);
+    if (ret != RET_OK) {
+        FI_HILOGE("Get udKey failed ret:%{public}d", ret);
+    }
+    WRITESTRING(reply, udKey, IPC_STUB_WRITE_PARCEL_ERR);
+    FI_HILOGD("Target udKey:%{public}s", udKey.c_str());
     return RET_OK;
 }
 
@@ -275,6 +289,7 @@ int32_t DeviceStatusSrvStub::StartDragStub(MessageParcel& data, MessageParcel& r
     READINT32(data, dragData.shadowInfo.x, E_DEVICESTATUS_READ_PARCEL_ERROR);
     READINT32(data, dragData.shadowInfo.y, E_DEVICESTATUS_READ_PARCEL_ERROR);
     READUINT8VECTOR(data, dragData.buffer, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    READSTRING(data, dragData.udKey, E_DEVICESTATUS_READ_PARCEL_ERROR);
     READINT32(data, dragData.sourceType, E_DEVICESTATUS_READ_PARCEL_ERROR);
     READINT32(data, dragData.dragNum, E_DEVICESTATUS_READ_PARCEL_ERROR);
     READINT32(data, dragData.pointerId, E_DEVICESTATUS_READ_PARCEL_ERROR);

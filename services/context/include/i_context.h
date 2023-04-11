@@ -18,6 +18,7 @@
 
 #include "i_delegate_tasks.h"
 #include "i_device_manager.h"
+#include "i_drag_manager.h"
 #include "i_timer_manager.h"
 
 namespace OHOS {
@@ -36,6 +37,7 @@ public:
     virtual IDelegateTasks& GetDelegateTasks() = 0;
     virtual IDeviceManager& GetDeviceManager() = 0;
     virtual ITimerManager& GetTimerManager() = 0;
+    virtual const IDragManager& GetDragManager() const = 0;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

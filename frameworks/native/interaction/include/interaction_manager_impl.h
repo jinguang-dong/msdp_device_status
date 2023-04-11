@@ -36,7 +36,7 @@ public:
     int32_t RegisterCoordinationListener(std::shared_ptr<ICoordinationListener> listener);
     int32_t UnregisterCoordinationListener(std::shared_ptr<ICoordinationListener> listener = nullptr);
     int32_t EnableCoordination(bool enabled, std::function<void(std::string, CoordinationMessage)> callback);
-    int32_t StartCoordination(const std::string &sinkDeviceId, int32_t srcDeviceId,
+    int32_t StartCoordination(const std::string &remoteNetworkId, int32_t startDeviceId,
         std::function<void(std::string, CoordinationMessage)> callback);
     int32_t StopCoordination(std::function<void(std::string, CoordinationMessage)> callback);
     int32_t GetCoordinationState(const std::string &deviceId, std::function<void(bool)> callback);
@@ -44,6 +44,7 @@ public:
     int32_t StartDrag(const DragData &dragData, std::function<void(const DragNotifyMsg&)> callback);
     int32_t StopDrag(DragResult result, bool hasCustomAnimation);
     int32_t GetDragTargetPid();
+    int32_t GetUdKey(std::string &udKey);
     int32_t AddDraglistener(DragListenerPtr listener);
     int32_t RemoveDraglistener(DragListenerPtr listener);
     int32_t SetDragWindowVisible(bool visible);

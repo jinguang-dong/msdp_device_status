@@ -43,8 +43,8 @@ public:
     virtual int32_t RegisterCoordinationListener() override;
     virtual int32_t UnregisterCoordinationListener() override;
     virtual int32_t EnableCoordination(int32_t userData, bool enabled) override;
-    virtual int32_t StartCoordination(int32_t userData, const std::string &sinkDeviceId,
-        int32_t srcDeviceId) override;
+    virtual int32_t StartCoordination(int32_t userData, const std::string &remoteNetworkId,
+        int32_t startDeviceId) override;
     virtual int32_t StopCoordination(int32_t userData) override;
     virtual int32_t GetCoordinationState(int32_t userData, const std::string &deviceId) override;
 
@@ -52,6 +52,7 @@ public:
     virtual int32_t StopDrag(DragResult result, bool hasCustomAnimation) override;
     virtual int32_t UpdateDragStyle(DragCursorStyle style) override;
     virtual int32_t GetDragTargetPid() override;
+    virtual int32_t GetUdKey(std::string &udKey) override;
     virtual int32_t AddDraglistener() override;
     virtual int32_t RemoveDraglistener() override;
     virtual int32_t SetDragWindowVisible(bool visible) override;

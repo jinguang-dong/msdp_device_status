@@ -124,7 +124,7 @@ int32_t InteractionManagerImpl::EnableCoordination(bool enabled,
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
-int32_t InteractionManagerImpl::StartCoordination(const std::string &sinkDeviceId, int32_t srcDeviceId,
+int32_t InteractionManagerImpl::StartCoordination(const std::string &remoteNetworkId, int32_t startDeviceId,
     std::function<void(std::string, CoordinationMessage)> callback)
 {
     CALL_DEBUG_ENTER;
@@ -134,11 +134,11 @@ int32_t InteractionManagerImpl::StartCoordination(const std::string &sinkDeviceI
         FI_HILOGE("Get client is nullptr");
         return RET_ERR;
     }
-    return coordinationManagerImpl_.StartCoordination(sinkDeviceId, srcDeviceId, callback);
+    return coordinationManagerImpl_.StartCoordination(remoteNetworkId, startDeviceId, callback);
 #else
     FI_HILOGW("Coordination does not support");
-    (void)(sinkDeviceId);
-    (void)(srcDeviceId);
+    (void)(remoteNetworkId);
+    (void)(startDeviceId);
     (void)(callback);
     return ERROR_UNSUPPORT;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
@@ -207,6 +207,12 @@ int32_t InteractionManagerImpl::GetDragTargetPid()
 {
     CALL_DEBUG_ENTER;
     return dragManagerImpl_.GetDragTargetPid();
+}
+
+int32_t InteractionManagerImpl::GetUdKey(std::string &udKey)
+{
+    CALL_DEBUG_ENTER;
+    return dragManagerImpl_.GetUdKey(udKey);
 }
 
 int32_t InteractionManagerImpl::AddDraglistener(DragListenerPtr listener)

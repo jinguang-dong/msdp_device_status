@@ -125,6 +125,11 @@ ITimerManager& DeviceStatusService::GetTimerManager()
     return timerMgr_;
 }
 
+const IDragManager& DeviceStatusService::GetDragManager() const
+{
+    return dragMgr_;
+}
+
 int32_t DeviceStatusService::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
     DEV_HILOGI(SERVICE, "dump DeviceStatusServiceInfo");
@@ -132,11 +137,10 @@ int32_t DeviceStatusService::Dump(int32_t fd, const std::vector<std::u16string>&
         DEV_HILOGE(SERVICE, "fd is invalid");
         return RET_NG;
     }
-    DeviceStatusDumper &deviceStatusDumper = DeviceStatusDumper::GetInstance();
     if (args.empty()) {
         DEV_HILOGE(SERVICE, "param cannot be empty");
         dprintf(fd, "param cannot be empty\n");
-        deviceStatusDumper.DumpHelpInfo(fd);
+        deviceStatusDumper_.DumpHelpInfo(fd);
         return RET_NG;
     }
     std::vector<std::string> argList = { "" };
@@ -153,7 +157,7 @@ int32_t DeviceStatusService::Dump(int32_t fd, const std::vector<std::u16string>&
             datas.emplace_back(data);
         }
     }
-    deviceStatusDumper.ParseCommand(fd, argList, datas);
+    deviceStatusDumper_.ParseCommand(fd, argList, datas);
     return RET_OK;
 }
 
@@ -192,6 +196,10 @@ bool DeviceStatusService::Init()
     }
     if (acrossDeviceDrag_.Init(this) != RET_OK) {
         FI_HILOGE("Drag adapter init failed");
+        goto INIT_FAIL;
+    }
+    if (deviceStatusDumper_.Init(this) != RET_OK) {
+        FI_HILOGE("Dump init failed");
         goto INIT_FAIL;
     }
     InitSessionDeathMonitor();
@@ -612,22 +620,22 @@ int32_t DeviceStatusService::EnableCoordination(int32_t userData, bool enabled)
 }
 
 int32_t DeviceStatusService::StartCoordination(int32_t userData,
-    const std::string &sinkDeviceId, int32_t srcDeviceId)
+    const std::string &remoteNetworkId, int32_t startDeviceId)
 {
     CALL_DEBUG_ENTER;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     int32_t pid = GetCallingPid();
     int32_t ret = delegateTasks_.PostSyncTask(
         std::bind(&DeviceStatusService::OnStartCoordination,
-        this, pid, userData, sinkDeviceId, srcDeviceId));
+        this, pid, userData, remoteNetworkId, startDeviceId));
     if (ret != RET_OK) {
         FI_HILOGE("OnStartCoordination failed, ret:%{public}d", ret);
         return ret;
     }
 #else
     (void)(userData);
-    (void)(sinkDeviceId);
-    (void)(srcDeviceId);
+    (void)(remoteNetworkId);
+    (void)(startDeviceId);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
     return RET_OK;
 }
@@ -658,7 +666,7 @@ int32_t DeviceStatusService::GetCoordinationState(int32_t userData, const std::s
         std::bind(&DeviceStatusService::OnGetCoordinationState, this, pid, userData, deviceId));
     if (ret != RET_OK) {
         FI_HILOGE("OnGetCoordinationState failed, ret:%{public}d", ret);
-        return RET_ERR;
+        return ret;
     }
 #else
     (void)(userData);
@@ -757,10 +765,26 @@ int32_t DeviceStatusService::UpdateDragStyle(DragCursorStyle style)
     return ret;
 }
 
+int32_t DeviceStatusService::GetUdKey(std::string &udKey)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = delegateTasks_.PostSyncTask(
+        std::bind(&DragManager::GetUdKey, &dragMgr_, std::ref(udKey)));
+    if (ret != RET_OK) {
+        FI_HILOGE("GetUdKey failed, ret:%{public}d", ret);
+    }
+    return ret;
+}
+
 int32_t DeviceStatusService::GetDragTargetPid()
 {
     CALL_DEBUG_ENTER;
-    return dragMgr_.GetDragTargetPid();
+    int32_t ret = delegateTasks_.PostSyncTask(
+        std::bind(&DragManager::GetDragTargetPid, &dragMgr_));
+    if (ret == RET_ERR) {
+        FI_HILOGE("GetDragTargetPid failed, ret:%{public}d", ret);
+    }
+    return ret;
 }
 
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
@@ -813,7 +837,7 @@ int32_t DeviceStatusService::OnEnableCoordination(int32_t pid, int32_t userData,
 }
 
 int32_t DeviceStatusService::OnStartCoordination(int32_t pid,
-    int32_t userData, const std::string &sinkDeviceId, int32_t srcDeviceId)
+    int32_t userData, const std::string &remoteNetworkId, int32_t startDeviceId)
 {
     CALL_DEBUG_ENTER;
     auto sess = GetSession(GetClientFd(pid));
@@ -839,7 +863,7 @@ int32_t DeviceStatusService::OnStartCoordination(int32_t pid,
         return RET_OK;
     }
     CoordinationEventMgr->AddCoordinationEvent(event);
-    int32_t ret = CooSM->StartCoordination(sinkDeviceId, srcDeviceId);
+    int32_t ret = CooSM->StartCoordination(remoteNetworkId, startDeviceId);
     if (ret != RET_OK) {
         FI_HILOGE("OnStartCoordination failed, ret:%{public}d", ret);
         return ret;

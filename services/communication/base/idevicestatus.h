@@ -42,6 +42,7 @@ public:
         START_DRAG,
         STOP_DRAG,
         GET_DRAG_TARGET_PID,
+        GET_DRAG_TARGET_UDKEY,
         REGISTER_DRAG_MONITOR,
         UNREGISTER_DRAG_MONITOR,
         SET_DRAG_WINDOW_VISIBLE,
@@ -61,14 +62,15 @@ public:
     virtual int32_t RegisterCoordinationListener() = 0;
     virtual int32_t UnregisterCoordinationListener() = 0;
     virtual int32_t EnableCoordination(int32_t userData, bool enabled) = 0;
-    virtual int32_t StartCoordination(int32_t userData, const std::string &sinkDeviceId,
-        int32_t srcDeviceId) = 0;
+    virtual int32_t StartCoordination(int32_t userData, const std::string &remoteNetworkId,
+        int32_t startDeviceId) = 0;
     virtual int32_t StopCoordination(int32_t userData) = 0;
     virtual int32_t GetCoordinationState(int32_t userData, const std::string &deviceId) = 0;
     virtual int32_t StartDrag(const DragData &dragData) = 0;
     virtual int32_t StopDrag(DragResult result, bool hasCustomAnimation) = 0;
     virtual int32_t UpdateDragStyle(DragCursorStyle style) = 0;
     virtual int32_t GetDragTargetPid() = 0;
+    virtual int32_t GetUdKey(std::string &udKey) = 0;
     virtual int32_t AddDraglistener() = 0;
     virtual int32_t RemoveDraglistener() = 0;
     virtual int32_t AllocSocketFd(const std::string &programName, const int32_t moduleType,
