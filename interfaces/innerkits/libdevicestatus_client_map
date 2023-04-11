@@ -30,6 +30,7 @@
             "vtable for OHOS::Msdp::DeviceStatus::DeviceStatusCallbackProxy";
             "VTT for OHOS::Msdp::DeviceStatus::DeviceStatusSrvProxy";
             "vtable for OHOS::Msdp::DeviceStatus::DeviceStatusSrvProxy";
+            "OHOS::Msdp::DeviceStatus::InteractionManager::GetDragTargetPid()";
         };
     local:
         *;
