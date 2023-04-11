@@ -27,10 +27,10 @@ NetPacket::~NetPacket() {}
 
 void NetPacket::MakeData(StreamBuffer &buf) const
 {
-    PACKHEAD head = {msgId_, wPos_};
+    PACKHEAD head = {msgId_, rustStreamBuffer_.wPos_};
     buf << head;
-    if (wPos_ > 0) {
-        if (!buf.Write(&szBuff_[0], wPos_)) {
+    if (rustStreamBuffer_.wPos_ > 0) {
+        if (!buf.Write(&rustStreamBuffer_.szBuff_[0], rustStreamBuffer_.wPos_)) {
             FI_HILOGE("Write data to stream failed, errCode:%{public}d", STREAM_BUF_WRITE_FAIL);
             return;
         }

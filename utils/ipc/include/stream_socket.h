@@ -30,6 +30,7 @@
 
 #include "circle_stream_buffer.h"
 #include "net_packet.h"
+#include "rust_binding.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -43,18 +44,20 @@ public:
     int32_t EpollCreate(int32_t size);
     int32_t EpollCtl(int32_t fd, int32_t op, struct epoll_event &event, int32_t epollFd = -1);
     int32_t EpollWait(struct epoll_event &events, int32_t maxevents, int32_t timeout, int32_t epollFd = -1);
-    void OnReadPackets(CircleStreamBuffer &buf, PacketCallBackFun callbackFun);
     void EpollClose();
     void Close();
 
     int32_t GetFd() const
     {
-        return fd_;
+        return get_fd(&rustStreamSocket_);
+    }
+    int32_t GetEpollFd() const
+    {
+        return get_epoll_fd(&rustStreamSocket_);
     }
 
 protected:
-    int32_t fd_ { -1 };
-    int32_t epollFd_ { -1 };
+    struct RustStreamSocket rustStreamSocket_;
 };
 } // namespace Msdp
 } // namespace OHOS

@@ -28,7 +28,7 @@ public:
     Client() = default;
     DISALLOW_COPY_AND_MOVE(Client);
     ~Client() override;
-
+    void OnPacket(NetPacket& pkt);
     int32_t Socket() override;
     void SetEventHandler(EventHandlerPtr eventHandler) override;
     void MarkIsEventHandlerChanged(EventHandlerPtr eventHandler) override;
@@ -56,7 +56,6 @@ private:
     void OnReconnect();
     bool AddFdListener(int32_t fd);
     bool DelFdListener(int32_t fd);
-    void OnPacket(NetPacket& pkt);
     const std::string& GetErrorStr(ErrCode code) const;
     void OnConnected() override;
     void OnDisconnected() override;

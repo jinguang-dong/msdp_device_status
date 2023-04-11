@@ -23,6 +23,7 @@
 #include "nocopyable.h"
 #include "securec.h"
 #include "devicestatus_define.h"
+#include "rust_binding.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -37,7 +38,6 @@ public:
 
     void Reset();
     void Clean();
-    bool SeekReadPos(int32_t n);
 
     bool Read(std::string &buf);
     bool Write(const std::string &buf);
@@ -47,15 +47,6 @@ public:
 
     bool Read(char *buf, size_t size);
     virtual bool Write(const char *buf, size_t size);
-
-    bool IsEmpty() const;
-    size_t Size() const;
-    int32_t UnreadSize() const;
-    int32_t GetAvailableBufSize() const;
-
-    bool ChkRWError() const;
-    const std::string &GetErrorStatusRemark() const;
-    const char *Data() const;
 
     template<typename T>
     bool Read(T &data);
@@ -72,27 +63,17 @@ public:
 protected:
     bool Clone(const StreamBuffer &buf);
 
-protected:
-    enum class ErrorStatus {
-        ERROR_STATUS_OK,
-        ERROR_STATUS_READ,
-        ERROR_STATUS_WRITE,
-    };
-    ErrorStatus rwErrorStatus_ = ErrorStatus::ERROR_STATUS_OK;
-    int32_t rCount_ { 0 };
-    int32_t wCount_ { 0 };
-
-    int32_t rPos_ { 0 };
-    int32_t wPos_ { 0 };
-    char szBuff_[MAX_STREAM_BUF_SIZE+1] = {};
+public:
+    struct RustStreamBuffer rustStreamBuffer_;
 };
 
 template<typename T>
 bool StreamBuffer::Read(T &data)
 {
     if (!Read(reinterpret_cast<char *>(&data), sizeof(data))) {
+        const char* s = get_error_status_remark(&rustStreamBuffer_);
         FI_HILOGE("[%{public}s] size:%{public}zu count:%{public}d,errCode:%{public}d",
-            GetErrorStatusRemark().c_str(), sizeof(data), rCount_ + 1, STREAM_BUF_READ_FAIL);
+            s, sizeof(data), rustStreamBuffer_.rCount_ + 1, STREAM_BUF_READ_FAIL);
         return false;
     }
     return true;
@@ -102,8 +83,9 @@ template<typename T>
 bool StreamBuffer::Write(const T &data)
 {
     if (!Write(reinterpret_cast<const char *>(&data), sizeof(data))) {
+        const char* s = get_error_status_remark(&rustStreamBuffer_);
         FI_HILOGE("[%{public}s] size:%{public}zu,count:%{public}d,errCode:%{public}d",
-            GetErrorStatusRemark().c_str(), sizeof(data), wCount_ + 1, STREAM_BUF_WRITE_FAIL);
+            s, sizeof(data), rustStreamBuffer_.wCount_ + 1, STREAM_BUF_WRITE_FAIL);
         return false;
     }
     return true;

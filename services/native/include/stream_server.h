@@ -42,6 +42,7 @@ enum EpollEventType {
 using MsgServerFunCallback = std::function<void(SessionPtr, NetPacket&)>;
 class StreamServer : public StreamSocket, public IStreamServer {
 public:
+    void OnPacket(int32_t fd, NetPacket& pkt);
     StreamServer() = default;
     DISALLOW_COPY_AND_MOVE(StreamServer);
     virtual ~StreamServer();
@@ -64,7 +65,6 @@ protected:
 
     void SetRecvFun(MsgServerFunCallback fun);
     void ReleaseSession(int32_t fd, epoll_event& ev);
-    void OnPacket(int32_t fd, NetPacket& pkt);
     void OnEpollRecv(int32_t fd, epoll_event& ev);
     void OnEpollEvent(epoll_event& ev);
     bool AddSession(SessionPtr ses);
