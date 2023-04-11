@@ -31,6 +31,7 @@
             "VTT for OHOS::Msdp::DeviceStatus::DeviceStatusSrvProxy";
             "vtable for OHOS::Msdp::DeviceStatus::DeviceStatusSrvProxy";
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetDragTargetPid()";
+            "OHOS::Msdp::DeviceStatus::InteractionManager::GetUdKey(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
         };
     local:
         *;
