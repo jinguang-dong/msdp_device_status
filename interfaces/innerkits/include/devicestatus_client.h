@@ -41,29 +41,172 @@ public:
     }
     DISALLOW_COPY_AND_MOVE(DeviceStatusClient);
 
+    /*
+    * @name: SubscribeCallback
+    * @function: 订阅设备状态回调
+    * @parameter: type 设备状态类型
+    * @parameter: event 对应类型的激活状态
+    * @parameter: latency 上报周期
+    * @parameter: callback 用于接收设备状态变化的回调
+    * @return: 订阅结果
+    */
     int32_t SubscribeCallback(Type type, ActivityEvent event, ReportLatencyNs latency,
         sptr<IRemoteDevStaCallback> callback);
+
+    /*
+    * @name: UnsubscribeCallback
+    * @function: 取消订阅设备状态回调
+    * @parameter: type 设备状态类型
+    * @parameter: event 对应类型的激活状态
+    * @parameter: callback 用于接收设备状态变化的回调
+    * @return: 取消订阅结果
+    */
     int32_t UnsubscribeCallback(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback);
+
+    /*
+    * @name: GetDeviceStatusData
+    * @function: 获取最近一次的设备状态数据
+    * @parameter: type 设备状态类型
+    * @return: 设备状态数据
+    */
     Data GetDeviceStatusData(const Type type);
+
+    /*
+    * @name: RegisterDeathListener
+    * @function: 注册死亡监听
+    * @parameter: deathListener 用于接受死亡通知的监听器
+    */
     void RegisterDeathListener(std::function<void()> deathListener);
 
+
+    /*
+    * @name: RegisterCoordinationListener
+    * @function: 注册键鼠穿越监听
+    */
     int32_t RegisterCoordinationListener();
+
+    /*
+    * @name: UnregisterCoordinationListener
+    * @function: 取消注册键鼠穿越监听
+    */
     int32_t UnregisterCoordinationListener();
+
+    /*
+    * @name: EnableCoordination
+    * @function: 使能键鼠穿越能力
+    * @parameter: userData 用户数据
+    * @parameter: enabled 使能状态
+    * @return: 使能结果
+    */
     int32_t EnableCoordination(int32_t userData, bool enabled);
+
+    /*
+    * @name: StartCoordination
+    * @function: 开始键鼠穿越
+    * @parameter: userData 用户数据
+    * @parameter: sinkDeviceId 设备ID
+    * @parameter: srcDeviceId 源设备ID
+    * @return: 开始键鼠穿越结果
+    */
     int32_t StartCoordination(int32_t userData, const std::string &sinkDeviceId, int32_t srcDeviceId);
+
+    /*
+    * @name: StopCoordination
+    * @function: 停止键鼠穿越
+    * @parameter: userData 用户数据
+    * @return: 停止键鼠穿越结果
+    */
     int32_t StopCoordination(int32_t userData);
+
+    /*
+    * @name: GetCoordinationState
+    * @function: 获取键鼠穿越状态
+    * @parameter: userData 用户数据
+    * @parameter: deviceId 设备ID
+    * @return: 键鼠穿越状态
+    */
     int32_t GetCoordinationState(int32_t userData, const std::string &deviceId);
 
+
+    /*
+    * @name: StartDrag
+    * @function: 开始拖拽
+    * @parameter: dragData DragData
+    * @return: 开始拖拽结果
+    */
     int32_t StartDrag(const DragData &dragData);
+
+    /*
+    * @name: StopDrag
+    * @function: 停止拖拽
+    * @parameter: result DragResult
+    * @parameter: hasCustomAnimation hasCustomAnimation
+    * @return: 停止拖拽结果
+    */
     int32_t StopDrag(DragResult result, bool hasCustomAnimation);
+
+    /*
+    * @name: UpdateDragStyle
+    * @function: 更新拖拽样式
+    * @parameter: style DragCursorStyle
+    * @return: 更新结果
+    */
     int32_t UpdateDragStyle(DragCursorStyle style);
+
+    /*
+    * @name: GetDragTargetPid
+    * @function: 获取拖拽目标进程号
+    * @return: 进程号
+    */
     int32_t GetDragTargetPid();
+
+    /*
+    * @name: AddDraglistener
+    * @function: 增加拖拽监听
+    * @return: the result for add listener
+    */
     int32_t AddDraglistener();
+
+    /*
+    * @name: RemoveDraglistener
+    * @function: 移除拖拽监听
+    * @return: the result for remove listener
+    */
     int32_t RemoveDraglistener();
+
+    /*
+    * @name: SetDragWindowVisible
+    * @function: 设置拖拽窗口可见性
+    * @parameter: visible visible
+    * @return: 设置结果
+    */
     int32_t SetDragWindowVisible(bool visible);
+
+    /*
+    * @name: GetShadowOffset
+    * @function: 获取阴影偏移量
+    * @parameter: offsetX X轴偏移量
+    * @parameter: offsetY Y轴偏移量
+    * @parameter: width 宽
+    * @parameter: height 高
+    * @return: 阴影偏移量
+    */
     int32_t GetShadowOffset(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height);
 
+
+    /*
+    * @name: AllocSocketPair
+    * @function: 分配套接字对
+    * @parameter: moduleType 模块类型
+    * @return: 分配结果
+    */
     int32_t AllocSocketPair(const int32_t moduleType);
+
+    /*
+    * @name: GetClientSocketFdOfAllocedSocketPair
+    * @function: 获取已分配套接字对客户端的套接字描述器
+    * @return: 客户端的套接字描述器
+    */
     int32_t GetClientSocketFdOfAllocedSocketPair() const;
 
 private:
