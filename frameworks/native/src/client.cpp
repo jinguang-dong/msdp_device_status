@@ -23,6 +23,7 @@
 #include "proto.h"
 #include "time_cost_chk.h"
 #include "util.h"
+#include "rust_binding.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -30,6 +31,20 @@ namespace DeviceStatus {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "Client" };
 const std::string THREAD_NAME = "ClientEventHandler";
+extern "C" {
+    void read_client_packets(RustStreamBuffer*, OHOS::Msdp::DeviceStatus::Client*,
+        void(*)(OHOS::Msdp::DeviceStatus::Client*, RustNetPacket*));
+}
+void OnCPacket(Client* object, RustNetPacket* cPkt)
+{
+    NetPacket pkt(cPkt->msgId_);
+    if ((memcpy_s(&pkt.rustStreamBuffer_, sizeof(struct RustStreamBuffer),
+        &(cPkt->rustStreamBuffer), sizeof(struct RustStreamBuffer))) != EOK) {
+        FI_HILOGE("OnCPacket: memcpy_s failed");
+        return;
+    }
+    object->OnPacket(pkt);
+}
 } // namespace
 
 using namespace AppExecFwk;
@@ -106,12 +121,12 @@ bool Client::StartEventRunner()
 
     FI_HILOGI("Create event handler, thread name:%{public}s", runner->GetRunnerThreadName().c_str());
 
-    if (isConnected_ && fd_ >= 0) {
+    if (isConnected_ && rustStreamSocket_.fd_ >= 0) {
         if (isListening_) {
             FI_HILOGI("File fd is in listening");
             return true;
         }
-        if (!AddFdListener(fd_)) {
+        if (!AddFdListener(rustStreamSocket_.fd_)) {
             FI_HILOGE("Add fd listener failed");
             return false;
         }
@@ -180,7 +195,7 @@ void Client::OnRecvMsg(const char *buf, size_t size)
     if (!circBuf_.Write(buf, size)) {
         FI_HILOGW("Write data failed. size:%{public}zu", size);
     }
-    OnReadPackets(circBuf_, std::bind(&Client::OnPacket, this, std::placeholders::_1));
+    read_client_packets(&circBuf_.rustStreamBuffer_, this, OnCPacket);
 }
 
 int32_t Client::Reconnect()
@@ -218,13 +233,13 @@ void Client::RegisterDisconnectedFunction(ConnectCallback fun)
 void Client::OnDisconnected()
 {
     CALL_DEBUG_ENTER;
-    FI_HILOGI("Disconnected from server, fd:%{public}d", fd_);
+    FI_HILOGI("Disconnected from server, fd:%{public}d", rustStreamSocket_.fd_);
     isConnected_ = false;
     isListening_ = false;
     if (funDisconnected_) {
         funDisconnected_(*this);
     }
-    if (!DelFdListener(fd_)) {
+    if (!DelFdListener(rustStreamSocket_.fd_)) {
         FI_HILOGW("Delete fd listener failed");
     }
     StreamClient::Stop();
@@ -243,8 +258,8 @@ void Client::OnConnected()
     if (funConnected_) {
         funConnected_(*this);
     }
-    if (hasClient_ && !isRunning_ && fd_ >= 0 && eventHandler_ != nullptr) {
-        if (!AddFdListener(fd_)) {
+    if (hasClient_ && !isRunning_ && rustStreamSocket_.fd_ >= 0 && eventHandler_ != nullptr) {
+        if (!AddFdListener(rustStreamSocket_.fd_)) {
             FI_HILOGE("Add fd listener failed");
             return;
         }
@@ -260,12 +275,12 @@ int32_t Client::Socket()
         FI_HILOGE("Call AllocSocketPair return %{public}d", ret);
         return RET_ERR;
     }
-    fd_ = DeviceStatusClient::GetInstance().GetClientSocketFdOfAllocedSocketPair();
-    if (fd_ == -1) {
+    rustStreamSocket_.fd_ = DeviceStatusClient::GetInstance().GetClientSocketFdOfAllocedSocketPair();
+    if (rustStreamSocket_.fd_ == -1) {
         FI_HILOGE("Call GetClientSocketFdOfAllocedSocketPair return invalid fd");
     }
-    FI_HILOGD("Call GetClientSocketFdOfAllocedSocketPair return fd:%{public}d", fd_);
-    return fd_;
+    FI_HILOGD("Call GetClientSocketFdOfAllocedSocketPair return fd:%{public}d", rustStreamSocket_.fd_);
+    return rustStreamSocket_.fd_;
 }
 
 void Client::Stop()

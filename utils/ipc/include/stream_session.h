@@ -26,6 +26,7 @@
 
 #include "net_packet.h"
 #include "proto.h"
+#include "rust_binding.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -42,9 +43,19 @@ public:
     bool SendMsg(NetPacket &pkt) const;
     void Close();
 
+    int32_t GetUid() const
+    {
+        return get_uid(&rustStreamSession_);
+    }
+
     int32_t GetPid() const
     {
-        return pid_;
+        return get_pid(&rustStreamSession_);
+    }
+
+    int32_t GetModuleType() const
+    {
+        return get_module_type(&rustStreamSession_);
     }
 
     SessionPtr GetSharedPtr()
@@ -54,7 +65,7 @@ public:
 
     int32_t GetFd() const
     {
-        return fd_;
+        return get_session_fd(&rustStreamSession_);
     }
 
     const std::string& GetDescript() const
@@ -62,17 +73,32 @@ public:
         return descript_;
     }
 
+    const std::string GetProgramName() const
+    {
+        return programName_;
+    }
+
     void SetTokenType(int32_t type)
     {
-        tokenType_ = type;
+        set_token_type(&rustStreamSession_, type);
+    }
+
+    int32_t GetTokenType() const
+    {
+        return get_token_type(&rustStreamSession_);
     }
 
     void UpdateDescript();
 protected:
+    struct EventTime {
+        int32_t id { 0 };
+        int64_t eventTime { 0 };
+        int32_t timerId { -1 };
+    };
+    struct RustStreamSession rustStreamSession_;
+    std::map<int32_t, std::vector<EventTime>> events_;
     std::string descript_;
-    int32_t fd_ { -1 };
-    const int32_t pid_ { -1 };
-    int32_t tokenType_ { TokenType::TOKEN_INVALID };
+    const std::string programName_;
 };
 } // namespace Msdp
 } // namespace OHOS

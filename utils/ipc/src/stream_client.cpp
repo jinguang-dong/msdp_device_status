@@ -46,54 +46,18 @@ int32_t StreamClient::ConnectTo()
 
 bool StreamClient::SendMsg(const char *buf, size_t size) const
 {
-    CHKPF(buf);
-    if ((size == 0) || (size > MAX_PACKET_BUF_SIZE)) {
-        FI_HILOGE("Stream buffer size out of range");
-        return false;
-    }
-    if (fd_ < 0) {
-        FI_HILOGE("The fd_ is less than 0");
-        return false;
-    }
-
-    int32_t idx = 0;
-    int32_t retryCount = 0;
-    const int32_t bufSize = static_cast<int32_t>(size);
-    int32_t remSize = bufSize;
-    while (remSize > 0 && retryCount < SEND_RETRY_LIMIT) {
-        retryCount += 1;
-        auto count = send(fd_, &buf[idx], remSize, MSG_DONTWAIT | MSG_NOSIGNAL);
-        if (count < 0) {
-            if (errno == EAGAIN || errno == EINTR || errno == EWOULDBLOCK) {
-                FI_HILOGW("Continue for errno EAGAIN|EINTR|EWOULDBLOCK, errno:%{public}d", errno);
-                continue;
-            }
-            FI_HILOGE("Send return failed,error:%{public}d fd:%{public}d", errno, fd_);
-            return false;
-        }
-        idx += count;
-        remSize -= count;
-        if (remSize > 0) {
-            usleep(SEND_RETRY_SLEEP_TIME);
-        }
-    }
-    if (retryCount >= SEND_RETRY_LIMIT || remSize != 0) {
-        FI_HILOGE("Send too many times:%{public}d/%{public}d,size:%{public}d/%{public}d fd:%{public}d",
-            retryCount, SEND_RETRY_LIMIT, idx, bufSize, fd_);
-        return false;
-    }
-    return true;
+    return send_msg_buf_size(&rustStreamSocket_, buf, size);
 }
 
 bool StreamClient::SendMsg(const NetPacket &pkt) const
 {
-    if (pkt.ChkRWError()) {
+    if (chk_rwerror(&pkt.rustStreamBuffer_)) {
         FI_HILOGE("Read and write status is error");
         return false;
     }
     StreamBuffer buf;
     pkt.MakeData(buf);
-    return SendMsg(buf.Data(), buf.Size());
+    return SendMsg(data(&buf.rustStreamBuffer_), size(&buf.rustStreamBuffer_));
 }
 
 bool StreamClient::StartClient(MsgClientFunCallback fun)

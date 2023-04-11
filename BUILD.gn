@@ -17,6 +17,7 @@ import("//build/ohos.gni")
 group("device_status_tests") {
   testonly = true
   deps = [
+    "${device_status_rust_path}/socket_ipc_rust_ffi:test_rust_pkt",
     "frameworks/native/interaction/test:interaction_manager_test",
     "services/native/test:devicestatussrv_test",
     "test/fuzztest:device_status_fuzztest",

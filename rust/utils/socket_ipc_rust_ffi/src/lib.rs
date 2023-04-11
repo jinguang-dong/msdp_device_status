@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,23 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "circle_stream_buffer.h"
 
-namespace OHOS {
-namespace Msdp {
-void CircleStreamBuffer::CopyDataToBegin()
-{
-    copy_data_to_begin(&rustStreamBuffer_);
-}
+//! Safe Rust interface to OHOS msdp
+#![feature(rustc_private)]
+#![allow(dead_code)]
 
-bool CircleStreamBuffer::CheckWrite(size_t size)
-{
-    return check_write(&rustStreamBuffer_, size);
-}
+extern crate libc;
+/// mod stream socket
+pub mod stream_socket;
+/// mod stream buffer
+pub mod stream_buffer;
+/// mod stream session
+pub mod stream_session;
+/// mod net packet
+pub mod net_packet;
+/// mod binding for binding extern C interface
+pub mod binding;
+mod error;
+/// annotation
+pub type Result<T> = std::result::Result<T, i32>;
 
-bool CircleStreamBuffer::Write(const char *buf, size_t size)
-{
-    return circle_write(&rustStreamBuffer_, buf, size);
-}
-} // namespace Msdp
-} // namespace OHOS
