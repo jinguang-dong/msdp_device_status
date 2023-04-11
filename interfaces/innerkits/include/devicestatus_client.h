@@ -78,7 +78,6 @@ public:
     */
     void RegisterDeathListener(std::function<void()> deathListener);
 
-
     /*
     * @name: RegisterCoordinationListener
     * @function: 注册键鼠穿越监听
@@ -125,7 +124,6 @@ public:
     * @return: 键鼠穿越状态
     */
     int32_t GetCoordinationState(int32_t userData, const std::string &deviceId);
-
 
     /*
     * @name: StartDrag
@@ -199,7 +197,6 @@ public:
     * @return: 阴影偏移量
     */
     int32_t GetShadowOffset(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height);
-
 
     /*
     * @name: AllocSocketPair
