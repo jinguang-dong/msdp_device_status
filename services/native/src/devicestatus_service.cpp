@@ -34,6 +34,7 @@
 #include "devicestatus_dumper.h"
 #include "devicestatus_hisysevent.h"
 #include "devicestatus_permission.h"
+#include "drag_data.h"
 
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
 #include "coordination_event_manager.h"
@@ -125,7 +126,7 @@ ITimerManager& DeviceStatusService::GetTimerManager()
     return timerMgr_;
 }
 
-const IDragManager& DeviceStatusService::GetDragManager() const
+IDragManager& DeviceStatusService::GetDragManager()
 {
     return dragMgr_;
 }
@@ -194,6 +195,7 @@ bool DeviceStatusService::Init()
         FI_HILOGE("Drag manager init failed");
         goto INIT_FAIL;
     }
+    FI_HILOGE("Drag adapter init start");
     if (acrossDeviceDrag_.Init(this) != RET_OK) {
         FI_HILOGE("Drag adapter init failed");
         goto INIT_FAIL;

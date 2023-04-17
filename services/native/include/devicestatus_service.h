@@ -54,7 +54,7 @@ public:
     IDelegateTasks& GetDelegateTasks() override;
     IDeviceManager& GetDeviceManager() override;
     ITimerManager& GetTimerManager() override;
-    const IDragManager& GetDragManager() const override;
+    IDragManager& GetDragManager() override;
 
     void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency,
         sptr<IRemoteDevStaCallback> callback) override;
@@ -105,6 +105,8 @@ private:
 
     int32_t OnStartDrag(const DragData &dragData, int32_t pid);
     int32_t OnStopDrag(DragResult result, bool hasCustomAnimation);
+
+    void OnGetDragState(DragMessage dragState);
 
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     int32_t OnRegisterCoordinationListener(int32_t pid);

@@ -13,29 +13,51 @@
 
 import("//base/msdp/device_status/device_status.gni")
 
-config("adapter_private_config") {
+config("across_private_config") {
   include_dirs = [ "include" ]
 }
 
 ohos_shared_library("interaction_across") {
   include_dirs = [
+    "${device_status_interfaces_path}/innerkits/interaction/include",
     "${device_status_service_path}/context/include",
     "${device_status_utils_path}/include",
+    "${device_status_interfaces_path}/innerkits/interaction/include",
+    "//base/msdp/device_status/services/interaction/drag/include",
   ]
 
   sources = [ "src/across_device_drag.cpp" ]
 
-  configs = [ ":adapter_private_config" ]
+  configs = [ ":across_private_config" ]
 
   defines = device_status_default_defines
 
-  deps = []
+  deps = [
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "//base/msdp/device_status/services/interaction/drag:interaction_drag",
+  ]
 
   if (fusion_interaction_coordination) {
-    deps += [ "../coordination:coordination" ]
+    deps += [
+      "../coordination:coordination"
+    ]
   }
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "hiviewdfx_hilog_native:libhilog",
+    "device_manager:devicemanagersdk",
+    "distributed_input:libdinput_sdk",
+    "input:libmmi-client",
+    "hitrace_native:hitrace_meter",
+    "multimedia_image_framework:image_native",
+  ]
+
+  # if (fusion_interaction_coordination) {
+  #   external_deps += [
+      # "device_manager:devicemanagersdk",
+      # "distributed_input:libdinput_sdk"
+  # ]
+  # }
 
   subsystem_name = "msdp"
   part_name = "${device_status_part_name}"

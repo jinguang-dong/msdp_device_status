@@ -348,9 +348,12 @@ int32_t DragDrawing::DrawShadow()
     auto pixelMapNode = g_drawingInfo.nodes[PIXEL_MAP_INDEX];
     CHKPR(pixelMapNode, RET_ERR);
     if (drawPixelMapModifier_ != nullptr) {
+        FI_HILOGE("drawPixelMapModifier_ != nullptr");
         pixelMapNode->RemoveModifier(drawPixelMapModifier_);
     }
+    FI_HILOGE("drawPixelMapModifier_ 22222");
     drawPixelMapModifier_ = std::make_shared<DrawPixelMapModifier>();
+    FI_HILOGE("drawPixelMapModifier_ 3333");
     pixelMapNode->AddModifier(drawPixelMapModifier_);
     return RET_OK;
 }
