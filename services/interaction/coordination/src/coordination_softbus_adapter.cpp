@@ -199,6 +199,8 @@ int32_t CoordinationSoftbusAdapter::OpenInputSoftbus(const std::string &remoteNe
     }
 
     std::string peerSessionName = SESSION_NAME + remoteNetworkId.substr(0, INTERCEPT_STRING_LENGTH);
+    FI_HILOGI("CoordinationSoftbusAdapter::OpenInputSoftbus localSessionName_:%{public}s, peerSessionName:%{public}s, remoteDevId:%{public}s,"
+        "GROUP_ID:%{public}s",localSessionName_.c_str(), peerSessionName.c_str(), remoteNetworkId.c_str(), GROUP_ID.c_str());
     int32_t sessionId = OpenSession(localSessionName_.c_str(), peerSessionName.c_str(), remoteNetworkId.c_str(),
         GROUP_ID.c_str(), &g_sessionAttr);
     if (sessionId < 0) {
@@ -252,6 +254,8 @@ int32_t CoordinationSoftbusAdapter::StartRemoteCoordination(const std::string &l
 {
     CALL_DEBUG_ENTER;
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
+    FI_HILOGE("CoordinationSoftbusAdapter::StartRemoteCoordination.localNetworkId:%{public}s, remoteNetworkId:%{public}s",
+        localNetworkId.c_str(), remoteNetworkId.c_str());
     if (sessionDevMap_.find(remoteNetworkId) == sessionDevMap_.end()) {
         FI_HILOGE("Start remote coordination error, not find this device");
         return RET_ERR;
@@ -281,6 +285,8 @@ int32_t CoordinationSoftbusAdapter::StartRemoteCoordinationResult(const std::str
     bool isSuccess, const std::string &startDeviceDhid, int32_t xPercent, int32_t yPercent)
 {
     CALL_DEBUG_ENTER;
+    FI_HILOGE("CoordinationSoftbusAdapter::StartRemoteCoordination.startDeviceDhid:%{public}s, remoteDeviceId:%{public}s",
+        startDeviceDhid.c_str(), remoteNetworkId.c_str());
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
     if (sessionDevMap_.find(remoteNetworkId) == sessionDevMap_.end()) {
         FI_HILOGE("Stop remote coordination error, not find this device");
@@ -308,6 +314,7 @@ int32_t CoordinationSoftbusAdapter::StartRemoteCoordinationResult(const std::str
 int32_t CoordinationSoftbusAdapter::StopRemoteCoordination(const std::string &remoteNetworkId)
 {
     CALL_DEBUG_ENTER;
+    FI_HILOGE("CoordinationSoftbusAdapter::StartRemoteCoordination.remoteNetworkId:%{public}s", remoteNetworkId.c_str());
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
     if (sessionDevMap_.find(remoteNetworkId) == sessionDevMap_.end()) {
         FI_HILOGE("Stop remote coordination error, not find this device");
@@ -332,6 +339,7 @@ int32_t CoordinationSoftbusAdapter::StopRemoteCoordinationResult(const std::stri
     bool isSuccess)
 {
     CALL_DEBUG_ENTER;
+    FI_HILOGE("CoordinationSoftbusAdapter::StartRemoteCoordination.remoteNetworkId:%{public}s", remoteNetworkId.c_str());
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
     if (sessionDevMap_.find(remoteNetworkId) == sessionDevMap_.end()) {
         FI_HILOGE("Stop remote coordination result error, not find this device");
@@ -381,9 +389,13 @@ int32_t CoordinationSoftbusAdapter::StartCoordinationOtherResult(const std::stri
 void CoordinationSoftbusAdapter::HandleSessionData(int32_t sessionId, const std::string& message)
 {
     JsonParser parser;
+    FI_HILOGI("HandleSessionData message: %{public}s", message.c_str());
     parser.json_ = cJSON_Parse(message.c_str());
     if (!cJSON_IsObject(parser.json_)) {
         FI_HILOGE("Parser.json_ is not object");
+        const DataPacket* dataPacket = static_cast<const DataPacket *>(static_cast<const void*>(message.c_str()));
+        FI_HILOGI("-------CoordinationSoftbusAdapter::dataPacket->messageId:%{public}d,SendData----dataPacket->data:%{public}s--------", dataPacket->messageId, dataPacket->data);
+        registerRecvMap_[dataPacket->messageId](dataPacket->data, dataPacket->dataLen);
         return;
     }
     cJSON* comType = cJSON_GetObjectItemCaseSensitive(parser.json_, FI_SOFTBUS_KEY_CMD_TYPE);
@@ -427,6 +439,10 @@ void CoordinationSoftbusAdapter::OnBytesReceived(int32_t sessionId, const void *
         FI_HILOGE("Param check failed");
         return;
     }
+    std::for_each(sessionDevMap_.begin(), sessionDevMap_.end(), [](auto item) {
+        FI_HILOGI("CoordinationSoftbusAdapter::OnBytesReceived deviceId::%{public}s, sessionId::%{public}d", (item.first).c_str(), item.second);
+    });
+    FI_HILOGW("CoordinationSoftbusAdapter::OnBytesReceived:%{public}d", sessionId);
     std::string message = std::string(static_cast<const char *>(data), dataLen);
     HandleSessionData(sessionId, message);
 }
@@ -434,6 +450,9 @@ void CoordinationSoftbusAdapter::OnBytesReceived(int32_t sessionId, const void *
 int32_t CoordinationSoftbusAdapter::SendMsg(int32_t sessionId, const std::string &message)
 {
     CALL_DEBUG_ENTER;
+    std::for_each(sessionDevMap_.begin(), sessionDevMap_.end(), [](auto item) {
+        FI_HILOGI("CoordinationSoftbusAdapter::SendMsg deviceId::%{public}s, sessionId::%{public}d", (item.first).c_str(), item.second);
+    });
     if (message.size() > MSG_MAX_SIZE) {
         FI_HILOGW("error:message.size() > MSG_MAX_SIZE message size:%{public}zu", message.size());
         return RET_ERR;
@@ -506,7 +525,7 @@ void CoordinationSoftbusAdapter::OnSessionClosed(int32_t sessionId)
     CooSM->Reset(deviceId);
 }
 
-void CoordinationSoftbusAdapter::RegisterRecvFunc(MessageId messageId, std::function<void(void*, uint32_t)> callback)
+void CoordinationSoftbusAdapter::RegisterRecvFunc(MessageId messageId, std::function<void(const void*, uint32_t)> callback)
 {
     CALL_DEBUG_ENTER;
     if (messageId <= MIN_ID || messageId >= MAX_ID) {
@@ -517,10 +536,51 @@ void CoordinationSoftbusAdapter::RegisterRecvFunc(MessageId messageId, std::func
     registerRecvMap_[messageId] = callback;
 }
 
-void CoordinationSoftbusAdapter::SendData(const std::string& deviceId, MessageId messageId,
+void CoordinationSoftbusAdapter::UnRegisterRecvFunc()
+{
+    CALL_DEBUG_ENTER;
+    registerRecvMap_.clear();
+}
+
+void CoordinationSoftbusAdapter::GetRemoteId(std::string& deviceId)
+{
+    for (auto iter = sessionDevMap_.begin(); iter != sessionDevMap_.end(); ++iter) {
+        deviceId = iter->first;
+    }
+}
+
+int32_t CoordinationSoftbusAdapter::SendData(const std::string& deviceId, MessageId messageId,
     void* data, uint32_t dataLen)
 {
     CALL_DEBUG_ENTER;
+    std::for_each(sessionDevMap_.begin(), sessionDevMap_.end(), [](auto item) {
+        FI_HILOGI("SessionDevIdMap deviceId::%{public}s, sessionId::%{public}d", (item.first).c_str(), item.second);
+    });
+    // sessionId
+    int32_t sessionId = sessionDevMap_[deviceId];
+    // DataPacket
+    DataPacket* dataPacket = (DataPacket*)malloc(sizeof(DataPacket) + dataLen);
+    if (dataPacket == nullptr) {
+        FI_HILOGE("Malloc failed");
+        return RET_ERR;
+    }
+    dataPacket->messageId = messageId;
+    dataPacket->dataLen = dataLen;
+    errno_t ret = memcpy_s(dataPacket->data, dataPacket->dataLen, data, dataPacket->dataLen);
+    if (ret != EOK) {
+        FI_HILOGE("memcpy_s failed");
+        free(dataPacket);
+        return RET_ERR;
+    }
+    FI_HILOGI("-------CoordinationSoftbusAdapter::SendData----dataPacket->data:%{public}s--------", dataPacket->data);
+    FI_HILOGD("*** sessionId:%{public}d, dataLen:%{public}d, messageId:%{public}d", sessionId, dataPacket->dataLen, dataPacket->messageId);
+    int32_t result = SendBytes(sessionId, dataPacket, sizeof(DataPacket) + dataLen);
+    free(dataPacket);
+    if (result != RET_OK) {
+        FI_HILOGE("Start remote coordination result send session msg failed");
+        return RET_ERR;
+    }
+    return RET_OK;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

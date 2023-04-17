@@ -28,8 +28,8 @@
 #include "proto.h"
 
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-#include "udmf_client.h"
-#include "unified_types.h"
+// #include "udmf_client.h"
+// #include "unified_types.h"
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 
 namespace OHOS {
@@ -85,7 +85,9 @@ int32_t DragManager::StartDrag(const DragData &dragData, SessionPtr sess)
         FI_HILOGE("Drag instance is running, can not start drag again");
         return RET_ERR;
     }
-    CHKPR(sess, RET_ERR);
+    if (!across_) {
+        CHKPR(sess, RET_ERR);
+    }
     dragOutSession_ = sess;
     dragTargetPid_ = -1;
     if (InitDataAdapter(dragData) != RET_OK) {
@@ -98,10 +100,11 @@ int32_t DragManager::StartDrag(const DragData &dragData, SessionPtr sess)
     }
     dragState_ = DragMessage::MSG_DRAG_STATE_START;
     stateNotify_.StateChangedNotify(DragMessage::MSG_DRAG_STATE_START);
+    StateChangedNotify(DragMessage::MSG_DRAG_STATE_START);
     return RET_OK;
 }
 
-int32_t DragManager::StopDrag(DragResult result, bool hasCustomAnimation)
+int32_t DragManager::StopDrag(DragResult result, bool hasCustomAnimation, bool hasPointer)
 {
     CALL_DEBUG_ENTER;
     if (dragState_ == DragMessage::MSG_DRAG_STATE_STOP) {
@@ -112,12 +115,13 @@ int32_t DragManager::StopDrag(DragResult result, bool hasCustomAnimation)
         context_->GetTimerManager().RemoveTimer(timerId_);
     }
     int32_t ret = RET_OK;
-    if (OnStopDrag(result, hasCustomAnimation) != RET_OK) {
+    if (OnStopDrag(result, hasCustomAnimation, hasPointer) != RET_OK) {
         FI_HILOGE("OnStopDrag failed");
         ret = RET_ERR;
     }
     dragState_ = DragMessage::MSG_DRAG_STATE_STOP;
     stateNotify_.StateChangedNotify(DragMessage::MSG_DRAG_STATE_STOP);
+    StateChangedNotify(DragMessage::MSG_DRAG_STATE_STOP);
     if (NotifyDragResult(result) != RET_OK) {
         FI_HILOGE("NotifyDragResult failed");
         ret = RET_ERR;
@@ -177,10 +181,12 @@ int32_t DragManager::NotifyDragResult(DragResult result)
         FI_HILOGE("Packet write data failed");
         return RET_ERR;
     }
-    CHKPR(dragOutSession_, RET_ERR);
-    if (!dragOutSession_->SendMsg(pkt)) {
-        FI_HILOGE("Send message failed");
-        return MSG_SEND_FAIL;
+    if (!across_) {
+        CHKPR(dragOutSession_, RET_ERR);
+        if (!dragOutSession_->SendMsg(pkt)) {
+            FI_HILOGE("Send message failed");
+            return MSG_SEND_FAIL;
+        }
     }
     return RET_OK;
 }
@@ -215,19 +221,29 @@ void DragManager::SendDragData(int32_t targetPid, const std::string &udKey)
 {
     CALL_DEBUG_ENTER;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    UDMF::QueryOption option;
-    option.key = udKey;
-    UDMF::Privilege privilege;
-    privilege.pid = targetPid;
-    FI_HILOGD("AddPrivilege enter");
-    int32_t ret = UDMF::UdmfClient::GetInstance().AddPrivilege(option, privilege);
-    if (ret != RET_OK) {
-        FI_HILOGE("Failed to send pid to Udmf client");
-    }
+    // UDMF::QueryOption option;
+    // option.key = udKey;
+    // UDMF::Privilege privilege;
+    // privilege.pid = targetPid;
+    // FI_HILOGD("AddPrivilege enter");
+    // int32_t ret = UDMF::UdmfClient::GetInstance().AddPrivilege(option, privilege);
+    // if (ret != RET_OK) {
+    //     FI_HILOGE("Failed to send pid to Udmf client");
+    // }
 #else
     (void)(targetPid);
     (void)(udKey);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
+}
+
+void DragManager::SetAcross(bool across)
+{
+    across_ = across;
+}
+
+DragMessage DragManager::GetDragState() const
+{
+    return dragState_;
 }
 
 void DragManager::OnDragUp(std::shared_ptr<MMI::PointerEvent> pointerEvent)
@@ -247,7 +263,7 @@ void DragManager::OnDragUp(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         INPUT_MANAGER->SetPointerVisible(true);
     }
 
-    SendDragData(pid, dragData.udKey);
+    // SendDragData(pid, dragData.udKey);
     CHKPV(context_);
     context_->GetTimerManager().AddTimer(TIMEOUT_MS, 1, [this]() {
         this->StopDrag(DragResult::DRAG_EXCEPTION, false);
@@ -262,6 +278,8 @@ void DragManager::InterceptorConsumer::OnInputEvent(std::shared_ptr<MMI::KeyEven
 void DragManager::InterceptorConsumer::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     CALL_DEBUG_ENTER;
+    FI_HILOGD("3pointer Interceptor consumer pointer event enter");
+    FI_HILOGD("DragManager::InterceptorConsumer::OnInputEvent pointerEvent->GetPointerId:%{public}d", pointerEvent->GetPointerId());
     CHKPV(pointerEvent);
     CHKPV(callback_);
     CHKPV(context_);
@@ -420,6 +438,7 @@ int32_t DragManager::InitDataAdapter(const DragData &dragData) const
         FI_HILOGE("GetPointerStyle failed");
         return RET_ERR;
     }
+    FI_HILOGI("GetPointerStyle GLOBAL_WINDOW_ID:%{public}d, pointerStyle:%{public}d", MMI::GLOBAL_WINDOW_ID, pointerStyle.id);
     DataAdapter.Init(dragData, pointerStyle);
     return RET_OK;
 }
@@ -428,6 +447,7 @@ int32_t DragManager::AddDragEventInterceptor(int32_t sourceType)
 {
     CALL_DEBUG_ENTER;
     uint32_t deviceTags = 0;
+    FI_HILOGI("sourceType:%{public}d", sourceType);
     if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         deviceTags = MMI::CapabilityToTags(MMI::INPUT_DEV_CAP_POINTER);
     } else if (sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
@@ -436,9 +456,12 @@ int32_t DragManager::AddDragEventInterceptor(int32_t sourceType)
         FI_HILOGW("Drag is not supported for this device type:%{public}d", sourceType);
         return RET_ERR;
     }
+    FI_HILOGI("deviceTags:%{public}d", deviceTags);
     auto callback = std::bind(&DragManager::DragCallback, this, std::placeholders::_1);
+    FI_HILOGI("callback = std::bind(&DragManager::DragCallback)");
     auto interceptor = std::make_shared<InterceptorConsumer>(context_, callback);
     interceptorId_ = INPUT_MANAGER->AddInterceptor(interceptor, DRAG_PRIORITY, deviceTags);
+    FI_HILOGE("interceptor code:%{public}d", interceptorId_);
     if (interceptorId_ <= 0) {
         FI_HILOGE("Failed to add interceptor, Error code:%{public}d", interceptorId_);
         return RET_ERR;
@@ -469,12 +492,13 @@ int32_t DragManager::OnStartDrag()
         return RET_ERR;
     }
     if (dragData.sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        FI_HILOGE("dragData.sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE");
         INPUT_MANAGER->SetPointerVisible(false);
     }
     return RET_OK;
 }
 
-int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation)
+int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation, bool hasPointer)
 {
     CALL_DEBUG_ENTER;
     if (interceptorId_ <= 0) {
@@ -486,11 +510,13 @@ int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation)
     DragData dragData = DataAdapter.GetDragData();
     if (dragData.sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         dragDrawing_.EraseMouseIcon();
-        INPUT_MANAGER->SetPointerVisible(true);
+        if (!hasPointer) {
+            INPUT_MANAGER->SetPointerVisible(true);
+        }
     }
     switch (result) {
         case DragResult::DRAG_SUCCESS: {
-            if (!hasCustomAnimation) {
+            if (!hasCustomAnimation && !hasPointer) {
                 dragDrawing_.OnDragSuccess();
             } else {
                 dragDrawing_.DestroyDragWindow();
@@ -500,7 +526,7 @@ int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation)
         }
         case DragResult::DRAG_FAIL:
         case DragResult::DRAG_CANCEL: {
-            if (!dragData.hasCanceledAnimation) {
+            if (!dragData.hasCanceledAnimation && !hasPointer) {
                 dragDrawing_.OnDragFail();
             } else {
                 dragDrawing_.DestroyDragWindow();
@@ -532,6 +558,30 @@ int32_t DragManager::OnGetShadowOffset(int32_t& offsetX, int32_t& offsetY, int32
 {
     return DataAdapter.GetShadowOffset(offsetX, offsetY, width, height);
 }
+
+void DragManager::RegisterStateChange(std::function<void(DragMessage)> callback)
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(callback);
+    stateChangedCallbacks_.push_back(callback);
+}
+
+void DragManager::UnRegisterStateChange()
+{
+    CALL_DEBUG_ENTER;
+    stateChangedCallbacks_.clear();
+}
+
+void DragManager::StateChangedNotify(DragMessage state)
+{
+    CALL_DEBUG_ENTER;
+    for (const auto &item : stateChangedCallbacks_) {
+        if (item) {
+            item(state);
+        }
+    }
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
