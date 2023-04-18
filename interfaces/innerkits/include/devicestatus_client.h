@@ -41,179 +41,179 @@ public:
     }
     DISALLOW_COPY_AND_MOVE(DeviceStatusClient);
 
-    /*
-    * @name: SubscribeCallback
-    * @function: 订阅设备状态
-    * @parameter: type 设备状态类型
-    * @parameter: event 订阅的事件（进入/退出/进入和退出）
-    * @parameter: latency 上报周期
-    * @parameter: callback 用于接收设备状态事件变化的回调
-    * @return: 订阅结果
-    */
+    /**
+     * @brief 订阅设备状态。
+     * @param type 设备状态类型
+     * @param event 订阅的事件（进入/退出/进入和退出）
+     * @param latency 上报周期
+     * @param callback 用于接收设备状态事件变化的回调
+     * @return 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败。
+     * @since 9
+     */
     int32_t SubscribeCallback(Type type, ActivityEvent event, ReportLatencyNs latency,
         sptr<IRemoteDevStaCallback> callback);
 
-    /*
-    * @name: UnsubscribeCallback
-    * @function: 取消订阅设备状态
-    * @parameter: type 设备状态类型
-    * @parameter: event 订阅的事件（进入/退出/进入和退出）
-    * @parameter: callback 用于接收设备状态事件变化的回调
-    * @return: 取消订阅结果
-    */
+    /**
+     * @brief 取消订阅设备状态。
+     * @param type 设备状态类型
+     * @param event 订阅的事件（进入/退出/进入和退出）
+     * @param callback 用于接收设备状态事件变化的回调
+     * @return 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败。
+     * @since 9
+     */
     int32_t UnsubscribeCallback(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback);
 
-    /*
-    * @name: GetDeviceStatusData
-    * @function: 获取当前设备状态数据
-    * @parameter: type 设备状态类型
-    * @return: 设备状态数据
-    */
+    /**
+     * @brief 获取当前设备状态数据。
+     * @param type 设备状态类型。
+     * @return 设备状态数据。
+     * @since 9
+     */
     Data GetDeviceStatusData(const Type type);
 
-    /*
-    * @name: RegisterDeathListener
-    * @function: 注册死亡监听
-    * @parameter: deathListener 用于接受死亡通知的监听器
-    */
+    /**
+     * @brief 注册死亡监听。
+     * @param deathListener 用于接受死亡通知的监听器。
+     * @since 9
+     */
     void RegisterDeathListener(std::function<void()> deathListener);
 
-    /*
-    * @name: RegisterCoordinationListener
-    * @function: 注册键鼠穿越管理事件监听
-    * @return: 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败
-    */
+    /**
+     * @brief 注册键鼠穿越管理事件监听。
+     * @return 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败。
+     * @since 9
+     */
     int32_t RegisterCoordinationListener();
 
-    /*
-    * @name: UnregisterCoordinationListener
-    * @function: 注销键鼠穿越管理事件监听
-    * @return: 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败。
-    */
+    /**
+     * @brief 注销键鼠穿越管理事件监听。
+     * @return 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败。
+     * @since 9
+     */
     int32_t UnregisterCoordinationListener();
 
-    /*
-    * @name: EnableCoordination
-    * @function: 开启/关闭键鼠穿越管理接口
-    * @parameter: userData 用户数据
-    * @parameter: enabled 开启/关闭
-    * @return: 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败
-    */
+    /**
+     * @brief 开启/关闭键鼠穿越管理接口。
+     * @param userData 用户数据
+     * @param enabled 开启/关闭键鼠穿越
+     * @return 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败。
+     * @since 9
+     */
     int32_t EnableCoordination(int32_t userData, bool enabled);
 
-    /*
-    * @name: StartCoordination
-    * @function: 启动跨设备键鼠穿越
-    * @parameter: userData 用户数据
-    * @parameter: remoteNetworkId 键鼠穿越目标设备描述符（networkID）
-    * @parameter: startDeviceId 键鼠穿越待穿越输入外设标识符（设备ID句柄）
-    * @return: 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败
-    */
+    /**
+     * @brief 启动跨设备键鼠穿越。
+     * @param userData 用户数据
+     * @param remoteNetworkId 键鼠穿越目标设备描述符（networkID）
+     * @param startDeviceId 键鼠穿越待穿越输入外设标识符（设备ID句柄）
+     * @return 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败。
+     * @since 9
+     */
     int32_t StartCoordination(int32_t userData, const std::string &remoteNetworkId, int32_t startDeviceId);
 
-    /*
-    * @name: StopCoordination
-    * @function: 停止跨设备键鼠穿越
-    * @parameter: userData 用户数据
-    * @return: 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败
-    */
+    /**
+     * @brief 停止跨设备键鼠穿越。
+     * @param userData 用户数据
+     * @return 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败。
+     * @since 9
+     */
     int32_t StopCoordination(int32_t userData);
 
-    /*
-    * @name: GetCoordinationState
-    * @function: 获取指定设备键鼠穿越状态
-    * @parameter: userData 用户数据
-    * @parameter: deviceId 指定设备描述符
-    * @return: 键鼠穿越状态
-    */
+    /**
+     * @brief 获取指定设备键鼠穿越状态。
+     * @param userData 用户数据
+     * @param deviceId 指定设备描述符
+     * @return 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败。
+     * @since 9
+     */
     int32_t GetCoordinationState(int32_t userData, const std::string &deviceId);
 
-    /*
-    * @name: StartDrag
-    * @function: 开始拖拽目标
-    * @parameter: dragData 拖拽附加数据
-    * @return: 返回0表示调用成功，否则，表示调用失败
-    */
+    /**
+     * @brief 开始拖拽目标。
+     * @param dragData 拖拽附加数据
+     * @return 返回0表示调用成功，否则，表示调用失败
+     * @since 10
+     */
     int32_t StartDrag(const DragData &dragData);
 
-    /*
-    * @name: StopDrag
-    * @function: 结束拖拽
-    * @parameter: result 标识拖拽调用结果 0-成功,1-失败,2-取消
-    * @parameter: hasCustomAnimation 标识是否在拖拽成功时做默认动效，true表示做应用自定义动效，false表示做默认动效
-    * @return: 返回0表示调用成功，否则，表示调用失败
-    */
+    /**
+     * @brief 结束拖拽。
+     * @param result 标识拖拽调用结果 0-成功,1-失败,2-取消
+     * @param hasCustomAnimation 标识是否在拖拽成功时做默认动效，true表示做应用自定义动效，false表示做默认动效
+     * @return 返回0表示调用成功，否则，表示调用失败
+     * @since 10
+     */
     int32_t StopDrag(DragResult result, bool hasCustomAnimation);
 
-    /*
-    * @name: UpdateDragStyle
-    * @function: 更新拖拽中的光标样式
-    * @parameter: style 指定光标样式
-    * @return: 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败
-    */
+    /**
+     * @brief 更新拖拽中的光标样式。
+     * @param style 指定光标样式。
+     * @return 返回值如果是0表示接口调用成功，返回其他值表示接口调用失败。
+     * @since 10
+     */
     int32_t UpdateDragStyle(DragCursorStyle style);
 
-    /*
-    * @name: GetDragTargetPid
-    * @function: 获取拖拽目标窗口PID
-    * @return: 返回值如果是-1则是无效值，为大于等于0的值为正确值
-    */
+    /**
+     * @brief 获取拖拽目标窗口PID
+     * @return 目标窗口PID
+     * @since 10
+     */
     int32_t GetDragTargetPid();
 
-    /*
-    * @name: GetUdKey
-    * @function: 获取拖拽目标窗口UdKey
-    * @parameter: udKey 拖拽目标窗口统一数据密钥
-    * @return: 返回值如果是-1则是无效值，为大于等于0的值为正确值
-    */
+    /**
+     * @brief 获取拖拽目标窗口UdKey
+     * @param UdKey 拖拽目标窗口统一数据密钥。
+     * @return 返回值如果是-1则是无效值，为大于等于0的值为正确值
+     * @since 10
+     */
     int32_t GetUdKey(std::string &udKey);
 
-    /*
-    * @name: AddDraglistener
-    * @function: 注册拖拽状态监听
-    * @return: 返回值0表示接口调用成功，否则，表示接口调用失败
-    */
+    /**
+     * @brief 注册拖拽状态监听。
+     * @return 返回值0表示接口调用成功，否则，表示接口调用失败。
+     * @since 10
+     */
     int32_t AddDraglistener();
 
-    /*
-    * @name: RemoveDraglistener
-    * @function: 取消注册拖拽状态监听
-    * @return: 返回值0表示接口调用成功，否则，表示接口调用失败
-    */
+    /**
+     * @brief 取消注册拖拽状态监听。
+     * @return 返回值0表示接口调用成功，否则，表示接口调用失败。
+     * @since 10
+     */
     int32_t RemoveDraglistener();
 
-    /*
-    * @name: SetDragWindowVisible
-    * @function: 设置拖拽窗口显示或者隐藏
-    * @parameter: visible 设置拖拽窗口的是否显示，true表示显示，false表示隐藏。
-    * @return: 返回值0表示接口调用成功，否则，表示接口调用失败
-    */
+    /**
+     * @brief 设置拖拽窗口显示或者隐藏
+     * @param visible 设置拖拽窗口的是否显示，true表示显示，false表示隐藏。
+     * @return 返回值0表示接口调用成功，否则，表示接口调用失败。
+     * @since 10
+     */
     int32_t SetDragWindowVisible(bool visible);
 
-    /*
-    * @name: GetShadowOffset
-    * @function: 获取触控点或鼠标光标相对于阴影缩略图左上角的位置
-    * @parameter: offsetX 要查询的x值
-    * @parameter: offsetY 要查询的y值
-    * @parameter: width 要查询缩略图的宽
-    * @parameter: height 要查询缩略图的高
-    * @return: 返回值0表示接口调用成功，否则，表示接口调用失败
-    */
+    /**
+     * @brief 获取触控点或鼠标光标相对于阴影缩略图左上角的位置。
+     * @param offsetX 要查询的x值。
+     * @param offsetY 要查询的y值。
+     * @param width 要查询缩略图的宽
+     * @param height 要查询缩略图的高
+     * @return 返回值0表示接口调用成功，否则，表示接口调用失败。
+     * @since 10
+     */
     int32_t GetShadowOffset(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height);
 
-    /*
-    * @name: AllocSocketPair
-    * @function: 分配套接字对
-    * @parameter: moduleType 模块类型
-    * @return: 分配结果
-    */
+    /**
+     * @brief 分配套接字对。
+     * @param moduleType 模块类型。
+     * @return 返回值0表示接口调用成功，否则，表示接口调用失败。
+     * @since 10
+     */
     int32_t AllocSocketPair(const int32_t moduleType);
 
-    /*
-    * @name: GetClientSocketFdOfAllocedSocketPair
-    * @function: 获取已分配套接字对客户端的套接字描述器
-    * @return: 客户端的套接字描述器
-    */
+    /**
+     * @brief 获取已分配套接字对客户端的套接字描述器。
+     * @return 客户端的套接字描述器。
+     * @since 10
+     */
     int32_t GetClientSocketFdOfAllocedSocketPair() const;
 
 private:
