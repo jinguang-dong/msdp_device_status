@@ -88,7 +88,6 @@ public:
     };
 private:
     int32_t AddDragEventInterceptor(int32_t sourceType);
-    OHOS::MMI::ExtraData CreateExtraData(bool appended) const;
     int32_t InitDataAdapter(const DragData &dragData) const;
     int32_t OnStartDrag();
     int32_t OnStopDrag(DragResult result, bool hasCustomAnimation);
@@ -99,6 +98,7 @@ private:
     std::string GetDragState(DragMessage value) const;
     std::string GetDragResult(DragResult value) const;
     std::string GetDragCursorStyle(DragCursorStyle value) const;
+    static OHOS::MMI::ExtraData CreateExtraData(bool appended);
 private:
     int32_t timerId_ { 0 };
     StateChangeNotify stateNotify_;
