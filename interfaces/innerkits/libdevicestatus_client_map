@@ -16,11 +16,12 @@
  1.0{
     global:
         extern "C++" {
+            "OHOS::Msdp::DeviceStatus::StationaryManager::GetInstance()";
             "OHOS::Msdp::DeviceStatus::DeviceStatusClient::DeviceStatusClient()";
             "OHOS::Msdp::DeviceStatus::DeviceStatusClient::RegisterDeathListener(std::__h::function<void ()>)";
-            "OHOS::Msdp::DeviceStatus::DeviceStatusClient::SubscribeCallback(OHOS::Msdp::DeviceStatus::Type, OHOS::Msdp::DeviceStatus::ActivityEvent, OHOS::Msdp::DeviceStatus::ReportLatencyNs, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteDevStaCallback>)";
-            "OHOS::Msdp::DeviceStatus::DeviceStatusClient::UnsubscribeCallback(OHOS::Msdp::DeviceStatus::Type, OHOS::Msdp::DeviceStatus::ActivityEvent, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteDevStaCallback>)";
-            "OHOS::Msdp::DeviceStatus::DeviceStatusClient::GetDeviceStatusData(OHOS::Msdp::DeviceStatus::Type)";
+            "OHOS::Msdp::DeviceStatus::StationaryManager::SubscribeCallback(OHOS::Msdp::DeviceStatus::Type, OHOS::Msdp::DeviceStatus::ActivityEvent, OHOS::Msdp::DeviceStatus::ReportLatencyNs, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteDevStaCallback>)";
+            "OHOS::Msdp::DeviceStatus::StationaryManager::UnsubscribeCallback(OHOS::Msdp::DeviceStatus::Type, OHOS::Msdp::DeviceStatus::ActivityEvent, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteDevStaCallback>)";
+            "OHOS::Msdp::DeviceStatus::StationaryManager::GetDeviceStatusData(OHOS::Msdp::DeviceStatus::Type)";
             "VTT for OHOS::Msdp::DeviceStatus::DeviceStatusCallbackStub";
             "OHOS::Msdp::DeviceStatus::DeviceStatusCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetInstance()";
