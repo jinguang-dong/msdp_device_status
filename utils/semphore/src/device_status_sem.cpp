@@ -18,6 +18,8 @@
 
 #include "device_status_sem.h"
 
+#include "devicestatus_define.h"
+
 #include <ctime>
 #include <fctl.h>
 
@@ -44,21 +46,25 @@ int32_t Semphore::Open(const std::string& name, int32_t flag)
 
 int32_t Semphore::Post()
 {
+    CHKPR(sem_, RET_ERR);
     return sem_post(sem_);
 }
 
 int32_t Semphore::Wait() const
 {
+    CHKPR(sem_, RET_ERR);
     return sem_wait(sem_);
 }
 
 int32_t Semphore::TryWait() const
 {
+    CHKPR(sem_, RET_ERR);
     return sem_trywait(sem_);
 }
 
 int32_t Semphore::WaitFor(unsigned long timeoutMs) const
 {
+    CHKPR(sem_, RET_ERR);
     struct timespec ts;
     GetAbsTime(timeoutMs, ts);
     int32_t ret = sem_timedwait(sem_, &ts);
@@ -71,6 +77,7 @@ int32_t Semphore::WaitFor(unsigned long timeoutMs) const
 
 int32_t Semphore::GetValue() const
 {
+    CHKPR(sem_, RET_ERR);
     int32_t value = 0;
     sem_getvalue(sem_, &value);
     return value;
@@ -78,11 +85,13 @@ int32_t Semphore::GetValue() const
 
 int32_t Semphore::Close()
 {
+    CHKPR(sem_, RET_ERR);
     return sem_close(sem_);
 }
 
 int32_t Semphore::Unlink()
 {
+    CHKPR(sem_, RET_ERR);
     return sem_unlink(name_.c_str());
 }
 
