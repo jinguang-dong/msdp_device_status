@@ -22,6 +22,7 @@ ohos_shared_library("interaction_drag") {
   include_dirs = [
     "${device_status_interfaces_path}/innerkits/interaction/include",
     "${device_status_utils_path}/include",
+    "${device_status_root_path}/utils/semphore/include",
     "${device_status_service_path}/context/include",
     "${device_status_service_path}/native/include",
   ]
@@ -40,6 +41,7 @@ ohos_shared_library("interaction_drag") {
   deps = [
     "${device_status_root_path}/etc/drag_icon:device_status_drag_icon",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_root_path}/utils/ipc:devicestatus_semphore",
     "${device_status_utils_path}:devicestatus_util",
     "//third_party/libxml2:xml2",
   ]

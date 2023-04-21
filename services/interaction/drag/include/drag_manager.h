@@ -24,6 +24,7 @@
 #include "pixel_map.h"
 
 #include "devicestatus_define.h"
+#include "device_status_sem.h"
 #include "drag_data.h"
 #include "drag_drawing.h"
 #include "i_context.h"

@@ -99,6 +99,10 @@ int32_t DragManagerImpl::OnNotifyResult(const StreamClient& client, NetPacket& p
     std::lock_guard<std::mutex> guard(mtx_);
     CHKPR(stopCallback_, RET_ERR);
     stopCallback_(notifyMsg);
+    Semphore sem;
+    sem.Open(SEMPHORE_FOR_DRAG, O_RDWR);
+    sem.Post();
+    sem.Close();
     return RET_OK;
 }
 
