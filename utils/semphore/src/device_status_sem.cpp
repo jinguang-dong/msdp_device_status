@@ -13,30 +13,49 @@
  * limitations under the License.
  */
 
-#ifndef DEVICE_STATUS_SEM_H
-#define DEVICE_STATUS_SEM_H
-
 #include "device_status_sem.h"
 
-#include "devicestatus_define.h"
-
+#include <limits>
 #include <ctime>
-#include <fctl.h>
+#include "fcntl.h"
 
-#include "devicestatus_data_define.h"
+#include "devicestatus_define.h"
+#include "util.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "Semphore" };
+constexpr int32_t THOUSAND { 1000 };
+constexpr int32_t MILLION { THOUSAND * THOUSAND };
+constexpr int32_t BILLION { MILLION * THOUSAND };
+}
+
+Semphore::~Semphore()
+{
+    if (sem_ != nullptr) {
+        Close();
+    }
 }
 
 int32_t Semphore::Open(const std::string& name, int32_t flag)
 {
     sem_t* sem = sem_open(name.c_str(), flag);
     if (sem == SEM_FAILED) {
-        FIHILOGE("sem_open failed, errno:%{public}d", errno);
+        FI_HILOGE("sem_open failed, errno:%{public}d", errno);
+        return RET_ERR;
+    }
+    sem_ = sem;
+    name_ = name;
+    return RET_OK;
+}
+
+int32_t Semphore::Open(const std::string& name, int32_t flag, mode_t mode, unsigned int value)
+{
+    sem_t* sem = sem_open(name.c_str(), flag, mode, value);
+    if (sem == SEM_FAILED) {
+        FI_HILOGE("sem_open failed, errno:%{public}d", errno);
         return RET_ERR;
     }
     sem_ = sem;
@@ -50,26 +69,26 @@ int32_t Semphore::Post()
     return sem_post(sem_);
 }
 
-int32_t Semphore::Wait() const
+int32_t Semphore::Wait()
 {
     CHKPR(sem_, RET_ERR);
     return sem_wait(sem_);
 }
 
-int32_t Semphore::TryWait() const
+int32_t Semphore::TryWait()
 {
     CHKPR(sem_, RET_ERR);
     return sem_trywait(sem_);
 }
 
-int32_t Semphore::WaitFor(unsigned long timeoutMs) const
+int32_t Semphore::WaitFor(int32_t timeoutMs)
 {
     CHKPR(sem_, RET_ERR);
-    struct timespec ts;
+    timespec ts;
     GetAbsTime(timeoutMs, ts);
     int32_t ret = sem_timedwait(sem_, &ts);
     if (ret != RET_OK) {
-        printf("sem_timedwait timeout, errno:%{public}d", errno);
+        FI_HILOGE("sem_timedwait timeout, errno:%{public}d", errno);
         return RET_ERR;
     }
     return RET_OK;
@@ -95,20 +114,34 @@ int32_t Semphore::Unlink()
     return sem_unlink(name_.c_str());
 }
 
-timespec* Semphore::GetAbsTime( size_t milliseconds, timespec& absTime )
+void Semphore::GetAbsTime(int32_t milliseconds, timespec& absTime)
 {
-    // todo 校验越界
     clock_gettime( CLOCK_REALTIME, &absTime );
-    absTime.tv_sec += milliseconds / THOUSAND;
-    absTime.tv_nsec += (milliseconds % THOUSAND) * MILLION;
-    if( absTime.tv_nsec >= BILLION ) {
-        absTime.tv_sec += 1;
+    long nanoSec = 0;
+    if (!MultiplyLong((milliseconds % THOUSAND), MILLION, nanoSec)) {
+        FI_HILOGE("overflow");
+        return;
+    }
+    if (!AddLongLong(absTime.tv_sec, milliseconds / THOUSAND, absTime.tv_sec)) {
+        FI_HILOGE("overflow");
+        return;
+    }
+    if (!AddLong(absTime.tv_nsec, nanoSec, absTime.tv_nsec)) {
+        FI_HILOGE("overflow");
+        return;
+    }
+    if(absTime.tv_nsec >= BILLION ) {
+        if (!AddLongLong(absTime.tv_sec, 1, absTime.tv_sec)) {
+            FI_HILOGE("overflow");
+            return;
+        }
         absTime.tv_nsec -= BILLION;
     }
-   return &absTime;
 }
-
+bool Semphore::isValid()
+{
+    return sem_ != nullptr;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // DEVICE_STATUS_SEM_H

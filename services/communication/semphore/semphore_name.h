@@ -21,7 +21,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 
-constexpr std::string SEMPHORE_FOR_DRAG {"SEMPHORE_FOR_DRAG"};
+static std::string SEMPHORE_FOR_DRAG {"SEMPHORE_FOR_DRAG"};
 
 } // namespace DeviceStatus
 } // namespace Msdp

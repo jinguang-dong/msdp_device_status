@@ -32,6 +32,7 @@ config("devicestatus_public_config") {
     "${device_status_root_path}/utils/ipc/include",
     "${device_status_root_path}/utils/semphore/include",
     "${device_status_root_path}/services/communication/base/",
+    "${device_status_root_path}/services/communication/semphore/",
     "${device_status_root_path}/services/communication/client/include",
   ]
 
@@ -62,7 +63,7 @@ ohos_shared_library("devicestatus_client") {
 
   deps = [
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
-    "${device_status_root_path}/utils/ipc:devicestatus_semphore",
+    "${device_status_root_path}/utils/semphore:devicestatus_semphore",
     "${device_status_utils_path}:devicestatus_util",
   ]
 

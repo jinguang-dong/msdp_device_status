@@ -16,33 +16,32 @@
 #ifndef DEVICE_STATUS_SEM_H
 #define DEVICE_STATUS_SEM_H
 #include <memory>
+#include <string>
 #include "semaphore.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-namespace {
-#define THOUSAND (1000)
-#define MILLION (THOUSAND * THOUSAND)
-#define BILLION (MILLION * THOUSAND)
-}
 class Semphore {
 public:
     Semphore() {};
+    ~Semphore();
     Semphore(const Semphore&) = delete;
     Semphore &operator=(const Semphore&) = delete;
     Semphore (const Semphore&&) = delete;
     
     int32_t Open(const std::string& name, int32_t flag);
-    int32_t Post();
-    int32_t Wait() const;
-    int32_t TryWait() const;
-    int32_t WaitFor(unsigned long timeout) const;
+    int32_t Open(const std::string& name, int32_t flag, mode_t mode, unsigned int value);
     int32_t GetValue() const;
+    int32_t Post();
+    int32_t Wait();
+    int32_t TryWait();
+    int32_t WaitFor(int32_t timeout);
     int32_t Close();
     int32_t Unlink();
+    bool isValid();
 private:
-    static timespec* Semphore::GetAbsTime( size_t milliseconds, timespec& absTime );
+    static void GetAbsTime(int32_t milliseconds, timespec& absTime );
     sem_t* sem_ { nullptr };
     std::string name_;
 };

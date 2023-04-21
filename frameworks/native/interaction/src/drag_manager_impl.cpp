@@ -100,7 +100,10 @@ int32_t DragManagerImpl::OnNotifyResult(const StreamClient& client, NetPacket& p
     CHKPR(stopCallback_, RET_ERR);
     stopCallback_(notifyMsg);
     Semphore sem;
-    sem.Open(SEMPHORE_FOR_DRAG, O_RDWR);
+    if (sem.Open(SEMPHORE_FOR_DRAG, O_RDWR) == RET_ERR) {
+        FI_HILOGE("sem_open failed:%{public}d", result);
+        return RET_ERR;
+    }
     sem.Post();
     sem.Close();
     return RET_OK;

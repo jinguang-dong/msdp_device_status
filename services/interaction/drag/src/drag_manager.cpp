@@ -180,7 +180,7 @@ int32_t DragManager::NotifyDragResult(DragResult result)
     }
     CHKPR(dragOutSession_, RET_ERR);
     Semphore sem;
-    if (sem.Open(SEMPHORE_FOR_DRAG, O_RDWR, 0666, 1) != RET_OK) {
+    if (sem.Open(SEMPHORE_FOR_DRAG, O_CREAT | O_RDWR, 0666, 1) != RET_OK) {
         FI_HILOGE("Open semphore failed, errno:%{public}d", errno);
         return RET_ERR;
     }
@@ -190,9 +190,11 @@ int32_t DragManager::NotifyDragResult(DragResult result)
         sem.Post();
         ret =  MSG_SEND_FAIL;
     }
-    sem.Wait();
+    if (sem.WaitFor(1000) == RET_ERR) {
+        FI_HILOGE("Wait semphore failed");
+        ret = RET_ERR;
+    }
     sem.Close();
-    sem.Unlink();
     return ret;
 }
 
