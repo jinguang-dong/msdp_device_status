@@ -181,7 +181,7 @@ int32_t DragManager::NotifyDragResult(DragResult result)
     }
     CHKPR(dragOutSession_, RET_ERR);
     Semphore sem;
-    if (sem.Create(SEM_DRAG, SEM_DRAG_CREATE_FLAG, SEM_DRAG_CREATE_MODE, SEM_DRAG_CREATE_VALUE) != RET_OK) {
+    if (sem.Create(SEM_DRAG_NAME, SEM_DRAG_CREATE_FLAG, SEM_DRAG_CREATE_MODE, SEM_DRAG_CREATE_VALUE) != RET_OK) {
         FI_HILOGE("Create semphore failed, errno:%{public}d", errno);
         return RET_ERR;
     }

@@ -21,9 +21,9 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 
-static std::string SEM_DRAG { "SEM_DRAG" };
+static std::string SEM_DRAG_NAME { "SEM_DRAG" };
 constexpr int32_t SEM_DRAG_TIMEOUT { 1000 };
-constexpr uint32_t SEM_DRAG_CREATE_FLAG { O_CREAT | O_RDWR };
+constexpr uint32_t SEM_DRAG_CREATE_FLAG { O_CREAT | O_EXCL };
 constexpr uint32_t SEM_DRAG_CREATE_MODE { 0666 };
 constexpr uint32_t SEM_DRAG_CREATE_VALUE { 1 };
 constexpr uint32_t SEM_DRAG_OPEN_FLAG { O_RDWR };

@@ -16,6 +16,8 @@
 #include "device_status_sem.h"
 #include <ctime>
 
+#include <sys/stat.h>
+
 #include "fcntl.h"
 #include "devicestatus_define.h"
 
@@ -40,7 +42,10 @@ Semphore::~Semphore()
 
 int32_t Semphore::Create(const std::string& name, int32_t flag, mode_t mode, unsigned int value)
 {
+    mode_t mask = umask(0);
+    FI_HILOGD("sem_open name:%{public}s", name.c_str());
     sem_t* sem = sem_open(name.c_str(), flag, mode, value);
+    umask(mask);
     if (sem == SEM_FAILED) {
         FI_HILOGE("sem_open failed, errno:%{public}d", errno);
         return RET_ERR;
@@ -52,7 +57,10 @@ int32_t Semphore::Create(const std::string& name, int32_t flag, mode_t mode, uns
 
 int32_t Semphore::Open(const std::string& name, int32_t flag)
 {
+    mode_t mask = umask(0);
+    FI_HILOGD("sem_open name:%{public}s", name.c_str());
     sem_t* sem = sem_open(name.c_str(), flag);
+    umask(mask);
     if (sem == SEM_FAILED) {
         FI_HILOGE("sem_open failed, errno:%{public}d", errno);
         return RET_ERR;
