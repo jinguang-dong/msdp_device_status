@@ -26,7 +26,6 @@
 #include "device_status_sem.h"
 #include "drag_data.h"
 #include "i_drag_listener.h"
-#include "semphore_name.h"
 #include "util.h"
 
 namespace OHOS {

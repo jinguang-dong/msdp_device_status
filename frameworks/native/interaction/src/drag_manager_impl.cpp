@@ -19,6 +19,7 @@
 #include "devicestatus_define.h"
 #include "drag_data.h"
 #include "drag_message.h"
+#include "semphore_record.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -100,7 +101,7 @@ int32_t DragManagerImpl::OnNotifyResult(const StreamClient& client, NetPacket& p
     CHKPR(stopCallback_, RET_ERR);
     stopCallback_(notifyMsg);
     Semphore sem;
-    if (sem.Open(SEMPHORE_FOR_DRAG, O_RDWR) == RET_ERR) {
+    if (sem.Open(SEM_DRAG, SEM_DRAG_OPEN_FLAG) != RET_OK) {
         FI_HILOGE("sem_open failed:%{public}d", result);
         return RET_ERR;
     }

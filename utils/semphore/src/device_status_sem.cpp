@@ -14,12 +14,11 @@
  */
 
 #include "device_status_sem.h"
-
-#include <limits>
 #include <ctime>
-#include "fcntl.h"
 
+#include "fcntl.h"
 #include "devicestatus_define.h"
+
 #include "util.h"
 
 namespace OHOS {
@@ -39,9 +38,9 @@ Semphore::~Semphore()
     }
 }
 
-int32_t Semphore::Open(const std::string& name, int32_t flag)
+int32_t Semphore::Create(const std::string& name, int32_t flag, mode_t mode, unsigned int value)
 {
-    sem_t* sem = sem_open(name.c_str(), flag);
+    sem_t* sem = sem_open(name.c_str(), flag, mode, value);
     if (sem == SEM_FAILED) {
         FI_HILOGE("sem_open failed, errno:%{public}d", errno);
         return RET_ERR;
@@ -51,9 +50,9 @@ int32_t Semphore::Open(const std::string& name, int32_t flag)
     return RET_OK;
 }
 
-int32_t Semphore::Open(const std::string& name, int32_t flag, mode_t mode, unsigned int value)
+int32_t Semphore::Open(const std::string& name, int32_t flag)
 {
-    sem_t* sem = sem_open(name.c_str(), flag, mode, value);
+    sem_t* sem = sem_open(name.c_str(), flag);
     if (sem == SEM_FAILED) {
         FI_HILOGE("sem_open failed, errno:%{public}d", errno);
         return RET_ERR;
@@ -138,10 +137,21 @@ void Semphore::GetAbsTime(int32_t milliseconds, timespec& absTime)
         absTime.tv_nsec -= BILLION;
     }
 }
+
 bool Semphore::isValid()
 {
     return sem_ != nullptr;
 }
+
+std::string Semphore::GetSemName()
+{
+    if (!isValid()) {
+        FI_HILOGE("Invalid sem");
+        return "";
+    }
+    return name_;
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

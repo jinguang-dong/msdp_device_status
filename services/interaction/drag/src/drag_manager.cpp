@@ -26,7 +26,7 @@
 #include "drag_data_adapter.h"
 #include "fi_log.h"
 #include "proto.h"
-#include "semphore_name.h"
+#include "semphore_record.h"
 
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
 #include "udmf_client.h"
@@ -181,8 +181,8 @@ int32_t DragManager::NotifyDragResult(DragResult result)
     }
     CHKPR(dragOutSession_, RET_ERR);
     Semphore sem;
-    if (sem.Open(SEMPHORE_FOR_DRAG, O_CREAT | O_RDWR, 0666, 1) != RET_OK) {
-        FI_HILOGE("Open semphore failed, errno:%{public}d", errno);
+    if (sem.Create(SEM_DRAG, SEM_DRAG_CREATE_FLAG, SEM_DRAG_CREATE_MODE, SEM_DRAG_CREATE_VALUE) != RET_OK) {
+        FI_HILOGE("Create semphore failed, errno:%{public}d", errno);
         return RET_ERR;
     }
     int32_t ret = RET_OK;
@@ -191,7 +191,7 @@ int32_t DragManager::NotifyDragResult(DragResult result)
         sem.Post();
         ret =  MSG_SEND_FAIL;
     }
-    if (sem.WaitFor(1000) == RET_ERR) {
+    if (sem.WaitFor(SEM_DRAG_TIMEOUT) != RET_OK) {
         FI_HILOGE("Wait semphore failed");
         ret = RET_ERR;
     }

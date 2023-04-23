@@ -17,6 +17,7 @@
 #define DEVICE_STATUS_SEM_H
 #include <memory>
 #include <string>
+
 #include "semaphore.h"
 
 namespace OHOS {
@@ -30,8 +31,8 @@ public:
     Semphore &operator=(const Semphore&) = delete;
     Semphore (const Semphore&&) = delete;
     
+    int32_t Create(const std::string& name, int32_t flag, mode_t mode, unsigned int value);
     int32_t Open(const std::string& name, int32_t flag);
-    int32_t Open(const std::string& name, int32_t flag, mode_t mode, unsigned int value);
     int32_t GetValue() const;
     int32_t Post();
     int32_t Wait();
@@ -40,6 +41,7 @@ public:
     int32_t Close();
     int32_t Unlink();
     bool isValid();
+    std::string GetSemName();
 private:
     static void GetAbsTime(int32_t milliseconds, timespec& absTime );
     sem_t* sem_ { nullptr };
