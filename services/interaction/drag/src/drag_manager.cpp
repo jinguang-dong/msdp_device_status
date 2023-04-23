@@ -122,6 +122,7 @@ int32_t DragManager::StartDrag(const DragData &dragData, sptr<IDragStopCallback>
     dragTargetPid_ = -1;
     dragState_ = DragMessage::MSG_DRAG_STATE_START;
     stateNotify_.StateChangedNotify(DragMessage::MSG_DRAG_STATE_START);
+    StateChangedNotify(DragMessage::MSG_DRAG_STATE_START);
     return RET_OK;
 }
 
@@ -146,6 +147,7 @@ int32_t DragManager::StopDrag(DragResult result, bool hasCustomAnimation)
     }
     dragState_ = DragMessage::MSG_DRAG_STATE_STOP;
     stateNotify_.StateChangedNotify(DragMessage::MSG_DRAG_STATE_STOP);
+    StateChangedNotify(DragMessage::MSG_DRAG_STATE_STOP);
     DataAdapter.ResetDragData();
     dragResult_ = static_cast<DragResult>(result);
     return ret;
@@ -578,6 +580,26 @@ int32_t DragManager::OnStopCallback(DragResult dragResult)
     return ret;
 }
 
+void DragManager::RegisterStateChange(std::function<void(DragMessage)> callback)
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(callback);
+    stateChangedCallback_ = callback;
+}
+
+void DragManager::StateChangedNotify(DragMessage state)
+{
+    CALL_DEBUG_ENTER;
+    if (stateChangedCallback_ != nullptr) {
+        stateChangedCallback_(state);
+    }
+}
+
+DragMessage DragManager::GetDragState() const
+{
+    CALL_DEBUG_ENTER;
+    return dragState_;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

@@ -16,7 +16,15 @@
 #ifndef I_DRAG_MANAGER_H
 #define I_DRAG_MANAGER_H
 
-#include <string>
+#include <cstdint>
+#include <functional>
+
+#include "refbase.h"
+
+#include "drag_data.h"
+#include "drag_message.h"
+#include "i_drag_stop_callback.h"
+#include "stream_session.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -27,6 +35,10 @@ public:
     virtual ~IDragManager() = default;
 
     virtual void Dump(int32_t fd) const = 0;
+    virtual void RegisterStateChange(std::function<void(DragMessage)> callback) = 0;
+    virtual int32_t StartDrag(const DragData &dragData, sptr<IDragStopCallback> callback) = 0;
+    virtual int32_t StopDrag(DragResult result, bool hasCustomAnimation) = 0;
+    virtual DragMessage GetDragState() const = 0;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
