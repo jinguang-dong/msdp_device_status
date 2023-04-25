@@ -334,7 +334,7 @@ int32_t DeviceStatusSrvProxy::GetCoordinationState(int32_t userData, const std::
     return ret;
 }
 
-int32_t DeviceStatusSrvProxy::StartDrag(const DragData &dragData)
+int32_t DeviceStatusSrvProxy::StartDrag(const DragData &dragData, sptr<IDragStopCallback> callback)
 {
     CALL_DEBUG_ENTER;
     MessageParcel data;
@@ -343,6 +343,7 @@ int32_t DeviceStatusSrvProxy::StartDrag(const DragData &dragData)
         return ERR_INVALID_VALUE;
     }
     CHKPR(dragData.shadowInfo.pixelMap, RET_ERR);
+    CHKPR(callback, RET_ERR);
     if (!dragData.shadowInfo.pixelMap->Marshalling(data)) {
         FI_HILOGE("Failed to marshalling pixelMap");
         return ERR_INVALID_VALUE;
@@ -358,6 +359,10 @@ int32_t DeviceStatusSrvProxy::StartDrag(const DragData &dragData)
     WRITEINT32(data, dragData.displayY, ERR_INVALID_VALUE);
     WRITEINT32(data, dragData.displayId, ERR_INVALID_VALUE);
     WRITEBOOL(data, dragData.hasCanceledAnimation, ERR_INVALID_VALUE);
+    auto object = callback->AsObject();
+    CHKPR(object, RET_ERR);
+    WRITEREMOTEOBJECT(data, object, ERR_INVALID_VALUE);
+    
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> remote = Remote();

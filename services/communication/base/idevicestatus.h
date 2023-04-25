@@ -18,9 +18,11 @@
 
 #include <iremote_broker.h>
 #include "iremote_object.h"
+#include "refbase.h"
 
 #include "devicestatus_data_utils.h"
 #include "drag_data.h"
+#include "i_drag_stop_callback.h"
 #include "idevicestatus_callback.h"
 
 namespace OHOS {
@@ -68,7 +70,7 @@ public:
         int32_t startDeviceId) = 0;
     virtual int32_t DeactivateCoordination(int32_t userData) = 0;
     virtual int32_t GetCoordinationState(int32_t userData, const std::string &deviceId) = 0;
-    virtual int32_t StartDrag(const DragData &dragData) = 0;
+    virtual int32_t StartDrag(const DragData &dragData, sptr<IDragStopCallback> callback) = 0;
     virtual int32_t StopDrag(DragResult result, bool hasCustomAnimation) = 0;
     virtual int32_t UpdateDragStyle(DragCursorStyle style) = 0;
     virtual int32_t GetDragTargetPid() = 0;

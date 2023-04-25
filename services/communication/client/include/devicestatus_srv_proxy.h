@@ -18,9 +18,11 @@
 
 #include "iremote_proxy.h"
 #include <nocopyable.h>
+#include "refbase.h"
 
 #include "drag_data.h"
 #include "idevicestatus.h"
+#include "i_drag_stop_callback.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -49,7 +51,7 @@ public:
     virtual int32_t DeactivateCoordination(int32_t userData) override;
     virtual int32_t GetCoordinationState(int32_t userData, const std::string &deviceId) override;
 
-    virtual int32_t StartDrag(const DragData &dragData) override;
+    virtual int32_t StartDrag(const DragData &dragData, sptr<IDragStopCallback> callback) override;
     virtual int32_t StopDrag(DragResult result, bool hasCustomAnimation) override;
     virtual int32_t UpdateDragStyle(DragCursorStyle style) override;
     virtual int32_t GetDragTargetPid() override;

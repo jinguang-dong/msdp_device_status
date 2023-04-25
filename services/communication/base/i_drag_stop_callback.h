@@ -13,34 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef I_DRAG_MANAGER_H
-#define I_DRAG_MANAGER_H
+#ifndef I_DRAG_STOP_CALLBACK_H
+#define I_DRAG_STOP_CALLBACK_H
 
-#include <cstdint>
-#include <functional>
-
-#include "refbase.h"
+#include <iremote_broker.h>
+#include <iremote_object.h>
 
 #include "drag_data.h"
-#include "drag_message.h"
-#include "i_drag_stop_callback.h"
-#include "stream_session.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class IDragManager {
+class IDragStopCallback : public IRemoteBroker {
 public:
-    IDragManager() = default;
-    virtual ~IDragManager() = default;
-
-    virtual void Dump(int32_t fd) const = 0;
-    virtual void RegisterStateChange(std::function<void(DragMessage)> callback) = 0;
-    virtual int32_t StartDrag(const DragData &dragData, sptr<IDragStopCallback> callback) = 0;
-    virtual int32_t StopDrag(DragResult result, bool hasCustomAnimation) = 0;
-    virtual DragMessage GetDragState() const = 0;
+    enum  {
+        DRAG_CHANGE = 0,
+    };
+    virtual int32_t OnDragChanged(const DragNotifyMsg& notifyMsg) = 0;
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.IDragStopCallback");
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // I_DRAG_MANAGER_H
+#endif // I_DRAG_STOP_CALLBACK_H

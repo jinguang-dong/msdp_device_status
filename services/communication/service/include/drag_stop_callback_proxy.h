@@ -13,34 +13,30 @@
  * limitations under the License.
  */
 
-#ifndef I_DRAG_MANAGER_H
-#define I_DRAG_MANAGER_H
+#ifndef DRAG_STOP_CALLBACK_PROXY_H
+#define DRAG_STOP_CALLBACK_PROXY_H
 
-#include <cstdint>
-#include <functional>
-
-#include "refbase.h"
+#include <iremote_proxy.h>
+#include <nocopyable.h>
 
 #include "drag_data.h"
-#include "drag_message.h"
 #include "i_drag_stop_callback.h"
-#include "stream_session.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class IDragManager {
+class DragStopCallbackProxy : public IRemoteProxy<IDragStopCallback> {
 public:
-    IDragManager() = default;
-    virtual ~IDragManager() = default;
+    explicit DragStopCallbackProxy(const sptr<IRemoteObject>& impl)
+        : IRemoteProxy<IDragStopCallback>(impl) {}
+    ~DragStopCallbackProxy() = default;
+    DISALLOW_COPY_AND_MOVE(DragStopCallbackProxy);
+    virtual int32_t OnDragChanged(const DragNotifyMsg& notifyMsg) override;
 
-    virtual void Dump(int32_t fd) const = 0;
-    virtual void RegisterStateChange(std::function<void(DragMessage)> callback) = 0;
-    virtual int32_t StartDrag(const DragData &dragData, sptr<IDragStopCallback> callback) = 0;
-    virtual int32_t StopDrag(DragResult result, bool hasCustomAnimation) = 0;
-    virtual DragMessage GetDragState() const = 0;
+private:
+    static inline BrokerDelegator<DragStopCallbackProxy> delegator_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // I_DRAG_MANAGER_H
+#endif // DRAG_STOP_CALLBACK_PROXY_H

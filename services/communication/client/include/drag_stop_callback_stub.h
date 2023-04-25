@@ -13,34 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef I_DRAG_MANAGER_H
-#define I_DRAG_MANAGER_H
+#ifndef DRAG_STOP_CALLBACK_STUB_H
+#define DRAG_STOP_CALLBACK_STUB_H
 
-#include <cstdint>
-#include <functional>
+#include <iremote_stub.h>
+#include <nocopyable.h>
 
-#include "refbase.h"
+#include "message_option.h"
+#include "message_parcel.h"
 
 #include "drag_data.h"
-#include "drag_message.h"
 #include "i_drag_stop_callback.h"
-#include "stream_session.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class IDragManager {
+class DragStopCallbackStub : public IRemoteStub<IDragStopCallback> {
 public:
-    IDragManager() = default;
-    virtual ~IDragManager() = default;
-
-    virtual void Dump(int32_t fd) const = 0;
-    virtual void RegisterStateChange(std::function<void(DragMessage)> callback) = 0;
-    virtual int32_t StartDrag(const DragData &dragData, sptr<IDragStopCallback> callback) = 0;
-    virtual int32_t StopDrag(DragResult result, bool hasCustomAnimation) = 0;
-    virtual DragMessage GetDragState() const = 0;
+    DISALLOW_COPY_AND_MOVE(DragStopCallbackStub);
+    DragStopCallbackStub() = default;
+    virtual ~DragStopCallbackStub() = default;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+private:
+    int32_t OnDragChangedStub(MessageParcel &data);
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // I_DRAG_MANAGER_H
+#endif // DRAG_STOP_CALLBACK_STUB_H

@@ -292,7 +292,7 @@ void DeviceStatusClient::RegisterDeathListener(std::function<void()> deathListen
     deathListener_ = deathListener;
 }
 
-int32_t DeviceStatusClient::StartDrag(const DragData &dragData)
+int32_t DeviceStatusClient::StartDrag(const DragData &dragData, sptr<IDragStopCallback> callback)
 {
     CALL_DEBUG_ENTER;
     DEV_RET_IF_NULL_WITH_RET((Connect() != RET_OK), RET_ERR);
@@ -300,7 +300,7 @@ int32_t DeviceStatusClient::StartDrag(const DragData &dragData)
         FI_HILOGE("devicestatusProxy_ is nullptr");
         return RET_ERR;
     }
-    return devicestatusProxy_->StartDrag(dragData);
+    return devicestatusProxy_->StartDrag(dragData, callback);
 }
 
 int32_t DeviceStatusClient::StopDrag(DragResult result, bool hasCustomAnimation)

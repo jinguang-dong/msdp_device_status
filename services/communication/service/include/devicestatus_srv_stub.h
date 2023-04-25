@@ -19,6 +19,7 @@
 #include <iremote_stub.h>
 #include <nocopyable.h>
 
+#include "i_drag_stop_callback.h"
 #include "idevicestatus.h"
 #include "message_option.h"
 #include "message_parcel.h"

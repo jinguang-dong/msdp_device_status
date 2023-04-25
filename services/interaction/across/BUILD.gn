@@ -20,6 +20,7 @@ config("across_private_config") {
 ohos_shared_library("interaction_across") {
   include_dirs = [
     "${device_status_interfaces_path}/innerkits/interaction/include",
+    "${device_status_service_path}/communication/base",
     "${device_status_service_path}/context/include",
     "${device_status_utils_path}/include",
     "../drag/include",

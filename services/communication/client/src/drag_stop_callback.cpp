@@ -13,34 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef I_DRAG_MANAGER_H
-#define I_DRAG_MANAGER_H
+#include "drag_stop_callback.h"
 
-#include <cstdint>
-#include <functional>
+#include <message_parcel.h>
 
-#include "refbase.h"
-
-#include "drag_data.h"
-#include "drag_message.h"
-#include "i_drag_stop_callback.h"
-#include "stream_session.h"
+#include "devicestatus_common.h"
+#include "devicestatus_define.h"
+#include "fi_log.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class IDragManager {
-public:
-    IDragManager() = default;
-    virtual ~IDragManager() = default;
+namespace {
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "DragStopCallback" };
+} // namespace
 
-    virtual void Dump(int32_t fd) const = 0;
-    virtual void RegisterStateChange(std::function<void(DragMessage)> callback) = 0;
-    virtual int32_t StartDrag(const DragData &dragData, sptr<IDragStopCallback> callback) = 0;
-    virtual int32_t StopDrag(DragResult result, bool hasCustomAnimation) = 0;
-    virtual DragMessage GetDragState() const = 0;
-};
+DragStopCallback::DragStopCallback(std::function<void(const DragNotifyMsg&)> callback) : stopCallback_(callback) {}
+
+int32_t DragStopCallback::OnDragChanged(const DragNotifyMsg& notifyMsg)
+{
+    CHKPR(stopCallback_, RET_ERR);
+    stopCallback_(notifyMsg);
+    return RET_OK;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // I_DRAG_MANAGER_H

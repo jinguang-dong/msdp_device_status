@@ -25,6 +25,7 @@
 #include "devicestatus_define.h"
 #include "drag_data.h"
 #include "i_drag_listener.h"
+#include "i_drag_stop_callback.h"
 #include "util.h"
 
 namespace OHOS {
@@ -40,7 +41,6 @@ public:
     
     int32_t StartDrag(const DragData &dragData, std::function<void(const DragNotifyMsg&)> callback);
     int32_t StopDrag(DragResult result, bool hasCustomAnimation);
-    int32_t OnNotifyResult(const StreamClient& client, NetPacket& pkt);
     int32_t OnStateChangedMessage(const StreamClient& client, NetPacket& pkt);
     int32_t AddDraglistener(DragListenerPtr listener);
     int32_t RemoveDraglistener(DragListenerPtr listener);
@@ -51,7 +51,7 @@ private:
     std::mutex mtx_;
     std::atomic_bool hasRegistered_ { false };
     std::list<DragListenerPtr> dragListener_;
-    std::function<void(const DragNotifyMsg&)> stopCallback_;
+    sptr<IDragStopCallback> stopCallback_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp

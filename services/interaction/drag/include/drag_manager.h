@@ -22,10 +22,12 @@
 #include "i_input_event_consumer.h"
 #include "input_manager.h"
 #include "pixel_map.h"
+#include "refbase.h"
 
 #include "devicestatus_define.h"
 #include "drag_data.h"
 #include "drag_drawing.h"
+#include "i_drag_stop_callback.h"
 #include "i_context.h"
 #include "state_change_notify.h"
 #include "stream_session.h"
@@ -33,6 +35,20 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+namespace {
+    template<typename T>
+    class DragStopCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
+    public:
+        explicit DragStopCallbackDeathRecipient(T &executor) : executor_(executor){};
+        virtual ~DragStopCallbackDeathRecipient() = default;
+        virtual void OnRemoteDied(const wptr<IRemoteObject> &object)
+        {
+            executor_.ProcessDeathObserver(object);
+        };
+    private:
+        T &executor_;
+    };
+} // namespace
 class DragManager : public IDragManager {
 public:
     DragManager()
@@ -44,7 +60,7 @@ public:
     void OnSessionLost(SessionPtr session);
     int32_t AddListener(SessionPtr session);
     int32_t RemoveListener(SessionPtr session);
-    int32_t StartDrag(const DragData &dragData, SessionPtr sess) override;
+    int32_t StartDrag(const DragData &dragData, sptr<IDragStopCallback> callback) override;
     int32_t StopDrag(DragResult result, bool hasCustomAnimation) override;
     int32_t GetDragTargetPid() const;
     int32_t GetUdKey(std::string &udKey) const;
@@ -56,6 +72,7 @@ public:
     void OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     int32_t OnSetDragWindowVisible(bool visible);
     int32_t OnGetShadowOffset(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height);
+    void ProcessDeathObserver(wptr<IRemoteObject> remote);
     void Dump(int32_t fd) const override;
     void RegisterStateChange(std::function<void(DragMessage)> callback) override;
     class InterceptorConsumer final : public MMI::IInputEventConsumer {
@@ -72,10 +89,13 @@ public:
     };
 private:
     int32_t AddDragEventInterceptor(int32_t sourceType);
-    int32_t NotifyDragResult(DragResult result);
     int32_t InitDataAdapter(const DragData &dragData) const;
     int32_t OnStartDrag();
     int32_t OnStopDrag(DragResult result, bool hasCustomAnimation);
+    int32_t OnStopCallback(DragResult dragResult);
+    int32_t AddStopCallback(sptr<IDragStopCallback> callback);
+    void InitDeathRecipient();
+    void RemoveExpiredDeathObserver();
     std::string GetDragState(DragMessage value) const;
     std::string GetDragResult(DragResult value) const;
     std::string GetDragCursorStyle(DragCursorStyle value) const;
@@ -89,9 +109,10 @@ private:
     DragResult dragResult_ { DragResult::DRAG_FAIL };
     int32_t interceptorId_ { -1 };
     int32_t dragTargetPid_ { -1 };
-    SessionPtr dragOutSession_ { nullptr };
     DragDrawing dragDrawing_;
     IContext* context_ { nullptr };
+    sptr<IDragStopCallback> stopCallback_ { nullptr };
+    sptr<IRemoteObject::DeathRecipient> stopCallbackCBDeathRecipient_ { nullptr };
     std::function<void(DragMessage)> stateChangedCallback_;
 };
 #define INPUT_MANAGER  OHOS::MMI::InputManager::GetInstance()
