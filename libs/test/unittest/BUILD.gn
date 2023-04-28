@@ -46,7 +46,7 @@ ohos_unittest("device_status_algorithm_test") {
 
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
-    "${device_status_root_path}/services:devicestatus_service",
+    "${device_status_root_path}/services:devicestatus_static_service",
     "//base/msdp/device_status/libs:devicestatus_algo",
     "//commonlibrary/c_utils/base:utils",
     "//drivers/peripheral/sensor/hal:hdi_sensor",
@@ -62,7 +62,8 @@ ohos_unittest("device_status_algorithm_test") {
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
+    "multimedia_image_framework:image_native",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "sensor:sensor_interface_native",
@@ -81,7 +82,7 @@ ohos_unittest("device_status_datahub_test") {
 
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
-    "${device_status_root_path}/services:devicestatus_service",
+    "${device_status_root_path}/services:devicestatus_static_service",
     "//base/msdp/device_status/libs:devicestatus_algo",
     "//base/msdp/device_status/libs:devicestatus_mock",
     "//commonlibrary/c_utils/base:utils",
@@ -98,7 +99,8 @@ ohos_unittest("device_status_datahub_test") {
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
+    "multimedia_image_framework:image_native",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "sensor:sensor_interface_native",
@@ -117,7 +119,7 @@ ohos_unittest("device_status_mock_test") {
 
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
-    "${device_status_root_path}/services:devicestatus_service",
+    "${device_status_root_path}/services:devicestatus_static_service",
     "//base/msdp/device_status/libs:devicestatus_algo",
     "//base/msdp/device_status/libs:devicestatus_mock",
     "//commonlibrary/c_utils/base:utils",
@@ -134,7 +136,8 @@ ohos_unittest("device_status_mock_test") {
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
+    "multimedia_image_framework:image_native",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
