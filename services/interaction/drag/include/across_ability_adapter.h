@@ -16,7 +16,10 @@
 #ifndef ACROSS_ABILITY_ADAPTER
 #define ACROSS_ABILITY_ADAPTER
 
+#include <cstddef>
+#include <cstdint>
 #include <vector>
+#include <sys/types.h>
 
 #include "ability_manager_client.h"
 #include "iremote_stub.h"
@@ -31,10 +34,10 @@ namespace {
 constexpr int32_t MAX_MISSION_NUM { 1000 };
 }
 class AcrossAbilityAdapter final {
-    DECLARE_SINGLETON(AcrossAbilityAdapter);
-
 public:
-    DISALLOW_MOVE(AcrossAbilityAdapter);
+    static AcrossAbilityAdapter *GetInstance();
+    virtual ~AcrossAbilityAdapter() = default;
+
     class MissionListenerCallback final : public AAFwk::RemoteMissionListenerStub {
     public:
         void NotifyMissionsChanged(const std::string& deviceId)override;
@@ -50,11 +53,13 @@ public:
     int32_t GetMissionIdToContinue(const std::string &bundleName, const std::string &abilityName);
     void LaunchAbility(const std::string &deviceId, const std::string &bundleName, const std::string &abilityName);
     void PrintCurrentMissionInfo();
+
 private:
     std::vector<AAFwk::MissionInfo> missionInfos_;
+    AcrossAbilityAdapter() = default;
+    DISALLOW_COPY_AND_MOVE(AcrossAbilityAdapter);
+    static AcrossAbilityAdapter *instance_;
 };
-
-#define AcrossDragAbilityAdapter ::OHOS::Singleton<AcrossAbilityAdapter>::GetInstance()
 
 } // namespace DeviceStatus
 } // namespace Msdp

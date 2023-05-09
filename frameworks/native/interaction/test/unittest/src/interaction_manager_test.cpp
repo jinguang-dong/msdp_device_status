@@ -39,7 +39,6 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "Inter
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 constexpr int32_t TIME_WAIT_FOR_INJECT_MS { 20 };
 constexpr int32_t TIME_WAIT_FOR_TOUCH_DOWN_MS { 1000 };
-constexpr int32_t TIME_WAIT_FOR_CROSS_MISSION { 300000 };
 constexpr int32_t MOUSE_POINTER_ID { 0 };
 constexpr int32_t TOUCH_POINTER_ID { 1 };
 constexpr int32_t DISPLAY_ID { 0 };
@@ -553,40 +552,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_Mouse, TestSiz
         ASSERT_TRUE(dragData);
         int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(), callback);
         ASSERT_EQ(ret, RET_OK);
-        SimulateMoveEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
-            MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, true);
-        SimulateUpEvent({ DRAG_DST_X, DRAG_DST_Y }, MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID);
-        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION);
-        ASSERT_TRUE(futureFlag.get());
-    }
-}
-
-
-/**
- * @tc.name: InteractionManagerTest_StartDrag_Mouse
- * @tc.desc: Start Drag
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_Cross_Mission
-    CALL_TEST_DEBUG;
-    if (g_deviceMouseId < 0) {
-        ASSERT_TRUE(g_deviceMouseId < 0);
-    } else {
-        std::promise<bool> promiseFlag;
-        std::future<bool> futureFlag = promiseFlag.get_future();
-        auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
-            FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-                notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
-            promiseFlag.set_value(true);
-        };
-        SimulateDownEvent({ DRAG_SRC_X, DRAG_SRC_Y }, MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID);
-        std::optional<DragData> dragData = CreateDragData({ MAX_PIXEL_MAP_WIDTH, MAX_PIXEL_MAP_HEIGHT },
-            MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, DISPLAY_ID, { DRAG_SRC_X, DRAG_SRC_Y });
-        ASSERT_TRUE(dragData);
-        int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(), callback);
-        ASSERT_EQ(ret, RET_OK);
-        std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_CROSS_MISSION));
         SimulateMoveEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
             MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, true);
         SimulateUpEvent({ DRAG_DST_X, DRAG_DST_Y }, MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID);

@@ -23,7 +23,6 @@
 #include "input_manager.h"
 #include "pixel_map.h"
 
-#include "across_ability_adapter.h"
 #include "devicestatus_define.h"
 #include "drag_data.h"
 #include "drag_drawing.h"

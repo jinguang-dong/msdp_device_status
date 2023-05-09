@@ -28,8 +28,12 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "AcrossAbilityAdapter" };
 } // namespace
 
-AcrossAbilityAdapter::AcrossAbilityAdapter() = default;
-AcrossAbilityAdapter::~AcrossAbilityAdapter() = default;
+AcrossAbilityAdapter *AcrossAbilityAdapter::instance_ = new (std::nothrow) AcrossAbilityAdapter();
+
+AcrossAbilityAdapter *AcrossAbilityAdapter::GetInstance()
+{
+    return instance_;
+}
 
 void AcrossAbilityAdapter::MissionListenerCallback::NotifyMissionsChanged(const std::string& deviceId)
 {
@@ -41,10 +45,10 @@ void AcrossAbilityAdapter::MissionListenerCallback::NotifyMissionsChanged(const 
         FI_HILOGE("RegisterMissionListener failed");
         return;
     }
-    if (AcrossDragAbilityAdapter.UpdateMissionInfos(deviceId) != RET_OK) {
+    if (AcrossAbilityAdapter::GetInstance()->UpdateMissionInfos(deviceId) != RET_OK) {
         FI_HILOGE("UpdateMissionInfos failed");
     }
-    AcrossDragAbilityAdapter.PrintCurrentMissionInfo();
+    AcrossAbilityAdapter::GetInstance()->PrintCurrentMissionInfo();
 }
 
 void AcrossAbilityAdapter::MissionListenerCallback::NotifySnapshot(const std::string& deviceId, int32_t missionId)
