@@ -26,11 +26,12 @@
 #include "drag_data_adapter.h"
 #include "fi_log.h"
 #include "proto.h"
+#include "coordination_sm.h"
 
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#include "udmf_client.h"
-#include "unified_types.h"
-#endif // OHOS_BUILD_ENABLE_COORDINATION
+// #ifdef OHOS_BUILD_ENABLE_COORDINATION
+// #include "udmf_client.h"
+// #include "unified_types.h"
+// #endif // OHOS_BUILD_ENABLE_COORDINATION
 
 namespace OHOS {
 namespace Msdp {
@@ -98,6 +99,11 @@ int32_t DragManager::StartDrag(const DragData &dragData, SessionPtr sess)
     dragState_ = DragState::START;
     stateNotify_.StateChangedNotify(DragState::START);
     StateChangedNotify(DragState::START);
+    std::string remoteDeviceId = CooSM->GetRemoteId();
+    FI_HILOGD("Current remoteDeviceId:%{public}s" remoteDeviceId.c_str());
+    if (AcrossDragAbilityAdapter.RegisterMissionListener(remoteDeviceId) != RET_OK) {
+        FI_HILOGE("RegisterMissionListener failed");
+    }
     return RET_OK;
 }
 
@@ -125,6 +131,11 @@ int32_t DragManager::StopDrag(DragResult result, bool hasCustomAnimation)
     }
     DataAdapter.ResetDragData();
     dragResult_ = static_cast<DragResult>(result);
+    std::string remoteDeviceId = CooSM->GetRemoteId();
+    FI_HILOGD("Current remoteDeviceId:%{public}s" remoteDeviceId.c_str());
+    if (AcrossDragAbilityAdapter.UnRegisterMissionListener(remoteDeviceId) != RET_OK) {
+        FI_HILOGE("UnRegisterMissionListener failed");
+    }
     return ret;
 }
 
@@ -216,15 +227,15 @@ void DragManager::SendDragData(int32_t targetPid, const std::string &udKey)
 {
     CALL_DEBUG_ENTER;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    UDMF::QueryOption option;
-    option.key = udKey;
-    UDMF::Privilege privilege;
-    privilege.pid = targetPid;
-    FI_HILOGD("AddPrivilege enter");
-    int32_t ret = UDMF::UdmfClient::GetInstance().AddPrivilege(option, privilege);
-    if (ret != RET_OK) {
-        FI_HILOGE("Failed to send pid to Udmf client");
-    }
+    // UDMF::QueryOption option;
+    // option.key = udKey;
+    // UDMF::Privilege privilege;
+    // privilege.pid = targetPid;
+    // FI_HILOGD("AddPrivilege enter");
+    // int32_t ret = UDMF::UdmfClient::GetInstance().AddPrivilege(option, privilege);
+    // if (ret != RET_OK) {
+    //     FI_HILOGE("Failed to send pid to Udmf client");
+    // }
 #else
     (void)(targetPid);
     (void)(udKey);
