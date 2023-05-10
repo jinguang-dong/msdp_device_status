@@ -107,35 +107,3 @@ group("unittest") {
   deps = []
   deps += [ ":test_across_by_ut" ]
 }
-
-
-# ohos_executable("test_across") {
-#   install_enable = true
-#   include_dirs = [
-#     "${device_status_utils_path}/include",
-#   ]
-
-#   sources = [
-#     "src/across_ability_adapter.cpp",
-#     "src/test_across.cpp",
-#   ]
-
-#   configs = [ ":drag_private_config" ]
-
-#   defines = device_status_default_defines
-
-#   deps = [
-#     "${device_status_utils_path}:devicestatus_util",
-#   ]
-
-#   external_deps = [
-#     "ability_base:want",
-#     "ability_runtime:ability_manager",
-#     "c_utils:utils",
-#     "ipc:ipc_single",
-#     "ipc:ipc_core",
-#   ]
-
-#   subsystem_name = "${device_status_subsystem_name}"
-#   part_name = "${device_status_part_name}"
-# }

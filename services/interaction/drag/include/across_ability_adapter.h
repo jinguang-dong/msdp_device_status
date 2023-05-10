@@ -45,17 +45,28 @@ public:
         void NotifyNetDisconnect(const std::string& deviceId, int32_t state)override;
     };
 
+    // class ContinueMissionCallback final : public IRemoteStub<IRemoteObject> {
+    // public:
+    //     DISALLOW_COPY_AND_MOVE(ContinueMissionCallback);
+    //     ContinueMissionCallback() = default;
+    //     virtual ~ContinueMissionCallback() = default;
+    //     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data,
+    //         MessageParcel &reply, MessageOption &option) override {}
+    // };
+
     int32_t RegisterMissionListener(const std::string &deviceId);
     int32_t UnRegisterMissionListener(const std::string &deviceId);
     int32_t UpdateMissionInfos(const std::string &deviceId);
-    int32_t ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId, int32_t missionId,
-        const sptr<IRemoteObject> &callback, AAFwk::WantParams &wantParams);
-    int32_t GetMissionIdToContinue(const std::string &bundleName, const std::string &abilityName);
+    int32_t ContinueMission(const AAFwk::MissionInfo &missionInfo);
+    AAFwk::MissionInfo GetMissionInfoToContinue(const std::string &bundleName, const std::string &abilityName);
     void LaunchAbility(const std::string &deviceId, const std::string &bundleName, const std::string &abilityName);
     void PrintCurrentMissionInfo();
+    int32_t ContinueFirstMission();
 
 private:
     std::vector<AAFwk::MissionInfo> missionInfos_;
+    std::string srcDeviceId_;
+    std::string dstDeviceId_;
     AcrossAbilityAdapter() = default;
     DISALLOW_COPY_AND_MOVE(AcrossAbilityAdapter);
     static AcrossAbilityAdapter *instance_;

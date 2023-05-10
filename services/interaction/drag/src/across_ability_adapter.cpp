@@ -39,12 +39,6 @@ void AcrossAbilityAdapter::MissionListenerCallback::NotifyMissionsChanged(const 
 {
     CALL_DEBUG_ENTER;
     FI_HILOGD("deviceId:%{public}s", deviceId.c_str());
-    bool fixConflict = true; // 该参数含义上不清晰
-    int64_t tag = 0; // 该参数具体是干啥的
-    if (AAFwk::AbilityManagerClient::GetInstance()->StartSyncRemoteMissions(deviceId, fixConflict, tag) != ERR_OK) {
-        FI_HILOGE("RegisterMissionListener failed");
-        return;
-    }
     if (AcrossAbilityAdapter::GetInstance()->UpdateMissionInfos(deviceId) != RET_OK) {
         FI_HILOGE("UpdateMissionInfos failed");
     }
@@ -76,6 +70,12 @@ int32_t AcrossAbilityAdapter::RegisterMissionListener(const std::string &deviceI
         FI_HILOGE("RegisterMissionListener failed, ret:%{public}d", ret);
         return RET_ERR;
     }
+    bool fixConflict = true; // 该参数含义上不清晰
+    int64_t tag = 0; // 该参数具体是干啥的
+    if (AAFwk::AbilityManagerClient::GetInstance()->StartSyncRemoteMissions(deviceId, fixConflict, tag) != ERR_OK) {
+        FI_HILOGE("StartSyncRemoteMissions failed");
+        return RET_ERR;
+    }
     return RET_OK;
 }
 
@@ -103,38 +103,42 @@ int32_t AcrossAbilityAdapter::UpdateMissionInfos(const std::string &deviceId)
     return RET_OK;
 }
 
-int32_t AcrossAbilityAdapter::ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId,
-    int32_t missionId, const sptr<IRemoteObject> &callback, AAFwk::WantParams &wantParams)
+int32_t AcrossAbilityAdapter::ContinueMission(const AAFwk::MissionInfo &missionInfo)
 {
     CALL_DEBUG_ENTER;
-    (void) srcDeviceId;
-    (void) dstDeviceId;
-    (void) missionId;
-    (void) callback;
-    (void) wantParams;
+    if (!missionInfo.continuable) {
+        FI_HILOGE("ContinueMission failed, this mission is unsupported to continue");
+        return RET_ERR;
+    }
+    AAFwk::WantParams wantParams = missionInfo.want.GetParams();
+    // sptr<IRemoteObject> callback = new (std::nothrow) AcrossAbilityAdapter::ContinueMissionCallback();
+    sptr<IRemoteObject> callback = nullptr;
+    if (int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ContinueMission(
+        srcDeviceId_, dstDeviceId_, missionInfo.id, callback, wantParams); ret != ERR_OK) {
+        FI_HILOGE("ContinueMission failed, %{public}d", ret);
+        return RET_ERR;
+    }
     return RET_OK;
 }
 
-int32_t AcrossAbilityAdapter::GetMissionIdToContinue(const std::string &bundleName, const std::string &abilityName)
+AAFwk::MissionInfo AcrossAbilityAdapter::GetMissionInfoToContinue(const std::string &bundleName, const std::string &abilityName)
 {
     CALL_DEBUG_ENTER;
-    (void) bundleName;
-    (void) abilityName;
-    return -1;
+    auto iter = find_if(missionInfos_.begin(), missionInfos_.end(),
+        [&bundleName, &abilityName](const auto &missionInfo) {
+            return missionInfo.want.GetElement().GetBundleName() == bundleName &&
+                   missionInfo.want.GetElement().GetAbilityName() == abilityName;
+        }
+    );
+    return (iter != missionInfos_.cend() ? *iter : AAFwk::MissionInfo());
 }
 
 void AcrossAbilityAdapter::LaunchAbility(const std::string &deviceId, const std::string &bundleName,
     const std::string &abilityName)
 {
-    CALL_INFO_TRACE;
+    CALL_DEBUG_ENTER;
     AAFwk::Want want;
     want.SetElementName(deviceId, bundleName, abilityName);
-    want.SetAction("");
-    want.SetUri("");
-    want.SetType("");
-    for (const auto &entity : { "" }) {
-        want.AddEntity(entity);
-    }
     FI_HILOGD("Start launch ability, bundleName:%{public}s", bundleName.c_str());
     int32_t err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want);
     if (err != ERR_OK) {
@@ -146,9 +150,27 @@ void AcrossAbilityAdapter::PrintCurrentMissionInfo()
 {
     CALL_DEBUG_ENTER;
     FI_HILOGD("MissionNum:%{public}d", missionInfos_.size());
-    for (const auto& elem : missionInfos_) {
-        FI_HILOGD("MissionId:%{public}d, label:%{public}s", elem.id, elem.label.c_str());
+    for (const auto& missionInfo : missionInfos_) {
+        FI_HILOGD("MissionId:%{public}d, label:%{public}s, bundleName:%{public}s, abilityName:%{public}s",
+            missionInfo.id, missionInfo.label.c_str(),
+            missionInfo.want.GetElement().GetBundleName().c_str(),
+            missionInfo.want.GetElement().GetAbilityName().c_str()
+        );
     }
+}
+
+int32_t AcrossAbilityAdapter::ContinueFirstMission()
+{
+    CALL_DEBUG_ENTER;
+    if (missionInfos_.empty()) {
+        FI_HILOGE("No remote missionInfo");
+        return RET_ERR;
+    }
+    if (ContinueMission(missionInfos_[0]) != RET_OK) {
+        FI_HILOGE("ContinueMission failed");
+        return RET_ERR;
+    }
+    return RET_OK;
 }
 
 } // namespace DeviceStatus
