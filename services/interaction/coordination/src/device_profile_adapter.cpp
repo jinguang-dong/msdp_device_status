@@ -208,7 +208,7 @@ void DeviceProfileAdapter::ProfileEventCallbackImpl::OnProfileChanged(
 {
     CALL_INFO_TRACE;
     std::string deviceId = changeNotification.GetDeviceId();
-    DProfileAdapter->OnProfileChanged(deviceId);
+    D_PROFILE_ADAPTER->OnProfileChanged(deviceId);
 }
 
 void DeviceProfileAdapter::ProfileEventCallbackImpl::OnSyncCompleted(const DeviceProfile::SyncResult &syncResults)

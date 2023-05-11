@@ -53,7 +53,7 @@ void ResponseStartRemoteCoordination(int32_t sessionId, const JsonParser& parser
         FI_HILOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE, data type is error");
         return;
     }
-    CooSM->StartRemoteCoordination(deviceId->valuestring, cJSON_IsTrue(buttonIsPressed));
+    COO_SM->StartRemoteCoordination(deviceId->valuestring, cJSON_IsTrue(buttonIsPressed));
 }
 
 void ResponseStartRemoteCoordinationResult(int32_t sessionId, const JsonParser& parser)
@@ -67,12 +67,12 @@ void ResponseStartRemoteCoordinationResult(int32_t sessionId, const JsonParser& 
         FI_HILOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE, data type is error");
         return;
     }
-    CooSM->StartRemoteCoordinationResult(cJSON_IsTrue(result), dhid->valuestring, x->valueint, y->valueint);
+    COO_SM->StartRemoteCoordinationResult(cJSON_IsTrue(result), dhid->valuestring, x->valueint, y->valueint);
 }
 
 void ResponseStopRemoteCoordination(int32_t sessionId, const JsonParser& parser)
 {
-    CooSM->StopRemoteCoordination();
+    COO_SM->StopRemoteCoordination();
 }
 
 void ResponseStopRemoteCoordinationResult(int32_t sessionId, const JsonParser& parser)
@@ -84,7 +84,7 @@ void ResponseStopRemoteCoordinationResult(int32_t sessionId, const JsonParser& p
         FI_HILOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE, data type is error");
         return;
     }
-    CooSM->StopRemoteCoordinationResult(cJSON_IsTrue(result));
+    COO_SM->StopRemoteCoordinationResult(cJSON_IsTrue(result));
 }
 
 void ResponseStartCoordinationOtherResult(int32_t sessionId, const JsonParser& parser)
@@ -96,23 +96,23 @@ void ResponseStartCoordinationOtherResult(int32_t sessionId, const JsonParser& p
         FI_HILOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE, data type is error");
         return;
     }
-    CooSM->StartCoordinationOtherResult(deviceId->valuestring);
+    COO_SM->StartCoordinationOtherResult(deviceId->valuestring);
 }
 } // namespace
 
 static int32_t SessionOpened(int32_t sessionId, int32_t result)
 {
-    return CooSoftbusAdapter->OnSessionOpened(sessionId, result);
+    return COO_SOFTBUS_ADAPTER->OnSessionOpened(sessionId, result);
 }
 
 static void SessionClosed(int32_t sessionId)
 {
-    CooSoftbusAdapter->OnSessionClosed(sessionId);
+    COO_SOFTBUS_ADAPTER->OnSessionClosed(sessionId);
 }
 
 static void BytesReceived(int32_t sessionId, const void *data, uint32_t dataLen)
 {
-    CooSoftbusAdapter->OnBytesReceived(sessionId, data, dataLen);
+    COO_SOFTBUS_ADAPTER->OnBytesReceived(sessionId, data, dataLen);
 }
 
 static void MessageReceived(int32_t sessionId, const void *data, uint32_t dataLen)
@@ -260,7 +260,7 @@ int32_t CoordinationSoftbusAdapter::StartRemoteCoordination(const std::string &l
         return RET_ERR;
     }
     int32_t sessionId = sessionDevMap_[remoteNetworkId];
-    auto pointerEvent = CooSM->GetLastPointerEvent();
+    auto pointerEvent = COO_SM->GetLastPointerEvent();
     CHKPR(pointerEvent, RET_ERR);
     bool isPointerButtonPressed =
         (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) ? true : false;
@@ -506,7 +506,7 @@ void CoordinationSoftbusAdapter::OnSessionClosed(int32_t sessionId)
     if (GetSessionSide(sessionId) != 0) {
         channelStatusMap_.erase(deviceId);
     }
-    CooSM->Reset(deviceId);
+    COO_SM->Reset(deviceId);
 }
 
 void CoordinationSoftbusAdapter::RegisterRecvFunc(MessageId messageId, std::function<void(void*, uint32_t)> callback)

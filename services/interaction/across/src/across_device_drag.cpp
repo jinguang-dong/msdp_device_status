@@ -34,9 +34,9 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "Acros
 AcrossDeviceDrag::AcrossDeviceDrag()
 {
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    CooSoftbusAdapter->RegisterRecvFunc(CoordinationSoftbusAdapter::DRAGING_DATA,
+    COO_SOFTBUS_ADAPTER->RegisterRecvFunc(CoordinationSoftbusAdapter::DRAGING_DATA,
         std::bind(&AcrossDeviceDrag::RecvDragingData, this, std::placeholders::_1, std::placeholders::_2));
-    CooSoftbusAdapter->RegisterRecvFunc(CoordinationSoftbusAdapter::STOPDRAG_DATA,
+    COO_SOFTBUS_ADAPTER->RegisterRecvFunc(CoordinationSoftbusAdapter::STOPDRAG_DATA,
         std::bind(&AcrossDeviceDrag::RecvStopDragData, this, std::placeholders::_1, std::placeholders::_2));
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
@@ -121,7 +121,7 @@ void AcrossDeviceDrag::SendDragingData()
         FI_HILOGE("Drag state is not draging");
         return;
     }
-    auto dragData = DataAdapter.GetDragData();
+    auto dragData = DATA_ADAPTER.GetDragData();
     if (dragData.sourceType != MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         FI_HILOGE("Source type is not mouse");
         return;
@@ -146,18 +146,18 @@ void AcrossDeviceDrag::SendDragingData()
         return;
     }
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    std::string remotedeviceId = CooSM->GetRemoteId();
+    std::string remotedeviceId = COO_SM->GetRemoteId();
     if (remotedeviceId.empty()) {
         free(dragInfo);
         FI_HILOGE("Remote device id is empty");
         return;
     }
-    if (CooSoftbusAdapter->OpenInputSoftbus(remotedeviceId) != RET_OK) {
+    if (COO_SOFTBUS_ADAPTER->OpenInputSoftbus(remotedeviceId) != RET_OK) {
         FI_HILOGE("OpenInputSoftbus failed");
         free(dragInfo);
         return;
     }
-    if (CooSoftbusAdapter->SendData(remotedeviceId, CoordinationSoftbusAdapter::DRAGING_DATA,
+    if (COO_SOFTBUS_ADAPTER->SendData(remotedeviceId, CoordinationSoftbusAdapter::DRAGING_DATA,
         dragInfo, size) != RET_OK) {
         FI_HILOGE("Send draging data failed");
         free(dragInfo);
@@ -180,7 +180,7 @@ int32_t AcrossDeviceDrag::ConvertDragingInfo(const DragData& dragData,
     dragInfo->pointerId = dragData.pointerId;
     dragInfo->displayId = dragData.displayId;
     dragInfo->dragNum = dragData.dragNum;
-    dragInfo->dragStyle = static_cast<int32_t>(DataAdapter.GetDragStyle());
+    dragInfo->dragStyle = static_cast<int32_t>(DATA_ADAPTER.GetDragStyle());
     dragInfo->offsetX = dragData.shadowInfo.x;
     dragInfo->offsetY = dragData.shadowInfo.y;
     dragInfo->hasCanceledAnimation = dragData.hasCanceledAnimation;
@@ -251,13 +251,13 @@ void AcrossDeviceDrag::ProcessDragingState()
 {
     CALL_DEBUG_ENTER;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    CooSM->RegisterStateChange(CooStateChangeType::STATE_FREE_TO_IN,
+    COO_SM->RegisterStateChange(CooStateChangeType::STATE_FREE_TO_IN,
         std::bind(&AcrossDeviceDrag::ProcessFreeToIn, this, std::placeholders::_1, std::placeholders::_2));
-    CooSM->RegisterStateChange(CooStateChangeType::STATE_FREE_TO_OUT,
+    COO_SM->RegisterStateChange(CooStateChangeType::STATE_FREE_TO_OUT,
         std::bind(&AcrossDeviceDrag::ProcessFreeToOut, this, std::placeholders::_1, std::placeholders::_2));
-    CooSM->RegisterStateChange(CooStateChangeType::STATE_IN_TO_FREE,
+    COO_SM->RegisterStateChange(CooStateChangeType::STATE_IN_TO_FREE,
         std::bind(&AcrossDeviceDrag::ProcessInToFree, this, std::placeholders::_1, std::placeholders::_2));
-    CooSM->RegisterStateChange(CooStateChangeType::STATE_OUT_TO_FREE,
+    COO_SM->RegisterStateChange(CooStateChangeType::STATE_OUT_TO_FREE,
         std::bind(&AcrossDeviceDrag::ProcessOutToFree, this, std::placeholders::_1, std::placeholders::_2));
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
