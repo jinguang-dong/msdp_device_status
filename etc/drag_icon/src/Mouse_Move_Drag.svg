@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="40px" height="40px" viewBox="0 0 40 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Cursor/Help</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="HarmonyOS-cursor-symbol" transform="translate(-149.000000, -71.000000)">
+            <g id="Cursor/Help" transform="translate(141.000000, 70.000000)">
+                <g id="角标" stroke-width="1" fill-rule="evenodd" transform="translate(8.000000, 16.000000)" fill="#0A5AF7">
+                    <rect id="矩形" x="0" y="0" width="24" height="24" rx="14"></rect>
+                    <text id="8" font-family="HarmonyHeiTi" font-size="16" font-weight="normal" fill="#FFFFFF">
+                        <tspan x="7" y="18">1</tspan>
+                    </text>
+                </g>
+                <path d="M4.6109127,2.40380592 L4.6109127,20.3739245 L9.87666507,15.1109127 L17.3180195,15.1109127 L4.6109127,2.40380592 Z" id="路径-21备份-2" stroke="#FFFFFF" stroke-width="1" fill="#000000" fill-rule="evenodd" stroke-linejoin="round" transform="translate(10.610913, 11.389087) scale(-1, 1) rotate(-315.000000) translate(-10.610913, -11.389087) "></path>
+            </g>
+        </g>
+    </g>
+</svg>
