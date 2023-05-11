@@ -59,7 +59,7 @@ public:
 
 private:
     static bool CheckArguments(napi_env env, napi_callback_info info);
-    static bool CheckUnsubArguments(napi_env env, napi_callback_info info);
+    static bool IsMatchCallbackType(napi_env &env, napi_value &value);
     static bool CheckGetArguments(napi_env env, napi_callback_info info);
     napi_ref callbackRef_ = { nullptr };
     static napi_ref devicestatusValueRef_;
