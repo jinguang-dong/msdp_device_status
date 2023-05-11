@@ -50,7 +50,7 @@ private:
     bool visible_ { false };
 };
 
-#define DataAdapter ::OHOS::Singleton<DragDataAdapter>::GetInstance()
+#define DATA_ADAPTER ::OHOS::Singleton<DragDataAdapter>::GetInstance()
 
 } // namespace DeviceStatus
 } // namespace Msdp
