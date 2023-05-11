@@ -148,7 +148,6 @@ private:
     std::map<CallbackType, DInputCallback> callbackMap_;
     std::mutex adapterLock_;
 };
-
 #define DISTRIBUTED_ADAPTER ::OHOS::DelayedSingleton<DistributedInputAdapter>::GetInstance()
 
 } // namespace DeviceStatus
