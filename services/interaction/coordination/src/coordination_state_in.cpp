@@ -61,7 +61,7 @@ int32_t CoordinationStateIn::ActivateCoordination(const std::string &remoteNetwo
 int32_t CoordinationStateIn::ProcessStart(const std::string &remoteNetworkId, int32_t startDeviceId)
 {
     CALL_DEBUG_ENTER;
-    auto* context = COORDINATION_EVENT_MGR ->GetIContext();
+    auto* context = COORDINATION_EVENT_MGR->GetIContext();
     CHKPR(context, RET_ERR);
     std::string originNetworkId = COO_DEV_MGR->GetOriginNetworkId(startDeviceId);
     if (remoteNetworkId == originNetworkId) {
