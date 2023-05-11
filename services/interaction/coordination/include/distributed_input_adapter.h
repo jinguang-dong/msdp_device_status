@@ -149,7 +149,7 @@ private:
     std::mutex adapterLock_;
 };
 
-#define DistributedAdapter ::OHOS::DelayedSingleton<DistributedInputAdapter>::GetInstance()
+#define DISTRIBUTED_ADAPTER ::OHOS::DelayedSingleton<DistributedInputAdapter>::GetInstance()
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
