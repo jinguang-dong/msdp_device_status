@@ -75,6 +75,7 @@ ohos_unittest("test_across_by_ut") {
   module_out_path = module_output_path
   include_dirs = [
     "${device_status_utils_path}/include",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/include",
   ]
 
   defines = []
@@ -90,6 +91,8 @@ ohos_unittest("test_across_by_ut") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
+    "dmsfwk:common_sdk",
+    "dmsfwk:continuation_manager",
     "c_utils:utils",
     "ipc:ipc_single",
     "ipc:ipc_core",

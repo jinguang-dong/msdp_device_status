@@ -111,8 +111,7 @@ int32_t AcrossAbilityAdapter::ContinueMission(const AAFwk::MissionInfo &missionI
         return RET_ERR;
     }
     AAFwk::WantParams wantParams = missionInfo.want.GetParams();
-    // sptr<IRemoteObject> callback = new (std::nothrow) AcrossAbilityAdapter::ContinueMissionCallback();
-    sptr<IRemoteObject> callback = nullptr;
+    sptr<IRemoteObject> callback = new (std::nothrow) AcrossAbilityAdapter::ContinueMissionCallback();
     if (int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ContinueMission(
         srcDeviceId_, dstDeviceId_, missionInfo.id, callback, wantParams); ret != ERR_OK) {
         FI_HILOGE("ContinueMission failed, %{public}d", ret);
