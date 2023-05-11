@@ -189,7 +189,7 @@ std::string CoordinationDeviceManager::Device::Sha256(const std::string &in) con
 void CoordinationDeviceManager::Init()
 {
     CALL_INFO_TRACE;
-    auto* context = COORDINATION_EVENT_MGR ->GetIContext();
+    auto* context = COORDINATION_EVENT_MGR->GetIContext();
     CHKPV(context);
     devObserver_ = std::make_shared<DeviceObserver>(*this);
     context->GetDeviceManager().AddDeviceObserver(devObserver_);

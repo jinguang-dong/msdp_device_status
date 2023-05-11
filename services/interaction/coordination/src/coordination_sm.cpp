@@ -132,7 +132,7 @@ void CoordinationSM::OnCoordinationChanged(const std::string &networkId, bool is
     auto *context = COORDINATION_EVENT_MGR ->GetIContext();
     CHKPV(context);
     int32_t ret = context->GetDelegateTasks().PostAsyncTask(
-        std::bind(&CoordinationEventManager::OnCoordinationMessage, COORDINATION_EVENT_MGR , msg, networkId));
+        std::bind(&CoordinationEventManager::OnCoordinationMessage, COORDINATION_EVENT_MGR, msg, networkId));
     if (ret != RET_OK) {
         FI_HILOGE("Posting async task failed");
     }
@@ -266,7 +266,7 @@ void CoordinationSM::StartRemoteCoordination(const std::string &remoteNetworkId,
     auto *context = COORDINATION_EVENT_MGR ->GetIContext();
     CHKPV(context);
     int32_t ret = context->GetDelegateTasks().PostAsyncTask(
-        std::bind(&CoordinationEventManager::OnCoordinationMessage, COORDINATION_EVENT_MGR ,
+        std::bind(&CoordinationEventManager::OnCoordinationMessage, COORDINATION_EVENT_MGR,
                   CoordinationMessage::ACTIVATE, remoteNetworkId));
     if (ret != RET_OK) {
         FI_HILOGE("Posting async task failed");
@@ -305,7 +305,7 @@ void CoordinationSM::StartRemoteCoordinationResult(bool isSuccess,
     auto *context = COORDINATION_EVENT_MGR ->GetIContext();
     CHKPV(context);
     int32_t ret = context->GetDelegateTasks().PostAsyncTask(
-        std::bind(&CoordinationEventManager::OnCoordinationMessage, COORDINATION_EVENT_MGR , msg, ""));
+        std::bind(&CoordinationEventManager::OnCoordinationMessage, COORDINATION_EVENT_MGR, msg, ""));
     if (ret != RET_OK) {
         FI_HILOGE("Posting async task failed");
     }
