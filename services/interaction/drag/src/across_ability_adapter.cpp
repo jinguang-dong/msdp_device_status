@@ -14,6 +14,7 @@
  */
 
 #include "across_ability_adapter.h"
+#include "continue_mission_callback.h"
 
 #include "ability_manager_errors.h"
 #include "want.h"
@@ -111,9 +112,9 @@ int32_t AcrossAbilityAdapter::ContinueMission(const AAFwk::MissionInfo &missionI
         return RET_ERR;
     }
     AAFwk::WantParams wantParams = missionInfo.want.GetParams();
-    sptr<IRemoteObject> callback = new (std::nothrow) AcrossAbilityAdapter::ContinueMissionCallback();
+    sptr<IRemoteObject> callback = new (std::nothrow) ContinueMissionCallback();
     if (int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ContinueMission(
-        srcDeviceId_, dstDeviceId_, missionInfo.id, callback, wantParams); ret != ERR_OK) {
+        remoteDeviceId_, localDeviceId_, missionInfo.id, callback, wantParams); ret != ERR_OK) {
         FI_HILOGE("ContinueMission failed, %{public}d", ret);
         return RET_ERR;
     }
@@ -170,6 +171,13 @@ int32_t AcrossAbilityAdapter::ContinueFirstMission()
         return RET_ERR;
     }
     return RET_OK;
+}
+
+void AcrossAbilityAdapter::InitDeviceId(const std::string &remoteDeviceId, const std::string &localDeviceId)
+{
+    CALL_DEBUG_ENTER;
+    remoteDeviceId_ = remoteDeviceId;
+    localDeviceId_ = localDeviceId;
 }
 
 } // namespace DeviceStatus

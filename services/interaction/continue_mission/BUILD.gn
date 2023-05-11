@@ -17,17 +17,16 @@ config("across_communication_private_config") {
   include_dirs = [ "include" ]
 }
 
-ohos_shared_library("continue_mission") {
+ohos_shared_library("continue_mission_callback") {
   include_dirs = [
     "${device_status_interfaces_path}/innerkits/interaction/include",
     "${device_status_service_path}/context/include",
     "${device_status_utils_path}/include",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/include",
   ]
 
   sources = [
     "src/continue_mission_callback.cpp",
-    "src/continue_mission_callback_proxy.cpp",
-    "src/continue_mission_callback_stub.cpp",
     ]
 
   configs = [ ":across_communication_private_config" ]
@@ -39,6 +38,11 @@ ohos_shared_library("continue_mission") {
   ]
 
   external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_manager",
+    "dmsfwk:common_sdk",
+    "dmsfwk:continuation_manager",
+    "dmsfwk:distributedschedsvr",
     "c_utils:utils",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",

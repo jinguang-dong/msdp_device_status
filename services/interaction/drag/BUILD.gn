@@ -75,6 +75,7 @@ ohos_unittest("test_across_by_ut") {
   module_out_path = module_output_path
   include_dirs = [
     "${device_status_utils_path}/include",
+    "../continue_mission/include",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/include",
   ]
 
@@ -87,12 +88,17 @@ ohos_unittest("test_across_by_ut") {
 
   configs = [ ":drag_private_config" ]
 
-  deps = [ "${device_status_utils_path}:devicestatus_util" ]
+  deps = [
+    "${device_status_utils_path}:devicestatus_util",
+    "../continue_mission:continue_mission_callback",
+  ]
+
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
     "dmsfwk:common_sdk",
     "dmsfwk:continuation_manager",
+    "dmsfwk:distributedschedsvr",
     "c_utils:utils",
     "ipc:ipc_single",
     "ipc:ipc_core",

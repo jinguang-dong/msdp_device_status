@@ -12,26 +12,83 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef CONTINUE_MISSION_CALLBACK_H
 #define CONTINUE_MISSION_CALLBACK_H
 
-#include <functional>
-#include <mutex>
-
-#include "continue_mission_callback_stub.h"
-#include "continue_mission_param.h"
+#include "distributed_sched_stub.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class ContinueMissionCallback : public ContinueMissionCallbackStub {
+class ContinueMissionCallback : public DistributedSchedule::DistributedSchedStub {
 public:
-    explicit ContinueMissionCallback(std::function<void(const ContinueMissionParam&)> callback);
-    int32_t OnContinueMission(const ContinueMissionParam& continueMissionParam) override;
-private:
-    std::function<void(const ContinueMissionParam& continueMissionParam)> callback_;
+
+    int32_t StartRemoteAbility(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t requestCode,
+        uint32_t accessToken) override;
+    int32_t StartAbilityFromRemote(const OHOS::AAFwk::Want& want,
+        const OHOS::AppExecFwk::AbilityInfo& abilityInfo, int32_t requestCode, const DistributedSchedule::CallerInfo& callerInfo,
+        const AccountInfo& accountInfo) override;
+    int32_t SendResultFromRemote(OHOS::AAFwk::Want& want, int32_t requestCode, const DistributedSchedule::CallerInfo& callerInfo,
+        const AccountInfo& accountInfo, int32_t resultCode) override;
+    int32_t ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
+        int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams) override;
+    int32_t StartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId, int32_t callerUid,
+        int32_t status, uint32_t accessToken) override;
+    void NotifyCompleteContinuation(const std::u16string& devId, int32_t sessionId, bool isSuccess) override;
+    int32_t NotifyContinuationResultFromRemote(int32_t sessionId, bool isSuccess) override;
+    int32_t ConnectRemoteAbility(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
+        int32_t callerUid, int32_t callerPid, uint32_t accessToken) override;
+    int32_t DisconnectRemoteAbility(const sptr<IRemoteObject>& connect, int32_t callerUid,
+        uint32_t accessToken) override;
+    int32_t ConnectAbilityFromRemote(const OHOS::AAFwk::Want& want, const AppExecFwk::AbilityInfo& abilityInfo,
+        const sptr<IRemoteObject>& connect, const DistributedSchedule::CallerInfo& callerInfo, const AccountInfo& accountInfo) override;
+    int32_t DisconnectAbilityFromRemote(const sptr<IRemoteObject>& connect,
+        int32_t uid, const std::string& sourceDeviceId) override;
+    int32_t NotifyProcessDiedFromRemote(const DistributedSchedule::CallerInfo& callerInfo) override;
+#ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
+    int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) override;
+    int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
+    int32_t UnRegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
+    int32_t GetMissionInfos(const std::string& deviceId, int32_t numMissions,
+        std::vector<AAFwk::MissionInfo>& missionInfos) override;
+    int32_t GetRemoteMissionSnapshotInfo(const std::string& networkId, int32_t missionId,
+        std::unique_ptr<AAFwk::MissionSnapshot>& missionSnapshot) override;
+    int32_t NotifyMissionsChangedFromRemote(const std::vector<DstbMissionInfo>& missionInfos,
+        const DistributedSchedule::CallerInfo& callerInfo) override;
+    int32_t StartSyncMissionsFromRemote(const DistributedSchedule::CallerInfo& callerInfo,
+        std::vector<DstbMissionInfo>& missionInfos) override;
+    int32_t StopSyncMissionsFromRemote(const DistributedSchedule::CallerInfo& callerInfo) override;
+    int32_t StopSyncRemoteMissions(const std::string& devId) override;
+#endif
+    int32_t StartRemoteAbilityByCall(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
+        int32_t callerUid, int32_t callerPid, uint32_t accessToken) override;
+    int32_t ReleaseRemoteAbility(const sptr<IRemoteObject>& connect,
+        const AppExecFwk::ElementName &element) override;
+    int32_t StartAbilityByCallFromRemote(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
+        const DistributedSchedule::CallerInfo& callerInfo, const AccountInfo& accountInfo) override;
+    int32_t ReleaseAbilityFromRemote(const sptr<IRemoteObject>& connect, const AppExecFwk::ElementName &element,
+        const DistributedSchedule::CallerInfo& callerInfo) override;
+    int32_t NotifyStateChangedFromRemote(int32_t abilityState, int32_t missionId,
+        const AppExecFwk::ElementName& element) override;
+    int32_t GetDistributedComponentList(std::vector<std::string>& distributedComponents) override;
+#ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
+    int32_t StartRemoteShareForm(const std::string& remoteDeviceId,
+        const OHOS::AppExecFwk::FormShareInfo& formShareInfo) override;
+    int32_t StartShareFormFromRemote(
+        const std::string& remoteDeviceId, const OHOS::AppExecFwk::FormShareInfo& formShareInfo) override;
+#endif
+    int32_t StartRemoteFreeInstall(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t requestCode,
+        uint32_t accessToken, const sptr<IRemoteObject>& callback) override;
+    int32_t StartFreeInstallFromRemote(const FreeInstallInfo& info, int64_t taskId) override;
+    int32_t NotifyCompleteFreeInstallFromRemote(int64_t taskId, int32_t resultCode) override;
+    int32_t NotifyCompleteFreeInstall(const FreeInstallInfo& info, int64_t taskId, int32_t resultCode);
+    int32_t StopRemoteExtensionAbility(
+        const OHOS::AAFwk::Want& want, int32_t callerUid, uint32_t accessToken, int32_t extensionType) override;
+    int32_t StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& want,
+        const DistributedSchedule::CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t extensionType) override;
 };
-} // namespace DeviceStatus
-} // namespace Msdp
+} // namespace ContinueMissionCallback
+}
 } // namespace OHOS
 #endif // CONTINUE_MISSION_CALLBACK_H
