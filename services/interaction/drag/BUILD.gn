@@ -77,20 +77,21 @@ ohos_unittest("test_across_by_ut") {
     "${device_status_utils_path}/include",
     "../continue_mission/include",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/include",
+    "//foundation/ability/ability_runtime/frameworks/js/napi/mission_manager"
   ]
 
   defines = []
 
-  sources = [  
+  sources = [
     "src/across_ability_adapter.cpp",
-    "src/test_across_by_ut.cpp", 
+    "src/test_across_by_ut.cpp",
+    "//foundation/ability/ability_runtime/frameworks/js/napi/mission_manager/mission_continue_stub.cpp"
   ]
 
   configs = [ ":drag_private_config" ]
 
   deps = [
     "${device_status_utils_path}:devicestatus_util",
-    "../continue_mission:continue_mission_callback",
   ]
 
   external_deps = [
@@ -98,9 +99,7 @@ ohos_unittest("test_across_by_ut") {
     "ability_runtime:ability_manager",
     "dmsfwk:common_sdk",
     "dmsfwk:continuation_manager",
-    "dmsfwk:distributedschedsvr",
     "c_utils:utils",
-    "ipc:ipc_single",
     "ipc:ipc_core",
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken",

@@ -14,7 +14,6 @@
  */
 
 #include "across_ability_adapter.h"
-#include "continue_mission_callback.h"
 
 #include "ability_manager_errors.h"
 #include "want.h"
@@ -54,6 +53,11 @@ void AcrossAbilityAdapter::MissionListenerCallback::NotifySnapshot(const std::st
 void AcrossAbilityAdapter::MissionListenerCallback::NotifyNetDisconnect(const std::string& deviceId, int32_t state)
 {
     FI_HILOGD("deviceId:%{public}s, state:%{public}d", deviceId.c_str(), state);
+}
+
+void AcrossAbilityAdapter::ContinueMissionCallback::OnContinueDone(int32_t result)
+{
+    FI_HILOGD("result:%{public}d", result);
 }
 
 int32_t AcrossAbilityAdapter::RegisterMissionListener(const std::string &deviceId)
@@ -107,14 +111,15 @@ int32_t AcrossAbilityAdapter::UpdateMissionInfos(const std::string &deviceId)
 int32_t AcrossAbilityAdapter::ContinueMission(const AAFwk::MissionInfo &missionInfo)
 {
     CALL_DEBUG_ENTER;
-    if (!missionInfo.continuable) {
-        FI_HILOGE("ContinueMission failed, this mission is unsupported to continue");
-        return RET_ERR;
-    }
+    // if (!missionInfo.continuable) {
+    //     FI_HILOGE("ContinueMission failed, this mission is unsupported to continue");
+    //     return RET_ERR;
+    // }
     AAFwk::WantParams wantParams = missionInfo.want.GetParams();
     sptr<IRemoteObject> callback = new (std::nothrow) ContinueMissionCallback();
     if (int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ContinueMission(
         remoteDeviceId_, localDeviceId_, missionInfo.id, callback, wantParams); ret != ERR_OK) {
+            // 这里的接口参数顺序是不是对的，先remoteDeviceId,在 localDeviceId?
         FI_HILOGE("ContinueMission failed, %{public}d", ret);
         return RET_ERR;
     }
@@ -159,16 +164,18 @@ void AcrossAbilityAdapter::PrintCurrentMissionInfo()
     }
 }
 
-int32_t AcrossAbilityAdapter::ContinueFirstMission()
+int32_t AcrossAbilityAdapter::ContinueAllMission()
 {
     CALL_DEBUG_ENTER;
     if (missionInfos_.empty()) {
         FI_HILOGE("No remote missionInfo");
         return RET_ERR;
     }
-    if (ContinueMission(missionInfos_[0]) != RET_OK) {
-        FI_HILOGE("ContinueMission failed");
-        return RET_ERR;
+    for (const auto &missionInfo : missionInfos_) {
+        if (ContinueMission(missionInfo) != RET_OK) {
+            FI_HILOGE("ContinueMission failed");
+            return RET_ERR;
+        }
     }
     return RET_OK;
 }

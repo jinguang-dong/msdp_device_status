@@ -97,7 +97,7 @@ HWTEST_F(TestAcrossByUT, test_across_by_ut, TestSize.Level1)
     std::cout << "Input localDeviceId" << std::endl;
     std::getline(std::cin, localDeviceId);
     std::cout << "localDeviceId: " << localDeviceId << std::endl;
-    
+
     AcrossAbilityAdapter::GetInstance()->InitDeviceId(remoteDeviceId, localDeviceId);
     
     std::cout << "----Start RegisterMissionListener----" << std::endl;
@@ -105,26 +105,26 @@ HWTEST_F(TestAcrossByUT, test_across_by_ut, TestSize.Level1)
         std::cout << "RegisterMissionListener failed" << std::endl;
     }
     std::cout << "----RegisterMissionListener success----" << std::endl;
-
     std::string op;
-    std::cout << "type <continueFirstMission> to ContinueFirstMission" << std::endl;
-    std::cout << "type <unReg> to UnRegisterMissionListener" << std::endl;
-    getline(std::cin, op);
+    while (true) {
+        std::cout << "type <continueMission> to ContinueAllMission" << std::endl;
+        std::cout << "type <unReg> to UnRegisterMissionListener" << std::endl;
+        getline(std::cin, op);
 
-    if (op == "continueFirstMission") {
-        if (AcrossAbilityAdapter::GetInstance()->ContinueFirstMission() != RET_OK) {
-            std::cout << "ContinueFirstMission failed" << std::endl;
+        if (op == "continueMission") {
+            if (AcrossAbilityAdapter::GetInstance()->ContinueAllMission() != RET_OK) {
+                std::cout << "ContinueAllMission failed" << std::endl;
+            }
+        } else if (op == "UnReg") {
+            std::cout << "----Start UnRegisterMissionListener----" << std::endl;
+            if (AcrossAbilityAdapter::GetInstance()->UnRegisterMissionListener(remoteDeviceId) != RET_OK) {
+                std::cout << "----UnRegisterMissionListener failed----" << std::endl;
+            } else {
+                std::cout << "----UnRegisterMissionListener success----" << std::endl;
+            }
+        } else {
+            std::cout << "Unsupported op" << std::endl;
         }
-    }
-
-    if (op == "UnReg") {
-        std::cout << "----Start UnRegisterMissionListener----" << std::endl;
-        if (AcrossAbilityAdapter::GetInstance()->UnRegisterMissionListener(remoteDeviceId) != RET_OK) {
-            std::cout << "UnRegisterMissionListener failed" << std::endl;
-        }
-        std::cout << "----UnRegisterMissionListener success----" << std::endl;
-    } else {
-        std::cout << "Unsupported op" << std::endl;
     }
 }
 

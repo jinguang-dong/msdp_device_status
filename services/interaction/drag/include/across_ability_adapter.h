@@ -26,6 +26,7 @@
 #include "iremote_stub.h"
 #include "nocopyable.h"
 #include "remote_mission_listener_stub.h"
+#include "mission_continue_stub.h"
 #include "singleton.h"
 
 namespace OHOS {
@@ -46,6 +47,11 @@ public:
         void NotifyNetDisconnect(const std::string& deviceId, int32_t state)override;
     };
 
+    class ContinueMissionCallback final : public AAFwk::MissionContinueStub {
+    public:
+        void OnContinueDone(int32_t result)override;
+    };
+
     int32_t RegisterMissionListener(const std::string &deviceId);
     int32_t UnRegisterMissionListener(const std::string &deviceId);
     int32_t UpdateMissionInfos(const std::string &deviceId);
@@ -53,7 +59,7 @@ public:
     AAFwk::MissionInfo GetMissionInfoToContinue(const std::string &bundleName, const std::string &abilityName);
     void LaunchAbility(const std::string &deviceId, const std::string &bundleName, const std::string &abilityName);
     void PrintCurrentMissionInfo();
-    int32_t ContinueFirstMission();
+    int32_t ContinueAllMission();
     void InitDeviceId(const std::string &remoteDeviceId, const std::string &localDeviceId);
 
 private:
