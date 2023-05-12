@@ -522,6 +522,7 @@ void DragDrawing::RemoveModifier()
 void DrawSVGModifier::Draw(OHOS::Rosen::RSDrawingContext& context) const
 {
     CALL_DEBUG_ENTER;
+    std::unique_ptr<std::fstream> fs = std::make_unique<std::fstream>();
     std::string filePath;
     if (GetFilePath(filePath) != RET_OK) {
         FI_HILOGD("Get file path failed");
