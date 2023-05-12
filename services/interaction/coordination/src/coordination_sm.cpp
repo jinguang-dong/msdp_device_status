@@ -118,7 +118,7 @@ void CoordinationSM::Reset(bool adjustAbsolutionLocation)
     if (hasPointer && adjustAbsolutionLocation) {
         SetAbsolutionLocation(MOUSE_ABS_LOCATION_X, MOUSE_ABS_LOCATION_Y);
     } else {
-        OHOS::MMI::InputManager::GetInstance()->SetPointerVisible(hasPointer);
+        OHOS::MMI::InputManager::GetInstance()->SetPointerVisible(false);
     }
     isStarting_ = false;
     isStopping_ = false;
@@ -315,12 +315,12 @@ void CoordinationSM::StartRemoteCoordinationResult(bool isSuccess,
         return;
     }
     if (coordinationState_ == CoordinationState::STATE_FREE) {
-        SetAbsolutionLocation(MOUSE_ABS_LOCATION - xPercent, yPercent);
+        MouseLocationNotify(xPercent, yPercent);
         UpdateState(CoordinationState::STATE_IN);
         StateChangedNotify(CoordinationState::STATE_FREE, CoordinationState::STATE_IN);
     }
     if (coordinationState_ == CoordinationState::STATE_OUT) {
-        SetAbsolutionLocation(MOUSE_ABS_LOCATION - xPercent, yPercent);
+        MouseLocationNotify(xPercent, yPercent);
         UpdateState(CoordinationState::STATE_FREE);
         StateChangedNotify(CoordinationState::STATE_OUT, CoordinationState::STATE_FREE);
     }
@@ -469,6 +469,7 @@ void CoordinationSM::UpdateState(CoordinationState state)
             break;
         }
         case CoordinationState::STATE_IN: {
+            OHOS::MMI::InputManager::GetInstance()->SetPointerVisible(false);
             currentStateSM_ = std::make_shared<CoordinationStateIn>(startDeviceDhid_);
             auto interceptor = std::make_shared<InterceptorConsumer>();
             MMI::InputManager::GetInstance()->EnableInputDevice(true);
@@ -854,6 +855,13 @@ void CoordinationSM::RegisterStateChange(CooStateChangeType type,
     stateChangedCallbacks_[type] = callback;
 }
 
+void CoordinationSM::RegisterMouseLocation(std::function<void(int32_t, int32_t)> callback)
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(callback);
+    mouseLocationCallback_ = callback;
+}
+
 void CoordinationSM::StateChangedNotify(CoordinationState oldState, CoordinationState newState)
 {
     CALL_DEBUG_ENTER;
@@ -886,6 +894,13 @@ std::string CoordinationSM::GetRemoteId() const
 {
     std::lock_guard<std::mutex> guard(mutex_);
     return remoteNetworkId_;
+}
+
+void CoordinationSM::MouseLocationNotify(int32_t x, int32_t y)
+{
+    if (mouseLocationCallback_ != nullptr) {
+        mouseLocationCallback_(x, y);
+    }
 }
 } // namespace DeviceStatus
 } // namespace Msdp
