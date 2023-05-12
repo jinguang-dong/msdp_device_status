@@ -33,6 +33,7 @@
 #include "string_ex.h"
 #include "transaction/rs_interfaces.h"
 #include "transaction/rs_transaction.h"
+#include "ui/rs_canvas_node.h"
 #include "ui/rs_root_node.h"
 #include "ui/rs_surface_extractor.h"
 #include "ui/rs_surface_node.h"
@@ -47,13 +48,10 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "DragDrawing" };
+constexpr int32_t BASELINE_DENSITY = 160;
+constexpr int32_t DEVICE_INDEPENDENT_PIXEL = 40;
 constexpr int32_t DRAG_NUM_ONE = 1;
 constexpr int32_t STRING_PX_LENGTH = 2;
-constexpr int32_t PAD_SCREEN_WIDTH = 2560;
-constexpr int32_t PHONE_SCREEN_WIDTH = 2160;
-constexpr int32_t SMALL_ICON = 40;
-constexpr int32_t MIDDLE_ICON = 60;
-constexpr int32_t LARGE_ICON = 80;
 constexpr int32_t EIGHT_SIZE = 8;
 constexpr int32_t IMAGE_WIDTH = 400;
 constexpr int32_t IMAGE_HEIGHT = 500;
@@ -66,9 +64,7 @@ constexpr int32_t SUCCESS_ANIMATION_DURATION = 300;
 constexpr int32_t VIEW_BOX_POS = 2;
 constexpr int32_t PIXEL_MAP_INDEX = 0;
 constexpr int32_t DRAG_STYLE_INDEX = 1;
-constexpr int32_t MOUSE_ICON_INDEX = 2;
-constexpr size_t TOUCH_NODE_MIN_COUNT = 2;
-constexpr size_t MOUSE_NODE_MIN_COUNT = 3;
+constexpr size_t NODE_COUNT = 2;
 constexpr double ONETHOUSAND = 1000.0;
 constexpr float BEGIN_ALPHA = 1.0f;
 constexpr float END_ALPHA = 0.0f;
@@ -77,19 +73,26 @@ constexpr float END_SCALE_SUCCESS = 1.2f;
 constexpr float END_SCALE_FAIL = 0.1f;
 constexpr float PIVOT_X = 0.5f;
 constexpr float PIVOT_Y = 0.5f;
+constexpr float SVG_ORIGINAL_SIZE = 40.0f;
 const std::string DEVICE_TYPE_DEFAULT = "default";
 const std::string DEVICE_TYPE_PHONE = "phone";
 const std::string THREAD_NAME = "AnimationEventRunner";
-const std::string COPY_DRAG_PATH = "/system/etc/device_status/drag_icon/Copy_Drag.svg";
-const std::string COPY_ONE_DRAG_PATH = "/system/etc/device_status/drag_icon/Copy_One_Drag.svg";
-const std::string MOVE_DRAG_PATH = "/system/etc/device_status/drag_icon/Move_Drag.svg";
-const std::string FORBID_DRAG_PATH = "/system/etc/device_status/drag_icon/Forbid_Drag.svg";
-const std::string MOUSE_DRAG_PATH = "/system/etc/device_status/drag_icon/Mouse_Drag.png";
+const std::string MOUSE_COPY_DRAG_PATH = "/system/etc/device_status/drag_icon/Mouse_Copy_Drag.svg";
+const std::string MOUSE_COPY_ONE_DRAG_PATH = "/system/etc/device_status/drag_icon/Mouse_Copy_One_Drag.svg";
+const std::string MOUSE_DRAG_PATH = "/system/etc/device_status/drag_icon/Mouse_Drag.svg";
+const std::string MOUSE_FORBID_DRAG_PATH = "/system/etc/device_status/drag_icon/Mouse_Forbid_Drag.svg";
+const std::string MOUSE_MOVE_DRAG_PATH = "/system/etc/device_status/drag_icon/Mouse_Move_Drag.svg";
+const std::string TOUCH_COPY_DRAG_PATH = "/system/etc/device_status/drag_icon/Touch_Copy_Drag.svg";
+const std::string TOUCH_COPY_ONE_DRAG_PATH = "/system/etc/device_status/drag_icon/Touch_Copy_One_Drag.svg";
+const std::string TOUCH_DEFAULT_DRAG_PATH = "/system/etc/device_status/drag_icon/Touch_Default_Drag.svg";
+const std::string TOUCH_FORBID_DRAG_PATH = "/system/etc/device_status/drag_icon/Touch_Forbid_Drag.svg";
+const std::string TOUCH_MOVE_DRAG_PATH = "/system/etc/device_status/drag_icon/Touch_Move_Drag.svg";
 struct DrawingInfo {
     std::atomic_bool isRunning { false };
+    bool isInitUiDirector { true };
     int32_t sourceType { -1 };
     int32_t currentDragNum { -1 };
-    DragCursorStyle currentStyle { DragCursorStyle::COPY };
+    DragCursorStyle currentStyle { DragCursorStyle::DEFAULT };
     int32_t displayId { -1 };
     int32_t pixelMapX { -1 };
     int32_t pixelMapY { -1 };
@@ -107,17 +110,19 @@ struct DrawingInfo {
 bool CheckNodesValid()
 {
     CALL_DEBUG_ENTER;
-    if ((g_drawingInfo.sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
-        (g_drawingInfo.nodes.size() < MOUSE_NODE_MIN_COUNT)) {
+    if (g_drawingInfo.nodes.size() < NODE_COUNT) {
         FI_HILOGE("Nodes size invalid when mouse type, node size:%{public}zu", g_drawingInfo.nodes.size());
         return false;
     }
-    if ((g_drawingInfo.sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) &&
-        (g_drawingInfo.nodes.size() < TOUCH_NODE_MIN_COUNT)) {
-        FI_HILOGE("Nodes size invalid when touchscreen type, node size:%{public}zu", g_drawingInfo.nodes.size());
-        return false;
-    }
     return true;
+}
+
+float GetScaling()
+{
+    CALL_DEBUG_ENTER;
+    auto displayInfo = OHOS::Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
+    CHKPR(displayInfo, RET_ERR);
+    return (displayInfo->GetDpi() * DEVICE_INDEPENDENT_PIXEL / BASELINE_DENSITY) / SVG_ORIGINAL_SIZE;
 }
 } // namespace
 
@@ -145,30 +150,19 @@ int32_t DragDrawing::Init(const DragData &dragData)
         FI_HILOGE("Init layer failed");
         return INIT_FAIL;
     }
-    if (DrawShadow() != RET_OK) {
-        FI_HILOGE("Draw shadow failed");
-        return INIT_FAIL;
-    }
-    if (DrawStyle() != RET_OK) {
-        FI_HILOGE("Draw style failed");
-        return INIT_FAIL;
-    }
     if (!CheckNodesValid()) {
         FI_HILOGE("CheckNodesValid failed");
         return INIT_FAIL;
     }
-    auto dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
-    CHKPR(dragStyleNode, INIT_FAIL);
-    dragStyleNode->SetVisible(false);
+    if (DrawShadow() != RET_OK) {
+        FI_HILOGE("Draw shadow failed");
+        return;
+    }
+    if (DrawStyle() != RET_OK) {
+        FI_HILOGE("Draw style failed");
+        return;
+    }
     CHKPR(rsUiDirector_, INIT_FAIL);
-    if (g_drawingInfo.sourceType != OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
-        rsUiDirector_->SendMessages();
-        return INIT_SUCCESS;
-    }
-    if (DrawMouseIcon() != RET_OK) {
-        FI_HILOGE("Draw mouse icon failed");
-        return INIT_FAIL;
-    }
     rsUiDirector_->SendMessages();
     return INIT_SUCCESS;
 }
@@ -189,7 +183,8 @@ void DragDrawing::Draw(int32_t displayId, int32_t displayX, int32_t displayY)
     if (displayY < 0) {
         g_drawingInfo.displayY = 0;
     }
-    int32_t positionY = g_drawingInfo.displayY + g_drawingInfo.pixelMapY - EIGHT_SIZE;
+    int32_t adjustSize = EIGHT_SIZE * GetScaling();
+    int32_t positionY = g_drawingInfo.displayY + g_drawingInfo.pixelMapY - adjustSize;
     if (g_drawingInfo.dragWindow != nullptr) {
         g_drawingInfo.dragWindow->MoveTo(g_drawingInfo.displayX + g_drawingInfo.pixelMapX, positionY);
         return;
@@ -205,23 +200,13 @@ int32_t DragDrawing::UpdateDragStyle(DragCursorStyle style)
         FI_HILOGE("Invalid style:%{public}d", style);
         return RET_ERR;
     }
-    CHKPR(rsUiDirector_, RET_ERR);
     if (g_drawingInfo.currentStyle == style) {
-        if (!CheckNodesValid()) {
-            FI_HILOGE("CheckNodesValid failed");
-            return RET_ERR;
-        }
-        if (style == DragCursorStyle::COPY) {
-            auto dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
-            CHKPR(dragStyleNode, RET_ERR);
-            dragStyleNode->SetVisible(true);
-            rsUiDirector_->SendMessages();
-        }
         FI_HILOGD("Not need update drag style");
         return RET_OK;
     }
     g_drawingInfo.currentStyle = style;
     DrawStyle();
+    CHKPR(rsUiDirector_, RET_ERR);
     rsUiDirector_->SendMessages();
     return RET_OK;
 }
@@ -238,34 +223,29 @@ void DragDrawing::OnDragFail()
     RunAnimation(END_ALPHA, END_SCALE_FAIL);
 }
 
-void DragDrawing::EraseMouseIcon()
-{
-    CALL_DEBUG_ENTER;
-    if (g_drawingInfo.nodes.size() < MOUSE_NODE_MIN_COUNT) {
-        FI_HILOGE("Nodes size invalid, node size:%{public}zu", g_drawingInfo.nodes.size());
-        return;
-    }
-    auto mouseIconNode = g_drawingInfo.nodes[MOUSE_ICON_INDEX];
-    CHKPV(mouseIconNode);
-    CHKPV(g_drawingInfo.rootNode);
-    g_drawingInfo.rootNode->RemoveChild(mouseIconNode);
-    CHKPV(rsUiDirector_);
-    rsUiDirector_->SendMessages();
-}
-
 void DragDrawing::DestroyDragWindow()
 {
     CALL_DEBUG_ENTER;
     startNum_ = START_TIME;
-    rsUiDirector_ = nullptr;
-    g_drawingInfo.currentStyle = DragCursorStyle::COPY;
+    g_drawingInfo.sourceType = -1;
+    g_drawingInfo.currentDragNum = -1;
+    g_drawingInfo.displayId = -1;
+    g_drawingInfo.pixelMapX = -1;
+    g_drawingInfo.pixelMapY = -1;
+    g_drawingInfo.displayX = -1;
+    g_drawingInfo.displayY = -1;
+    g_drawingInfo.rootNodeWidth = -1;
+    g_drawingInfo.rootNodeHeight = -1;
     g_drawingInfo.pixelMap = nullptr;
+    g_drawingInfo.currentStyle = DragCursorStyle::DEFAULT;
+    RemoveModifier();
     if (!g_drawingInfo.nodes.empty()) {
         g_drawingInfo.nodes.clear();
         g_drawingInfo.nodes.shrink_to_fit();
     }
     if (g_drawingInfo.rootNode != nullptr) {
         g_drawingInfo.rootNode->ClearChildren();
+        g_drawingInfo.rootNode.reset();
         g_drawingInfo.rootNode = nullptr;
     }
     g_drawingInfo.surfaceNode = nullptr;
@@ -273,6 +253,8 @@ void DragDrawing::DestroyDragWindow()
         g_drawingInfo.dragWindow->Destroy();
         g_drawingInfo.dragWindow = nullptr;
     }
+    rsUiDirector_->SetRoot(-1);
+    rsUiDirector_->SendMessages();
 }
 
 void DragDrawing::UpdateDrawingState()
@@ -322,24 +304,6 @@ int32_t DragDrawing::DrawShadow()
     }
     drawPixelMapModifier_ = std::make_shared<DrawPixelMapModifier>();
     pixelMapNode->AddModifier(drawPixelMapModifier_);
-    return RET_OK;
-}
-
-int32_t DragDrawing::DrawMouseIcon()
-{
-    CALL_DEBUG_ENTER;
-    if (g_drawingInfo.nodes.size() < MOUSE_NODE_MIN_COUNT) {
-        FI_HILOGE("Nodes size invalid, node size:%{public}zu", g_drawingInfo.nodes.size());
-        return RET_ERR;
-    }
-    auto mouseIconNode = g_drawingInfo.nodes[MOUSE_ICON_INDEX];
-    CHKPR(mouseIconNode, RET_ERR);
-    if (drawMouseIconModifier_ != nullptr) {
-        mouseIconNode->RemoveModifier(drawMouseIconModifier_);
-        drawMouseIconModifier_ = nullptr;
-    }
-    drawMouseIconModifier_ = std::make_shared<DrawMouseIconModifier>();
-    mouseIconNode->AddModifier(drawMouseIconModifier_);
     return RET_OK;
 }
 
@@ -422,6 +386,11 @@ void DragDrawing::OnVsync()
         handler_ = nullptr;
         g_drawingInfo.isRunning = false;
         receiver_ = nullptr;
+        CHKPV(g_drawingInfo.rootNode);
+        if (drawDynamicEffectModifier_ != nullptr) {
+            g_drawingInfo.rootNode->RemoveModifier(drawDynamicEffectModifier_);
+            drawDynamicEffectModifier_ = nullptr;
+        }
         DestroyDragWindow();
         return;
     }
@@ -462,9 +431,12 @@ int32_t DragDrawing::InitLayer()
         FI_HILOGE("Init layer failed, surface is nullptr");
         return RET_ERR;
     }
-    rsUiDirector_ = OHOS::Rosen::RSUIDirector::Create();
-    CHKPR(rsUiDirector_, RET_ERR);
-    rsUiDirector_->Init();
+    if (g_drawingInfo.isInitUiDirector) {
+        g_drawingInfo.isInitUiDirector = false;
+        rsUiDirector_ = OHOS::Rosen::RSUIDirector::Create();
+        CHKPR(rsUiDirector_, RET_ERR);
+        rsUiDirector_->Init();
+    }
     rsUiDirector_->SetRSSurfaceNode(g_drawingInfo.surfaceNode);
     InitCanvas(IMAGE_WIDTH, IMAGE_HEIGHT);
     OHOS::Rosen::RSTransaction::FlushImplicitTransaction();
@@ -478,37 +450,33 @@ void DragDrawing::InitCanvas(int32_t width, int32_t height)
         g_drawingInfo.rootNode = OHOS::Rosen::RSRootNode::Create();
         CHKPV(g_drawingInfo.rootNode);
     }
-    g_drawingInfo.rootNode->SetBounds(g_drawingInfo.displayX, g_drawingInfo.displayY + EIGHT_SIZE, width, height);
-    g_drawingInfo.rootNode->SetFrame(g_drawingInfo.displayX, g_drawingInfo.displayY + EIGHT_SIZE, width, height);
+    int32_t adjustSize = EIGHT_SIZE * GetScaling();
+    g_drawingInfo.rootNode->SetBounds(g_drawingInfo.displayX, g_drawingInfo.displayY - adjustSize, width, height);
+    g_drawingInfo.rootNode->SetFrame(g_drawingInfo.displayX, g_drawingInfo.displayY - adjustSize, width, height);
     g_drawingInfo.rootNode->SetBackgroundColor(SK_ColorTRANSPARENT);
 
     auto pixelMapNode = OHOS::Rosen::RSCanvasNode::Create();
     CHKPV(pixelMapNode);
     CHKPV(g_drawingInfo.pixelMap);
-    pixelMapNode->SetBounds(0, 0, g_drawingInfo.pixelMap->GetWidth(), g_drawingInfo.pixelMap->GetHeight());
-    pixelMapNode->SetFrame(0, 0, g_drawingInfo.pixelMap->GetWidth(), g_drawingInfo.pixelMap->GetHeight());
+    pixelMapNode->SetBounds(0, adjustSize, g_drawingInfo.pixelMap->GetWidth(), g_drawingInfo.pixelMap->GetHeight());
+    pixelMapNode->SetFrame(0, adjustSize, g_drawingInfo.pixelMap->GetWidth(), g_drawingInfo.pixelMap->GetHeight());
     g_drawingInfo.nodes.emplace_back(pixelMapNode);
-
     auto dragStyleNode = OHOS::Rosen::RSCanvasNode::Create();
     CHKPV(dragStyleNode);
-    dragStyleNode->SetBounds(0, 0, SVG_HEIGHT, SVG_HEIGHT);
-    dragStyleNode->SetFrame(0, 0, SVG_HEIGHT, SVG_HEIGHT);
-    g_drawingInfo.nodes.emplace_back(dragStyleNode);
-
-    if (g_drawingInfo.sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
-        auto mouseIconNode = OHOS::Rosen::RSCanvasNode::Create();
-        CHKPV(mouseIconNode);
-        mouseIconNode->SetBounds(ChangeNumber(g_drawingInfo.pixelMapX), ChangeNumber(g_drawingInfo.pixelMapY),
-            SVG_HEIGHT, SVG_HEIGHT);
-        mouseIconNode->SetFrame(ChangeNumber(g_drawingInfo.pixelMapX), ChangeNumber(g_drawingInfo.pixelMapY),
-            SVG_HEIGHT, SVG_HEIGHT);
-        g_drawingInfo.nodes.emplace_back(mouseIconNode);
+    if (g_drawingInfo.sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        dragStyleNode->SetBounds(0, 0, SVG_HEIGHT, SVG_HEIGHT);
+        dragStyleNode->SetFrame(0, 0, SVG_HEIGHT, SVG_HEIGHT);
+        g_drawingInfo.nodes.emplace_back(dragStyleNode);
         g_drawingInfo.rootNode->AddChild(pixelMapNode);
         g_drawingInfo.rootNode->AddChild(dragStyleNode);
-        g_drawingInfo.rootNode->AddChild(mouseIconNode);
         rsUiDirector_->SetRoot(g_drawingInfo.rootNode->GetId());
         return;
     }
+    dragStyleNode->SetBounds(ChangeNumber(g_drawingInfo.pixelMapX), ChangeNumber(g_drawingInfo.pixelMapY),
+        SVG_HEIGHT, SVG_HEIGHT);
+    dragStyleNode->SetFrame(ChangeNumber(g_drawingInfo.pixelMapX), ChangeNumber(g_drawingInfo.pixelMapY),
+        SVG_HEIGHT, SVG_HEIGHT);
+    g_drawingInfo.nodes.emplace_back(dragStyleNode);
     g_drawingInfo.rootNode->AddChild(pixelMapNode);
     g_drawingInfo.rootNode->AddChild(dragStyleNode);
     rsUiDirector_->SetRoot(g_drawingInfo.rootNode->GetId());
@@ -534,6 +502,23 @@ void DragDrawing::CreateWindow(int32_t displayX, int32_t displayY)
     g_drawingInfo.dragWindow = OHOS::Rosen::Window::Create(windowName, option, nullptr);
 }
 
+void DragDrawing::RemoveModifier()
+{
+    CALL_DEBUG_ENTER;
+    auto pixelMapNode = g_drawingInfo.nodes[PIXEL_MAP_INDEX];
+    CHKPV(pixelMapNode);
+    if (drawPixelMapModifier_ != nullptr) {
+        pixelMapNode->RemoveModifier(drawPixelMapModifier_);
+        drawPixelMapModifier_ = nullptr;
+    }
+    auto dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
+    CHKPV(dragStyleNode);
+    if (drawSVGModifier_ != nullptr) {
+        dragStyleNode->RemoveModifier(drawSVGModifier_);
+        drawSVGModifier_ = nullptr;
+    }
+}
+
 void DrawSVGModifier::Draw(OHOS::Rosen::RSDrawingContext& context) const
 {
     CALL_DEBUG_ENTER;
@@ -546,38 +531,27 @@ void DrawSVGModifier::Draw(OHOS::Rosen::RSDrawingContext& context) const
         FI_HILOGE("Svg file is invalid");
         return;
     }
-    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = DecodeSvgToPixelMap(filePath);
+    auto pixelMap = DecodeSvgToPixelMap(filePath);
     CHKPV(pixelMap);
-    CHKPV(g_drawingInfo.pixelMap);
-    int32_t svgTouchPositionX = g_drawingInfo.pixelMap->GetWidth() + EIGHT_SIZE - pixelMap->GetWidth();
-    if (svgTouchPositionX < 0) {
-        FI_HILOGD("svgTouchPositionX:%{public}d", svgTouchPositionX);
-        svgTouchPositionX = 0;
-    }
     if (!CheckNodesValid()) {
         FI_HILOGE("CheckNodesValid failed");
         return;
     }
     auto dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
     CHKPV(dragStyleNode);
-    dragStyleNode->SetBounds(svgTouchPositionX, 0, pixelMap->GetWidth(), pixelMap->GetHeight());
-    dragStyleNode->SetFrame(svgTouchPositionX, 0, pixelMap->GetWidth(), pixelMap->GetHeight());
     dragStyleNode->SetBgImageWidth(pixelMap->GetWidth());
-    dragStyleNode->SetBgImageHeight(SVG_HEIGHT);
+    dragStyleNode->SetBgImageHeight(pixelMap->GetHeight());
     dragStyleNode->SetBgImagePositionX(0);
     dragStyleNode->SetBgImagePositionY(0);
     auto rosenImage = std::make_shared<OHOS::Rosen::RSImage>();
     rosenImage->SetPixelMap(pixelMap);
     rosenImage->SetImageRepeat(0);
     dragStyleNode->SetBgImage(rosenImage);
-    g_drawingInfo.rootNodeWidth = g_drawingInfo.pixelMap->GetWidth() + EIGHT_SIZE;
-    g_drawingInfo.rootNodeHeight = pixelMap->GetHeight() + g_drawingInfo.pixelMap->GetHeight() + EIGHT_SIZE;
-    CHKPV(g_drawingInfo.rootNode);
-    g_drawingInfo.rootNode->SetBounds(0, EIGHT_SIZE, g_drawingInfo.rootNodeWidth, g_drawingInfo.rootNodeHeight);
-    g_drawingInfo.rootNode->SetFrame(0, EIGHT_SIZE, g_drawingInfo.rootNodeWidth, g_drawingInfo.rootNodeHeight);
-    CHKPV(g_drawingInfo.dragWindow);
-    g_drawingInfo.dragWindow->Resize(g_drawingInfo.rootNodeWidth, g_drawingInfo.rootNodeHeight);
-    OHOS::Rosen::RSTransaction::FlushImplicitTransaction();
+    if (g_drawingInfo.sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        DrawTouchscreenSVG(pixelMap);
+        return;
+    }
+    DrawMouseSVG(pixelMap);
 }
 
 int32_t DrawSVGModifier::UpdateSvgNodeInfo(xmlNodePtr curNode, int32_t extendSvgWidth) const
@@ -729,21 +703,27 @@ std::shared_ptr<OHOS::Media::PixelMap> DrawSVGModifier::DecodeSvgToPixelMap(
     uint32_t errCode = 0;
     auto imageSource = OHOS::Media::ImageSource::CreateImageSource(reinterpret_cast<const uint8_t*>(content.c_str()),
         content.size(), opts, errCode);
-    CHKPP(imageSource);
     OHOS::Media::DecodeOptions decodeOpts;
+    SetDecodeOptions(decodeOpts);
+    CHKPP(imageSource);
     std::shared_ptr<OHOS::Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOpts, errCode);
     return pixelMap;
 }
+
 bool DrawSVGModifier::NeedAdjustSvgInfo() const
 {
     CALL_DEBUG_ENTER;
     if (g_drawingInfo.currentStyle == DragCursorStyle::DEFAULT) {
         return false;
     }
-    if (g_drawingInfo.currentStyle == DragCursorStyle::FORBIDDEN) {
+    if ((g_drawingInfo.currentStyle == DragCursorStyle::COPY) &&
+        (g_drawingInfo.currentDragNum == DRAG_NUM_ONE)) {
         return false;
     }
-    if ((g_drawingInfo.currentStyle == DragCursorStyle::COPY) &&
+    std::string deviceType = OHOS::system::GetDeviceType();
+    if ((g_drawingInfo.currentStyle == DragCursorStyle::MOVE) &&
+        ((deviceType.compare(0, DEVICE_TYPE_DEFAULT.size(), DEVICE_TYPE_DEFAULT) == 0) ||
+        (deviceType.compare(0, DEVICE_TYPE_PHONE.size(), DEVICE_TYPE_PHONE) == 0)) &&
         (g_drawingInfo.currentDragNum == DRAG_NUM_ONE)) {
         return false;
     }
@@ -753,18 +733,56 @@ bool DrawSVGModifier::NeedAdjustSvgInfo() const
 int32_t DrawSVGModifier::GetFilePath(std::string &filePath) const
 {
     CALL_DEBUG_ENTER;
-    if (!CheckNodesValid()) {
-        FI_HILOGE("CheckNodesValid failed");
-        return RET_ERR;
+    if (g_drawingInfo.sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        return GetMouseFilePath(filePath);
     }
-    auto dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
-    CHKPR(dragStyleNode, RET_ERR);
+    return GetTouchscreenFilePath(filePath);
+}
+
+int32_t DrawSVGModifier::GetMouseFilePath(std::string &filePath) const
+{
+    CALL_DEBUG_ENTER;
     switch (g_drawingInfo.currentStyle) {
         case DragCursorStyle::COPY: {
             if (g_drawingInfo.currentDragNum == DRAG_NUM_ONE) {
-                filePath = COPY_ONE_DRAG_PATH;
+                filePath = MOUSE_COPY_ONE_DRAG_PATH;
             } else {
-                filePath = COPY_DRAG_PATH;
+                filePath = MOUSE_COPY_DRAG_PATH;
+            }
+            break;
+        }
+        case DragCursorStyle::MOVE: {
+            std::string deviceType = OHOS::system::GetDeviceType();
+            if (((deviceType.compare(0, DEVICE_TYPE_DEFAULT.size(), DEVICE_TYPE_DEFAULT) == 0) ||
+                (deviceType.compare(0, DEVICE_TYPE_PHONE.size(), DEVICE_TYPE_PHONE) == 0)) &&
+                (g_drawingInfo.currentDragNum == DRAG_NUM_ONE)) {
+                filePath = MOUSE_DRAG_PATH;
+            } else {
+                filePath = MOUSE_MOVE_DRAG_PATH;
+            }
+            break;
+        }
+        case DragCursorStyle::FORBIDDEN: {
+            filePath = MOUSE_FORBID_DRAG_PATH;
+            break;
+        }
+        case DragCursorStyle::DEFAULT:
+        default: {
+            filePath = MOUSE_DRAG_PATH;
+        }
+    }
+    return RET_OK;
+}
+
+int32_t DrawSVGModifier::GetTouchscreenFilePath(std::string &filePath) const
+{
+    CALL_DEBUG_ENTER;
+    switch (g_drawingInfo.currentStyle) {
+        case DragCursorStyle::COPY: {
+            if (g_drawingInfo.currentDragNum == DRAG_NUM_ONE) {
+                filePath = TOUCH_COPY_ONE_DRAG_PATH;
+            } else {
+                filePath = TOUCH_COPY_DRAG_PATH;
             }
             break;
         }
@@ -774,26 +792,110 @@ int32_t DrawSVGModifier::GetFilePath(std::string &filePath) const
                 (deviceType.compare(0, DEVICE_TYPE_PHONE.size(), DEVICE_TYPE_PHONE) == 0)) &&
                 (g_drawingInfo.currentDragNum == DRAG_NUM_ONE)) {
                 FI_HILOGD("Device type is phone, not need draw svg style, deviceType:%{public}s", deviceType.c_str());
-                dragStyleNode->SetVisible(false);
-                return RET_ERR;
+                filePath = TOUCH_DEFAULT_DRAG_PATH;
             } else {
-                filePath = MOVE_DRAG_PATH;
+                filePath = TOUCH_MOVE_DRAG_PATH;
             }
             break;
         }
         case DragCursorStyle::FORBIDDEN: {
-            filePath = FORBID_DRAG_PATH;
+            filePath = TOUCH_FORBID_DRAG_PATH;
             break;
         }
         case DragCursorStyle::DEFAULT:
         default: {
             FI_HILOGW("Not need draw svg style, DragCursorStyle:%{public}d", g_drawingInfo.currentStyle);
-            dragStyleNode->SetVisible(false);
-            return RET_ERR;
+            filePath = TOUCH_DEFAULT_DRAG_PATH;
         }
     }
-    dragStyleNode->SetVisible(true);
     return RET_OK;
+}
+
+void DrawSVGModifier::DrawMouseSVG(std::shared_ptr<OHOS::Media::PixelMap> pixelMap) const
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(g_drawingInfo.pixelMap);
+    auto dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
+    CHKPV(dragStyleNode);
+    int32_t adjustSize = EIGHT_SIZE * GetScaling();
+    dragStyleNode->SetBounds(ChangeNumber(g_drawingInfo.pixelMapX), ChangeNumber(g_drawingInfo.pixelMapY) + adjustSize,
+        pixelMap->GetWidth(), pixelMap->GetHeight());
+    dragStyleNode->SetFrame(ChangeNumber(g_drawingInfo.pixelMapX), ChangeNumber(g_drawingInfo.pixelMapY) + adjustSize,
+        pixelMap->GetWidth(), pixelMap->GetHeight());
+    g_drawingInfo.rootNodeWidth = pixelMap->GetWidth() + ChangeNumber(g_drawingInfo.pixelMapX);
+    g_drawingInfo.rootNodeHeight = pixelMap->GetHeight() + ChangeNumber(g_drawingInfo.pixelMapY) + adjustSize;
+    g_drawingInfo.rootNodeWidth = g_drawingInfo.rootNodeWidth > g_drawingInfo.pixelMap->GetWidth()
+        ? g_drawingInfo.rootNodeWidth : g_drawingInfo.pixelMap->GetWidth();
+    g_drawingInfo.rootNodeHeight = g_drawingInfo.rootNodeHeight > g_drawingInfo.pixelMap->GetHeight()
+        ? g_drawingInfo.rootNodeHeight : g_drawingInfo.pixelMap->GetHeight();
+    CHKPV(g_drawingInfo.rootNode);
+    g_drawingInfo.rootNode->SetBounds(0, 0, g_drawingInfo.rootNodeWidth, g_drawingInfo.rootNodeHeight);
+    g_drawingInfo.rootNode->SetFrame(0, 0, g_drawingInfo.rootNodeWidth, g_drawingInfo.rootNodeHeight);
+    CHKPV(g_drawingInfo.dragWindow);
+    g_drawingInfo.dragWindow->Resize(g_drawingInfo.rootNodeWidth, g_drawingInfo.rootNodeHeight);
+    OHOS::Rosen::RSTransaction::FlushImplicitTransaction();
+}
+
+void DrawSVGModifier::DrawTouchscreenSVG(std::shared_ptr<OHOS::Media::PixelMap> pixelMap) const
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(g_drawingInfo.pixelMap);
+    int32_t adjustSize = EIGHT_SIZE * GetScaling();
+    int32_t svgTouchPositionX;
+    if ((g_drawingInfo.pixelMap->GetWidth() + adjustSize) < pixelMap->GetWidth()) {
+        FI_HILOGD("pixelMap width:%{public}d", g_drawingInfo.pixelMap->GetWidth());
+        svgTouchPositionX = 0;
+    } else {
+        svgTouchPositionX = g_drawingInfo.pixelMap->GetWidth() + adjustSize - pixelMap->GetWidth();
+    }
+    auto dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
+    CHKPV(dragStyleNode);
+    dragStyleNode->SetBounds(svgTouchPositionX, 0, pixelMap->GetWidth(), pixelMap->GetHeight());
+    dragStyleNode->SetFrame(svgTouchPositionX, 0, pixelMap->GetWidth(), pixelMap->GetHeight());
+    g_drawingInfo.rootNodeWidth = g_drawingInfo.pixelMap->GetWidth() + adjustSize;
+    g_drawingInfo.rootNodeHeight = g_drawingInfo.pixelMap->GetHeight() + adjustSize;
+    CHKPV(g_drawingInfo.rootNode);
+    g_drawingInfo.rootNode->SetBounds(0, 0, g_drawingInfo.rootNodeWidth, g_drawingInfo.rootNodeHeight);
+    g_drawingInfo.rootNode->SetFrame(0, 0, g_drawingInfo.rootNodeWidth, g_drawingInfo.rootNodeHeight);
+    CHKPV(g_drawingInfo.dragWindow);
+    g_drawingInfo.dragWindow->Resize(g_drawingInfo.rootNodeWidth, g_drawingInfo.rootNodeHeight);
+    OHOS::Rosen::RSTransaction::FlushImplicitTransaction();
+}
+
+void DrawSVGModifier::SetDecodeOptions(OHOS::Media::DecodeOptions &decodeOpts) const
+{
+    CALL_DEBUG_ENTER;
+    std::string strStyle = std::to_string(g_drawingInfo.currentDragNum);
+    if (strStyle.size() < 1) {
+        FI_HILOGE("strStyle size:%{public}zu invalid", strStyle.size());
+        return;
+    }
+    int32_t extendSvgWidth = (strStyle.size() - 1) * EIGHT_SIZE;
+    std::string deviceType = OHOS::system::GetDeviceType();
+    if ((g_drawingInfo.currentStyle == DragCursorStyle::COPY) && (g_drawingInfo.currentDragNum == DRAG_NUM_ONE)) {
+        decodeOpts.desiredSize= {
+            .width = DEVICE_INDEPENDENT_PIXEL * GetScaling(),
+            .height = DEVICE_INDEPENDENT_PIXEL * GetScaling()
+        };
+    } else if (((deviceType.compare(0, DEVICE_TYPE_DEFAULT.size(), DEVICE_TYPE_DEFAULT) == 0) ||
+        (deviceType.compare(0, DEVICE_TYPE_PHONE.size(), DEVICE_TYPE_PHONE) == 0)) &&
+        (g_drawingInfo.currentStyle == DragCursorStyle::MOVE) && (g_drawingInfo.currentDragNum == DRAG_NUM_ONE)) {
+        decodeOpts.desiredSize= {
+            .width = DEVICE_INDEPENDENT_PIXEL * GetScaling(),
+            .height = DEVICE_INDEPENDENT_PIXEL * GetScaling()
+        };
+    } else if ((g_drawingInfo.sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
+        (g_drawingInfo.currentStyle == DragCursorStyle::DEFAULT)) {
+        decodeOpts.desiredSize= {
+            .width = DEVICE_INDEPENDENT_PIXEL * GetScaling(),
+            .height = DEVICE_INDEPENDENT_PIXEL * GetScaling()
+        };
+    } else {
+        decodeOpts.desiredSize = {
+            .width = (DEVICE_INDEPENDENT_PIXEL + extendSvgWidth) * GetScaling(),
+            .height = DEVICE_INDEPENDENT_PIXEL * GetScaling()
+        };
+    }
 }
 
 void DrawPixelMapModifier::Draw(OHOS::Rosen::RSDrawingContext &context) const
@@ -818,57 +920,6 @@ void DrawPixelMapModifier::Draw(OHOS::Rosen::RSDrawingContext &context) const
     pixelMapNode->SetBgImagePositionY(0);
     pixelMapNode->SetBgImage(rosenImage);
     OHOS::Rosen::RSTransaction::FlushImplicitTransaction();
-}
-
-void DrawMouseIconModifier::Draw(OHOS::Rosen::RSDrawingContext &context) const
-{
-    CALL_DEBUG_ENTER;
-    std::string imagePath = MOUSE_DRAG_PATH;
-    OHOS::Media::SourceOptions opts;
-    opts.formatHint = "image/png";
-    uint32_t errCode = 0;
-    auto imageSource = OHOS::Media::ImageSource::CreateImageSource(imagePath, opts, errCode);
-    CHKPV(imageSource);
-    int32_t iconSize = GetIconSize();
-    if (iconSize <= 0) {
-        FI_HILOGE("Get icon size failed");
-        return;
-    }
-    OHOS::Media::DecodeOptions decodeOpts;
-    decodeOpts.desiredSize = {
-        .width = iconSize,
-        .height = iconSize
-    };
-    decodeOpts.allocatorType = OHOS::Media::AllocatorType::SHARE_MEM_ALLOC;
-    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOpts, errCode);
-    CHKPV(pixelMap);
-    auto rosenImage = std::make_shared<Rosen::RSImage>();
-    rosenImage->SetPixelMap(pixelMap);
-    rosenImage->SetImageRepeat(0);
-    auto mouseIconNode = g_drawingInfo.nodes[MOUSE_ICON_INDEX];
-    CHKPV(mouseIconNode);
-    mouseIconNode->SetBoundsWidth(decodeOpts.desiredSize.width);
-    mouseIconNode->SetBoundsHeight(decodeOpts.desiredSize.height);
-    mouseIconNode->SetBgImageWidth(decodeOpts.desiredSize.width);
-    mouseIconNode->SetBgImageHeight(decodeOpts.desiredSize.height);
-    mouseIconNode->SetBgImagePositionX(0);
-    mouseIconNode->SetBgImagePositionY(0);
-    mouseIconNode->SetBgImage(rosenImage);
-}
-
-int32_t DrawMouseIconModifier::GetIconSize() const
-{
-    CALL_DEBUG_ENTER;
-    auto displayInfo = OHOS::Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
-    CHKPR(displayInfo, RET_ERR);
-    if ((displayInfo->GetWidth() >= PHONE_SCREEN_WIDTH) || (displayInfo->GetHeight() >= PHONE_SCREEN_WIDTH)) {
-        if ((displayInfo->GetWidth() == PAD_SCREEN_WIDTH) || (displayInfo->GetHeight() == PAD_SCREEN_WIDTH)) {
-            return MIDDLE_ICON;
-        } else {
-            return LARGE_ICON;
-        }
-    }
-    return SMALL_ICON;
 }
 
 void DrawDynamicEffectModifier::Draw(OHOS::Rosen::RSDrawingContext &context) const
