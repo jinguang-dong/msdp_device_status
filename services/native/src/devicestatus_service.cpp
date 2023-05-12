@@ -401,7 +401,7 @@ int32_t DeviceStatusService::InitDelegateTasks()
         FI_HILOGE("AddEpoll error ret:%{public}d", ret);
         return ret;
     }
-    FI_HILOGI("AddEpoll, epollfd:%{public}d,fd:%{public}d", epollFd_, delegateTasks_.GetReadFd());
+    FI_HILOGI("AddEpoll, epollfd:%{public}d,fd:%{public}d", rustStreamSocket_.epollFd_, delegateTasks_.GetReadFd());
     return RET_OK;
 }
 

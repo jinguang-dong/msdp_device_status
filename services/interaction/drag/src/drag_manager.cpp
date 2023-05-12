@@ -174,7 +174,7 @@ int32_t DragManager::NotifyDragResult(DragResult result)
         return RET_ERR;
     }
     pkt << dragData.displayX << dragData.displayY << static_cast<int32_t>(result) << targetPid;
-    if (pkt.ChkRWError()) {
+    if (chk_rwerror(&pkt.rustStreamBuffer_)) {
         FI_HILOGE("Packet write data failed");
         return RET_ERR;
     }

@@ -56,6 +56,7 @@ ohos_shared_library("devicestatus_client") {
 
   deps = [
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_rust_path}/socket_ipc_rust_ffi:devicestatus_rust_util_ffi",
     "${device_status_utils_path}:devicestatus_util",
   ]
 

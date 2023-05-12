@@ -86,7 +86,7 @@ int32_t DragManagerImpl::OnNotifyResult(const StreamClient& client, NetPacket& p
     DragNotifyMsg notifyMsg;
     int32_t result = 0;
     pkt >> notifyMsg.displayX >> notifyMsg.displayY >> result >> notifyMsg.targetPid;
-    if (pkt.ChkRWError()) {
+    if (chk_rwerror(&pkt.rustStreamBuffer_)) {
         FI_HILOGE("Packet read drag msg failed");
         return RET_ERR;
     }
@@ -107,7 +107,7 @@ int32_t DragManagerImpl::OnStateChangedMessage(const StreamClient& client, NetPa
     CALL_DEBUG_ENTER;
     int32_t state;
     pkt >> state;
-    if (pkt.ChkRWError()) {
+    if (chk_rwerror(&pkt.rustStreamBuffer_)) {
         FI_HILOGE("Packet read drag msg failed");
         return RET_ERR;
     }

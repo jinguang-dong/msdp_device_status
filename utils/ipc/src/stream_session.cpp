@@ -35,85 +35,49 @@ const std::string FOUNDATION = "foundation";
 
 StreamSession::StreamSession(const std::string &programName, const int32_t moduleType, const int32_t fd,
     const int32_t uid, const int32_t pid)
-    : fd_(fd),
-      pid_(pid)
+    : programName_(programName)
 {
+    rustStreamSession_.moduleType_ = moduleType;
+    rustStreamSession_.fd_ = fd;
+    rustStreamSession_.uid_ = uid;
+    rustStreamSession_.pid_ = pid;
     UpdateDescript();
 }
 
 bool StreamSession::SendMsg(const char *buf, size_t size) const
 {
-    CHKPF(buf);
-    if ((size == 0) || (size > MAX_PACKET_BUF_SIZE)) {
-        FI_HILOGE("buf size:%{public}zu", size);
-        return false;
-    }
-    if (fd_ < 0) {
-        FI_HILOGE("The fd_ is less than 0");
-        return false;
-    }
-
-    int32_t idx = 0;
-    int32_t retryCount = 0;
-    const int32_t bufSize = static_cast<int32_t>(size);
-    int32_t remSize = bufSize;
-    while (remSize > 0 && retryCount < SEND_RETRY_LIMIT) {
-        retryCount += 1;
-        auto count = send(fd_, &buf[idx], remSize, MSG_DONTWAIT | MSG_NOSIGNAL);
-        if (count < 0) {
-            if (errno == EAGAIN || errno == EINTR || errno == EWOULDBLOCK) {
-                usleep(SEND_RETRY_SLEEP_TIME);
-                FI_HILOGW("Continue for errno EAGAIN|EINTR|EWOULDBLOCK, errno:%{public}d", errno);
-                continue;
-            }
-            FI_HILOGE("Send return failed,error:%{public}d fd:%{public}d", errno, fd_);
-            return false;
-        }
-        idx += count;
-        remSize -= count;
-        if (remSize > 0) {
-            usleep(SEND_RETRY_SLEEP_TIME);
-        }
-    }
-    if (retryCount >= SEND_RETRY_LIMIT || remSize != 0) {
-        FI_HILOGE("Send too many times:%{public}d/%{public}d,size:%{public}d/%{public}d fd:%{public}d",
-            retryCount, SEND_RETRY_LIMIT, idx, bufSize, fd_);
-        return false;
-    }
-    return true;
+    return session_send_msg(&rustStreamSession_, buf, size);
 }
 
 void StreamSession::Close()
 {
-    CALL_DEBUG_ENTER;
-    FI_HILOGD("Enter fd_:%{public}d.", fd_);
-    if (fd_ >= 0) {
-        close(fd_);
-        fd_ = -1;
-        UpdateDescript();
-    }
+    session_close(&rustStreamSession_);
+    UpdateDescript();
 }
 
 void StreamSession::UpdateDescript()
 {
     std::ostringstream oss;
-    oss << "fd = " << fd_
-        << ((fd_ < 0) ? ", closed" : ", opened")
-        << ", pid = " << pid_
-        << ", tokenType = " << tokenType_
+    oss << "fd = " << rustStreamSession_.fd_
+        << ", programName = " << programName_
+        << ", moduleType = " << rustStreamSession_.moduleType_
+        << ((rustStreamSession_.fd_ < 0) ? ", closed" : ", opened")
+        << ", uid = " << rustStreamSession_.uid_
+        << ", pid = " << rustStreamSession_.pid_
+        << ", tokenType = " << rustStreamSession_.tokenType_
         << std::endl;
     descript_ = oss.str().c_str();
 }
 
 bool StreamSession::SendMsg(NetPacket &pkt) const
 {
-    if (pkt.ChkRWError()) {
+    if (chk_rwerror(&pkt.rustStreamBuffer_)) {
         FI_HILOGE("Read and write status is error");
         return false;
     }
     StreamBuffer buf;
     pkt.MakeData(buf);
-    return SendMsg(buf.Data(), buf.Size());
+    return SendMsg(data(&buf.rustStreamBuffer_), size(&buf.rustStreamBuffer_));
 }
 } // namespace Msdp
 } // namespace OHOS

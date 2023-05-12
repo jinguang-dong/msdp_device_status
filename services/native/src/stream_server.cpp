@@ -27,8 +27,21 @@ namespace OHOS {
 namespace Msdp {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "StreamServer" };
+extern "C" {
+    void read_server_packets(RustStreamBuffer*, OHOS::Msdp::StreamServer*, int32_t,
+        void(*)(OHOS::Msdp::StreamServer*, int32_t, RustNetPacket*));
+}
+void OnCPacket(StreamServer* object, int32_t fd, RustNetPacket* cPkt)
+{
+    NetPacket pkt(cPkt->msgId_);
+    if ((memcpy_s(&pkt.rustStreamBuffer_, sizeof(struct RustStreamBuffer),
+        &(cPkt->rustStreamBuffer), sizeof(struct RustStreamBuffer))) != EOK) {
+        FI_HILOGE("OnCPacket: memcpy_s failed");
+        return;
+    }
+    object->OnPacket(fd, pkt);
+}
 } // namespace
-
 StreamServer::~StreamServer()
 {
     CALL_DEBUG_ENTER;
@@ -37,9 +50,9 @@ StreamServer::~StreamServer()
 
 void StreamServer::UdsStop()
 {
-    if (epollFd_ != -1) {
-        close(epollFd_);
-        epollFd_ = -1;
+    if (rustStreamSocket_.epollFd_ != -1) {
+        close(rustStreamSocket_.epollFd_);
+        rustStreamSocket_.epollFd_ = -1;
     }
 
     for (const auto &item : sessionsMap_) {
@@ -219,7 +232,8 @@ void StreamServer::OnEpollRecv(int32_t fd, epoll_event& ev)
             if (!buf.Write(szBuf, size)) {
                 FI_HILOGW("Write data failed. size:%{public}zu", size);
             }
-            OnReadPackets(buf, std::bind(&StreamServer::OnPacket, this, fd, std::placeholders::_1));
+            read_server_packets(&buf.rustStreamBuffer_, this, fd, OnCPacket);
+            //OnReadPackets(buf, std::bind(&StreamServer::OnPacket, this, fd, std::placeholders::_1));
         } else if (size < 0) {
             if (errno == EAGAIN || errno == EINTR || errno == EWOULDBLOCK) {
                 FI_HILOGD("Continue for errno EAGAIN|EINTR|EWOULDBLOCK size:%{public}zu errno:%{public}d",

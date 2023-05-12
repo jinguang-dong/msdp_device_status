@@ -76,7 +76,7 @@ void StateChangeNotify::OnStateChangedNotify(SessionPtr session, MessageId msgId
     CHKPV(session);
     NetPacket pkt(msgId);
     pkt << static_cast<int32_t>(state);
-    if (pkt.ChkRWError()) {
+    if (chk_rwerror(&pkt.rustStreamBuffer_)) {
         FI_HILOGE("Packet write data failed");
         return;
     }

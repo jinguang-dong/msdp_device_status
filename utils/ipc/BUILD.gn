@@ -36,7 +36,10 @@ ohos_shared_library("devicestatus_ipc") {
 
   public_configs = [ ":devicestatus_ipc_public_config" ]
 
-  deps = [ "${device_status_utils_path}:devicestatus_util" ]
+  deps = [
+    "${device_status_rust_path}/socket_ipc_rust_ffi:devicestatus_rust_util_ffi",
+    "${device_status_utils_path}:devicestatus_util",
+  ]
 
   external_deps = [
     "c_utils:utils",
