@@ -13,36 +13,70 @@
 
 import("../../device_status.gni")
 
-ohos_prebuilt_etc("drawing_image_Copy_Drag") {
-  source = "src/Copy_Drag.svg"
+ohos_prebuilt_etc("drawing_image_Mouse_Copy_Drag") {
+  source = "src/Mouse_Copy_Drag.svg"
   part_name = "${device_status_part_name}"
-  subsystem_name = "${device_status_subsystem_name}"
+  subsystem_name = "device_status"
   relative_install_dir = "device_status/drag_icon"
 }
 
-ohos_prebuilt_etc("drawing_image_Forbid_Drag") {
-  source = "src/Forbid_Drag.svg"
+ohos_prebuilt_etc("drawing_image_Mouse_Copy_One_Drag") {
+  source = "src/Mouse_Copy_One_Drag.svg"
   part_name = "${device_status_part_name}"
-  subsystem_name = "${device_status_subsystem_name}"
-  relative_install_dir = "device_status/drag_icon"
-}
-
-ohos_prebuilt_etc("drawing_image_Copy_One_Drag") {
-  source = "src/Copy_One_Drag.svg"
-  part_name = "${device_status_part_name}"
-  subsystem_name = "${device_status_subsystem_name}"
-  relative_install_dir = "device_status/drag_icon"
-}
-
-ohos_prebuilt_etc("drawing_image_Move_Drag") {
-  source = "src/Move_Drag.svg"
-  part_name = "${device_status_part_name}"
-  subsystem_name = "${device_status_subsystem_name}"
+  subsystem_name = "device_status"
   relative_install_dir = "device_status/drag_icon"
 }
 
 ohos_prebuilt_etc("drawing_image_Mouse_Drag") {
-  source = "src/Mouse_Drag.png"
+  source = "src/Mouse_Drag.svg"
+  part_name = "${device_status_part_name}"
+  subsystem_name = "device_status"
+  relative_install_dir = "device_status/drag_icon"
+}
+
+ohos_prebuilt_etc("drawing_image_Mouse_Forbid_Drag") {
+  source = "src/Mouse_Forbid_Drag.svg"
+  part_name = "${device_status_part_name}"
+  subsystem_name = "device_status"
+  relative_install_dir = "device_status/drag_icon"
+}
+ohos_prebuilt_etc("drawing_image_Mouse_Move_Drag") {
+  source = "src/Mouse_Move_Drag.svg"
+  part_name = "${device_status_part_name}"
+  subsystem_name = "${device_status_subsystem_name}"
+  relative_install_dir = "device_status/drag_icon"
+}
+
+ohos_prebuilt_etc("drawing_image_Touch_Copy_Drag") {
+  source = "src/Touch_Copy_Drag.svg"
+  part_name = "${device_status_part_name}"
+  subsystem_name = "${device_status_subsystem_name}"
+  relative_install_dir = "device_status/drag_icon"
+}
+
+ohos_prebuilt_etc("drawing_image_Touch_Copy_One_Drag") {
+  source = "src/Touch_Copy_One_Drag.svg"
+  part_name = "${device_status_part_name}"
+  subsystem_name = "${device_status_subsystem_name}"
+  relative_install_dir = "device_status/drag_icon"
+}
+
+ohos_prebuilt_etc("drawing_image_Touch_Default_Drag") {
+  source = "src/Touch_Default_Drag.svg"
+  part_name = "${device_status_part_name}"
+  subsystem_name = "${device_status_subsystem_name}"
+  relative_install_dir = "device_status/drag_icon"
+}
+
+ohos_prebuilt_etc("drawing_image_Touch_Forbid_Drag") {
+  source = "src/Touch_Forbid_Drag.svg"
+  part_name = "${device_status_part_name}"
+  subsystem_name = "${device_status_subsystem_name}"
+  relative_install_dir = "device_status/drag_icon"
+}
+
+ohos_prebuilt_etc("drawing_image_Touch_Move_Drag") {
+  source = "src/Touch_Move_Drag.svg"
   part_name = "${device_status_part_name}"
   subsystem_name = "${device_status_subsystem_name}"
   relative_install_dir = "device_status/drag_icon"
@@ -50,10 +84,16 @@ ohos_prebuilt_etc("drawing_image_Mouse_Drag") {
 
 group("device_status_drag_icon") {
   deps = [
-    ":drawing_image_Copy_Drag",
-    ":drawing_image_Copy_One_Drag",
-    ":drawing_image_Forbid_Drag",
+    ":drawing_image_Mouse_Copy_Drag",
+    ":drawing_image_Mouse_Copy_One_Drag",
     ":drawing_image_Mouse_Drag",
-    ":drawing_image_Move_Drag",
+    ":drawing_image_Mouse_Forbid_Drag",
+    ":drawing_image_Mouse_Move_Drag",
+    ":drawing_image_Touch_Copy_Drag",
+    ":drawing_image_Touch_Copy_One_Drag",
+    ":drawing_image_Touch_Default_Drag",
+    ":drawing_image_Touch_Forbid_Drag",
+    ":drawing_image_Touch_Move_Drag",
+
   ]
 }

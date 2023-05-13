@@ -68,6 +68,13 @@ enum class DragCursorStyle {
     MOVE
 };
 
+struct DragAnimationData {
+    int32_t displayX { -1 };
+    int32_t displayY { -1 };
+    int32_t offsetX { -1 };
+    int32_t offsetY { -1 };
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap { nullptr };
+};
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
