@@ -61,6 +61,7 @@ public:
     void PrintCurrentMissionInfo();
     int32_t ContinueAllMission();
     void InitDeviceId(const std::string &remoteDeviceId, const std::string &localDeviceId);
+    int32_t ContinueNote();
 
 private:
     std::vector<AAFwk::MissionInfo> missionInfos_;

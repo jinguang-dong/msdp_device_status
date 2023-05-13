@@ -57,6 +57,7 @@ void AcrossAbilityAdapter::MissionListenerCallback::NotifyNetDisconnect(const st
 
 void AcrossAbilityAdapter::ContinueMissionCallback::OnContinueDone(int32_t result)
 {
+    CALL_DEBUG_ENTER;
     FI_HILOGD("result:%{public}d", result);
 }
 
@@ -100,6 +101,7 @@ int32_t AcrossAbilityAdapter::UnRegisterMissionListener(const std::string &devic
 int32_t AcrossAbilityAdapter::UpdateMissionInfos(const std::string &deviceId)
 {
     CALL_DEBUG_ENTER;
+    missionInfos_.clear();
     int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfos(deviceId, MAX_MISSION_NUM, missionInfos_);
     if (ret != ERR_OK) {
         FI_HILOGE("GetMissionInfos failed, ret:%{public}d", ret);
@@ -111,19 +113,35 @@ int32_t AcrossAbilityAdapter::UpdateMissionInfos(const std::string &deviceId)
 int32_t AcrossAbilityAdapter::ContinueMission(const AAFwk::MissionInfo &missionInfo)
 {
     CALL_DEBUG_ENTER;
-    // if (!missionInfo.continuable) {
-    //     FI_HILOGE("ContinueMission failed, this mission is unsupported to continue");
-    //     return RET_ERR;
-    // }
+    if (!missionInfo.continuable) {
+        FI_HILOGE("ContinueMission failed, this mission is unsupported to continue");
+        return RET_ERR;
+    }
     AAFwk::WantParams wantParams = missionInfo.want.GetParams();
     sptr<IRemoteObject> callback = new (std::nothrow) ContinueMissionCallback();
     if (int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ContinueMission(
         remoteDeviceId_, localDeviceId_, missionInfo.id, callback, wantParams); ret != ERR_OK) {
-            // 这里的接口参数顺序是不是对的，先remoteDeviceId,在 localDeviceId?
         FI_HILOGE("ContinueMission failed, %{public}d", ret);
         return RET_ERR;
     }
     return RET_OK;
+}
+
+/*
+    note is continuable
+*/
+int32_t AcrossAbilityAdapter::ContinueNote()
+{
+    CALL_DEBUG_ENTER;
+    std::string noteBundleName {"com.ohos.note"};
+    std::string noteAbilityName {"MainAbility"};
+    AAFwk::MissionInfo noteMissionInfo = GetMissionInfoToContinue(noteBundleName, noteAbilityName);
+    FI_HILOGD("NoteMissionInfo: \nMissionId:%{public}d, \nlabel:%{public}s, \nbundleName:%{public}s, \nabilityName:%{public}s, \ncontinuable:%{public}s",
+            noteMissionInfo.id, noteMissionInfo.label.c_str(),
+            noteMissionInfo.want.GetElement().GetBundleName().c_str(),
+            noteMissionInfo.want.GetElement().GetAbilityName().c_str(),
+            std::to_string(noteMissionInfo.continuable).c_str());
+    return ContinueMission(noteMissionInfo);
 }
 
 AAFwk::MissionInfo AcrossAbilityAdapter::GetMissionInfoToContinue(const std::string &bundleName, const std::string &abilityName)
@@ -156,10 +174,11 @@ void AcrossAbilityAdapter::PrintCurrentMissionInfo()
     CALL_DEBUG_ENTER;
     FI_HILOGD("MissionNum:%{public}d", missionInfos_.size());
     for (const auto& missionInfo : missionInfos_) {
-        FI_HILOGD("MissionId:%{public}d, label:%{public}s, bundleName:%{public}s, abilityName:%{public}s",
+        FI_HILOGD("MissionId:%{public}d, label:%{public}s, bundleName:%{public}s, abilityName:%{public}s, continuable:%{public}s",
             missionInfo.id, missionInfo.label.c_str(),
             missionInfo.want.GetElement().GetBundleName().c_str(),
-            missionInfo.want.GetElement().GetAbilityName().c_str()
+            missionInfo.want.GetElement().GetAbilityName().c_str(),
+            std::to_string(missionInfo.continuable).c_str()
         );
     }
 }

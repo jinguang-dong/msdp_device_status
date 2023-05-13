@@ -65,12 +65,18 @@ void TestAcrossByUT::TearDownTestCase()
 void TestAcrossByUT::SetTokenID()
 {
     uint64_t tokenId;
-    const char *perms[2];
+    const char *perms[8];
     perms[0] = "ohos.permission.MANAGE_MISSIONS";
     perms[1] = "ohos.permission.MANAGER_ABILITY_FROM_GATEWAY";
+    perms[2] = "ohos.permission.DISTRIBUTED_DATASYNC";
+    perms[3] = "ohos.permission.ACCESS_SERVICE_DM";
+    perms[4] = "ohos.permission.ACCESS_UDID";
+    perms[5] = "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED";
+    perms[6] = "ohos.permission.MANAGER_ABILITY_FROM_GATEWAY";
+    perms[7] = "ohos.permission.GET_BUNDLE_INFO";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
-        .permsNum = 2,
+        .permsNum = 8,
         .aclsNum = 0,
         .dcaps = NULL,
         .perms = perms,
@@ -81,7 +87,6 @@ void TestAcrossByUT::SetTokenID()
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
     OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
-    
 }
 
 HWTEST_F(TestAcrossByUT, test_across_by_ut, TestSize.Level1)
@@ -108,6 +113,7 @@ HWTEST_F(TestAcrossByUT, test_across_by_ut, TestSize.Level1)
     std::string op;
     while (true) {
         std::cout << "type <continueMission> to ContinueAllMission" << std::endl;
+        std::cout << "type <continueNote> to ContinueNote" << std::endl;
         std::cout << "type <unReg> to UnRegisterMissionListener" << std::endl;
         getline(std::cin, op);
 
@@ -121,6 +127,10 @@ HWTEST_F(TestAcrossByUT, test_across_by_ut, TestSize.Level1)
                 std::cout << "----UnRegisterMissionListener failed----" << std::endl;
             } else {
                 std::cout << "----UnRegisterMissionListener success----" << std::endl;
+            }
+        } else if (op == "continueNote") {
+            if (AcrossAbilityAdapter::GetInstance()->ContinueNote() != RET_OK) {
+                std::cout << "ContinueNote failed" << std::endl;
             }
         } else {
             std::cout << "Unsupported op" << std::endl;
