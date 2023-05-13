@@ -242,7 +242,6 @@ void DragManager::OnDragUp(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     SetDragTargetPid(pid);
     DragData dragData = DRAG_DATA_MGR.GetDragData();
     if (dragData.sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
-        dragDrawing_.EraseMouseIcon();
         MMI::InputManager::GetInstance()->SetPointerVisible(true);
     }
 
@@ -487,7 +486,6 @@ int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation)
     interceptorId_ = -1;
     DragData dragData = DRAG_DATA_MGR.GetDragData();
     if (dragData.sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
-        dragDrawing_.EraseMouseIcon();
         MMI::InputManager::GetInstance()->SetPointerVisible(true);
     }
     switch (result) {
@@ -502,7 +500,7 @@ int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation)
         }
         case DragResult::DRAG_FAIL:
         case DragResult::DRAG_CANCEL: {
-            if (!dragData.hasCanceledAnimation) {
+            if (!hasCustomAnimation) {
                 dragDrawing_.OnDragFail();
             } else {
                 dragDrawing_.DestroyDragWindow();

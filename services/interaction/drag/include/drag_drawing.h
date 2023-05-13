@@ -25,7 +25,6 @@
 #include "modifier/rs_extended_modifier.h"
 #include "modifier/rs_modifier.h"
 #include "pixel_map.h"
-#include "ui/rs_canvas_node.h"
 #include "vsync_receiver.h"
 
 #include "drag_data.h"
@@ -47,7 +46,12 @@ private:
     int32_t ParseAndAdjustSvgInfo(xmlNodePtr curNode) const;
     std::shared_ptr<OHOS::Media::PixelMap> DecodeSvgToPixelMap(const std::string &filePath) const;
     int32_t GetFilePath(std::string &filePath) const;
+    int32_t GetMouseFilePath(std::string &filePath) const;
+    int32_t GetTouchscreenFilePath(std::string &filePath) const;
     bool NeedAdjustSvgInfo() const;
+    void DrawMouseSVG(std::shared_ptr<OHOS::Media::PixelMap> pixelMap) const;
+    void DrawTouchscreenSVG(std::shared_ptr<OHOS::Media::PixelMap> pixelMap) const;
+    void SetDecodeOptions(OHOS::Media::DecodeOptions &decodeOpts) const;
 };
 
 class DrawPixelMapModifier : public OHOS::Rosen::RSContentStyleModifier {
@@ -55,16 +59,6 @@ public:
     DrawPixelMapModifier() = default;
     ~DrawPixelMapModifier() = default;
     void Draw(OHOS::Rosen::RSDrawingContext &context) const override;
-};
-
-class DrawMouseIconModifier : public OHOS::Rosen::RSContentStyleModifier {
-public:
-    DrawMouseIconModifier() = default;
-    ~DrawMouseIconModifier() = default;
-    void Draw(OHOS::Rosen::RSDrawingContext &context) const override;
-
-private:
-    int32_t GetIconSize() const;
 };
 
 class DrawDynamicEffectModifier : public OHOS::Rosen::RSContentStyleModifier {
@@ -85,13 +79,11 @@ public:
     DragDrawing() = default;
     ~DragDrawing() = default;
     DISALLOW_COPY_AND_MOVE(DragDrawing);
-
     int32_t Init(const DragData &dragData);
     void Draw(int32_t displayId, int32_t displayX, int32_t displayY);
     int32_t UpdateDragStyle(DragCursorStyle style);
     void OnDragSuccess();
     void OnDragFail();
-    void EraseMouseIcon();
     void DestroyDragWindow();
     void UpdateDrawingState();
     void UpdateDragWindowState(bool visible);
@@ -101,19 +93,17 @@ private:
     void InitCanvas(int32_t width, int32_t height);
     void CreateWindow(int32_t displayX, int32_t displayY);
     int32_t DrawShadow();
-    int32_t DrawMouseIcon();
     int32_t DrawStyle();
     void RunAnimation(float endAlpha, float endScale);
     int32_t InitVSync(float endAlpha, float endScale);
     void OnVsync();
     void InitDrawingInfo(const DragData &dragData);
+    void RemoveModifier();
 
 private:
     int64_t startNum_ { -1 };
-    std::shared_ptr<OHOS::Rosen::RSCanvasNode> canvasNode_ { nullptr };
     std::shared_ptr<DrawSVGModifier> drawSVGModifier_ { nullptr };
     std::shared_ptr<DrawPixelMapModifier> drawPixelMapModifier_ { nullptr };
-    std::shared_ptr<DrawMouseIconModifier> drawMouseIconModifier_ { nullptr };
     std::shared_ptr<DrawDynamicEffectModifier> drawDynamicEffectModifier_ { nullptr };
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector_ { nullptr };
     std::shared_ptr<OHOS::Rosen::VSyncReceiver> receiver_ { nullptr };
