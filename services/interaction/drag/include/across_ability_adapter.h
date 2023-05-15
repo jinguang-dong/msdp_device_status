@@ -16,10 +16,7 @@
 #ifndef ACROSS_ABILITY_ADAPTER
 #define ACROSS_ABILITY_ADAPTER
 
-#include <cstddef>
-#include <cstdint>
 #include <vector>
-#include <sys/types.h>
 
 #include "ability_manager_client.h"
 #include "distributed_sched_stub.h"
@@ -55,21 +52,20 @@ public:
     int32_t RegisterMissionListener(const std::string &deviceId);
     int32_t UnRegisterMissionListener(const std::string &deviceId);
     int32_t UpdateMissionInfos(const std::string &deviceId);
-    int32_t ContinueMission(const AAFwk::MissionInfo &missionInfo);
-    AAFwk::MissionInfo GetMissionInfoToContinue(const std::string &bundleName, const std::string &abilityName);
-    void LaunchAbility(const std::string &deviceId, const std::string &bundleName, const std::string &abilityName);
-    void PrintCurrentMissionInfo();
-    int32_t ContinueAllMission();
+    int32_t ContinueMission(const std::string& bundleName);
+    AAFwk::MissionInfo GetMissionInfo(const std::string &bundleName);
     void InitDeviceId(const std::string &remoteDeviceId, const std::string &localDeviceId);
+    void DispMissionInfo(const AAFwk::MissionInfo &missionInfo);
+    void PrintCurrentMissionInfos();
     int32_t ContinueNote();
 
 private:
-    std::vector<AAFwk::MissionInfo> missionInfos_;
-    std::string remoteDeviceId_;
-    std::string localDeviceId_;
     AcrossAbilityAdapter() = default;
     DISALLOW_COPY_AND_MOVE(AcrossAbilityAdapter);
     static AcrossAbilityAdapter *instance_;
+    std::vector<AAFwk::MissionInfo> missionInfos_;
+    std::string remoteDeviceId_;
+    std::string localDeviceId_;
 };
 
 } // namespace DeviceStatus

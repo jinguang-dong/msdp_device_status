@@ -12,18 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "across_ability_adapter.h"
-#include "accesstoken_kit.h"
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
-#include "surface.h"
-#include "unistd.h"
+
 #include <iostream>
 #include <string>
 
-#include "devicestatus_define.h"
-
+#include "accesstoken_kit.h"
 #include <gtest/gtest.h>
+#include "nativetoken_kit.h"
+#include "surface.h"
+#include "token_setproc.h"
+
+#include "across_ability_adapter.h"
+#include "devicestatus_define.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -112,14 +112,20 @@ HWTEST_F(TestAcrossByUT, test_across_by_ut, TestSize.Level1)
     std::cout << "----RegisterMissionListener success----" << std::endl;
     std::string op;
     while (true) {
-        std::cout << "type <continueMission> to ContinueAllMission" << std::endl;
+        std::cout << "type <continueCustom> to ContinueCustomMission" << std::endl;
         std::cout << "type <continueNote> to ContinueNote" << std::endl;
         std::cout << "type <unReg> to UnRegisterMissionListener" << std::endl;
         getline(std::cin, op);
-
-        if (op == "continueMission") {
-            if (AcrossAbilityAdapter::GetInstance()->ContinueAllMission() != RET_OK) {
-                std::cout << "ContinueAllMission failed" << std::endl;
+        if (op == "continueCustom") {
+            std::string bundleName;
+            std::cout << "Input bundleName to continue" << std::endl;
+            getline(std::cin, bundleName);
+            if (AcrossAbilityAdapter::GetInstance()->ContinueMission(bundleName) != RET_OK) {
+                std::cout << "continueCustom failed" << std::endl;
+            }
+        } else if (op == "continueNote") {
+            if (AcrossAbilityAdapter::GetInstance()->ContinueNote() != RET_OK) {
+                std::cout << "ContinueNote failed" << std::endl;
             }
         } else if (op == "UnReg") {
             std::cout << "----Start UnRegisterMissionListener----" << std::endl;
@@ -128,16 +134,11 @@ HWTEST_F(TestAcrossByUT, test_across_by_ut, TestSize.Level1)
             } else {
                 std::cout << "----UnRegisterMissionListener success----" << std::endl;
             }
-        } else if (op == "continueNote") {
-            if (AcrossAbilityAdapter::GetInstance()->ContinueNote() != RET_OK) {
-                std::cout << "ContinueNote failed" << std::endl;
-            }
         } else {
             std::cout << "Unsupported op" << std::endl;
         }
     }
 }
-
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

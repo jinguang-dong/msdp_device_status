@@ -75,7 +75,6 @@ ohos_unittest("test_across_by_ut") {
   module_out_path = module_output_path
   include_dirs = [
     "${device_status_utils_path}/include",
-    "../continue_mission/include",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/include",
     "//foundation/ability/ability_runtime/frameworks/js/napi/mission_manager"
   ]

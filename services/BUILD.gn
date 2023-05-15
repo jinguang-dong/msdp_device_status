@@ -66,7 +66,6 @@ sources_set = [
 ]
 
 external_deps_set = [
-#   "ability_runtime:ability_manager",
   "distributed_input:libdinput_sdk",
   "device_manager:devicemanagersdk",
   "access_token:libaccesstoken_sdk",
