@@ -40,7 +40,7 @@
         "ability_base",
         "libuv",
         "huks",
-        "graphic_standard"
+        "graphic_2d"
       ],
       "third_party": []
     },
