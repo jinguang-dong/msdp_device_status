@@ -101,7 +101,7 @@ int32_t DragManager::StartDrag(const DragData &dragData, SessionPtr sess)
     return RET_OK;
 }
 
-int32_t DragManager::StopDrag(DragResult result, bool hasCustomAnimation)
+int32_t DragManager::StopDrag(DragResult result, bool hasCustomAnimation, bool initiatorDrag)
 {
     CALL_DEBUG_ENTER;
     if (dragState_ == DragState::STOP) {
@@ -112,19 +112,19 @@ int32_t DragManager::StopDrag(DragResult result, bool hasCustomAnimation)
         context_->GetTimerManager().RemoveTimer(timerId_);
     }
     int32_t ret = RET_OK;
-    if (OnStopDrag(result, hasCustomAnimation) != RET_OK) {
+    if (OnStopDrag(result, hasCustomAnimation, initiatorDrag) != RET_OK) {
         FI_HILOGE("OnStopDrag failed");
         ret = RET_ERR;
     }
     dragState_ = DragState::STOP;
     stateNotify_.StateChangedNotify(DragState::STOP);
-    StateChangedNotify(DragState::STOP);
     if (NotifyDragResult(result) != RET_OK) {
         FI_HILOGE("NotifyDragResult failed");
         ret = RET_ERR;
     }
     DRAG_DATA_MGR.ResetDragData();
     dragResult_ = static_cast<DragResult>(result);
+    StateChangedNotify(DragState::STOP, initiatorDrag);
     return ret;
 }
 
@@ -476,7 +476,7 @@ int32_t DragManager::OnStartDrag()
     return RET_OK;
 }
 
-int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation)
+int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation, bool initiatorDrag)
 {
     CALL_DEBUG_ENTER;
     if (interceptorId_ <= 0) {
@@ -487,12 +487,15 @@ int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation)
     interceptorId_ = -1;
     DragData dragData = DRAG_DATA_MGR.GetDragData();
     if (dragData.sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
-        dragDrawing_.EraseMouseIcon();
-        MMI::InputManager::GetInstance()->SetPointerVisible(true);
+        if (!initiatorDrag) {
+            dragDrawing_.EraseMouseIcon();
+            FI_HILOGI("~~~zhf SetPointerVisible");
+            MMI::InputManager::GetInstance()->SetPointerVisible(true);
+        }
     }
     switch (result) {
         case DragResult::DRAG_SUCCESS: {
-            if (!hasCustomAnimation) {
+            if (!hasCustomAnimation && !initiatorDrag) {
                 dragDrawing_.OnDragSuccess();
             } else {
                 dragDrawing_.DestroyDragWindow();
@@ -502,7 +505,7 @@ int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation)
         }
         case DragResult::DRAG_FAIL:
         case DragResult::DRAG_CANCEL: {
-            if (!dragData.hasCanceledAnimation) {
+            if (!dragData.hasCanceledAnimation && !initiatorDrag) {
                 dragDrawing_.OnDragFail();
             } else {
                 dragDrawing_.DestroyDragWindow();
@@ -542,9 +545,14 @@ void DragManager::RegisterStateChange(std::function<void(DragState)> callback)
     stateChangedCallback_ = callback;
 }
 
-void DragManager::StateChangedNotify(DragState state)
+void DragManager::StateChangedNotify(DragState state, bool initiatorDrag)
 {
     CALL_DEBUG_ENTER;
+    FI_HILOGD("initiatorDrag::%{public}d", initiatorDrag);
+    if (initiatorDrag) {
+        FI_HILOGD("The device is not the initiator of stopping drag");
+        return;
+    }
     if (stateChangedCallback_ != nullptr) {
         stateChangedCallback_(state);
     }

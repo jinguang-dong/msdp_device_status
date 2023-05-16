@@ -160,8 +160,7 @@ public:
     bool IsNeedFilterOut(const std::string &deviceId, const std::shared_ptr<MMI::KeyEvent> keyEvent);
     void RegisterStateChange(CooStateChangeType type,
         std::function<void(CoordinationState, CoordinationState)> callback);
-    std::string GetRemoteId() const;
-
+    void RegisterMouseLocation(std::function<void(int32_t, int32_t)> callback);
 private:
     void Reset(bool adjustAbsolutionLocation = false);
     void OnCloseCoordination(const std::string &networkId, bool isLocal);
@@ -171,6 +170,7 @@ private:
     bool UpdateMouseLocation();
     void StateChangedNotify(CoordinationState oldState, CoordinationState newState);
     void ChangeNotify(CooStateChangeType type, CoordinationState oldState, CoordinationState newState);
+    void MouseLocationNotify(int32_t x, int32_t y);
 
 private:
     std::shared_ptr<ICoordinationState> currentStateSM_ { nullptr };
@@ -192,6 +192,7 @@ private:
     int32_t monitorId_ { -1 };
     int32_t filterId_ { -1 };
     std::map<CooStateChangeType, std::function<void(CoordinationState, CoordinationState)>> stateChangedCallbacks_;
+    std::function<void(int32_t, int32_t)> mouseLocationCallback_;
 };
 
 #define DIS_HARDWARE DistributedHardware::DeviceManager::GetInstance()

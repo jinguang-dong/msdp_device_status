@@ -44,7 +44,7 @@ public:
     int32_t AddListener(SessionPtr session);
     int32_t RemoveListener(SessionPtr session);
     int32_t StartDrag(const DragData &dragData, SessionPtr sess) override;
-    int32_t StopDrag(DragResult result, bool hasCustomAnimation) override;
+    int32_t StopDrag(DragResult result, bool hasCustomAnimation, bool initiatorDrag = false) override;
     int32_t GetDragTargetPid() const;
     int32_t GetUdKey(std::string &udKey) const;
     void SetDragTargetPid(int32_t dragTargetPid);
@@ -74,12 +74,12 @@ private:
     int32_t NotifyDragResult(DragResult result);
     int32_t InitDataAdapter(const DragData &dragData) const;
     int32_t OnStartDrag();
-    int32_t OnStopDrag(DragResult result, bool hasCustomAnimation);
+    int32_t OnStopDrag(DragResult result, bool hasCustomAnimation, bool initiatorDrag = false);
     std::string GetDragState(DragState value) const;
     std::string GetDragResult(DragResult value) const;
     std::string GetDragCursorStyle(DragCursorStyle value) const;
     static OHOS::MMI::ExtraData CreateExtraData(bool appended);
-    void StateChangedNotify(DragState state);
+    void StateChangedNotify(DragState state, bool initiatorDrag = false);
     DragState GetDragState() const override;
 private:
     int32_t timerId_ { 0 };
