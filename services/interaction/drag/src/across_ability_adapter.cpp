@@ -41,7 +41,6 @@ void AcrossAbilityAdapter::MissionListenerCallback::NotifyMissionsChanged(const 
     if (AcrossAbilityAdapter::GetInstance()->UpdateMissionInfos(deviceId) != RET_OK) {
         FI_HILOGE("UpdateMissionInfos failed");
     }
-    AcrossAbilityAdapter::GetInstance()->PrintCurrentMissionInfos();
 }
 
 void AcrossAbilityAdapter::MissionListenerCallback::NotifySnapshot(const std::string& deviceId, int32_t missionId)
@@ -50,7 +49,6 @@ void AcrossAbilityAdapter::MissionListenerCallback::NotifySnapshot(const std::st
     if (AcrossAbilityAdapter::GetInstance()->UpdateMissionInfos(deviceId) != RET_OK) {
         FI_HILOGE("UpdateMissionInfos failed");
     }
-    AcrossAbilityAdapter::GetInstance()->PrintCurrentMissionInfos();
 }
 
 void AcrossAbilityAdapter::MissionListenerCallback::NotifyNetDisconnect(const std::string& deviceId, int32_t state)
@@ -59,7 +57,6 @@ void AcrossAbilityAdapter::MissionListenerCallback::NotifyNetDisconnect(const st
     if (AcrossAbilityAdapter::GetInstance()->UpdateMissionInfos(deviceId) != RET_OK) {
         FI_HILOGE("UpdateMissionInfos failed");
     }
-    AcrossAbilityAdapter::GetInstance()->PrintCurrentMissionInfos();
 }
 
 void AcrossAbilityAdapter::ContinueMissionCallback::OnContinueDone(int32_t result)
@@ -116,6 +113,7 @@ int32_t AcrossAbilityAdapter::UpdateMissionInfos(const std::string &deviceId)
         FI_HILOGE("GetMissionInfos failed, ret:%{public}d", ret);
         return RET_ERR;
     }
+    AcrossAbilityAdapter::GetInstance()->PrintCurrentMissionInfos();
     return RET_OK;
 }
 
