@@ -725,9 +725,13 @@ int32_t DeviceStatusService::RemoveDraglistener()
 int32_t DeviceStatusService::StartDrag(const DragData &dragData)
 {
     CALL_DEBUG_ENTER;
+    auto callerToken = GetCallingTokenID();
+    std::string bundleName;
+    devicestatusManager_->GetPackageName(callerToken, bundleName);
+    FI_HILOGE("bundleName :%{public}s", bundleName.c_str());
     int32_t pid = GetCallingPid();
     int32_t ret = delegateTasks_.PostSyncTask(
-        std::bind(&DeviceStatusService::OnStartDrag, this, std::cref(dragData), pid));
+        std::bind(&DeviceStatusService::OnStartDrag, this, std::cref(dragData), pid, bundleName));
     if (ret != RET_OK) {
         FI_HILOGE("OnStartDrag failed, ret:%{public}d", ret);
         return ret;
@@ -948,11 +952,12 @@ int32_t DeviceStatusService::OnGetCoordinationState(
 }
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 
-int32_t DeviceStatusService::OnStartDrag(const DragData &dragData, int32_t pid)
+int32_t DeviceStatusService::OnStartDrag(const DragData &dragData, int32_t pid, const std::string &bundleName)
 {
     CALL_DEBUG_ENTER;
     auto sess = GetSession(GetClientFd(pid));
     CHKPR(sess, RET_ERR);
+    dragMgr_.SetBundleName(bundleName);
     int32_t ret = dragMgr_.StartDrag(dragData, sess);
     if (ret != RET_OK) {
         FI_HILOGE("StartDrag failed, ret:%{public}d", ret);

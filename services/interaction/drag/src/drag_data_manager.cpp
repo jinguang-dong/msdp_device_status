@@ -89,6 +89,17 @@ void DragDataManager::ResetDragData()
     std::vector<uint8_t> buffer;
     dragData_ = { shadowInfo, buffer, "", -1, -1, -1, -1, -1, -1, false };
 }
+
+void DragDataManager::SetBundleName(const std::string &bundleName)
+{
+    bundleName_ = bundleName;
+}
+
+std::string DragDataManager::GetBundleName()
+{
+    return bundleName_;
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

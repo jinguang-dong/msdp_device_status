@@ -41,13 +41,15 @@ public:
     bool GetDragWindowVisible() const;
     int32_t GetShadowOffset(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height) const;
     void ResetDragData();
-
+    void SetBundleName(const std::string &bundleName);
+    std::string GetBundleName();
 private:
     DragData dragData_;
     OHOS::MMI::PointerStyle pointerStyle_;
     DragCursorStyle dragStyle_ { DragCursorStyle::DEFAULT };
     std::u16string dragMessage_;
     bool visible_ { false };
+    std::string bundleName_;
 };
 
 #define DRAG_DATA_MGR OHOS::Singleton<DragDataManager>::GetInstance()

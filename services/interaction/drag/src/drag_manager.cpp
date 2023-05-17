@@ -15,6 +15,7 @@
 
 #include "drag_manager.h"
 
+#include "across_ability_adapter.h"
 #include "extra_data.h"
 #include "hitrace_meter.h"
 #include "input_manager.h"
@@ -28,8 +29,9 @@
 #include "proto.h"
 
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-#include "udmf_client.h"
-#include "unified_types.h"
+// #include "udmf_client.h"
+// #include "unified_types.h"
+#include "coordination_sm.h"
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 
 namespace OHOS {
@@ -125,6 +127,15 @@ int32_t DragManager::StopDrag(DragResult result, bool hasCustomAnimation)
     }
     DRAG_DATA_MGR.ResetDragData();
     dragResult_ = static_cast<DragResult>(result);
+    if (CooSM->GetCurrentCoordinationState() == CoordinationState::STATE_IN) {
+        auto bundleName = DRAG_DATA_MGR.GetPackageName();
+        auto remoteId = CooSM->GetRemoteId();
+        auto localId = COORDINATION::GetLocalNetworkId();
+        if (ContinueMission(bundleName, remoteId, localId) != RET_OK) {
+            FI_HILOGE("ContinueMission failed");
+            return RET_ERR;
+        }
+    }
     return ret;
 }
 
@@ -540,6 +551,25 @@ void DragManager::RegisterStateChange(std::function<void(DragState)> callback)
     CALL_DEBUG_ENTER;
     CHKPV(callback);
     stateChangedCallback_ = callback;
+}
+
+void DragManager::SetBundleName(const std::string &bundleName)
+{
+    CALL_DEBUG_ENTER;
+    DRAG_DATA_MGR.SetBundleName(bundleName);
+}
+
+int32_t DragManager::ContinueMission(const std::string& bundleName, const std::string &remoteId, const std::string &localId)
+{
+    CALL_DEBUG_ENTER;
+    if (AcrossAbilityAdapter::GetInstance()->UpdateMissionInfos(remoteId) != RET_OK) {
+        FI_HILOGE("UpdateMissionInfos failed, ret:%{public}d", ret);
+        return RET_ERR;
+    }
+    if (AcrossAbilityAdapter::GetInstance()->ContinueMission(bundleName, remoteId, localId) != RET_OK) {
+        FI_HILOGE("ContinueMission failed");
+        return RET_ERR;
+    }
 }
 
 void DragManager::StateChangedNotify(DragState state)

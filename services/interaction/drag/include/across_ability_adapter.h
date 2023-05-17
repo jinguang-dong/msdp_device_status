@@ -49,23 +49,19 @@ public:
         void OnContinueDone(int32_t result)override;
     };
 
-    int32_t RegisterMissionListener(const std::string &deviceId);
-    int32_t UnRegisterMissionListener(const std::string &deviceId);
-    int32_t UpdateMissionInfos(const std::string &deviceId);
-    int32_t ContinueMission(const std::string& bundleName);
+    int32_t RegisterMissionListener(const std::string &remoteId);
+    int32_t UnRegisterMissionListener(const std::string &remoteId);
+    int32_t UpdateMissionInfos(const std::string &remoteId);
+    int32_t ContinueMission(const std::string& bundleName, const std::string &remoteId, const std::string &localId);
     AAFwk::MissionInfo GetMissionInfo(const std::string &bundleName);
-    void InitDeviceId(const std::string &remoteDeviceId, const std::string &localDeviceId);
     void DispMissionInfo(const AAFwk::MissionInfo &missionInfo);
     void PrintCurrentMissionInfos();
-    int32_t ContinueNote();
 
 private:
     AcrossAbilityAdapter() = default;
     DISALLOW_COPY_AND_MOVE(AcrossAbilityAdapter);
     static AcrossAbilityAdapter *instance_;
     std::vector<AAFwk::MissionInfo> missionInfos_;
-    std::string remoteDeviceId_;
-    std::string localDeviceId_;
 };
 
 } // namespace DeviceStatus

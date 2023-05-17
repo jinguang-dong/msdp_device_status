@@ -65,38 +65,46 @@ void AcrossAbilityAdapter::ContinueMissionCallback::OnContinueDone(int32_t resul
     FI_HILOGD("result:%{public}d", result);
 }
 
-int32_t AcrossAbilityAdapter::RegisterMissionListener(const std::string &deviceId)
+/**
+ * 注册对远端设备Mission信息的监听
+*/
+int32_t AcrossAbilityAdapter::RegisterMissionListener(const std::string &remoteId)
 {
     CALL_DEBUG_ENTER;
     sptr<AAFwk::IRemoteMissionListener> listener = new (std::nothrow) AcrossAbilityAdapter::MissionListenerCallback();
+    CHKPR(listener, RET_ERR);
     ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->Connect();
     if (ret != ERR_OK) {
         FI_HILOGE("Connect sa failed, ret:%{public}d", ret);
         return RET_ERR;
     }
-    ret = AAFwk::AbilityManagerClient::GetInstance()->RegisterMissionListener(deviceId, listener);
+    ret = AAFwk::AbilityManagerClient::GetInstance()->RegisterMissionListener(remoteId, listener);
     if (ret != ERR_OK) {
         FI_HILOGE("RegisterMissionListener failed, ret:%{public}d", ret);
         return RET_ERR;
     }
     bool fixConflict = true;
     int64_t tag = 0;
-    if (AAFwk::AbilityManagerClient::GetInstance()->StartSyncRemoteMissions(deviceId, fixConflict, tag) != ERR_OK) {
+    if (AAFwk::AbilityManagerClient::GetInstance()->StartSyncRemoteMissions(remoteId, fixConflict, tag) != ERR_OK) {
         FI_HILOGE("StartSyncRemoteMissions failed");
         return RET_ERR;
     }
-    if (AcrossAbilityAdapter::GetInstance()->UpdateMissionInfos(deviceId) != RET_OK) {
+    if (AcrossAbilityAdapter::GetInstance()->UpdateMissionInfos(remoteId) != RET_OK) {
         FI_HILOGE("UpdateMissionInfos failed");
     }
     AcrossAbilityAdapter::GetInstance()->PrintCurrentMissionInfos();
     return RET_OK;
 }
 
-int32_t AcrossAbilityAdapter::UnRegisterMissionListener(const std::string &deviceId)
+/*
+取消对远端设备上应用信息的监听
+*/
+int32_t AcrossAbilityAdapter::UnRegisterMissionListener(const std::string &remoteId)
 {
     CALL_DEBUG_ENTER;
     sptr<AAFwk::IRemoteMissionListener> listener = new (std::nothrow) AcrossAbilityAdapter::MissionListenerCallback();
-    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->UnRegisterMissionListener(deviceId, listener);
+    CHKPR(listener, RET_ERR);
+    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->UnRegisterMissionListener(remoteId, listener);
     if (ret != ERR_OK) {
         FI_HILOGE("UnRegisterMissionListener failed, ret:%{public}d", ret);
         return RET_ERR;
@@ -104,11 +112,11 @@ int32_t AcrossAbilityAdapter::UnRegisterMissionListener(const std::string &devic
     return RET_OK;
 }
 
-int32_t AcrossAbilityAdapter::UpdateMissionInfos(const std::string &deviceId)
+int32_t AcrossAbilityAdapter::UpdateMissionInfos(const std::string &remoteId)
 {
     CALL_DEBUG_ENTER;
     missionInfos_.clear();
-    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfos(deviceId, MAX_MISSION_NUM, missionInfos_);
+    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfos(remoteId, MAX_MISSION_NUM, missionInfos_);
     if (ret != ERR_OK) {
         FI_HILOGE("GetMissionInfos failed, ret:%{public}d", ret);
         return RET_ERR;
@@ -117,7 +125,10 @@ int32_t AcrossAbilityAdapter::UpdateMissionInfos(const std::string &deviceId)
     return RET_OK;
 }
 
-int32_t AcrossAbilityAdapter::ContinueMission(const std::string& bundleName)
+/*
+    把bundleName 对应的应用从 remoteId 对应的设备流转到 localId 对应的本设备
+*/
+int32_t AcrossAbilityAdapter::ContinueMission(const std::string& bundleName, const std::string &remoteId, const std::string &localId)
 {
     CALL_DEBUG_ENTER;
     AAFwk::MissionInfo missionInfo = GetMissionInfo(bundleName);
@@ -128,20 +139,11 @@ int32_t AcrossAbilityAdapter::ContinueMission(const std::string& bundleName)
     AAFwk::WantParams wantParams = missionInfo.want.GetParams();
     sptr<IRemoteObject> callback = new (std::nothrow) ContinueMissionCallback();
     if (int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ContinueMission(
-        remoteDeviceId_, localDeviceId_, missionInfo.id, callback, wantParams); ret != ERR_OK) {
+        remoteId, localId, missionInfo.id, callback, wantParams); ret != ERR_OK) {
         FI_HILOGE("ContinueMission failed, %{public}d", ret);
         return RET_ERR;
     }
     return RET_OK;
-}
-
-int32_t AcrossAbilityAdapter::ContinueNote()
-{
-    CALL_DEBUG_ENTER;
-    std::string noteBundleName {"com.ohos.note"};
-    AAFwk::MissionInfo noteMissionInfo = GetMissionInfo(noteBundleName);
-    DispMissionInfo(noteMissionInfo);
-    return ContinueMission(noteBundleName);
 }
 
 AAFwk::MissionInfo AcrossAbilityAdapter::GetMissionInfo(const std::string &bundleName)
@@ -175,12 +177,6 @@ void AcrossAbilityAdapter::DispMissionInfo(const AAFwk::MissionInfo &missionInfo
     );
 }
 
-void AcrossAbilityAdapter::InitDeviceId(const std::string &remoteDeviceId, const std::string &localDeviceId)
-{
-    CALL_DEBUG_ENTER;
-    remoteDeviceId_ = remoteDeviceId;
-    localDeviceId_ = localDeviceId;
-}
 
 } // namespace DeviceStatus
 } // namespace Msdp

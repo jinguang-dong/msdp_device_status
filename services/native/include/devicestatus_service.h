@@ -106,7 +106,7 @@ private:
     int32_t EnableDevMgr(int32_t nRetries);
     void DisableDevMgr();
 
-    int32_t OnStartDrag(const DragData &dragData, int32_t pid);
+    int32_t OnStartDrag(const DragData &dragData, int32_t pid, const std::string &bundleName);
     int32_t OnStopDrag(DragResult result, bool hasCustomAnimation);
 
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
