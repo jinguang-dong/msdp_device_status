@@ -248,7 +248,7 @@ void DragManager::OnDragUp(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 
     SendDragData(pid, dragData.udKey);
     CHKPV(context_);
-    context_->GetTimerManager().AddTimer(TIMEOUT_MS, 1, [this]() {
+    timerId_ = context_->GetTimerManager().AddTimer(TIMEOUT_MS, 1, [this]() {
         this->StopDrag(DragResult::DRAG_EXCEPTION, false);
     });
 }
