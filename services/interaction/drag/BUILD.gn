@@ -71,9 +71,9 @@ ohos_shared_library("interaction_drag") {
   ]
 
   if (fusion_interaction_coordination) {
-      deps += [ 
-      "../coordination:coordination"
-      ]
+    deps += [ 
+     "../coordination:coordination"
+    ]
   }
 
   if (fusion_interaction_coordination) {
