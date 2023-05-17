@@ -193,10 +193,10 @@ bool DeviceStatusService::Init()
         goto INIT_FAIL;
     }
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    if (motionDrag_.Init(this) != RET_OK) {
-        FI_HILOGE("Drag adapter init failed");
-        goto INIT_FAIL;
-    }
+    // if (motionDrag_.Init(this) != RET_OK) {
+    //     FI_HILOGE("Drag adapter init failed");
+    //     goto INIT_FAIL;
+    // }
 #endif // OHOS_BUILD_ENABLE_COORDINATION
     if (deviceStatusDumper_.Init(this) != RET_OK) {
         FI_HILOGE("Dump init failed");

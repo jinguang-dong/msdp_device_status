@@ -120,14 +120,10 @@ HWTEST_F(TestAcrossByUT, test_across_by_ut, TestSize.Level1)
             std::string bundleName;
             std::cout << "Input bundleName to continue" << std::endl;
             getline(std::cin, bundleName);
-            if (AcrossAbilityAdapter::GetInstance()->ContinueMission(bundleName) != RET_OK) {
+            if (AcrossAbilityAdapter::GetInstance()->ContinueMission(bundleName, remoteDeviceId, localDeviceId) != RET_OK) {
                 std::cout << "continueCustom failed" << std::endl;
             }
-        } else if (op == "continueNote") {
-            if (AcrossAbilityAdapter::GetInstance()->ContinueNote() != RET_OK) {
-                std::cout << "ContinueNote failed" << std::endl;
-            }
-        } else if (op == "UnReg") {
+        }  else if (op == "UnReg") {
             std::cout << "----Start UnRegisterMissionListener----" << std::endl;
             if (AcrossAbilityAdapter::GetInstance()->UnRegisterMissionListener(remoteDeviceId) != RET_OK) {
                 std::cout << "----UnRegisterMissionListener failed----" << std::endl;

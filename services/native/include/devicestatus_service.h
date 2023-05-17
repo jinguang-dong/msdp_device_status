@@ -31,7 +31,7 @@
 #include "drag_manager.h"
 #include "i_context.h"
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-#include "motion_drag.h"
+// #include "motion_drag.h"
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 #include "stationary_callback.h"
 #include "stationary_data.h"
@@ -130,7 +130,7 @@ private:
     std::shared_ptr<DeviceStatusManager> devicestatusManager_;
     DragManager dragMgr_;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    MotionDrag motionDrag_;
+    // MotionDrag motionDrag_;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
     DeviceStatusDumper deviceStatusDumper_;
 };

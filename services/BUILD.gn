@@ -13,7 +13,7 @@
 
 import("../device_status.gni")
 if (fusion_interaction_coordination) {
-  import("//base/msdp/motion/motion.gni")
+#   import("//base/msdp/motion/motion.gni")
 }
 config("devicestatus_services_private_config") {
   include_dirs = [
@@ -32,7 +32,7 @@ config("devicestatus_services_private_config") {
   ]
 
   if (fusion_interaction_coordination) {
-    include_dirs += [ "${motion_service_path}/native/include" ]
+    # include_dirs += [ "${motion_service_path}/native/include" ]
   }
 
   defines = device_status_default_defines
@@ -101,7 +101,7 @@ ohos_shared_library("devicestatus_service") {
 
   if (fusion_interaction_coordination) {
     deps += [
-      "${motion_service_path}:motion_drag",
+    #   "${motion_service_path}:motion_drag",
       "interaction/coordination:coordination",
     ]
   }
@@ -134,7 +134,7 @@ ohos_static_library("devicestatus_static_service") {
 
   if (fusion_interaction_coordination) {
     deps += [
-      "${motion_service_path}:motion_drag",
+    #   "${motion_service_path}:motion_drag",
       "interaction/coordination:coordination",
     ]
   }
