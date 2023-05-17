@@ -127,9 +127,9 @@ int32_t DragManager::StopDrag(DragResult result, bool hasCustomAnimation)
     }
     DRAG_DATA_MGR.ResetDragData();
     dragResult_ = static_cast<DragResult>(result);
-    if (CooSM->GetCurrentCoordinationState() == CoordinationState::STATE_IN) {
-        auto bundleName = DRAG_DATA_MGR.GetPackageName();
-        auto remoteId = CooSM->GetRemoteId();
+    if (COOR_SM->GetCurrentCoordinationState() == CoordinationState::STATE_IN) {
+        auto bundleName = DRAG_DATA_MGR.GetBundleName();
+        auto remoteId = COOR_SM->GetRemoteId();
         auto localId = COORDINATION::GetLocalNetworkId();
         if (ContinueMission(bundleName, remoteId, localId) != RET_OK) {
             FI_HILOGE("ContinueMission failed");
@@ -227,18 +227,18 @@ void DragManager::SendDragData(int32_t targetPid, const std::string &udKey)
 {
     CALL_DEBUG_ENTER;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    UDMF::QueryOption option;
-    option.key = udKey;
-    UDMF::Privilege privilege;
-    privilege.pid = targetPid;
-    FI_HILOGD("AddPrivilege enter");
-    int32_t ret = UDMF::UdmfClient::GetInstance().AddPrivilege(option, privilege);
-    if (ret != RET_OK) {
-        FI_HILOGE("Failed to send pid to Udmf client");
-    }
+    // UDMF::QueryOption option;
+    // option.key = udKey;
+    // UDMF::Privilege privilege;
+    // privilege.pid = targetPid;
+    // FI_HILOGD("AddPrivilege enter");
+    // int32_t ret = UDMF::UdmfClient::GetInstance().AddPrivilege(option, privilege);
+    // if (ret != RET_OK) {
+    //     FI_HILOGE("Failed to send pid to Udmf client");
+    // }
 #else
-    (void)(targetPid);
-    (void)(udKey);
+    // (void)(targetPid);
+    // (void)(udKey);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -563,7 +563,7 @@ int32_t DragManager::ContinueMission(const std::string& bundleName, const std::s
 {
     CALL_DEBUG_ENTER;
     if (AcrossAbilityAdapter::GetInstance()->UpdateMissionInfos(remoteId) != RET_OK) {
-        FI_HILOGE("UpdateMissionInfos failed, ret:%{public}d", ret);
+        FI_HILOGE("UpdateMissionInfos failed");
         return RET_ERR;
     }
     if (AcrossAbilityAdapter::GetInstance()->ContinueMission(bundleName, remoteId, localId) != RET_OK) {
