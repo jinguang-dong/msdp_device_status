@@ -76,8 +76,11 @@ ohos_shared_library("interaction_drag") {
     ]
   }
 
-  if (fusion_interaction_coordination) {
-   external_deps += [ "udmf:udmf_client" ]
+if (fusion_interaction_coordination) {
+    external_deps += [
+      "device_manager:devicemanagersdk",
+      "distributed_input:libdinput_sdk",
+    ]
   }
 
   subsystem_name = "${device_status_subsystem_name}"
