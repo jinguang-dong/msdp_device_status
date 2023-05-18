@@ -141,6 +141,8 @@ int32_t DragManager::StopDrag(DragResult result, bool hasCustomAnimation)
         auto bundleName = DRAG_DATA_MGR.GetBundleName();
         auto remoteId = COOR_SM->GetRemoteId();
         auto localId = COORDINATION::GetLocalNetworkId();
+        FI_HILOGI("bundleName:%{public}s, remoteId:%{public}s, localId%{public}s",
+            bundleName.c_str(), remoteId.c_str(), localId.c_str());
         if (ContinueMission(bundleName, remoteId, localId) != RET_OK) {
             FI_HILOGE("ContinueMission failed");
             return RET_ERR;
