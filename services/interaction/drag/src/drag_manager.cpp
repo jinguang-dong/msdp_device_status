@@ -49,7 +49,16 @@ int32_t DragManager::Init(IContext* context)
     CALL_INFO_TRACE;
     CHKPR(context, RET_ERR);
     context_ = context;
+    COOR_SM->RegisterAcrossAbility(std::bind(&DragManager::RegisterMissionListener, this, std::placeholders::_1));
     return RET_OK;
+}
+
+void DragManager::RegisterMissionListener(const std::string &remoteId)
+{
+    CALL_DEBUG_ENTER;
+    if (AcrossAbilityAdapter::GetInstance()->RegisterMissionListener(remoteId) != RET_OK) {
+        FI_HILOGE("RegisterMissionListener failed");
+    }
 }
 
 void DragManager::OnSessionLost(SessionPtr session)

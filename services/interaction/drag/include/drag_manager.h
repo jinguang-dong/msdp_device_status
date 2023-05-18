@@ -59,6 +59,7 @@ public:
     void RegisterStateChange(std::function<void(DragState)> callback) override;
     void SetBundleName(const std::string &bundleName);
     int32_t ContinueMission(const std::string& bundleName, const std::string &remoteId, const std::string &localId);
+    void RegisterMissionListener(const std::string &remoteId);
     class InterceptorConsumer final : public MMI::IInputEventConsumer {
     public:
         InterceptorConsumer(IContext *context,
