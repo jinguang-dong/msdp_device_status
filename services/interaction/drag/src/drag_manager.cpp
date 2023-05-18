@@ -31,6 +31,7 @@
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
 // #include "udmf_client.h"
 // #include "unified_types.h"
+#include "coordination_util.h"
 #include "coordination_sm.h"
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 
