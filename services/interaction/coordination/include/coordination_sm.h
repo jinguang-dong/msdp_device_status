@@ -161,6 +161,7 @@ public:
     void RegisterStateChange(CooStateChangeType type,
         std::function<void(CoordinationState, CoordinationState)> callback);
     std::string GetRemoteId() const;
+    void RegisterAcrossAbility(std::function<void(const std::string &)> callback);
 
 private:
     void Reset(bool adjustAbsolutionLocation = false);
@@ -171,6 +172,7 @@ private:
     bool UpdateMouseLocation();
     void StateChangedNotify(CoordinationState oldState, CoordinationState newState);
     void ChangeNotify(CooStateChangeType type, CoordinationState oldState, CoordinationState newState);
+    void ExecuteAcrossAbilityCallback(const std::string &remoteId);
 
 private:
     std::shared_ptr<ICoordinationState> currentStateSM_ { nullptr };
@@ -192,6 +194,7 @@ private:
     int32_t monitorId_ { -1 };
     int32_t filterId_ { -1 };
     std::map<CooStateChangeType, std::function<void(CoordinationState, CoordinationState)>> stateChangedCallbacks_;
+    std::function<void(const std::string &)> acrossAbilityCallback_;
 };
 
 #define DIS_HARDWARE DistributedHardware::DeviceManager::GetInstance()

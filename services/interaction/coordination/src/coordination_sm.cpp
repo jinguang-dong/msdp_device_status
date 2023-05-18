@@ -317,11 +317,13 @@ void CoordinationSM::StartRemoteCoordinationResult(bool isSuccess,
     if (coordinationState_ == CoordinationState::STATE_FREE) {
         SetAbsolutionLocation(MOUSE_ABS_LOCATION - xPercent, yPercent);
         UpdateState(CoordinationState::STATE_IN);
+        ExecuteAcrossAbilityCallback(COOR_DEV_MGR->GetOriginNetworkId(startDeviceDhid_));
         StateChangedNotify(CoordinationState::STATE_FREE, CoordinationState::STATE_IN);
     }
     if (coordinationState_ == CoordinationState::STATE_OUT) {
         SetAbsolutionLocation(MOUSE_ABS_LOCATION - xPercent, yPercent);
         UpdateState(CoordinationState::STATE_FREE);
+        ExecuteAcrossAbilityCallback(remoteNetworkId_);
         StateChangedNotify(CoordinationState::STATE_OUT, CoordinationState::STATE_FREE);
     }
     isStarting_ = false;
@@ -373,6 +375,7 @@ void CoordinationSM::OnStartFinish(bool isSuccess,
         NotifyRemoteStartSuccess(remoteNetworkId, startDeviceDhid_);
         if (coordinationState_ == CoordinationState::STATE_FREE) {
             UpdateState(CoordinationState::STATE_OUT);
+            ExecuteAcrossAbilityCallback(remoteNetworkId);
             StateChangedNotify(CoordinationState::STATE_FREE, CoordinationState::STATE_OUT);
         } else if (coordinationState_ == CoordinationState::STATE_IN) {
             std::string originNetworkId = COOR_DEV_MGR->GetOriginNetworkId(startDeviceId);
@@ -380,6 +383,7 @@ void CoordinationSM::OnStartFinish(bool isSuccess,
                 COOR_SOFTBUS_ADAPTER->StartCoordinationOtherResult(originNetworkId, remoteNetworkId);
             }
             UpdateState(CoordinationState::STATE_FREE);
+            ExecuteAcrossAbilityCallback(originNetworkId);
             StateChangedNotify(CoordinationState::STATE_IN, CoordinationState::STATE_FREE);
         } else {
             FI_HILOGI("Current state is out");
@@ -403,6 +407,7 @@ void CoordinationSM::OnStopFinish(bool isSuccess, const std::string &remoteNetwo
         }
         if (coordinationState_ == CoordinationState::STATE_IN || coordinationState_ == CoordinationState::STATE_OUT) {
             UpdateState(CoordinationState::STATE_FREE);
+            ExecuteAcrossAbilityCallback(remoteNetworkId);
             StateChangedNotify(coordinationState_, CoordinationState::STATE_FREE);
         } else {
             FI_HILOGI("Current state is free");
@@ -881,6 +886,18 @@ std::string CoordinationSM::GetRemoteId() const
     std::lock_guard<std::mutex> guard(mutex_);
     return remoteNetworkId_;
 }
+
+void CoordinationSM::ExecuteAcrossAbilityCallback(const std::string &remoteId)
+{
+    CHKPV(acrossAbilityCallback_);
+    acrossAbilityCallback_(remoteId);
+}
+
+void CoordinationSM::RegisterAcrossAbility(std::function<void(const std::string &)> callback)
+{
+    acrossAbilityCallback_ = callback;
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

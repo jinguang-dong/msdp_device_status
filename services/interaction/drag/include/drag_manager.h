@@ -57,6 +57,9 @@ public:
     int32_t OnGetShadowOffset(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height);
     void Dump(int32_t fd) const override;
     void RegisterStateChange(std::function<void(DragState)> callback) override;
+    void SetBundleName(const std::string &bundleName);
+    int32_t ContinueMission(const std::string& bundleName, const std::string &remoteId, const std::string &localId);
+    void RegisterMissionListener(const std::string &remoteId);
     class InterceptorConsumer final : public MMI::IInputEventConsumer {
     public:
         InterceptorConsumer(IContext *context,

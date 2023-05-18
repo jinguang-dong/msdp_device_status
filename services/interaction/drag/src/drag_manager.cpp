@@ -15,6 +15,7 @@
 
 #include "drag_manager.h"
 
+#include "across_ability_adapter.h"
 #include "extra_data.h"
 #include "hitrace_meter.h"
 #include "input_manager.h"
@@ -28,8 +29,10 @@
 #include "proto.h"
 
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-#include "udmf_client.h"
-#include "unified_types.h"
+// #include "udmf_client.h"
+// #include "unified_types.h"
+#include "coordination_util.h"
+#include "coordination_sm.h"
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 
 namespace OHOS {
@@ -46,7 +49,16 @@ int32_t DragManager::Init(IContext* context)
     CALL_INFO_TRACE;
     CHKPR(context, RET_ERR);
     context_ = context;
+    COOR_SM->RegisterAcrossAbility(std::bind(&DragManager::RegisterMissionListener, this, std::placeholders::_1));
     return RET_OK;
+}
+
+void DragManager::RegisterMissionListener(const std::string &remoteId)
+{
+    CALL_DEBUG_ENTER;
+    if (AcrossAbilityAdapter::GetInstance()->RegisterMissionListener(remoteId) != RET_OK) {
+        FI_HILOGE("RegisterMissionListener failed");
+    }
 }
 
 void DragManager::OnSessionLost(SessionPtr session)
@@ -125,6 +137,17 @@ int32_t DragManager::StopDrag(DragResult result, bool hasCustomAnimation)
     }
     DRAG_DATA_MGR.ResetDragData();
     dragResult_ = static_cast<DragResult>(result);
+    if (COOR_SM->GetCurrentCoordinationState() == CoordinationState::STATE_IN) {
+        auto bundleName = DRAG_DATA_MGR.GetBundleName();
+        auto remoteId = COOR_SM->GetRemoteId();
+        auto localId = COORDINATION::GetLocalNetworkId();
+        FI_HILOGI("bundleName:%{public}s, remoteId:%{public}s, localId%{public}s",
+            bundleName.c_str(), remoteId.c_str(), localId.c_str());
+        if (ContinueMission(bundleName, remoteId, localId) != RET_OK) {
+            FI_HILOGE("ContinueMission failed");
+            return RET_ERR;
+        }
+    }
     return ret;
 }
 
@@ -216,18 +239,18 @@ void DragManager::SendDragData(int32_t targetPid, const std::string &udKey)
 {
     CALL_DEBUG_ENTER;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    UDMF::QueryOption option;
-    option.key = udKey;
-    UDMF::Privilege privilege;
-    privilege.pid = targetPid;
-    FI_HILOGD("AddPrivilege enter");
-    int32_t ret = UDMF::UdmfClient::GetInstance().AddPrivilege(option, privilege);
-    if (ret != RET_OK) {
-        FI_HILOGE("Failed to send pid to Udmf client");
-    }
+    // UDMF::QueryOption option;
+    // option.key = udKey;
+    // UDMF::Privilege privilege;
+    // privilege.pid = targetPid;
+    // FI_HILOGD("AddPrivilege enter");
+    // int32_t ret = UDMF::UdmfClient::GetInstance().AddPrivilege(option, privilege);
+    // if (ret != RET_OK) {
+    //     FI_HILOGE("Failed to send pid to Udmf client");
+    // }
 #else
-    (void)(targetPid);
-    (void)(udKey);
+    // (void)(targetPid);
+    // (void)(udKey);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -540,6 +563,25 @@ void DragManager::RegisterStateChange(std::function<void(DragState)> callback)
     CALL_DEBUG_ENTER;
     CHKPV(callback);
     stateChangedCallback_ = callback;
+}
+
+void DragManager::SetBundleName(const std::string &bundleName)
+{
+    CALL_DEBUG_ENTER;
+    DRAG_DATA_MGR.SetBundleName(bundleName);
+}
+
+int32_t DragManager::ContinueMission(const std::string& bundleName, const std::string &remoteId, const std::string &localId)
+{
+    CALL_DEBUG_ENTER;
+    if (AcrossAbilityAdapter::GetInstance()->UpdateMissionInfos(remoteId) != RET_OK) {
+        FI_HILOGE("UpdateMissionInfos failed");
+        return RET_ERR;
+    }
+    if (AcrossAbilityAdapter::GetInstance()->ContinueMission(bundleName, remoteId, localId) != RET_OK) {
+        FI_HILOGE("ContinueMission failed");
+        return RET_ERR;
+    }
 }
 
 void DragManager::StateChangedNotify(DragState state)
