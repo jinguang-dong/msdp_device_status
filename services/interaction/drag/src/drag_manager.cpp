@@ -49,7 +49,9 @@ int32_t DragManager::Init(IContext* context)
     CALL_INFO_TRACE;
     CHKPR(context, RET_ERR);
     context_ = context;
+    #ifdef OHOS_BUILD_ENABLE_COORDINATION
     COOR_SM->RegisterAcrossAbility(std::bind(&DragManager::RegisterMissionListener, this, std::placeholders::_1));
+    #endif //OHOS_BUILD_ENABLE_COORDINATION
     return RET_OK;
 }
 
