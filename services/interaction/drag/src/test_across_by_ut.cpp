@@ -103,8 +103,6 @@ HWTEST_F(TestAcrossByUT, test_across_by_ut, TestSize.Level1)
     std::getline(std::cin, localDeviceId);
     std::cout << "localDeviceId: " << localDeviceId << std::endl;
 
-    AcrossAbilityAdapter::GetInstance()->InitDeviceId(remoteDeviceId, localDeviceId);
-    
     std::cout << "----Start RegisterMissionListener----" << std::endl;
     if (AcrossAbilityAdapter::GetInstance()->RegisterMissionListener(remoteDeviceId) != RET_OK) {
         std::cout << "RegisterMissionListener failed" << std::endl;
