@@ -137,6 +137,7 @@ int32_t DragManager::StopDrag(DragResult result, bool hasCustomAnimation)
     }
     DRAG_DATA_MGR.ResetDragData();
     dragResult_ = static_cast<DragResult>(result);
+    #ifdef OHOS_BUILD_ENABLE_COORDINATION
     if (COOR_SM->GetCurrentCoordinationState() == CoordinationState::STATE_IN) {
         auto bundleName = DRAG_DATA_MGR.GetBundleName();
         auto remoteId = COOR_SM->GetRemoteId();
@@ -148,6 +149,7 @@ int32_t DragManager::StopDrag(DragResult result, bool hasCustomAnimation)
             return RET_ERR;
         }
     }
+    #endif // OHOS_BUILD_ENABLE_COORDINATION
     return ret;
 }
 
