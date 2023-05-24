@@ -30,7 +30,7 @@ using namespace OHOS;
 using namespace OHOS::Msdp;
 using namespace OHOS::Msdp::DeviceStatus;
 namespace {
-constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceStatusCallback" };
+constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceStatusNapi" };
 constexpr size_t ARG_0 = 0;
 constexpr size_t ARG_1 = 1;
 constexpr size_t ARG_2 = 2;
@@ -296,7 +296,7 @@ std::tuple<bool, napi_value, int32_t, int32_t, bool> DeviceStatusNapi::CheckUnsu
             return result;
         }
     }
-    FI_HILOGD("Type: %{public}d, event: %{public}d", type, event);
+    FI_HILOGD("Type:%{public}d, event:%{public}d", type, event);
     return std::make_tuple(true, args[ARG_2], type, event, isArgumentsValid);
 }
 
@@ -468,7 +468,7 @@ napi_value DeviceStatusNapi::GetDeviceStatus(napi_env env, napi_callback_info in
     }
     Data devicestatusData = StationaryManager::GetInstance()->GetDeviceStatusData(Type(type));
     if (devicestatusData.type == Type::TYPE_INVALID) {
-        ThrowErr(env, SERVICE_EXCEPTION, "Once:Failed to GetDeviceStatusData");
+        ThrowErr(env, SERVICE_EXCEPTION, "Once:Failed to get device status data");
     }
     g_obj->OnDeviceStatusChangedDone(devicestatusData.type, devicestatusData.value, true);
     g_obj->OffOnce(devicestatusData.type, handler);

@@ -48,7 +48,7 @@ bool DeviceStatusEvent::On(int32_t eventType, napi_value handler, bool isOnce)
 {
     FI_HILOGD("On for event:%{public}d, isOnce:%{public}d", eventType, isOnce);
     if ((eventMap_.size() > EVENT_MAP_MAX) || (eventOnceMap_.size() > EVENT_MAP_MAX)) {
-        FI_HILOGE("EventMap_ or eventOnceMap_  size over");
+        FI_HILOGE("EventMap_ or eventOnceMap_ size over");
         return false;
     }
     napi_handle_scope scope = nullptr;
@@ -98,7 +98,7 @@ bool DeviceStatusEvent::Off(int32_t eventType, napi_value handler)
     FI_HILOGD("DeviceStatusEvent off in for event:%{public}d", eventType);
     auto iter = eventMap_.find(eventType);
     if (iter == eventMap_.end()) {
-        FI_HILOGE("EventType %{public}d not find", eventType);
+        FI_HILOGE("EventType %{public}d not found", eventType);
         return false;
     }
     bool equal = false;
@@ -132,10 +132,10 @@ bool DeviceStatusEvent::Off(int32_t eventType, napi_value handler)
 
 bool DeviceStatusEvent::OffOnce(int32_t eventType, napi_value handler)
 {
-    FI_HILOGD("DeviceStatusEvent OffOnce in for event:%{public}d", eventType);
+    FI_HILOGD("Off once in for event:%{public}d", eventType);
     auto iter = eventOnceMap_.find(eventType);
     if (iter == eventOnceMap_.end()) {
-        FI_HILOGE("EventType %{public}d not find", eventType);
+        FI_HILOGE("EventType %{public}d not found", eventType);
         return false;
     }
     bool equal = false;
@@ -163,7 +163,7 @@ bool DeviceStatusEvent::RemoveAllCallback(int32_t eventType)
     CALL_DEBUG_ENTER;
     auto iter = eventMap_.find(eventType);
     if (iter == eventMap_.end()) {
-        FI_HILOGE("EvenType %{public}d not find", eventType);
+        FI_HILOGE("EvenType %{public}d not found", eventType);
         return false;
     }
     eventMap_.erase(eventType);
