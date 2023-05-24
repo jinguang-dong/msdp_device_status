@@ -58,7 +58,7 @@ void DeviceStatusCallback::OnDeviceStatusChanged(const Data& devicestatusData)
     CHKPV(loop);
     uv_work_t *work = new (std::nothrow) uv_work_t;
     CHKPV(work);
-    FI_HILOGD("devicestatusData.type:%{public}d, devicestatusData.value:%{public}d",
+    FI_HILOGD("DevicestatusData.type:%{public}d, devicestatusData.value:%{public}d",
         devicestatusData.type, devicestatusData.value);
     data_ = devicestatusData;
     work->data = static_cast<void *>(&data_);
@@ -77,7 +77,7 @@ void DeviceStatusCallback::EmitOnEvent(uv_work_t *work, int status)
     CHKPV(deviceStatusNapi);
     int32_t type = static_cast<int32_t>(data->type);
     int32_t value = static_cast<int32_t>(data->value);
-    FI_HILOGD("type:%{public}d, value:%{public}d", type, value);
+    FI_HILOGD("Type:%{public}d, Value:%{public}d", type, value);
     deviceStatusNapi->OnDeviceStatusChangedDone(type, value, false);
 }
 
@@ -115,7 +115,7 @@ DeviceStatusNapi::~DeviceStatusNapi()
 void DeviceStatusNapi::OnDeviceStatusChangedDone(int32_t type, int32_t value, bool isOnce)
 {
     CALL_DEBUG_ENTER;
-    FI_HILOGD("value:%{public}d", value);
+    FI_HILOGD("Value:%{public}d", value);
     OnEvent(type, ARG_1, value, isOnce);
 }
 
@@ -156,7 +156,7 @@ bool DeviceStatusNapi::CheckArguments(napi_env env, napi_callback_info info)
             FI_HILOGE("Failed to get valueType");
             return false;
         }
-        FI_HILOGD("valueType:%{public}d", valueType);
+        FI_HILOGD("ValueType:%{public}d", valueType);
         arr[i] = valueType;
     }
     if (arr[ARG_0] != napi_string || arr[ARG_1] != napi_number || arr[ARG_2] != napi_number ||
@@ -197,7 +197,7 @@ bool DeviceStatusNapi::CheckGetArguments(napi_env env, napi_callback_info info)
             FI_HILOGE("Failed to get valueType");
             return false;
         }
-        FI_HILOGD("valueType:%{public}d", valueType);
+        FI_HILOGD("ValueType:%{public}d", valueType);
         arr[i] = valueType;
     }
     if (arr[ARG_0] != napi_string || arr[ARG_1] != napi_function) {
@@ -275,7 +275,7 @@ std::tuple<bool, napi_value, int32_t, int32_t, bool> DeviceStatusNapi::CheckUnsu
     }
     int32_t type = DeviceStatusNapi::ConvertTypeToInt(mode);
     if ((type < Type::TYPE_ABSOLUTE_STILL) || (type > Type::TYPE_LID_OPEN)) {
-        ThrowErr(env, PARAM_ERROR, "type is illegal");
+        ThrowErr(env, PARAM_ERROR, "Type is illegal");
         return result;
     }
     int32_t event = 0;
@@ -285,7 +285,7 @@ std::tuple<bool, napi_value, int32_t, int32_t, bool> DeviceStatusNapi::CheckUnsu
         return result;
     }
     if ((event < ActivityEvent::ENTER) || (event > ActivityEvent::ENTER_EXIT)) {
-        ThrowErr(env, PARAM_ERROR, "event is illegal");
+        ThrowErr(env, PARAM_ERROR, "Event is illegal");
         return result;
     }
     bool isArgumentsValid = false;
@@ -296,7 +296,7 @@ std::tuple<bool, napi_value, int32_t, int32_t, bool> DeviceStatusNapi::CheckUnsu
             return result;
         }
     }
-    FI_HILOGD("type: %{public}d, event: %{public}d", type, event);
+    FI_HILOGD("Type: %{public}d, event: %{public}d", type, event);
     return std::make_tuple(true, args[ARG_2], type, event, isArgumentsValid);
 }
 
@@ -328,7 +328,7 @@ std::tuple<bool, napi_value, int32_t> DeviceStatusNapi::CheckGetParam(napi_env e
     }
     int32_t type = ConvertTypeToInt(mode);
     if ((type < Type::TYPE_ABSOLUTE_STILL) || (type > Type::TYPE_LID_OPEN)) {
-        ThrowErr(env, PARAM_ERROR, "type is illegal");
+        ThrowErr(env, PARAM_ERROR, "Type is illegal");
         return result;
     }
     return std::make_tuple(true, args[ARG_1], type);
@@ -355,7 +355,7 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatusCallback(napi_env env, napi_ca
         },
         nullptr, &(g_obj->callbackRef_));
     if (!g_obj->On(type, handler, false)) {
-        FI_HILOGE("type:%{public}d already exists", type);
+        FI_HILOGE("Type:%{public}d already exists", type);
         return nullptr;
     }
     auto callbackIter = callbackMap_.find(type);
@@ -366,13 +366,13 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatusCallback(napi_env env, napi_ca
     sptr<IRemoteDevStaCallback> callback;
     callback = new (std::nothrow) DeviceStatusCallback(env);
     if (callback == nullptr) {
-        FI_HILOGE("callback is nullptr");
+        FI_HILOGE("Callback is nullptr");
         return nullptr;
     }
     auto subscribeRet = StationaryManager::GetInstance()->SubscribeCallback(Type(type),
         ActivityEvent(event), ReportLatencyNs(latency), callback);
     if (subscribeRet != RET_OK) {
-        ThrowErr(env, SERVICE_EXCEPTION, "on: Failed to SubscribeCallback");
+        ThrowErr(env, SERVICE_EXCEPTION, "On:Failed to SubscribeCallback");
         return nullptr;
     }
     auto ret = callbackMap_.insert(std::pair<int32_t, sptr<IRemoteDevStaCallback>>(type, callback));
@@ -388,21 +388,21 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatus(napi_env env, napi_callback_i
     CALL_DEBUG_ENTER;
     const auto [ret, handler, typeMode, event, latency] = CheckSubscribeParam(env, info);
     if (!ret) {
-        FI_HILOGE("on: SubscribeDeviceStatus is failed");
+        FI_HILOGE("On:SubscribeDeviceStatus is failed");
         return nullptr;
     }
     int32_t type = ConvertTypeToInt(typeMode);
-    FI_HILOGD("type:%{public}d, event:%{public}d, latency:%{public}d", type, event, latency);
+    FI_HILOGD("Type:%{public}d, event:%{public}d, latency:%{public}d", type, event, latency);
     if ((type < Type::TYPE_ABSOLUTE_STILL) || (type > Type::TYPE_LID_OPEN)) {
-        ThrowErr(env, PARAM_ERROR, "type is illegal");
+        ThrowErr(env, PARAM_ERROR, "Type is illegal");
         return nullptr;
     }
     if ((event < ActivityEvent::ENTER) || (event > ActivityEvent::ENTER_EXIT)) {
-        ThrowErr(env, PARAM_ERROR, "event is illegal");
+        ThrowErr(env, PARAM_ERROR, "Event is illegal");
         return nullptr;
     }
     if ((latency < ReportLatencyNs::SHORT) || (latency > ReportLatencyNs::LONG)) {
-        ThrowErr(env, PARAM_ERROR, "latency is illegal");
+        ThrowErr(env, PARAM_ERROR, "Latency is illegal");
         return nullptr;
     }
     return SubscribeDeviceStatusCallback(env, info, handler, type, event, latency);
@@ -412,12 +412,12 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
 {
     CALL_DEBUG_ENTER;
     if (g_obj == nullptr) {
-        FI_HILOGE("g_obj is nullptr");
+        FI_HILOGE("G_obj is nullptr");
         return nullptr;
     }
     const auto [ret, handler, type, event, isArgumentsValid] = CheckUnsubscribeParam(env, info);
     if (!ret) {
-        FI_HILOGE("off: UnsubscribeDeviceStatus is failed");
+        FI_HILOGE("Off:UnsubscribeDeviceStatus is failed");
         return nullptr;
     }
     if (!isArgumentsValid && !g_obj->Off(type, handler)) {
@@ -429,7 +429,7 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
         auto unsubscribeRet = StationaryManager::GetInstance()->UnsubscribeCallback(Type(type),
             ActivityEvent(event), callbackIter->second);
         if (unsubscribeRet != RET_OK) {
-            ThrowErr(env, SERVICE_EXCEPTION, "off: Failed to UnsubscribeCallback");
+            ThrowErr(env, SERVICE_EXCEPTION, "Off:Failed to UnsubscribeCallback");
         }
         callbackMap_.erase(type);
     } else {
@@ -444,7 +444,7 @@ napi_value DeviceStatusNapi::GetDeviceStatus(napi_env env, napi_callback_info in
     CALL_DEBUG_ENTER;
     const auto [ret, handler, type] = CheckGetParam(env, info);
     if (!ret) {
-        FI_HILOGE("once: GetDeviceStatus is failed");
+        FI_HILOGE("Once:GetDeviceStatus is failed");
         return nullptr;
     }
     if (g_obj == nullptr) {
@@ -463,12 +463,12 @@ napi_value DeviceStatusNapi::GetDeviceStatus(napi_env env, napi_callback_info in
             nullptr, &(g_obj->callbackRef_));
     }
     if (!g_obj->On(type, handler, true)) {
-        FI_HILOGE("type:%{public}d already exists", type);
+        FI_HILOGE("Type:%{public}d already exists", type);
         return nullptr;
     }
     Data devicestatusData = StationaryManager::GetInstance()->GetDeviceStatusData(Type(type));
     if (devicestatusData.type == Type::TYPE_INVALID) {
-        ThrowErr(env, SERVICE_EXCEPTION, "once: Failed to GetDeviceStatusData");
+        ThrowErr(env, SERVICE_EXCEPTION, "Once:Failed to GetDeviceStatusData");
     }
     g_obj->OnDeviceStatusChangedDone(devicestatusData.type, devicestatusData.value, true);
     g_obj->OffOnce(devicestatusData.type, handler);

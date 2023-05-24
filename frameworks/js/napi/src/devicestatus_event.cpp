@@ -23,6 +23,7 @@
 #include "napi/native_node_api.h"
 
 #include "devicestatus_common.h"
+#include "devicestatus_define.h"
 
 using namespace OHOS::Msdp;
 using namespace OHOS::Msdp::DeviceStatus;
@@ -47,7 +48,7 @@ bool DeviceStatusEvent::On(int32_t eventType, napi_value handler, bool isOnce)
 {
     FI_HILOGD("On for event:%{public}d, isOnce:%{public}d", eventType, isOnce);
     if ((eventMap_.size() > EVENT_MAP_MAX) || (eventOnceMap_.size() > EVENT_MAP_MAX)) {
-        FI_HILOGE("eventMap_ or eventOnceMap_  size over");
+        FI_HILOGE("EventMap_ or eventOnceMap_  size over");
         return false;
     }
     napi_handle_scope scope = nullptr;
@@ -58,7 +59,7 @@ bool DeviceStatusEvent::On(int32_t eventType, napi_value handler, bool isOnce)
     if (isOnce) {
         auto iter = eventOnceMap_.find(eventType);
         if (iter == eventOnceMap_.end()) {
-            FI_HILOGD("eventType:%{public}d not exists", eventType);
+            FI_HILOGD("EventType:%{public}d not exists", eventType);
             eventOnceMap_[eventType] = std::list<std::shared_ptr<DeviceStatusEventListener>>();
         }
         auto listener = std::make_shared<DeviceStatusEventListener>();
@@ -74,7 +75,7 @@ bool DeviceStatusEvent::On(int32_t eventType, napi_value handler, bool isOnce)
     } else {
         auto iter = eventMap_.find(eventType);
         if (iter == eventMap_.end()) {
-            FI_HILOGD("eventType:%{public}d not exists", eventType);
+            FI_HILOGD("EventType:%{public}d not exists", eventType);
             eventMap_[eventType] = std::list<std::shared_ptr<DeviceStatusEventListener>>();
         }
         auto listener = std::make_shared<DeviceStatusEventListener>();
@@ -97,7 +98,7 @@ bool DeviceStatusEvent::Off(int32_t eventType, napi_value handler)
     FI_HILOGD("DeviceStatusEvent off in for event:%{public}d", eventType);
     auto iter = eventMap_.find(eventType);
     if (iter == eventMap_.end()) {
-        FI_HILOGE("eventType %{public}d not find", eventType);
+        FI_HILOGE("EventType %{public}d not find", eventType);
         return false;
     }
     bool equal = false;
@@ -115,7 +116,7 @@ bool DeviceStatusEvent::Off(int32_t eventType, napi_value handler)
             return false;
         }
         if (equal) {
-            FI_HILOGI("delete handler from list %{public}d", eventType);
+            FI_HILOGI("Delete handler from list %{public}d", eventType);
             status = napi_delete_reference(env_, listener->onHandlerRef);
             if (status != napi_ok) {
                 FI_HILOGW("Delete failed");
@@ -134,7 +135,7 @@ bool DeviceStatusEvent::OffOnce(int32_t eventType, napi_value handler)
     FI_HILOGD("DeviceStatusEvent OffOnce in for event:%{public}d", eventType);
     auto iter = eventOnceMap_.find(eventType);
     if (iter == eventOnceMap_.end()) {
-        FI_HILOGE("eventType %{public}d not find", eventType);
+        FI_HILOGE("EventType %{public}d not find", eventType);
         return false;
     }
     bool equal = false;
@@ -143,7 +144,7 @@ bool DeviceStatusEvent::OffOnce(int32_t eventType, napi_value handler)
         napi_get_reference_value(env_, listener->onHandlerRef, &result);
         napi_strict_equals(env_, result, handler, &equal);
         if (equal) {
-            FI_HILOGI("delete once handler from list %{public}d", eventType);
+            FI_HILOGI("Delete once handler from list %{public}d", eventType);
             napi_status status = napi_delete_reference(env_, listener->onHandlerRef);
             if (status != napi_ok) {
                 FI_HILOGW("Delete failed");
@@ -162,7 +163,7 @@ bool DeviceStatusEvent::RemoveAllCallback(int32_t eventType)
     CALL_DEBUG_ENTER;
     auto iter = eventMap_.find(eventType);
     if (iter == eventMap_.end()) {
-        FI_HILOGE("evenType %{public}d not find", eventType);
+        FI_HILOGE("EvenType %{public}d not find", eventType);
         return false;
     }
     eventMap_.erase(eventType);
@@ -175,7 +176,7 @@ void DeviceStatusEvent::CheckRet(int32_t eventType, size_t argc, int32_t value,
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(env_, &scope);
     if (scope == nullptr) {
-        FI_HILOGE("scope is nullptr");
+        FI_HILOGE("Scope is nullptr");
         return;
     }
     napi_value handler = nullptr;
@@ -237,7 +238,7 @@ void DeviceStatusEvent::OnEvent(int32_t eventType, size_t argc, int32_t value, b
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(env_, &scope);
     if (scope == nullptr) {
-        FI_HILOGE("scope is nullptr");
+        FI_HILOGE("Scope is nullptr");
         return;
     }
 
