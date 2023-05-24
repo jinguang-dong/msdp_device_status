@@ -30,7 +30,7 @@ using namespace OHOS;
 using namespace OHOS::Msdp;
 using namespace OHOS::Msdp::DeviceStatus;
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "DevicestatusNapi" };
+constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceStatusCallback" };
 constexpr size_t ARG_0 = 0;
 constexpr size_t ARG_1 = 1;
 constexpr size_t ARG_2 = 2;
@@ -51,23 +51,20 @@ struct ResponseEntity {
 
 void DeviceStatusCallback::OnDeviceStatusChanged(const Data& devicestatusData)
 {
-    DEV_HILOGD(JS_NAPI, "OnDeviceStatusChanged enter");
+    CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mutex_);
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(env_, &loop);
-    if (loop == nullptr) {
-        DEV_HILOGE(JS_NAPI, "loop is nullptr");
-        return;
-    }
+    CHKPV(loop);
     uv_work_t *work = new (std::nothrow) uv_work_t;
     CHKPV(work);
-    DEV_HILOGD(JS_NAPI, "devicestatusData.type:%{public}d, devicestatusData.value:%{public}d",
+    FI_HILOGD("devicestatusData.type:%{public}d, devicestatusData.value:%{public}d",
         devicestatusData.type, devicestatusData.value);
     data_ = devicestatusData;
     work->data = static_cast<void *>(&data_);
     int ret = uv_queue_work(loop, work, [] (uv_work_t *work) {}, EmitOnEvent);
     if (ret != 0) {
-        DEV_HILOGE(JS_NAPI, "Failed to execute work queue");
+        FI_HILOGE("Failed to execute work queue");
     }
 }
 
@@ -75,25 +72,17 @@ void DeviceStatusCallback::EmitOnEvent(uv_work_t *work, int status)
 {
     Data* data = static_cast<Data*>(work->data);
     delete work;
-    if (data == nullptr) {
-        DEV_HILOGE(JS_NAPI, "work->data is nullptr");
-        return;
-    }
+    CHKPV(data);
     DeviceStatusNapi* deviceStatusNapi = DeviceStatusNapi::GetDeviceStatusNapi();
-    if (deviceStatusNapi == nullptr) {
-        DEV_HILOGE(JS_NAPI, "deviceStatusNapi is nullptr");
-        return;
-    }
-
+    CHKPV(deviceStatusNapi);
     int32_t type = static_cast<int32_t>(data->type);
     int32_t value = static_cast<int32_t>(data->value);
-    DEV_HILOGD(JS_NAPI, "type:%{public}d, value:%{public}d", type, value);
+    FI_HILOGD("type:%{public}d, value:%{public}d", type, value);
     deviceStatusNapi->OnDeviceStatusChangedDone(type, value, false);
 }
 
 DeviceStatusNapi* DeviceStatusNapi::GetDeviceStatusNapi()
 {
-    DEV_HILOGD(JS_NAPI, "Enter");
     return g_obj;
 }
 
@@ -103,7 +92,7 @@ DeviceStatusNapi::DeviceStatusNapi(napi_env env) : DeviceStatusEvent(env)
     callbackRef_ = nullptr;
     devicestatusValueRef_ = nullptr;
     DeviceStatusClient::GetInstance().RegisterDeathListener([this] {
-        DEV_HILOGI(JS_NAPI, "Receive death notification");
+        FI_HILOGI("Receive death notification");
         callbackMap_.clear();
         ClearEventMap();
     });
@@ -125,9 +114,9 @@ DeviceStatusNapi::~DeviceStatusNapi()
 
 void DeviceStatusNapi::OnDeviceStatusChangedDone(int32_t type, int32_t value, bool isOnce)
 {
-    DEV_HILOGD(JS_NAPI, "Enter, value:%{public}d", value);
+    CALL_DEBUG_ENTER;
+    FI_HILOGD("value:%{public}d", value);
     OnEvent(type, ARG_1, value, isOnce);
-    DEV_HILOGD(JS_NAPI, "Exit");
 }
 
 int32_t DeviceStatusNapi::ConvertTypeToInt(const std::string &type)
@@ -151,74 +140,70 @@ int32_t DeviceStatusNapi::ConvertTypeToInt(const std::string &type)
 
 bool DeviceStatusNapi::CheckArguments(napi_env env, napi_callback_info info)
 {
-    DEV_HILOGD(JS_NAPI, "Enter");
+    CALL_DEBUG_ENTER;
     int arr[ARG_4] = {};
     size_t argc = ARG_4;
     napi_value args[ARG_4] = {};
     napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
     if (status != napi_ok) {
-        DEV_HILOGE(JS_NAPI, "Failed to get_cb_info");
+        FI_HILOGE("Failed to get_cb_info");
         return false;
     }
     for (size_t i = 0; i < ARG_4; i++) {
         napi_valuetype valueType = napi_undefined;
         status = napi_typeof(env, args[i], &valueType);
         if (status != napi_ok) {
-            DEV_HILOGE(JS_NAPI, "Failed to get valueType");
+            FI_HILOGE("Failed to get valueType");
             return false;
         }
-        DEV_HILOGD(JS_NAPI, "valueType:%{public}d", valueType);
+        FI_HILOGD("valueType:%{public}d", valueType);
         arr[i] = valueType;
     }
     if (arr[ARG_0] != napi_string || arr[ARG_1] != napi_number || arr[ARG_2] != napi_number ||
         arr[ARG_3] != napi_function) {
-        DEV_HILOGE(JS_NAPI, "Failed to get arguements");
+        FI_HILOGE("Failed to get arguements");
         return false;
     }
-    DEV_HILOGD(JS_NAPI, "Exit");
     return true;
 }
 
 bool DeviceStatusNapi::IsMatchCallbackType(napi_env &env, napi_value &value)
 {
-    DEV_HILOGD(JS_NAPI, "Enter");
+    CALL_DEBUG_ENTER;
     napi_valuetype valueType = napi_undefined;
     napi_status status = napi_typeof(env, value, &valueType);
     if (status != napi_ok) {
-        DEV_HILOGE(JS_NAPI, "Failed to get valueType");
+        FI_HILOGE("Failed to get valueType");
         return false;
     }
-       
-    DEV_HILOGD(JS_NAPI, "Exit");
     return valueType == napi_function;
 }
 
 bool DeviceStatusNapi::CheckGetArguments(napi_env env, napi_callback_info info)
 {
-    DEV_HILOGD(JS_NAPI, "Enter");
+    CALL_DEBUG_ENTER;
     int arr[ARG_2] = {};
     size_t argc = ARG_2;
     napi_value args[ARG_2] = {};
     napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
     if (status != napi_ok) {
-        DEV_HILOGE(JS_NAPI, "Failed to get_cb_info");
+        FI_HILOGE("Failed to get_cb_info");
         return false;
     }
     for (size_t i = 0; i < ARG_2; i++) {
         napi_valuetype valueType = napi_undefined;
         status = napi_typeof(env, args[i], &valueType);
         if (status != napi_ok) {
-            DEV_HILOGE(JS_NAPI, "Failed to get valueType");
+            FI_HILOGE("Failed to get valueType");
             return false;
         }
-        DEV_HILOGD(JS_NAPI, "valueType:%{public}d", valueType);
+        FI_HILOGD("valueType:%{public}d", valueType);
         arr[i] = valueType;
     }
     if (arr[ARG_0] != napi_string || arr[ARG_1] != napi_function) {
-        DEV_HILOGE(JS_NAPI, "Failed to get arguements");
+        FI_HILOGE("Failed to get arguements");
         return false;
     }
-    DEV_HILOGD(JS_NAPI, "Exit");
     return true;
 }
 
@@ -307,11 +292,11 @@ std::tuple<bool, napi_value, int32_t, int32_t, bool> DeviceStatusNapi::CheckUnsu
     if ((argc < ARG_3) || !IsMatchCallbackType(env, args[ARG_2])) {
         isArgumentsValid = g_obj->RemoveAllCallback(type);
         if (!isArgumentsValid) {
-            DEV_HILOGE(JS_NAPI, "Callback is not exist");
+            FI_HILOGE("Callback is not exist");
             return result;
         }
     }
-    DEV_HILOGD(JS_NAPI, "type:%{public}d, event:%{public}d", type, event);
+    FI_HILOGD("type: %{public}d, event: %{public}d", type, event);
     return std::make_tuple(true, args[ARG_2], type, event, isArgumentsValid);
 }
 
@@ -352,10 +337,14 @@ std::tuple<bool, napi_value, int32_t> DeviceStatusNapi::CheckGetParam(napi_env e
 napi_value DeviceStatusNapi::SubscribeDeviceStatusCallback(napi_env env, napi_callback_info info, napi_value handler,
     int32_t type, int32_t event, int32_t latency)
 {
+    CALL_DEBUG_ENTER;
     if (g_obj == nullptr) {
         g_obj = new (std::nothrow) DeviceStatusNapi(env);
-        CHKPP(g_obj);
-        DEV_HILOGD(JS_NAPI, "Didn't find object, so created it");
+        if (g_obj == nullptr) {
+            FI_HILOGE("Failed to new g_obj");
+            return nullptr;
+        }
+        FI_HILOGD("Didn't find object, so created it");
     }
     napi_wrap(env, nullptr, reinterpret_cast<void *>(g_obj),
         [](napi_env env, void *data, void *hint) {
@@ -366,17 +355,20 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatusCallback(napi_env env, napi_ca
         },
         nullptr, &(g_obj->callbackRef_));
     if (!g_obj->On(type, handler, false)) {
-        DEV_HILOGE(JS_NAPI, "type:%{public}d already exists", type);
+        FI_HILOGE("type:%{public}d already exists", type);
         return nullptr;
     }
     auto callbackIter = callbackMap_.find(type);
     if (callbackIter != callbackMap_.end()) {
-        DEV_HILOGD(JS_NAPI, "Callback exists");
+        FI_HILOGD("Callback exists");
         return nullptr;
     }
     sptr<IRemoteDevStaCallback> callback;
     callback = new (std::nothrow) DeviceStatusCallback(env);
-    CHKPP(callback);
+    if (callback == nullptr) {
+        FI_HILOGE("callback is nullptr");
+        return nullptr;
+    }
     auto subscribeRet = StationaryManager::GetInstance()->SubscribeCallback(Type(type),
         ActivityEvent(event), ReportLatencyNs(latency), callback);
     if (subscribeRet != RET_OK) {
@@ -385,23 +377,22 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatusCallback(napi_env env, napi_ca
     }
     auto ret = callbackMap_.insert(std::pair<int32_t, sptr<IRemoteDevStaCallback>>(type, callback));
     if (!ret.second) {
-        DEV_HILOGE(JS_NAPI, "Failed to insert");
+        FI_HILOGE("Failed to insert");
         return nullptr;
     }
-    DEV_HILOGD(JS_NAPI, "Exit");
     return nullptr;
 }
 
 napi_value DeviceStatusNapi::SubscribeDeviceStatus(napi_env env, napi_callback_info info)
 {
-    DEV_HILOGD(JS_NAPI, "Enter");
+    CALL_DEBUG_ENTER;
     const auto [ret, handler, typeMode, event, latency] = CheckSubscribeParam(env, info);
     if (!ret) {
-        DEV_HILOGE(JS_NAPI, "on: SubscribeDeviceStatus is failed");
+        FI_HILOGE("on: SubscribeDeviceStatus is failed");
         return nullptr;
     }
     int32_t type = ConvertTypeToInt(typeMode);
-    DEV_HILOGD(JS_NAPI, "type:%{public}d, event:%{public}d, latency:%{public}d", type, event, latency);
+    FI_HILOGD("type:%{public}d, event:%{public}d, latency:%{public}d", type, event, latency);
     if ((type < Type::TYPE_ABSOLUTE_STILL) || (type > Type::TYPE_LID_OPEN)) {
         ThrowErr(env, PARAM_ERROR, "type is illegal");
         return nullptr;
@@ -419,18 +410,18 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatus(napi_env env, napi_callback_i
 
 napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback_info info)
 {
-    DEV_HILOGD(JS_NAPI, "Enter");
+    CALL_DEBUG_ENTER;
     if (g_obj == nullptr) {
-        DEV_HILOGE(JS_NAPI, "g_obj is nullptr");
+        FI_HILOGE("g_obj is nullptr");
         return nullptr;
     }
     const auto [ret, handler, type, event, isArgumentsValid] = CheckUnsubscribeParam(env, info);
     if (!ret) {
-        DEV_HILOGE(JS_NAPI, "off: UnsubscribeDeviceStatus is failed");
+        FI_HILOGE("off: UnsubscribeDeviceStatus is failed");
         return nullptr;
     }
     if (!isArgumentsValid && !g_obj->Off(type, handler)) {
-        DEV_HILOGE(JS_NAPI, "Not ready to Unsubscribe for type:%{public}d", type);
+        FI_HILOGE("Not ready to Unsubscribe for type:%{public}d", type);
         return nullptr;
     }
     auto callbackIter = callbackMap_.find(type);
@@ -445,21 +436,23 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
         NAPI_ASSERT(env, false, "No existed callback");
         return nullptr;
     }
-    DEV_HILOGD(JS_NAPI, "Exit");
     return nullptr;
 }
 
 napi_value DeviceStatusNapi::GetDeviceStatus(napi_env env, napi_callback_info info)
 {
-    DEV_HILOGD(JS_NAPI, "Enter");
+    CALL_DEBUG_ENTER;
     const auto [ret, handler, type] = CheckGetParam(env, info);
     if (!ret) {
-        DEV_HILOGE(JS_NAPI, "once: GetDeviceStatus is failed");
+        FI_HILOGE("once: GetDeviceStatus is failed");
         return nullptr;
     }
     if (g_obj == nullptr) {
         g_obj = new (std::nothrow) DeviceStatusNapi(env);
-        CHKPP(g_obj);
+        if (g_obj == nullptr) {
+            FI_HILOGE("Failed to new g_obj");
+            return nullptr;
+        }
         napi_wrap(env, nullptr, reinterpret_cast<void *>(g_obj),
             [](napi_env env, void *data, void *hint) {
                 (void)env;
@@ -470,7 +463,7 @@ napi_value DeviceStatusNapi::GetDeviceStatus(napi_env env, napi_callback_info in
             nullptr, &(g_obj->callbackRef_));
     }
     if (!g_obj->On(type, handler, true)) {
-        DEV_HILOGE(JS_NAPI, "type:%{public}d already exists", type);
+        FI_HILOGE("type:%{public}d already exists", type);
         return nullptr;
     }
     Data devicestatusData = StationaryManager::GetInstance()->GetDeviceStatusData(Type(type));
@@ -479,49 +472,47 @@ napi_value DeviceStatusNapi::GetDeviceStatus(napi_env env, napi_callback_info in
     }
     g_obj->OnDeviceStatusChangedDone(devicestatusData.type, devicestatusData.value, true);
     g_obj->OffOnce(devicestatusData.type, handler);
-    DEV_HILOGD(JS_NAPI, "Exit");
     return nullptr;
 }
 
 napi_value DeviceStatusNapi::EnumActivityEventConstructor(napi_env env, napi_callback_info info)
 {
-    DEV_HILOGD(JS_NAPI, "Enter");
+    CALL_DEBUG_ENTER;
     napi_value thisArg = nullptr;
     void *data = nullptr;
     napi_status status = napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, &data);
     if (status != napi_ok) {
-        DEV_HILOGE(JS_NAPI, "Failed to get_cb_info item");
+        FI_HILOGE("Failed to get_cb_info item");
         return nullptr;
     }
     napi_value global = nullptr;
     status = napi_get_global(env, &global);
     if (status != napi_ok) {
-        DEV_HILOGE(JS_NAPI, "Failed to get_global item");
+        FI_HILOGE("Failed to get_global item");
         return nullptr;
     }
-    DEV_HILOGD(JS_NAPI, "Exit");
     return thisArg;
 }
 
 napi_value DeviceStatusNapi::DeclareEventTypeInterface(napi_env env, napi_value exports)
 {
-    DEV_HILOGD(JS_NAPI, "Enter");
+    CALL_DEBUG_ENTER;
     napi_value enter = nullptr;
     napi_status status = napi_create_int32(env, static_cast<int32_t>(ActivityEvent::ENTER), &enter);
     if (status != napi_ok) {
-        DEV_HILOGE(JS_NAPI, "Failed to create ENTER item");
+        FI_HILOGE("Failed to create ENTER item");
         return nullptr;
     }
     napi_value exit = nullptr;
     status = napi_create_int32(env, static_cast<int32_t>(ActivityEvent::EXIT), &exit);
     if (status != napi_ok) {
-        DEV_HILOGE(JS_NAPI, "Failed to create EXIT item");
+        FI_HILOGE("Failed to create EXIT item");
         return nullptr;
     }
     napi_value enter_exit = nullptr;
     status = napi_create_int32(env, static_cast<int32_t>(ActivityEvent::ENTER_EXIT), &enter_exit);
     if (status != napi_ok) {
-        DEV_HILOGE(JS_NAPI, "Failed to create ENTER_EXIT item");
+        FI_HILOGE("Failed to create ENTER_EXIT item");
         return nullptr;
     }
     napi_property_descriptor desc[] = {
@@ -533,21 +524,20 @@ napi_value DeviceStatusNapi::DeclareEventTypeInterface(napi_env env, napi_value 
     status = napi_define_class(env, "ActivityEvent", NAPI_AUTO_LENGTH,
         EnumActivityEventConstructor, nullptr, sizeof(desc) / sizeof(*desc), desc, &result);
     if (status != napi_ok) {
-        DEV_HILOGE(JS_NAPI, "Failed to define_class item");
+        FI_HILOGE("Failed to define_class item");
         return nullptr;
     }
     status = napi_set_named_property(env, exports, "ActivityEvent", result);
     if (status != napi_ok) {
-        DEV_HILOGE(JS_NAPI, "Failed to set_named_property item");
+        FI_HILOGE("Failed to set_named_property item");
         return nullptr;
     }
-    DEV_HILOGD(JS_NAPI, "Exit");
     return exports;
 }
 
 napi_value DeviceStatusNapi::Init(napi_env env, napi_value exports)
 {
-    DEV_HILOGD(JS_NAPI, "Enter");
+    CALL_DEBUG_ENTER;
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("on", SubscribeDeviceStatus),
         DECLARE_NAPI_FUNCTION("off", UnsubscribeDeviceStatus),
@@ -555,7 +545,6 @@ napi_value DeviceStatusNapi::Init(napi_env env, napi_value exports)
     };
     DeclareEventTypeInterface(env, exports);
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
-    DEV_HILOGD(JS_NAPI, "Exit");
     return exports;
 }
 
@@ -565,9 +554,8 @@ EXTERN_C_START
  */
 static napi_value DeviceStatusInit(napi_env env, napi_value exports)
 {
-    DEV_HILOGD(JS_NAPI, "Enter");
+    CALL_DEBUG_ENTER;
     napi_value ret = DeviceStatusNapi::Init(env, exports);
-    DEV_HILOGD(JS_NAPI, "Exit");
     return ret;
 }
 EXTERN_C_END
