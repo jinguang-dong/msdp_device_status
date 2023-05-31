@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "RegisterCoordinationListenerFuzzTest" };
+constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "RegisterCoordinationListenerFuzzTest" };
 } // namespace
 
 class CoordinationListenerTest : public ICoordinationListener {
@@ -51,6 +51,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 {
     (void)data;
     (void)size;
-    OHOS::Msdp::DeviceStatus::RegisterCoordinationListenerFuzzTest();
+    ::OHOS::Msdp::DeviceStatus::RegisterCoordinationListenerFuzzTest();
     return 0;
 }

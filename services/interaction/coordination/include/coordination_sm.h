@@ -72,7 +72,7 @@ struct PointerFilter : public MMI::IInputEventFilter {
             return false;
         }
         if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-            OHOS::MMI::InputManager::GetInstance()->RemoveInputEventFilter(filterId_);
+            ::OHOS::MMI::InputManager::GetInstance()->RemoveInputEventFilter(filterId_);
             filterId_ = -1;
             return true;
         }
@@ -207,7 +207,7 @@ private:
 };
 
 #define DIS_HARDWARE DistributedHardware::DeviceManager::GetInstance()
-#define COOR_SM OHOS::DelayedSingleton<CoordinationSM>::GetInstance()
+#define COOR_SM ::OHOS::DelayedSingleton<CoordinationSM>::GetInstance()
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

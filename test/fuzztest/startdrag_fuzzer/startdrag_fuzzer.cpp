@@ -30,7 +30,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "StartDragFuzzTest" };
+constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "StartDragFuzzTest" };
 constexpr int32_t POINTER_ID { 0 };
 constexpr int32_t MAX_PIXEL_MAP_WIDTH { 600 };
 constexpr int32_t MAX_PIXEL_MAP_HEIGHT { 600 };
@@ -52,7 +52,7 @@ size_t GetObject(const uint8_t *data, size_t size, T &object)
 std::shared_ptr<Media::PixelMap> CreatePixelMap(int32_t width, int32_t height)
 {
     CALL_DEBUG_ENTER;
-    OHOS::Media::InitializationOptions opts;
+    ::OHOS::Media::InitializationOptions opts;
     opts.size.width = width;
     opts.size.height = height;
     std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(opts);
@@ -75,7 +75,7 @@ DragData CreateDragData(const uint8_t* data, size_t size)
     dragData.hasCanceledAnimation = true;
     dragData.shadowInfo = shadowInfo;
     dragData.pointerId = POINTER_ID;
-    dragData.sourceType = OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE;
+    dragData.sourceType = ::OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE;
     return dragData;
 }
 
@@ -102,7 +102,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (size < sizeof(int32_t)) {
         return 0;
     }
-    OHOS::Msdp::DeviceStatus::StartDragFuzzTest(data, size);
+    ::OHOS::Msdp::DeviceStatus::StartDragFuzzTest(data, size);
     return 0;
 }
 

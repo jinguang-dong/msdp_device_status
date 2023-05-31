@@ -23,10 +23,10 @@
 #include "fi_log.h"
 
 using namespace std;
-using namespace OHOS;
-using namespace OHOS::Msdp::DeviceStatus;
+using namespace ::OHOS;
+using namespace ::OHOS::Msdp::DeviceStatus;
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, OHOS::Msdp::MSDP_DOMAIN_ID, "DeviceStatusClientFuzzTest" };
+constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, ::OHOS::Msdp::MSDP_DOMAIN_ID, "DeviceStatusClientFuzzTest" };
 } // namespace
 
 auto stationaryMgr = StationaryManager::GetInstance();

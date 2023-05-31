@@ -22,7 +22,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "AddDragListenerFuzzTest" };
+constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "AddDragListenerFuzzTest" };
 } // namespace
 
 class DragListenerTest : public IDragListener {
@@ -47,6 +47,6 @@ void AddDragListenerFuzzTest(const uint8_t* data, size_t size)
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 {
-    OHOS::Msdp::DeviceStatus::AddDragListenerFuzzTest(data, size);
+    ::OHOS::Msdp::DeviceStatus::AddDragListenerFuzzTest(data, size);
     return 0;
 }

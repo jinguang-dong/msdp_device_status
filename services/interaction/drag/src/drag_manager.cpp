@@ -36,7 +36,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "DragManager" };
+constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DragManager" };
 constexpr int32_t TIMEOUT_MS = 2000;
 constexpr int32_t DRAG_PRIORITY = 500;
 } // namespace
@@ -237,7 +237,7 @@ void DragManager::OnDragUp(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     FI_HILOGD("Target window drag pid:%{public}d", pid);
 
     DragData dragData = DRAG_DATA_MGR.GetDragData();
-    if (dragData.sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+    if (dragData.sourceType == ::OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         dragDrawing_.EraseMouseIcon();
         MMI::InputManager::GetInstance()->SetPointerVisible(true);
     }
@@ -305,7 +305,7 @@ void DragManager::Dump(int32_t fd) const
             dragData.pointerId, dragData.displayX, dragData.displayY, dragData.displayId,
             dragData.hasCanceledAnimation ? "true" : "false");
     if (dragState_ != DragState::STOP) {
-        std::shared_ptr<OHOS::Media::PixelMap> pixelMap = dragData.shadowInfo.pixelMap;
+        std::shared_ptr<::OHOS::Media::PixelMap> pixelMap = dragData.shadowInfo.pixelMap;
         CHKPV(pixelMap);
         dprintf(fd, "\tpixelMapWidth:%d\n\tpixelMapHeight:%d\n", pixelMap->GetWidth(), pixelMap->GetHeight());
     }
@@ -399,11 +399,11 @@ std::string DragManager::GetDragCursorStyle(DragCursorStyle value) const
     return style;
 }
 
-OHOS::MMI::ExtraData DragManager::CreateExtraData(bool appended)
+::OHOS::MMI::ExtraData DragManager::CreateExtraData(bool appended)
 {
     CALL_DEBUG_ENTER;
     DragData dragData = DRAG_DATA_MGR.GetDragData();
-    OHOS::MMI::ExtraData extraData;
+    ::OHOS::MMI::ExtraData extraData;
     extraData.buffer = dragData.buffer;
     extraData.sourceType = dragData.sourceType;
     extraData.pointerId = dragData.pointerId;
@@ -468,7 +468,7 @@ int32_t DragManager::OnStartDrag()
         dragDrawing_.DestroyDragWindow();
         return RET_ERR;
     }
-    if (dragData.sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+    if (dragData.sourceType == ::OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         MMI::InputManager::GetInstance()->SetPointerVisible(false);
     }
     return RET_OK;
@@ -484,7 +484,7 @@ int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation)
     MMI::InputManager::GetInstance()->RemoveInterceptor(interceptorId_);
     interceptorId_ = -1;
     DragData dragData = DRAG_DATA_MGR.GetDragData();
-    if (dragData.sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE && !DRAG_DATA_MGR.IsMotionDrag()) {
+    if (dragData.sourceType == ::OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE && !DRAG_DATA_MGR.IsMotionDrag()) {
         dragDrawing_.EraseMouseIcon();
         MMI::InputManager::GetInstance()->SetPointerVisible(true);
     }

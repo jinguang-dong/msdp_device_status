@@ -38,7 +38,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "CoordinationSM" };
+constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CoordinationSM" };
 constexpr int32_t INTERVAL_MS = 2000;
 constexpr double PERCENT_CONST = 100.0;
 constexpr int32_t MOUSE_ABS_LOCATION = 100;
@@ -118,7 +118,7 @@ void CoordinationSM::Reset(bool adjustAbsolutionLocation)
     if (hasPointer && adjustAbsolutionLocation) {
         SetAbsolutionLocation(MOUSE_ABS_LOCATION_X, MOUSE_ABS_LOCATION_Y);
     } else {
-        OHOS::MMI::InputManager::GetInstance()->SetPointerVisible(false);
+        ::OHOS::MMI::InputManager::GetInstance()->SetPointerVisible(false);
     }
     isStarting_ = false;
     isStopping_ = false;
@@ -288,7 +288,7 @@ void CoordinationSM::StartPointerEventFilter()
     auto filter = std::make_shared<PointerFilter>();
     uint32_t touchTags = CapabilityToTags(MMI::INPUT_DEV_CAP_MAX);
     filterId_ =
-        OHOS::MMI::InputManager::GetInstance()->AddInputEventFilter(filter, POINTER_DEFAULT_PRIORITY, touchTags);
+        ::OHOS::MMI::InputManager::GetInstance()->AddInputEventFilter(filter, POINTER_DEFAULT_PRIORITY, touchTags);
     if (0 > filterId_) {
         FI_HILOGE("Add Event Filter Failed");
     }
@@ -463,7 +463,7 @@ void CoordinationSM::NotifyRemoteStopFinish(bool isSuccess, const std::string &r
 bool CoordinationSM::UpdateMouseLocation()
 {
     CALL_DEBUG_ENTER;
-    auto display = OHOS::Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    auto display = ::OHOS::Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (display == nullptr) {
         return false;
     }
@@ -503,7 +503,7 @@ void CoordinationSM::UpdateState(CoordinationState state)
             break;
         }
         case CoordinationState::STATE_IN: {
-            OHOS::MMI::InputManager::GetInstance()->SetPointerVisible(false);
+            ::OHOS::MMI::InputManager::GetInstance()->SetPointerVisible(false);
             currentStateSM_ = std::make_shared<CoordinationStateIn>(startDeviceDhid_);
             auto interceptor = std::make_shared<InterceptorConsumer>();
             MMI::InputManager::GetInstance()->EnableInputDevice(true);
@@ -517,7 +517,7 @@ void CoordinationSM::UpdateState(CoordinationState state)
             break;
         }
         case CoordinationState::STATE_OUT: {
-            OHOS::MMI::InputManager::GetInstance()->SetPointerVisible(false);
+            ::OHOS::MMI::InputManager::GetInstance()->SetPointerVisible(false);
             currentStateSM_ = std::make_shared<CoordinationStateOut>(startDeviceDhid_);
             auto interceptor = std::make_shared<InterceptorConsumer>();
             interceptorId_ = MMI::InputManager::GetInstance()->AddInterceptor(interceptor, COORDINATION_PRIORITY,
@@ -731,13 +731,13 @@ void CoordinationSM::RemoveInterceptor()
 bool CoordinationSM::IsNeedFilterOut(const std::string &deviceId, const std::shared_ptr<MMI::KeyEvent> keyEvent)
 {
     CALL_DEBUG_ENTER;
-    std::vector<OHOS::MMI::KeyEvent::KeyItem> KeyItems = keyEvent->GetKeyItems();
+    std::vector<::OHOS::MMI::KeyEvent::KeyItem> KeyItems = keyEvent->GetKeyItems();
     std::vector<int32_t> KeyItemsForDInput;
     KeyItemsForDInput.reserve(KeyItems.size());
     for (const auto &item : KeyItems) {
         KeyItemsForDInput.push_back(item.GetKeyCode());
     }
-    OHOS::DistributedHardware::DistributedInput::BusinessEvent businessEvent;
+    ::OHOS::DistributedHardware::DistributedInput::BusinessEvent businessEvent;
     businessEvent.keyCode = keyEvent->GetKeyCode();
     businessEvent.keyAction = keyEvent->GetKeyAction();
     businessEvent.pressedKeys = KeyItemsForDInput;
@@ -779,7 +779,7 @@ void CoordinationSM::DmDeviceStateCallback::OnDeviceReady(const DistributedHardw
 void CoordinationSM::SetAbsolutionLocation(double xPercent, double yPercent)
 {
     CALL_INFO_TRACE;
-    auto display = OHOS::Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    auto display = ::OHOS::Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (display == nullptr) {
         FI_HILOGE("display is nullptr");
         return;
@@ -790,7 +790,7 @@ void CoordinationSM::SetAbsolutionLocation(double xPercent, double yPercent)
     int32_t physicalY = static_cast<int32_t>(height * yPercent / PERCENT_CONST);
     FI_HILOGD("width:%{public}d, height:%{public}d, physicalX:%{public}d, physicalY:%{public}d", width, height,
         physicalX, physicalY);
-    OHOS::MMI::InputManager::GetInstance()->SetPointerLocation(physicalX, physicalY);
+    ::OHOS::MMI::InputManager::GetInstance()->SetPointerLocation(physicalX, physicalY);
 }
 
 void CoordinationSM::InterceptorConsumer::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const

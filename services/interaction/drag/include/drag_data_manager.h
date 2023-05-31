@@ -50,7 +50,7 @@ public:
     bool IsMotionDrag() const;
 private:
     DragData dragData_;
-    OHOS::MMI::PointerStyle pointerStyle_;
+    ::OHOS::MMI::PointerStyle pointerStyle_;
     DragCursorStyle dragStyle_ { DragCursorStyle::DEFAULT };
     std::u16string dragMessage_;
     bool visible_ { false };
@@ -59,7 +59,7 @@ private:
     bool isMotionDrag_ { false };
 };
 
-#define DRAG_DATA_MGR OHOS::Singleton<DragDataManager>::GetInstance()
+#define DRAG_DATA_MGR ::OHOS::Singleton<DragDataManager>::GetInstance()
 
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -22,7 +22,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "GetDragTargetPidFuzzTest" };
+constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "GetDragTargetPidFuzzTest" };
 } // namespace
 
 void GetDragTargetPidFuzzTest(const uint8_t* data, size_t size)
@@ -42,6 +42,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (size < sizeof(int32_t)) {
         return 0;
     }
-    OHOS::Msdp::DeviceStatus::GetDragTargetPidFuzzTest(data, size);
+    ::OHOS::Msdp::DeviceStatus::GetDragTargetPidFuzzTest(data, size);
     return 0;
 }

@@ -24,7 +24,7 @@
 #include "devicestatus_service.h"
 #include "message_parcel.h"
 
-using namespace OHOS::Msdp::DeviceStatus;
+using namespace ::OHOS::Msdp::DeviceStatus;
 
 namespace OHOS {
 constexpr size_t FOO_MAX_LEN = 1024;
@@ -66,12 +66,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         return 0;
     }
 
-    if (size < OHOS::U32_AT_SIZE) {
+    if (size < ::OHOS::U32_AT_SIZE) {
         return 0;
     }
 
     /* Validate the length of size */
-    if (size == 0 || size > OHOS::FOO_MAX_LEN) {
+    if (size == 0 || size > ::OHOS::FOO_MAX_LEN) {
         return 0;
     }
 
@@ -79,7 +79,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (ch == nullptr) {
         return 0;
     }
-    OHOS::DoSomethingWithMyAPI(ch, size);
+    ::OHOS::DoSomethingInterestingWithMyAPI(ch, size);
     return 0;
 }
 

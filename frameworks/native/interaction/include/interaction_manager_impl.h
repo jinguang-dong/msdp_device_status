@@ -63,6 +63,6 @@ private:
 } // namespace Msdp
 } // namespace OHOS
 
-#define INTER_MGR_IMPL OHOS::Singleton<InteractionManagerImpl>::GetInstance()
+#define INTER_MGR_IMPL ::OHOS::Singleton<InteractionManagerImpl>::GetInstance()
 
 #endif // INTERACTION_MANAGER_IMPL_H
