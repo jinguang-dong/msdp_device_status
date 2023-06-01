@@ -29,9 +29,9 @@
 #include "sensor_data_callback.h"
 
 using namespace testing::ext;
-using namespace OHOS::Msdp;
-using namespace OHOS::Msdp::DeviceStatus;
-using namespace OHOS;
+using namespace ::OHOS::Msdp;
+using namespace ::OHOS::Msdp::DeviceStatus;
+using namespace ::OHOS;
 
 namespace {
 std::shared_ptr<DeviceStatusMsdpMock> g_testMock;

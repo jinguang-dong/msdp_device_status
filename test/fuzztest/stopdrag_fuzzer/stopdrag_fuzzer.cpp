@@ -30,7 +30,7 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace {
 constexpr bool HAS_CUSTOM_ANIMATION { true };
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "StopDragFuzzTest" };
+constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "StopDragFuzzTest" };
 } // namespace
 
 void StopDragFuzzTest(const uint8_t* data, size_t  size)
@@ -51,7 +51,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (size < sizeof(int32_t)) {
         return 0;
     }
-    OHOS::Msdp::DeviceStatus::StopDragFuzzTest(data, size);
+    ::OHOS::Msdp::DeviceStatus::StopDragFuzzTest(data, size);
     return 0;
 }
 

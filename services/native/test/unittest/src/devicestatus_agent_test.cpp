@@ -18,8 +18,8 @@
 #include "devicestatus_define.h"
 
 using namespace testing::ext;
-using namespace OHOS::Msdp::DeviceStatus;
-using namespace OHOS;
+using namespace ::OHOS::Msdp::DeviceStatus;
+using namespace ::OHOS;
 
 static std::shared_ptr<DeviceStatusAgent> g_agent1;
 static std::shared_ptr<DeviceStatusAgent> g_agent2;

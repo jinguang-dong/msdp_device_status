@@ -25,9 +25,9 @@
 #include "devicestatus_napi_error.h"
 #include "stationary_manager.h"
 
-using namespace OHOS;
-using namespace OHOS::Msdp;
-using namespace OHOS::Msdp::DeviceStatus;
+using namespace ::OHOS;
+using namespace ::OHOS::Msdp;
+using namespace ::OHOS::Msdp::DeviceStatus;
 namespace {
 constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceStatusNapi" };
 constexpr size_t ARG_0 = 0;

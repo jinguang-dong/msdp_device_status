@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "DeactivateCoordinationFuzzTest" };
+constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeactivateCoordinationFuzzTest" };
 } // namespace
 
 void DeactivateCoordinationFuzzTest()
@@ -44,6 +44,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     (void)data;
     (void)size;
-    OHOS::Msdp::DeviceStatus::DeactivateCoordinationFuzzTest();
+    ::OHOS::Msdp::DeviceStatus::DeactivateCoordinationFuzzTest();
     return 0;
 }

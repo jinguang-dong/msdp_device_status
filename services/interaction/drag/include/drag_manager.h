@@ -77,7 +77,7 @@ private:
     std::string GetDragState(DragState value) const;
     std::string GetDragResult(DragResult value) const;
     std::string GetDragCursorStyle(DragCursorStyle value) const;
-    static OHOS::MMI::ExtraData CreateExtraData(bool appended);
+    static ::OHOS::MMI::ExtraData CreateExtraData(bool appended);
     void StateChangedNotify(DragState state);
     DragState GetDragState() const override;
 private:

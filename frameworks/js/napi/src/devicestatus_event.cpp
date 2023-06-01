@@ -24,8 +24,8 @@
 
 #include "devicestatus_define.h"
 
-using namespace OHOS::Msdp;
-using namespace OHOS::Msdp::DeviceStatus;
+using namespace ::OHOS::Msdp;
+using namespace ::OHOS::Msdp::DeviceStatus;
 
 namespace {
 constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceStatusEvent" };
