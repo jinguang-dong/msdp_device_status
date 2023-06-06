@@ -36,14 +36,14 @@ public:
     int32_t Init();
     
 private:
-    int32_t fdSignal_;
+    int32_t fd_;
     int32_t signo_;
     std::atomic<ServiceRunningState> state_ = ServiceRunningState::STATE_NOT_START;
 };
 
 inline int32_t SignalHandler::GetFd() const
 {
-    return fdSignal_;
+    return fd_;
 }
 
 inline ServiceRunningState SignalHandler::GetState() const

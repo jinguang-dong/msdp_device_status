@@ -45,8 +45,8 @@ int32_t SignalHandler::Init()
         return RET_ERR;
     }
 
-    fdSignal_ = signalfd(-1, &mask, SFD_NONBLOCK | SFD_CLOEXEC);
-    if (fdSignal_ < 0) {
+    fd_ = signalfd(-1, &mask, SFD_NONBLOCK | SFD_CLOEXEC);
+    if (fd_ < 0) {
         FI_HILOGE("Signal fd failed:%{public}d", errno);
         return RET_ERR;
     }
@@ -59,7 +59,7 @@ void SignalHandler::Dispatch(const struct epoll_event &ev)
     CALL_DEBUG_ENTER;
     if ((ev.events & EPOLLIN) == EPOLLIN) {
         signalfd_siginfo sigInfo;
-        int32_t size = read(fdSignal_, &sigInfo, sizeof(signalfd_siginfo));
+        int32_t size = read(fd_, &sigInfo, sizeof(signalfd_siginfo));
         if (size != static_cast<int32_t>(sizeof(signalfd_siginfo))) {
             FI_HILOGE("Read signal info failed, invalid size:%{public}d,errno:%{public}d", size, errno);
             return;
@@ -76,9 +76,11 @@ void SignalHandler::Dispatch(const struct epoll_event &ev)
             case SIGSEGV:
             case SIGTERM: {
                 state_ = ServiceRunningState::STATE_EXIT;
+                FI_HILOGD("State exit");
                 break;
             }
             default: {
+                FI_HILOGD("State running");
                 break;
             }
         }
