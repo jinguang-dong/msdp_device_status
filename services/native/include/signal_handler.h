@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-enum class ServiceRunningState {STATE_NOT_START, STATE_RUNNING, STATE_EXIT};
+enum class ServiceRunningState { STATE_NOT_START, STATE_RUNNING, STATE_EXIT };
 class SignalHandler final : public IEpollEventSource {
 public:
     int32_t GetFd() const override;
