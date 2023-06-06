@@ -35,22 +35,19 @@ int32_t SignalHandler::Init()
     sigset_t mask { 0 };
     int32_t retCode = sigfillset(&mask);
     if (retCode < 0) {
-        FI_HILOGE("Fill signal set failed:%{public}d", errno);
+        FI_HILOGE("Fill signal set failed: %{public}d", errno);
         return RET_ERR;
     }
-
     retCode = sigprocmask(SIG_SETMASK, &mask, nullptr);
     if (retCode < 0) {
-        FI_HILOGE("Sigprocmask failed:%{public}d", errno);
+        FI_HILOGE("Sigprocmask failed: %{public}d", errno);
         return RET_ERR;
     }
-
     fd_ = signalfd(-1, &mask, SFD_NONBLOCK | SFD_CLOEXEC);
     if (fd_ < 0) {
-        FI_HILOGE("Signal fd failed:%{public}d", errno);
+        FI_HILOGE("Signal fd failed: %{public}d", errno);
         return RET_ERR;
     }
-
     return RET_OK;
 }
 
@@ -61,11 +58,11 @@ void SignalHandler::Dispatch(const struct epoll_event &ev)
         signalfd_siginfo sigInfo;
         int32_t size = read(fd_, &sigInfo, sizeof(signalfd_siginfo));
         if (size != static_cast<int32_t>(sizeof(signalfd_siginfo))) {
-            FI_HILOGE("Read signal info failed, invalid size:%{public}d,errno:%{public}d", size, errno);
+            FI_HILOGE("Read signal info failed, invalid size: %{public}d,errno: %{public}d", size, errno);
             return;
         }
         signo_ = static_cast<int32_t>(sigInfo.ssi_signo);
-        FI_HILOGD("Receive signal:%{public}d", signo_);
+        FI_HILOGD("Receive signal: %{public}d", signo_);
         switch (signo_) {
             case SIGQUIT:
             case SIGILL:
