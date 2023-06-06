@@ -34,9 +34,6 @@ public:
     void SetState(ServiceRunningState state);
     void Dispatch(const struct epoll_event &ev) override;
     int32_t Init();
-
-protected:
-    void OnThread();
     
 private:
     int32_t fdSignal_;

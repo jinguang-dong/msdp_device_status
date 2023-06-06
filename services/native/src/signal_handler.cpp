@@ -15,8 +15,8 @@
 
 #include "signal_handler.h"
 
-#include <sys/signalfd.h>
 #include <csignal>
+#include <sys/signalfd.h>
 
 #include "devicestatus_define.h"
 #include "fi_log.h"
