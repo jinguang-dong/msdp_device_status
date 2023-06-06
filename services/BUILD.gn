@@ -62,6 +62,7 @@ sources_set = [
   "native/src/devicestatus_msdp_client_impl.cpp",
   "native/src/devicestatus_service.cpp",
   "native/src/stream_server.cpp",
+  "native/src/signal_handler.cpp",
   "timer_manager/src/timer_manager.cpp",
 ]
 
