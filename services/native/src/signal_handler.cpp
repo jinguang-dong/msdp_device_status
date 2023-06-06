@@ -56,7 +56,7 @@ int32_t SignalHandler::Init()
 
 void SignalHandler::Dispatch(const struct epoll_event &ev)
 {
-     CALL_DEBUG_ENTER;
+    CALL_DEBUG_ENTER;
     if ((ev.events & EPOLLIN) == EPOLLIN) {
         signalfd_siginfo sigInfo;
         int32_t size = read(fdSignal_, &sigInfo, sizeof(signalfd_siginfo));
