@@ -26,13 +26,13 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, MSDP_DOMAIN_ID, "SignalHandler" };
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "SignalHandler" };
 } // namespace
 
 int32_t SignalHandler::Init()
 {
     CALL_DEBUG_ENTER;
-    sigset_t mask = { 0 };
+    sigset_t mask { 0 };
     int32_t retCode = sigfillset(&mask);
     if (retCode < 0) {
         FI_HILOGE("Fill signal set failed:%{public}d", errno);
