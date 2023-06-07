@@ -166,33 +166,18 @@ bool DeviceStatusNapi::CheckArguments(napi_env env, napi_callback_info info)
     return true;
 }
 
-bool DeviceStatusNapi::CheckUnsubArguments(napi_env env, napi_callback_info info)
+bool DeviceStatusNapi::IsMatchCallbackType(napi_env &env, napi_value &value)
 {
     DEV_HILOGD(JS_NAPI, "Enter");
-    int arr[ARG_3] = {};
-    size_t argc = ARG_3;
-    napi_value args[ARG_3] = {};
-    napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    napi_valuetype valueType = napi_undefined;
+    napi_status status = napi_typeof(env, value, &valueType);
     if (status != napi_ok) {
-        DEV_HILOGE(JS_NAPI, "Failed to get_cb_info");
+        DEV_HILOGE(JS_NAPI, "Failed to get valueType");
         return false;
     }
-    for (size_t i = 0; i < ARG_3; i++) {
-        napi_valuetype valueType = napi_undefined;
-        status = napi_typeof(env, args[i], &valueType);
-        if (status != napi_ok) {
-            DEV_HILOGE(JS_NAPI, "Failed to get valueType");
-            return false;
-        }
-        DEV_HILOGD(JS_NAPI, "valueType:%{public}d", valueType);
-        arr[i] = valueType;
-    }
-    if (arr[ARG_0] != napi_string || arr[ARG_1] != napi_number || arr[ARG_2] != napi_function) {
-        DEV_HILOGE(JS_NAPI, "Failed to get arguements");
-        return false;
-    }
+       
     DEV_HILOGD(JS_NAPI, "Exit");
-    return true;
+    return valueType == napi_function;
 }
 
 bool DeviceStatusNapi::CheckGetArguments(napi_env env, napi_callback_info info)
@@ -321,19 +306,19 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
         DEV_HILOGE(JS_NAPI, "g_obj is nullptr");
         return nullptr;
     }
-    size_t argc = ARG_3;
-    napi_value args[ARG_3] = {};
+    size_t argc = 3;
+    napi_value args[3] = {};
     napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-    NAPI_ASSERT(env, (status == napi_ok) && (argc >= ARG_3), "Bad parameters");
-    if (!CheckUnsubArguments(env, info)) {
-        DEV_HILOGE(JS_NAPI, "Failed to get unsub arguements");
-        return nullptr;
-    }
+    NAPI_ASSERT(env, status == napi_ok, "Bad parameters");
     size_t len;
     status = napi_get_value_string_utf8(env, args[0], nullptr, 0, &len);
     if (status != napi_ok) {
         DEV_HILOGE(JS_NAPI, "Failed to get string item");
         return nullptr;
+    }
+    if (argc < 2) {
+        DEV_HILOGE(JS_NAPI, "Param number is invalid");
+        return result;
     }
     std::vector<char> typeBuf(len + 1);
     status = napi_get_value_string_utf8(env, args[0], typeBuf.data(), len + 1, &len);
@@ -345,14 +330,34 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
     NAPI_ASSERT(env, (type >= DevicestatusDataUtils::DevicestatusType::TYPE_STILL) &&
         (type <= DevicestatusDataUtils::DevicestatusType::TYPE_LID_OPEN), "type is illegal");
     int32_t eventMode = 0;
-    status = napi_get_value_int32(env, args[ARG_1], &eventMode);
+    status = napi_get_value_int32(env, args[1], &eventMode);
     if (status != napi_ok) {
         DEV_HILOGE(JS_NAPI, "Failed to get int32 item");
         return nullptr;
     }
     int32_t event = eventMode;
     DEV_HILOGD(JS_NAPI, "type:%{public}d, event:%{public}d", type, event);
-    if (!g_obj->Off(type, args[ARG_2])) {
+    if (argc >= 3) {
+        napi_valuetype valueType = napi_undefined;
+        status = napi_typeof(env, args[2], &valueType);
+        if (status != napi_ok) {
+            DEV_HILOGE(JS_NAPI, "Failed to get valueType");
+            return nullptr;
+        }
+        if ((valueType != napi_function) && (valueType != napi_undefined) && (valueType != napi_null)) {
+            DEV_HILOGE(JS_NAPI, "Callback parameter type is error");
+            return nullptr;
+        }
+    }
+    bool isArgumentsValid = false;
+    if ((argc < 3) || !IsMatchCallbackType(env, args[2])) {
+        isArgumentsValid = g_obj->RemoveAllCallback(type);
+        if (!isArgumentsValid) {
+            DEV_HILOGE(JS_NAPI, "Callback is not exit");
+            return nullptr;
+        }
+    }
+    if (!isArgumentsValid && !g_obj->Off(type, args[2])) {
         DEV_HILOGE(JS_NAPI, "Not ready to Unsubscribe for type:%{public}d", type);
         return nullptr;
     }
