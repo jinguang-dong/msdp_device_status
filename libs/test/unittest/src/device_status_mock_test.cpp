@@ -33,7 +33,7 @@ namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
-std::shared_ptr<DeviceStatusMsdpMock> g_testMock;
+std::shared_ptr<DeviceStatusMsdpMock> g_testMock { nullptr };
 } // namespace
 
 class DeviceStatusMsdpMoclTest : public testing::Test {

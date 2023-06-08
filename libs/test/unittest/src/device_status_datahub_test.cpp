@@ -28,7 +28,7 @@ namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
-std::shared_ptr<SensorDataCallback> g_datahub;
+std::shared_ptr<SensorDataCallback> g_datahub { nullptr };
 } // namespace
 
 class DeviceStatusDatahubTest : public testing::Test {

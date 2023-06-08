@@ -55,7 +55,7 @@ int32_t StreamSocket::EpollCtl(int32_t fd, int32_t op, struct epoll_event &event
         FI_HILOGE("Invalid param epollFd");
         return RET_ERR;
     }
-    int32_t ret;
+    int32_t ret { 0 };
     if (op == EPOLL_CTL_DEL) {
         ret = epoll_ctl(epollFd, op, fd, NULL);
     } else {

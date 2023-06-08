@@ -11,28 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/config/features.gni")
-import("//build/test.gni")
-import("../../../device_status.gni")
-module_output_path = "device_status/device_status_native"
-
-ohos_fuzztest("GetUdKeyFuzzTest") {
-  module_out_path = module_output_path
-  fuzz_config_file = "../../../test/fuzztest/getudkey_fuzzer"
-  include_dirs = [
-    "../../../interfaces/innerkits/interaction/include",
-    "../../../utils/common/include",
-  ]
-  sources = [ "getudkey_fuzzer.cpp" ]
-  deps = [ "../../../interfaces/innerkits:devicestatus_client" ]
-  external_deps = [
-    "hiviewdfx_hilog_native:libhilog",
-    "multimedia_image_framework:image_native",
-  ]
-}
-
-group("fuzztest") {
-  testonly = true
-  deps = []
-  deps += [ ":GetUdKeyFuzzTest" ]
-}
+FUZZ
