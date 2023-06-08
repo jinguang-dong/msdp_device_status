@@ -43,7 +43,7 @@ void DeviceStatusClientFuzzer::DeviceStatusTestCallback::OnDeviceStatusChanged(c
 void DeviceStatusClientFuzzer::TestSubscribeCallback(const uint8_t* data)
 {
     std::cout << "TestSubscribeCallback: Enter" << std::endl;
-    int32_t type[1];
+    int32_t type[1] { -1 };
     int32_t idSize = 4;
     errno_t ret = memcpy_s(type, sizeof(type), data, idSize);
     if (ret != EOK) {

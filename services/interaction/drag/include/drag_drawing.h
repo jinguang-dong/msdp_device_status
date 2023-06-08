@@ -13,111 +13,54 @@
  * limitations under the License.
  */
 
-#ifndef DRAG_DRAWING_H
-#define DRAG_DRAWING_H
+#ifndef DRAG_DATA_MANAGER_H
+#define DRAG_DATA_MANAGER_H
 
-#include <vector>
+#include <string>
 
-#include "event_handler.h"
-#include "event_runner.h"
-#include "libxml/tree.h"
-#include "libxml/parser.h"
-#include "modifier/rs_extended_modifier.h"
-#include "modifier/rs_modifier.h"
 #include "pixel_map.h"
-#include "ui/rs_canvas_node.h"
-#include "vsync_receiver.h"
+#include "pointer_style.h"
+#include "singleton.h"
 
 #include "drag_data.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class DrawSVGModifier : public OHOS::Rosen::RSContentStyleModifier {
-public:
-    DrawSVGModifier() = default;
-    ~DrawSVGModifier() = default;
-    void Draw(OHOS::Rosen::RSDrawingContext& context) const override;
+class DragDataManager final {
+    DECLARE_SINGLETON(DragDataManager);
 
+public:
+    DISALLOW_MOVE(DragDataManager);
+
+    void Init(const DragData &dragData, const MMI::PointerStyle &pointerStyle);
+    DragData GetDragData() const;
+    void SetDragStyle(DragCursorStyle style);
+    DragCursorStyle GetDragStyle() const;
+    std::u16string GetDragMessage() const;
+    void SetDragWindowVisible(bool visible);
+    bool GetDragWindowVisible() const;
+    int32_t GetShadowOffset(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height) const;
+    void ResetDragData();
+    void SetTargetTid(int32_t tokenId);
+    int32_t GetTargetTid() const;
+    void SetTargetPid(int32_t pid);
+    int32_t GetTargetPid() const;
+    void SetMotionDrag(bool isMotionDrag);
+    bool IsMotionDrag() const;
 private:
-    int32_t UpdateSvgNodeInfo(xmlNodePtr curNode, int32_t extendSvgWidth) const;
-    xmlNodePtr GetRectNode(xmlNodePtr curNode) const;
-    xmlNodePtr UpdateRectNode(xmlNodePtr curNode, int32_t extendSvgWidth) const;
-    void UpdateTspanNode(xmlNodePtr curNode) const;
-    int32_t ParseAndAdjustSvgInfo(xmlNodePtr curNode) const;
-    std::shared_ptr<OHOS::Media::PixelMap> DecodeSvgToPixelMap(const std::string &filePath) const;
-    int32_t GetFilePath(std::string &filePath) const;
-    bool NeedAdjustSvgInfo() const;
-    void SetDecodeOptions(OHOS::Media::DecodeOptions &decodeOpts) const;
+    DragData dragData_;
+    OHOS::MMI::PointerStyle pointerStyle_;
+    DragCursorStyle dragStyle_ { DragCursorStyle::DEFAULT };
+    std::u16string dragMessage_;
+    bool visible_ { false };
+    int32_t targetTid_ { -1 };
+    int32_t targetPid_ { -1 };
+    bool isMotionDrag_ { false };
 };
 
-class DrawPixelMapModifier : public OHOS::Rosen::RSContentStyleModifier {
-public:
-    DrawPixelMapModifier() = default;
-    ~DrawPixelMapModifier() = default;
-    void Draw(OHOS::Rosen::RSDrawingContext &context) const override;
-};
+#define DRAG_DATA_MGR OHOS::Singleton<DragDataManager>::GetInstance()
 
-class DrawMouseIconModifier : public OHOS::Rosen::RSContentStyleModifier {
-public:
-    DrawMouseIconModifier() = default;
-    ~DrawMouseIconModifier() = default;
-    void Draw(OHOS::Rosen::RSDrawingContext &context) const override;
-};
-
-class DrawDynamicEffectModifier : public OHOS::Rosen::RSContentStyleModifier {
-public:
-    DrawDynamicEffectModifier() = default;
-    ~DrawDynamicEffectModifier() = default;
-    void Draw(OHOS::Rosen::RSDrawingContext &context) const override;
-    void SetAlpha(float alpha);
-    void SetScale(float scale);
-
-private:
-    std::shared_ptr<OHOS::Rosen::RSAnimatableProperty<float>> alpha_ { nullptr };
-    std::shared_ptr<OHOS::Rosen::RSAnimatableProperty<float>> scale_ { nullptr };
-};
-
-class DragDrawing final {
-public:
-    DragDrawing() = default;
-    DISALLOW_COPY_AND_MOVE(DragDrawing);
-    ~DragDrawing() = default;
-
-    int32_t Init(const DragData &dragData);
-    void Draw(int32_t displayId, int32_t displayX, int32_t displayY);
-    int32_t UpdateDragStyle(DragCursorStyle style);
-    void OnDragSuccess();
-    void OnDragFail();
-    void EraseMouseIcon();
-    void DestroyDragWindow();
-    void UpdateDrawingState();
-    void UpdateDragWindowState(bool visible);
-    void MoveTo(int32_t x, int32_t y);
-private:
-    int32_t InitLayer();
-    void InitCanvas(int32_t width, int32_t height);
-    void CreateWindow(int32_t displayX, int32_t displayY);
-    int32_t DrawShadow();
-    int32_t DrawMouseIcon();
-    int32_t DrawStyle();
-    void RunAnimation(float endAlpha, float endScale);
-    int32_t InitVSync(float endAlpha, float endScale);
-    void OnVsync();
-    void InitDrawingInfo(const DragData &dragData);
-    void RemoveModifier();
-
-private:
-    int64_t startNum_ { -1 };
-    std::shared_ptr<OHOS::Rosen::RSCanvasNode> canvasNode_ { nullptr };
-    std::shared_ptr<DrawSVGModifier> drawSVGModifier_ { nullptr };
-    std::shared_ptr<DrawPixelMapModifier> drawPixelMapModifier_ { nullptr };
-    std::shared_ptr<DrawMouseIconModifier> drawMouseIconModifier_ { nullptr };
-    std::shared_ptr<DrawDynamicEffectModifier> drawDynamicEffectModifier_ { nullptr };
-    std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector_ { nullptr };
-    std::shared_ptr<OHOS::Rosen::VSyncReceiver> receiver_ { nullptr };
-    std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ { nullptr };
-};
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
