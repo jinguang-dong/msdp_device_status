@@ -22,10 +22,15 @@
 #include <sstream>
 
 #include "hilog/log.h"
+#include "lang_standards.h"
 
 namespace OHOS {
 namespace Msdp {
-inline constexpr uint32_t MSDP_DOMAIN_ID = 0xD002220;
+#if CPP_STANDARD >= CPP_STANDARD_17
+inline constexpr uint32_t MSDP_DOMAIN_ID { 0xD002220 };
+#else
+constexpr uint32_t MSDP_DOMAIN_ID { 0xD002220 };
+#endif // CPP_STANDARD >= CPP_STANDARD_17
 } // namespace Msdp
 } // namespace OHOS
 
