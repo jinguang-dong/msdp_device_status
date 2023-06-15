@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-constexpr double MOVEMENT_THRESHOLD { 0.001 };
+inline constexpr double MOVEMENT_THRESHOLD { 0.001 };
 enum Type {
     TYPE_INVALID = -1,
     TYPE_ABSOLUTE_STILL,
@@ -93,7 +93,7 @@ struct Data {
     }
 };
 
-typedef struct DeviceStatusJsonData {
+using struct DeviceStatusJsonData {
     int32_t type { -1 };
     std::string json;
 }DeviceStatusJsonD;

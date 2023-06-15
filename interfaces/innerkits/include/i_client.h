@@ -27,8 +27,8 @@ namespace DeviceStatus {
 class IClient;
 using IClientPtr = std::shared_ptr<IClient>;
 using EventHandlerPtr = std::shared_ptr<AppExecFwk::EventHandler>;
-typedef std::function<void(const IClient&)> ConnectCallback;
-typedef std::function<int32_t(const StreamClient&, NetPacket&)> ClientMsgFun;
+using std::function<void(const IClient&)> ConnectCallback;
+using std::function<int32_t(const StreamClient&, NetPacket&)> ClientMsgFun;
 class IClient : public MsgHandler<MessageId, ClientMsgFun> {
 public:
     virtual IClientPtr GetSharedPtr() = 0;
