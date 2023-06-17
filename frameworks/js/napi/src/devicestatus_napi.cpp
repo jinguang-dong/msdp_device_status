@@ -118,19 +118,19 @@ void DeviceStatusNapi::OnDeviceStatusChangedDone(int32_t type, int32_t value, bo
 int32_t DeviceStatusNapi::ConvertTypeToInt(const std::string &type)
 {
     if (type == "absoluteStill") {
-        return Type::TYPE_ABSOLUTE_STILL;
+        return static_cast<int32_t>(Type::TYPE_ABSOLUTE_STILL);
     } else if (type == "horizontalPosition") {
-        return Type::TYPE_HORIZONTAL_POSITION;
+        return static_cast<int32_t>(Type::TYPE_HORIZONTAL_POSITION);
     } else if (type == "verticalPosition") {
-        return Type::TYPE_VERTICAL_POSITION;
+        return static_cast<int32_t>(Type::TYPE_VERTICAL_POSITION);
     } else if (type == "still") {
-        return Type::TYPE_STILL;
+        return static_cast<int32_t>(Type::TYPE_STILL);
     } else if (type == "relativeStill") {
-        return Type::TYPE_RELATIVE_STILL;
+        return static_cast<int32_t>(Type::TYPE_RELATIVE_STILL);
     } else if (type == "carBluetooth") {
-        return Type::TYPE_CAR_BLUETOOTH;
+        return static_cast<int32_t>(Type::TYPE_CAR_BLUETOOTH);
     } else {
-        return Type::TYPE_INVALID;
+        return static_cast<int32_t>(Type::TYPE_INVALID);
     }
 }
 
@@ -270,7 +270,8 @@ std::tuple<bool, napi_value, int32_t, int32_t, bool> DeviceStatusNapi::CheckUnsu
         return result;
     }
     int32_t type = DeviceStatusNapi::ConvertTypeToInt(mode);
-    if ((type < Type::TYPE_ABSOLUTE_STILL) || (type > Type::TYPE_LID_OPEN)) {
+    if ((type < static_cast<int32_t>(Type::TYPE_ABSOLUTE_STILL)) ||
+            (type > static_cast<int32_t>(Type::TYPE_LID_OPEN))) {
         ThrowErr(env, PARAM_ERROR, "Type is illegal");
         return result;
     }
@@ -280,7 +281,8 @@ std::tuple<bool, napi_value, int32_t, int32_t, bool> DeviceStatusNapi::CheckUnsu
         ThrowErr(env, PARAM_ERROR, "Failed to get int32 item");
         return result;
     }
-    if ((event < ActivityEvent::ENTER) || (event > ActivityEvent::ENTER_EXIT)) {
+    if ((event < static_cast<int32_t>(ActivityEvent::ENTER)) ||
+            (event > static_cast<int32_t>(ActivityEvent::ENTER_EXIT))) {
         ThrowErr(env, PARAM_ERROR, "Event is illegal");
         return result;
     }
@@ -323,7 +325,8 @@ std::tuple<bool, napi_value, int32_t> DeviceStatusNapi::CheckGetParam(napi_env e
         return result;
     }
     int32_t type = ConvertTypeToInt(mode);
-    if ((type < Type::TYPE_ABSOLUTE_STILL) || (type > Type::TYPE_LID_OPEN)) {
+    if ((type < static_cast<int32_t>(Type::TYPE_ABSOLUTE_STILL)) ||
+            (type > static_cast<int32_t>(Type::TYPE_LID_OPEN))) {
         ThrowErr(env, PARAM_ERROR, "Type is illegal");
         return result;
     }
@@ -382,15 +385,18 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatus(napi_env env, napi_callback_i
     }
     int32_t type = ConvertTypeToInt(typeMode);
     FI_HILOGD("Type:%{public}d, event:%{public}d, latency:%{public}d", type, event, latency);
-    if ((type < Type::TYPE_ABSOLUTE_STILL) || (type > Type::TYPE_LID_OPEN)) {
+    if ((type < static_cast<int32_t>(Type::TYPE_ABSOLUTE_STILL)) ||
+            (type > static_cast<int32_t>(Type::TYPE_LID_OPEN))) {
         ThrowErr(env, PARAM_ERROR, "Type is illegal");
         return nullptr;
     }
-    if ((event < ActivityEvent::ENTER) || (event > ActivityEvent::ENTER_EXIT)) {
+    if ((event < static_cast<int32_t>(ActivityEvent::ENTER)) ||
+            (event > static_cast<int32_t>(ActivityEvent::ENTER_EXIT))) {
         ThrowErr(env, PARAM_ERROR, "Event is illegal");
         return nullptr;
     }
-    if ((latency < ReportLatencyNs::SHORT) || (latency > ReportLatencyNs::LONG)) {
+    if ((latency < static_cast<int32_t>(ReportLatencyNs::SHORT)) ||
+            (latency > static_cast<int32_t>(ReportLatencyNs::LONG))) {
         ThrowErr(env, PARAM_ERROR, "Latency is illegal");
         return nullptr;
     }
@@ -453,8 +459,9 @@ napi_value DeviceStatusNapi::GetDeviceStatus(napi_env env, napi_callback_info in
     if (devicestatusData.type == Type::TYPE_INVALID) {
         ThrowErr(env, SERVICE_EXCEPTION, "Once:Failed to get device status data");
     }
-    g_obj->OnDeviceStatusChangedDone(devicestatusData.type, devicestatusData.value, true);
-    g_obj->OffOnce(devicestatusData.type, handler);
+    g_obj->OnDeviceStatusChangedDone(static_cast<int32_t>(devicestatusData.type),
+        static_cast<int32_t>(devicestatusData.value), true);
+    g_obj->OffOnce(static_cast<int32_t>(devicestatusData.type), handler);
     return nullptr;
 }
 

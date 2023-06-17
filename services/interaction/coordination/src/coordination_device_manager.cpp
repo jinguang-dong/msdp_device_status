@@ -236,7 +236,7 @@ std::vector<std::string> CoordinationDeviceManager::GetCoordinationDhids(int32_t
         if (networkId != pointerNetworkId) {
             continue;
         }
-        if (dev->GetKeyboardType() == IDevice::KEYBOARD_TYPE_ALPHABETICKEYBOARD) {
+        if (dev->GetKeyboardType() == KeyboardType::KEYBOARD_TYPE_ALPHABETICKEYBOARD) {
             inputDeviceDhids.push_back(dev->GetDhid());
             FI_HILOGD("unq:%{public}s, type:%{public}s", inputDeviceDhids.back().c_str(), "supportkey");
         }
@@ -346,7 +346,7 @@ void CoordinationDeviceManager::OnDeviceRemoved(std::shared_ptr<IDevice> device)
     if (device->IsPointerDevice()) {
         COOR_SM->OnPointerOffline(dev->GetDhid(), dhids);
     } else if (device->IsKeyboard()) {
-        if (!dev->IsRemote() && dev->GetKeyboardType() == IDevice::KEYBOARD_TYPE_ALPHABETICKEYBOARD) {
+        if (!dev->IsRemote() && dev->GetKeyboardType() == KeyboardType::KEYBOARD_TYPE_ALPHABETICKEYBOARD) {
             COOR_SM->OnKeyboardOffline(dev->GetDhid());
         }
     }

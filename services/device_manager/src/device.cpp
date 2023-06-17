@@ -210,20 +210,20 @@ void Device::CheckPointers()
     if (hasAbs) {
         if (hasAbsCoords) {
             if (hasKeys && stylusOrPen) {
-                caps_.set(DEVICE_CAP_TABLET_TOOL);
+                caps_.set(static_cast<size_t>(Capability::DEVICE_CAP_TABLET_TOOL));
                 FI_HILOGD("This is tablet tool");
             }
         }
         if (hasMtCoords) {
             if (hasTouch || isDirect) {
-                caps_.set(DEVICE_CAP_TOUCH);
+                caps_.set(static_cast<size_t>(Capability::DEVICE_CAP_TOUCH));
                 FI_HILOGD("This is touch device");
             }
         }
     }
     if (hasRels) {
         if (hasRelCoords) {
-            caps_.set(DEVICE_CAP_POINTER);
+            caps_.set(static_cast<size_t>(Capability::DEVICE_CAP_POINTER));
             FI_HILOGD("This is pointer device");
         }
     }
@@ -240,7 +240,7 @@ void Device::CheckKeys()
         for (size_t key = KEY_BLOCKS[block].start; key < KEY_BLOCKS[block].end; ++key) {
             if (TestBit(key, keyBitmask_)) {
                 FI_HILOGD("Found key:%{public}zx", key);
-                caps_.set(DEVICE_CAP_KEYBOARD);
+                caps_.set(static_cast<size_t>(Capability::DEVICE_CAP_KEYBOARD));
                 return;
             }
         }
@@ -344,21 +344,21 @@ void Device::JudgeKeyboardType()
 {
     CALL_DEBUG_ENTER;
     if (TestBit(KEY_HOME, keyBitmask_) && (GetBus() == BUS_BLUETOOTH)) {
-        keyboardType_ = IDevice::KEYBOARD_TYPE_REMOTECONTROL;
+        keyboardType_ = KeyboardType::KEYBOARD_TYPE_REMOTECONTROL;
         FI_HILOGD("The keyboard type is remote control");
     } else if (TestBit(KEY_Q, keyBitmask_)) {
-        keyboardType_ = IDevice::KEYBOARD_TYPE_ALPHABETICKEYBOARD;
+        keyboardType_ = KeyboardType::KEYBOARD_TYPE_ALPHABETICKEYBOARD;
         FI_HILOGD("The keyboard type is standard");
     } else if (TestBit(KEY_KP1, keyBitmask_)) {
-        keyboardType_ = IDevice::KEYBOARD_TYPE_DIGITALKEYBOARD;
+        keyboardType_ = KeyboardType::KEYBOARD_TYPE_DIGITALKEYBOARD;
         FI_HILOGD("The keyboard type is digital keyboard");
     } else if (TestBit(KEY_LEFTCTRL, keyBitmask_) &&
                TestBit(KEY_RIGHTCTRL, keyBitmask_) &&
                TestBit(KEY_F20, keyBitmask_)) {
-        keyboardType_ = IDevice::KEYBOARD_TYPE_HANDWRITINGPEN;
+        keyboardType_ = KeyboardType::KEYBOARD_TYPE_HANDWRITINGPEN;
         FI_HILOGD("The keyboard type is handwriting pen");
     } else {
-        keyboardType_ = IDevice::KEYBOARD_TYPE_UNKNOWN;
+        keyboardType_ = KeyboardType::KEYBOARD_TYPE_UNKNOWN;
         FI_HILOGD("Undefined keyboard type");
     }
 }
@@ -368,15 +368,15 @@ void Device::LoadDeviceConfig()
     CALL_DEBUG_ENTER;
     if (ReadTomlFile(MakeConfigFileName()) != RET_OK) {
         FI_HILOGE("ReadTomlFile failed");
-        keyboardType_ = IDevice::KEYBOARD_TYPE_NONE;
+        keyboardType_ = KeyboardType::KEYBOARD_TYPE_NONE;
     }
     if (IsKeyboard()) {
-        if ((keyboardType_ <= IDevice::KEYBOARD_TYPE_NONE) ||
-            (keyboardType_ >= IDevice::KEYBOARD_TYPE_MAX)) {
+        if ((keyboardType_ <= KeyboardType::KEYBOARD_TYPE_NONE) ||
+            (keyboardType_ >= KeyboardType::KEYBOARD_TYPE_MAX)) {
             JudgeKeyboardType();
         }
     } else {
-        keyboardType_ = IDevice::KEYBOARD_TYPE_NONE;
+        keyboardType_ = KeyboardType::KEYBOARD_TYPE_NONE;
     }
     FI_HILOGD("keyboard type:%{public}d", keyboardType_);
 }

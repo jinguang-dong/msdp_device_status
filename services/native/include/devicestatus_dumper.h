@@ -42,7 +42,7 @@ struct AppInfo {
     int32_t pid {};
     Security::AccessToken::AccessTokenID tokenId;
     std::string packageName;
-    Type type { TYPE_INVALID };
+    Type type { Type::TYPE_INVALID };
     sptr<IRemoteDevStaCallback> callback { nullptr };
 };
 struct DeviceStatusRecord {

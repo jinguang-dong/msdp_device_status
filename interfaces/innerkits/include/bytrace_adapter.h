@@ -24,15 +24,15 @@ namespace Msdp {
 namespace DeviceStatus {
 class BytraceAdapter {
 public:
-    enum TraceBtn {
+    enum class TraceBtn {
         TRACE_STOP = 0,
         TRACE_START = 1
     };
-    enum SubscribeType {
+    enum class SubscribeType {
         SUBSCRIBE,
         UNSUBSCRIBE
     };
-    enum SubscribeObject {
+    enum class SubscribeObject {
         CLIENT,
         SERVICE
     };

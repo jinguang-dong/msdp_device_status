@@ -404,7 +404,7 @@ void CoordinationSoftbusAdapter::HandleSessionData(int32_t sessionId, const std:
             return;
         }
         FI_HILOGI("Message:%{public}d", dataPacket->messageId);
-        if (dataPacket->messageId == DRAGGING_DATA || dataPacket->messageId == STOPDRAG_DATA) {
+        if (dataPacket->messageId == MessageId::DRAGGING_DATA || dataPacket->messageId == MessageId::STOPDRAG_DATA) {
             CHKPV(registerRecvMap_[dataPacket->messageId]);
             registerRecvMap_[dataPacket->messageId](dataPacket->data, dataPacket->dataLen);
         }
@@ -534,7 +534,7 @@ void CoordinationSoftbusAdapter::OnSessionClosed(int32_t sessionId)
 void CoordinationSoftbusAdapter::RegisterRecvFunc(MessageId messageId, std::function<void(void*, uint32_t)> callback)
 {
     CALL_DEBUG_ENTER;
-    if (messageId <= MIN_ID || messageId >= MAX_ID) {
+    if (messageId <= MessageId::MIN_ID || messageId >= MessageId::MAX_ID) {
         FI_HILOGE("Message id is invalid:%{public}d", messageId);
         return;
     }

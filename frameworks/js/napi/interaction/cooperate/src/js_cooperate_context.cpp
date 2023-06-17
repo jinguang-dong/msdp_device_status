@@ -63,11 +63,12 @@ napi_value JsCooperateContext::Enable(napi_env env, napi_callback_info info)
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
 
     if (argc == ZERO_PARAM) {
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
+        THROWERR_CUSTOM(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR),
+            "Wrong number of parameters");
         return nullptr;
     }
     if (!UtilNapi::TypeOf(env, argv[ZERO_PARAM], napi_boolean)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "enable", "boolean");
+        THROWERR(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR), "enable", "boolean");
         return nullptr;
     }
     bool enable = false;
@@ -80,7 +81,7 @@ napi_value JsCooperateContext::Enable(napi_env env, napi_callback_info info)
         return jsCooperateManager->Enable(env, enable);
     }
     if (!UtilNapi::TypeOf(env, argv[ONE_PARAM], napi_function)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "callback", "function");
+        THROWERR(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR), "callback", "function");
         return nullptr;
     }
     return jsCooperateManager->Enable(env, enable, argv[ONE_PARAM]);
@@ -94,15 +95,17 @@ napi_value JsCooperateContext::Start(napi_env env, napi_callback_info info)
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
 
     if (argc < TWO_PARAM) {
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
+        THROWERR_CUSTOM(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR),
+            "Wrong number of parameters");
         return nullptr;
     }
     if (!UtilNapi::TypeOf(env, argv[ZERO_PARAM], napi_string)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "remoteNetworkDescriptor", "string");
+        THROWERR(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR),
+            "remoteNetworkDescriptor", "string");
         return nullptr;
     }
     if (!UtilNapi::TypeOf(env, argv[ONE_PARAM], napi_number)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "startDeviceId", "number");
+        THROWERR(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR), "startDeviceId", "number");
         return nullptr;
     }
     char remoteNetworkDescriptor[MAX_STRING_LEN] = {};
@@ -119,7 +122,7 @@ napi_value JsCooperateContext::Start(napi_env env, napi_callback_info info)
         return jsCooperateManager->Start(env, remoteNetworkDescriptor, startDeviceId);
     }
     if (!UtilNapi::TypeOf(env, argv[TWO_PARAM], napi_function)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "callback", "function");
+        THROWERR(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR), "callback", "function");
         return nullptr;
     }
     return jsCooperateManager->Start(env, std::string(remoteNetworkDescriptor), startDeviceId, argv[TWO_PARAM]);
@@ -139,7 +142,7 @@ napi_value JsCooperateContext::Stop(napi_env env, napi_callback_info info)
         return jsCooperateManager->Stop(env);
     }
     if (!UtilNapi::TypeOf(env, argv[ZERO_PARAM], napi_function)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "callback", "function");
+        THROWERR(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR), "callback", "function");
         return nullptr;
     }
     return jsCooperateManager->Stop(env, argv[ZERO_PARAM]);
@@ -153,11 +156,12 @@ napi_value JsCooperateContext::GetState(napi_env env, napi_callback_info info)
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
 
     if (argc == ZERO_PARAM) {
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
+        THROWERR_CUSTOM(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR),
+            "Wrong number of parameters");
         return nullptr;
     }
     if (!UtilNapi::TypeOf(env, argv[ZERO_PARAM], napi_string)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "deviceDescriptor", "string");
+        THROWERR(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR), "deviceDescriptor", "string");
         return nullptr;
     }
     char deviceDescriptor[MAX_STRING_LEN] = { ZERO_PARAM };
@@ -173,7 +177,7 @@ napi_value JsCooperateContext::GetState(napi_env env, napi_callback_info info)
         return jsCooperateManager->GetState(env, deviceDescriptor_);
     }
     if (!UtilNapi::TypeOf(env, argv[ONE_PARAM], napi_function)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "callback", "function");
+        THROWERR(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR), "callback", "function");
         return nullptr;
     }
     return jsCooperateManager->GetState(env, deviceDescriptor_, argv[ONE_PARAM]);
@@ -187,25 +191,27 @@ napi_value JsCooperateContext::On(napi_env env, napi_callback_info info)
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
 
     if (argc == ZERO_PARAM) {
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
+        THROWERR_CUSTOM(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR),
+            "Wrong number of parameters");
         return nullptr;
     }
     if (!UtilNapi::TypeOf(env, argv[ZERO_PARAM], napi_string)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "type", "string");
+        THROWERR(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR), "type", "string");
         return nullptr;
     }
     char type[MAX_STRING_LEN] = {};
     size_t length = ZERO_PARAM;
     CHKRP(napi_get_value_string_utf8(env, argv[ZERO_PARAM], type, sizeof(type), &length), GET_VALUE_STRING_UTF8);
     if (std::strcmp(type, "cooperation") != ZERO_PARAM) {
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Type must be cooperation");
+        THROWERR_CUSTOM(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR),
+            "Type must be cooperation");
         return nullptr;
     }
     JsCooperateContext *jsDev = JsCooperateContext::GetInstance(env);
     CHKPP(jsDev);
     auto jsCooperateManager = jsDev->GetJsCoordinationMgr();
     if (!UtilNapi::TypeOf(env, argv[ONE_PARAM], napi_function)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "callback", "function");
+        THROWERR(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR), "callback", "function");
         return nullptr;
     }
     jsCooperateManager->RegisterListener(env, type, argv[ONE_PARAM]);
@@ -220,11 +226,12 @@ napi_value JsCooperateContext::Off(napi_env env, napi_callback_info info)
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
 
     if (argc == ZERO_PARAM) {
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
+        THROWERR_CUSTOM(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR),
+            "Wrong number of parameters");
         return nullptr;
     }
     if (!UtilNapi::TypeOf(env, argv[ZERO_PARAM], napi_string)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "type", "string");
+        THROWERR(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR), "type", "string");
         return nullptr;
     }
     char type[MAX_STRING_LEN] = {};
@@ -240,7 +247,7 @@ napi_value JsCooperateContext::Off(napi_env env, napi_callback_info info)
         return nullptr;
     }
     if (!UtilNapi::TypeOf(env, argv[ONE_PARAM], napi_function)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "callback", "function");
+        THROWERR(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR), "callback", "function");
         return nullptr;
     }
     jsCooperateManager->UnregisterListener(env, type_, argv[ONE_PARAM]);

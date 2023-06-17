@@ -49,7 +49,7 @@ enum class MessageId : int32_t {
     DRAG_STATE_LISTENER
 };
 
-enum TokenType : int32_t {
+enum class TokenType : int32_t {
     TOKEN_INVALID = -1,
     TOKEN_HAP = 0,
     TOKEN_NATIVE,

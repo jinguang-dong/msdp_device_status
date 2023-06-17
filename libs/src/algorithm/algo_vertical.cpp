@@ -30,7 +30,7 @@ bool AlgoVertical::Init(Type type)
     CALL_DEBUG_ENTER;
     algoCallback_ = std::bind(&AlgoVertical::StartAlgorithm, this, std::placeholders::_1, std::placeholders::_2);
     CHKPF(algoCallback_);
-    SENSOR_DATA_CB.SubscribeSensorEvent(type, algoCallback_);
+    SENSOR_DATA_CB.SubscribeSensorEvent(static_cast<int32_t>(type), algoCallback_);
     return true;
 }
 
@@ -63,14 +63,14 @@ void AlgoVertical::ExecuteOperation()
         counter_--;
         if (counter_ == 0) {
             counter_ = COUNTER_THRESHOLD;
-            UpdateStateAndReport(VALUE_ENTER, VERTICAL, TYPE_VERTICAL_POSITION);
+            UpdateStateAndReport(OnChangedValue::VALUE_ENTER, VERTICAL, Type::TYPE_VERTICAL_POSITION);
         }
     } else {
         counter_ = COUNTER_THRESHOLD;
         if (state_ == NON_VERTICAL) {
             return;
         }
-        UpdateStateAndReport(VALUE_EXIT, NON_VERTICAL, TYPE_VERTICAL_POSITION);
+        UpdateStateAndReport(OnChangedValue::VALUE_EXIT, NON_VERTICAL, Type::TYPE_VERTICAL_POSITION);
     }
 }
 } // namespace DeviceStatus

@@ -22,7 +22,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 inline constexpr double MOVEMENT_THRESHOLD { 0.001 };
-enum Type {
+enum class Type {
     TYPE_INVALID = -1,
     TYPE_ABSOLUTE_STILL,
     TYPE_HORIZONTAL_POSITION,
@@ -34,31 +34,31 @@ enum Type {
     TYPE_MAX
 };
 
-enum TypeValue : bool {
+enum class TypeValue : bool {
     INVALID = false,
     VALID = true
 };
 
-enum OnChangedValue {
+enum class OnChangedValue {
     VALUE_INVALID = -1,
     VALUE_ENTER = 1,
     VALUE_EXIT = 2
 };
 
-enum ActivityEvent {
+enum class ActivityEvent {
     EVENT_INVALID = 0,
     ENTER = 1,
     EXIT = 2,
     ENTER_EXIT = 3
 };
 
-enum ReportLatencyNs {
-    Latency_INVALID = -1,
+enum class ReportLatencyNs {
+    LATENCY_INVALID = -1,
     SHORT = 1,
     MIDDLE = 2,
     LONG = 3
 };
-enum Status {
+enum class Status {
     STATUS_INVALID = -1,
     STATUS_CANCEL,
     STATUS_START,
@@ -66,7 +66,7 @@ enum Status {
     STATUS_FINISH
 };
 
-enum Action {
+enum class Action {
     ACTION_INVALID = -1,
     ACTION_ENLARGE,
     ACTION_REDUCE,
@@ -77,36 +77,36 @@ enum Action {
 };
 
 struct Data {
-    Type type { TYPE_INVALID };
-    OnChangedValue value { VALUE_INVALID };
-    Status status { STATUS_INVALID };
-    Action action { ACTION_INVALID };
+    Type type { Type::TYPE_INVALID };
+    OnChangedValue value { OnChangedValue::VALUE_INVALID };
+    Status status { Status::STATUS_INVALID };
+    Action action { Action::ACTION_INVALID };
     double movement { 0.0 };
 
     bool operator !=(const Data& r) const
     {
-        if (type == r.type && value == r.value &&
-            status - r.status && action == r.action && (movement - r.movement) < MOVEMENT_THRESHOLD) {
+        if (type == r.type && value == r.value && static_cast<int32_t>(status) - static_cast<int32_t>(r.status) &&
+            action == r.action && (movement - r.movement) < MOVEMENT_THRESHOLD) {
             return false;
         }
         return true;
     }
 };
 
-using struct DeviceStatusJsonData {
+typedef struct DeviceStatusJsonData {
     int32_t type { -1 };
     std::string json;
 }DeviceStatusJsonD;
 
 static DeviceStatusJsonD DeviceStatusJson[] = {
-    {Type::TYPE_ABSOLUTE_STILL, "absoluteStill"},
-    {Type::TYPE_HORIZONTAL_POSITION, "horizontalPosition"},
-    {Type::TYPE_VERTICAL_POSITION, "verticalPosition"},
-    {Type::TYPE_STILL, "still"},
-    {Type::TYPE_RELATIVE_STILL, "relativeStill"},
-    {Type::TYPE_CAR_BLUETOOTH, "carBluetooth"},
-    {Type::TYPE_LID_OPEN, "LID_OPEN"},
-    {Type::TYPE_MAX, "MAX"}
+    {static_cast<int32_t>(Type::TYPE_ABSOLUTE_STILL), "absoluteStill"},
+    {static_cast<int32_t>(Type::TYPE_HORIZONTAL_POSITION), "horizontalPosition"},
+    {static_cast<int32_t>(Type::TYPE_VERTICAL_POSITION), "verticalPosition"},
+    {static_cast<int32_t>(Type::TYPE_STILL), "still"},
+    {static_cast<int32_t>(Type::TYPE_RELATIVE_STILL), "relativeStill"},
+    {static_cast<int32_t>(Type::TYPE_CAR_BLUETOOTH), "carBluetooth"},
+    {static_cast<int32_t>(Type::TYPE_LID_OPEN), "LID_OPEN"},
+    {static_cast<int32_t>(Type::TYPE_MAX), "MAX"}
 };
 } // namespace DeviceStatus
 } // namespace Msdp

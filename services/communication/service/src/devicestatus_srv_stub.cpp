@@ -124,8 +124,8 @@ int32_t DeviceStatusSrvStub::GetLatestDeviceStatusDataStub(MessageParcel& data, 
     Data devicestatusData = GetCache(static_cast<Type>(type));
     FI_HILOGD("devicestatusData.type:%{public}d", devicestatusData.type);
     FI_HILOGD("devicestatusData.value:%{public}d", devicestatusData.value);
-    WRITEINT32(reply, devicestatusData.type, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
-    WRITEINT32(reply, devicestatusData.value, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
+    WRITEINT32(reply, static_cast<int32_t>(devicestatusData.type), E_DEVICESTATUS_WRITE_PARCEL_ERROR);
+    WRITEINT32(reply, static_cast<int32_t>(devicestatusData.value), E_DEVICESTATUS_WRITE_PARCEL_ERROR);
     return RET_OK;
 }
 

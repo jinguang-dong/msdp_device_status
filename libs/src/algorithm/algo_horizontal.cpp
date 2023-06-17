@@ -29,7 +29,7 @@ bool AlgoHorizontal::Init(Type type)
     CALL_DEBUG_ENTER;
     algoCallback_ = std::bind(&AlgoHorizontal::StartAlgorithm, this, std::placeholders::_1, std::placeholders::_2);
     CHKPF(algoCallback_);
-    SENSOR_DATA_CB.SubscribeSensorEvent(type, algoCallback_);
+    SENSOR_DATA_CB.SubscribeSensorEvent(static_cast<int32_t>(type), algoCallback_);
     return true;
 }
 
@@ -61,14 +61,14 @@ void AlgoHorizontal::ExecuteOperation()
         counter_--;
         if (counter_ == 0) {
             counter_ = COUNTER_THRESHOLD;
-            UpdateStateAndReport(VALUE_ENTER, HORIZONTAL, TYPE_HORIZONTAL_POSITION);
+            UpdateStateAndReport(OnChangedValue::VALUE_ENTER, HORIZONTAL, Type::TYPE_HORIZONTAL_POSITION);
         }
     } else {
         counter_ = COUNTER_THRESHOLD;
         if (state_ == NON_HORIZONTAL) {
             return;
         }
-        UpdateStateAndReport(VALUE_EXIT, NON_HORIZONTAL, TYPE_HORIZONTAL_POSITION);
+        UpdateStateAndReport(OnChangedValue::VALUE_EXIT, NON_HORIZONTAL, Type::TYPE_HORIZONTAL_POSITION);
     }
 }
 } // namespace DeviceStatus

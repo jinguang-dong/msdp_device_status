@@ -92,15 +92,15 @@ bool DeviceStatusDataParse::DeviceStatusDataInit(const std::string& fileData, bo
         return false;
     }
 
-    cJSON* mockarray = cJSON_GetObjectItem(parser.json_, DeviceStatusJson[type].json.c_str());
+    cJSON* mockarray = cJSON_GetObjectItem(parser.json_, DeviceStatusJson[static_cast<int32_t>(type)].json.c_str());
     int32_t jsonsize = cJSON_GetArraySize(mockarray);
     if (jsonsize == 0) {
         FI_HILOGE("json size is zero");
         return false;
     }
-    tempcount_[type] = tempcount_[type] % jsonsize;
-    cJSON* mockvalue = cJSON_GetArrayItem(mockarray, tempcount_[type]);
-    tempcount_[type]++;
+    tempcount_[static_cast<int32_t>(type)] = tempcount_[static_cast<int32_t>(type)] % jsonsize;
+    cJSON* mockvalue = cJSON_GetArrayItem(mockarray, tempcount_[static_cast<int32_t>(type)]);
+    tempcount_[static_cast<int32_t>(type)]++;
     data.type = type;
     if (mockvalue == nullptr || !cJSON_IsNumber(mockvalue)) {
         FI_HILOGE("json parser number is failed");

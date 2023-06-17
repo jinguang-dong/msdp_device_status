@@ -208,7 +208,7 @@ void DeviceStatusDumper::DumpDeviceStatusCurrentStatus(int32_t fd, const std::ve
         return;
     }
     for (auto it = datas.begin(); it != datas.end(); ++it) {
-        if (it->value == VALUE_INVALID) {
+        if (it->value == OnChangedValue::VALUE_INVALID) {
             continue;
         }
         dprintf(fd, "type:%s | state:%s\n",
@@ -220,15 +220,15 @@ std::string DeviceStatusDumper::GetDeviceState(OnChangedValue value) const
 {
     std::string state;
     switch (value) {
-        case VALUE_ENTER: {
+        case OnChangedValue::VALUE_ENTER: {
             state = "enter";
             break;
         }
-        case VALUE_EXIT: {
+        case OnChangedValue::VALUE_EXIT: {
             state = "exit";
             break;
         }
-        case VALUE_INVALID: {
+        case OnChangedValue::VALUE_INVALID: {
             state = "invalid";
             break;
         }
@@ -244,19 +244,19 @@ std::string DeviceStatusDumper::GetStatusType(Type type) const
 {
     std::string stateType;
     switch (type) {
-        case TYPE_ABSOLUTE_STILL: {
+        case Type::TYPE_ABSOLUTE_STILL: {
             stateType = "absolute still";
             break;
         }
-        case TYPE_HORIZONTAL_POSITION: {
+        case Type::TYPE_HORIZONTAL_POSITION: {
             stateType = "horizontal position";
             break;
         }
-        case TYPE_VERTICAL_POSITION: {
+        case Type::TYPE_VERTICAL_POSITION: {
             stateType = "vertical position";
             break;
         }
-        case TYPE_LID_OPEN: {
+        case Type::TYPE_LID_OPEN: {
             stateType = "lid open";
             break;
         }

@@ -115,7 +115,7 @@ int32_t StreamServer::AddSocketPairInfo(const std::string& programName, int32_t 
         FI_HILOGE("setsockopt serverFd failed, errno:%{public}d", errno);
         goto CLOSE_SOCK;
     }
-    if (tokenType == TokenType::TOKEN_NATIVE) {
+    if (tokenType == static_cast<int32_t>(TokenType::TOKEN_NATIVE)) {
         if (setsockopt(toReturnClientFd, SOL_SOCKET, SO_SNDBUF, &nativeBufferSize, sizeof(nativeBufferSize)) != 0) {
             FI_HILOGE("setsockopt toReturnClientFd failed, errno:%{public}d", errno);
             goto CLOSE_SOCK;
@@ -140,7 +140,7 @@ int32_t StreamServer::AddSocketPairInfo(const std::string& programName, int32_t 
         FI_HILOGE("AddSession fail errCode:%{public}d", ADD_SESSION_FAIL);
         goto CLOSE_SOCK;
     }
-    if (AddEpoll(EPOLL_EVENT_SOCKET, serverFd) != RET_OK) {
+    if (AddEpoll(EpollEventType::EPOLL_EVENT_SOCKET, serverFd) != RET_OK) {
         FI_HILOGE("epoll_ctl EPOLL_CTL_ADD failed, errCode:%{public}d", EPOLL_MODIFY_FAIL);
         goto CLOSE_SOCK;
     }
@@ -193,7 +193,7 @@ void StreamServer::ReleaseSession(int32_t fd, epoll_event& ev)
         circleBufMap_.erase(it);
     }
     auto DeviceStatusService = DeviceStatus::DelayedSpSingleton<DeviceStatus::DeviceStatusService>::GetInstance();
-    DeviceStatusService->DelEpoll(EPOLL_EVENT_SOCKET, fd);
+    DeviceStatusService->DelEpoll(EpollEventType::EPOLL_EVENT_SOCKET, fd);
     close(fd);
 }
 

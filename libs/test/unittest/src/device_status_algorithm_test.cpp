@@ -72,7 +72,7 @@ HWTEST_F(DeviceStatusAlgorithmTest, DeviceStatusAlgorithmTest001, TestSize.Level
 {
     GTEST_LOG_(INFO) << "AbsolutstillTest001 start";
     AlgoAbsoluteStill still;
-    bool ret = still.Init(TYPE_INVALID);
+    bool ret = still.Init(Type::TYPE_INVALID);
     ASSERT_TRUE(ret);
     int32_t sensorTypeId = SensorTypeId::SENSOR_TYPE_ID_ACCELEROMETER;
     still.Unsubscribe(sensorTypeId);
@@ -93,7 +93,7 @@ HWTEST_F(DeviceStatusAlgorithmTest, DeviceStatusAlgorithmTest002, TestSize.Level
     GTEST_LOG_(INFO) << "AbsolutstillTest002 start";
     AlgoHorizontal horizontal;
     int32_t sensorTypeId = SensorTypeId::SENSOR_TYPE_ID_ACCELEROMETER;
-    bool ret = horizontal.Init(TYPE_INVALID);
+    bool ret = horizontal.Init(Type::TYPE_INVALID);
     ASSERT_TRUE(ret);
     std::shared_ptr<DeviceStatusMsdpClientImpl> callback_ = std::make_shared<DeviceStatusMsdpClientImpl>();
     horizontal.RegisterCallback(callback_);
@@ -112,7 +112,7 @@ HWTEST_F(DeviceStatusAlgorithmTest, DeviceStatusAlgorithmTest003, TestSize.Level
 {
     GTEST_LOG_(INFO) << "AbsolutstillTest003 start";
     AlgoVertical vertical;
-    bool ret = vertical.Init(TYPE_INVALID);
+    bool ret = vertical.Init(Type::TYPE_INVALID);
     int32_t sensorTypeId = SensorTypeId::SENSOR_TYPE_ID_ACCELEROMETER;
     ASSERT_TRUE(ret);
     std::shared_ptr<DeviceStatusMsdpClientImpl> callback_ = std::make_shared<DeviceStatusMsdpClientImpl>();

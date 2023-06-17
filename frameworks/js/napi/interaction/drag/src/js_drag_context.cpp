@@ -152,7 +152,8 @@ napi_value JsDragContext::On(napi_env env, napi_callback_info info)
     napi_value argv[1] = { nullptr };
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
     if (argc == 0) {
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
+        THROWERR_CUSTOM(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR),
+            "Wrong number of parameters");
         return nullptr;
     }
     JsDragContext *jsDev = JsDragContext::GetInstance(env);
@@ -160,7 +161,7 @@ napi_value JsDragContext::On(napi_env env, napi_callback_info info)
     auto jsDragMgr = jsDev->GetJsDragMgr();
     CHKPP(jsDragMgr);
     if (!UtilNapi::TypeOf(env, argv[0], napi_function)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "callback", "function");
+        THROWERR(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR), "callback", "function");
         return nullptr;
     }
     jsDragMgr->RegisterListener(env, argv[0]);
@@ -187,7 +188,7 @@ napi_value JsDragContext::Off(napi_env env, napi_callback_info info)
         return nullptr;
     }
     if (!UtilNapi::TypeOf(env, argv[0], napi_function)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "callback", "function");
+        THROWERR(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR), "callback", "function");
         return nullptr;
     }
     jsDragMgr->UnregisterListener(env, argv[0]);

@@ -49,9 +49,9 @@ void DeviceStatusSrvProxy::Subscribe(Type type, ActivityEvent event, ReportLaten
         return;
     }
 
-    WRITEINT32(data, type);
-    WRITEINT32(data, event);
-    WRITEINT32(data, latency);
+    WRITEINT32(data, static_cast<int32_t>(type));
+    WRITEINT32(data, static_cast<int32_t>(event));
+    WRITEINT32(data, static_cast<int32_t>(latency));
     WRITEREMOTEOBJECT(data, callback->AsObject());
 
     int32_t ret = remote->SendRequest(static_cast<int32_t>(Idevicestatus::DEVICESTATUS_SUBSCRIBE), data, reply, option);
@@ -78,8 +78,8 @@ void DeviceStatusSrvProxy::Unsubscribe(Type type, ActivityEvent event, sptr<IRem
         return;
     }
 
-    WRITEINT32(data, type);
-    WRITEINT32(data, event);
+    WRITEINT32(data, static_cast<int32_t>(type));
+    WRITEINT32(data, static_cast<int32_t>(event));
     WRITEREMOTEOBJECT(data, callback->AsObject());
 
     int32_t ret = remote->SendRequest(static_cast<int32_t>(Idevicestatus::DEVICESTATUS_UNSUBSCRIBE),
@@ -109,7 +109,7 @@ Data DeviceStatusSrvProxy::GetCache(const Type& type)
         return devicestatusData;
     }
 
-    WRITEINT32(data, type, devicestatusData);
+    WRITEINT32(data, static_cast<int32_t>(type), devicestatusData);
 
     int32_t ret = remote->SendRequest(static_cast<int32_t>(Idevicestatus::DEVICESTATUS_GETCACHE), data, reply, option);
     if (ret != RET_OK) {

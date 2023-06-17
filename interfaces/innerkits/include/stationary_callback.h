@@ -26,7 +26,7 @@ namespace Msdp {
 namespace DeviceStatus {
 class IRemoteDevStaCallback : public IRemoteBroker {
 public:
-    enum  {
+    enum class Change {
         DEVICESTATUS_CHANGE = 0
     };
 

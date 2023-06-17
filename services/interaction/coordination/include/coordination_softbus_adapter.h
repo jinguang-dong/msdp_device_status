@@ -32,7 +32,7 @@ class CoordinationSoftbusAdapter {
 public:
     virtual ~CoordinationSoftbusAdapter();
 
-    enum MessageId {
+    enum class MessageId {
         MIN_ID = 0,
         DRAGGING_DATA = 1,
         STOPDRAG_DATA = 2,

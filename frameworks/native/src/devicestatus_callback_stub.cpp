@@ -39,7 +39,7 @@ int32_t DeviceStatusCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &
     }
 
     switch (code) {
-        case static_cast<int32_t>(IRemoteDevStaCallback::DEVICESTATUS_CHANGE): {
+        case static_cast<int32_t>(IRemoteDevStaCallback::Change::DEVICESTATUS_CHANGE): {
             return OnDeviceStatusChangedStub(data);
         }
         default:

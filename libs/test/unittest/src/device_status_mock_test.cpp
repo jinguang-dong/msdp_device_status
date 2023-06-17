@@ -296,7 +296,7 @@ HWTEST_F(DeviceStatusMsdpMoclTest, DeviceStatusMsdpMoclTest015, TestSize.Level1)
     GTEST_LOG_(INFO) << "DeviceStatusMsdpMoclTest015 start";
     std::shared_ptr<DeviceStatusMsdpClientImpl> callback_ = std::make_shared<DeviceStatusMsdpClientImpl>();
     EXPECT_TRUE(g_testMock->RegisterCallback(callback_) == ERR_OK);
-    EXPECT_FALSE(g_testMock->NotifyMsdpImpl({TYPE_INVALID, VALUE_INVALID}) == ERR_OK);
+    EXPECT_FALSE(g_testMock->NotifyMsdpImpl({Type::TYPE_INVALID, OnChangedValue::VALUE_INVALID}) == ERR_OK);
     GTEST_LOG_(INFO) << "DeviceStatusMsdpMoclTest015 end";
 }
 
