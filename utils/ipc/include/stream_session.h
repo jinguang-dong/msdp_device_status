@@ -71,7 +71,7 @@ protected:
     std::string descript_;
     int32_t fd_ { -1 };
     const int32_t pid_ { -1 };
-    int32_t tokenType_ { TokenType::TOKEN_INVALID };
+    int32_t tokenType_ { static_cast<int32_t>(TokenType::TOKEN_INVALID) };
 };
 } // namespace Msdp
 } // namespace OHOS

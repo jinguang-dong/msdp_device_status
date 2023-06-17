@@ -35,9 +35,16 @@ namespace DeviceStatus {
 class CoordinationEventManager final {
     DECLARE_DELAYED_SINGLETON(CoordinationEventManager);
 public:
-    enum EventType { LISTENER, ENABLE, START, STOP, STATE };
+    enum class EventType {
+        LISTENER,
+        ENABLE,
+        START,
+        STOP,
+        STATE
+    };
+
     struct EventInfo : public RefBase {
-        EventType type { LISTENER };
+        EventType type { EventType::LISTENER };
         SessionPtr sess { nullptr };
         MessageId msgId { MessageId::INVALID };
         int32_t userData { -1 };

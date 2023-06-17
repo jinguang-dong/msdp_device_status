@@ -617,7 +617,7 @@ void JsEventTarget::HandleExecuteResult(napi_env env, int32_t errCode)
             FI_HILOGE("This error code could not be found");
             return;
         }
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, napiError.msg.c_str());
+        THROWERR_CUSTOM(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR), napiError.msg.c_str());
     }
 }
 } // namespace DeviceStatus

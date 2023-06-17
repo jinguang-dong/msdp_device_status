@@ -32,7 +32,7 @@ namespace Msdp {
 namespace DeviceStatus {
 class DeviceStatusMsdpMock final : public IMsdp {
 public:
-    enum EventType {
+    enum class EventType {
         EVENT_UEVENT_FD,
         EVENT_TIMER_FD
     };

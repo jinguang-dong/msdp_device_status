@@ -28,7 +28,7 @@
 
 namespace OHOS {
 namespace Msdp {
-enum EpollEventType {
+enum class EpollEventType {
     EPOLL_EVENT_BEGIN = 0,
     EPOLL_EVENT_INPUT = EPOLL_EVENT_BEGIN,
     EPOLL_EVENT_SOCKET,

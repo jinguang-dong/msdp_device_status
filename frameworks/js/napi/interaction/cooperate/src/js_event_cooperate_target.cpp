@@ -625,13 +625,13 @@ void JsEventCooperateTarget::EmitCoordinationMessageEvent(uv_work_t *work, int32
 
 void JsEventCooperateTarget::HandleExecuteResult(napi_env env, int32_t errCode)
 {
-    if (errCode != OTHER_ERROR && errCode != RET_OK) {
+    if (errCode != NapiErrorCode::OTHER_ERROR && errCode != RET_OK) {
         NapiError napiError;
         if (!UtilNapiError::GetApiError(errCode, napiError)) {
             FI_HILOGE("This error code could not be found");
             return;
         }
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, napiError.msg.c_str());
+        THROWERR_CUSTOM(env, static_cast<int32_t>(NapiErrorCode::COMMON_PARAMETER_ERROR), napiError.msg.c_str());
     }
 }
 } // namespace DeviceStatus

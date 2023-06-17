@@ -58,10 +58,10 @@ protected:
     } algoPara_ {};
     int32_t state_ { UNKNOWN };
     int32_t counter_ { COUNTER_THRESHOLD };
-    Data reportInfo_ { TYPE_INVALID,
-                       VALUE_INVALID,
-                       STATUS_INVALID,
-                       ACTION_INVALID,
+    Data reportInfo_ { Type::TYPE_INVALID,
+                       OnChangedValue::VALUE_INVALID,
+                       Status::STATUS_INVALID,
+                       Action::ACTION_INVALID,
                        0.0 };
 
     virtual bool StartAlgorithm(int32_t sensorTypeId, AccelData* sensorData) = 0;

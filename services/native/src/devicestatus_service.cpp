@@ -47,7 +47,7 @@ constexpr int32_t MAX_N_RETRIES { 100 };
 
 struct device_status_epoll_event {
     int32_t fd { 0 };
-    EpollEventType event_type { EPOLL_EVENT_BEGIN };
+    EpollEventType event_type { EpollEventType::EPOLL_EVENT_BEGIN };
 };
 
 const bool REGISTER_RESULT =
@@ -145,7 +145,8 @@ int32_t DeviceStatusService::Dump(int32_t fd, const std::vector<std::u16string>&
     });
 
     std::vector<Data> datas;
-    for (auto type = TYPE_ABSOLUTE_STILL; type <= TYPE_LID_OPEN; type = static_cast<Type>(type + 1)) {
+    for (auto type = Type::TYPE_ABSOLUTE_STILL; type <= Type::TYPE_LID_OPEN;
+            type = static_cast<Type>(static_cast<int32_t>(type) + 1)) {
         Data data = GetCache(type);
         if (data.value != OnChangedValue::VALUE_INVALID) {
             datas.emplace_back(data);
@@ -235,8 +236,8 @@ void DeviceStatusService::Subscribe(Type type, ActivityEvent event, ReportLatenc
     DS_DUMPER->SaveAppInfo(appInfo);
     devicestatusManager_->Subscribe(type, event, latency, callback);
     FinishTrace(HITRACE_TAG_MSDP);
-    ReportSensorSysEvent(type, true);
-    WriteSubscribeHiSysEvent(appInfo->uid, appInfo->packageName, type);
+    ReportSensorSysEvent(static_cast<int32_t>(type), true);
+    WriteSubscribeHiSysEvent(appInfo->uid, appInfo->packageName, static_cast<int32_t>(type));
 }
 
 void DeviceStatusService::Unsubscribe(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback)
@@ -254,8 +255,8 @@ void DeviceStatusService::Unsubscribe(Type type, ActivityEvent event, sptr<IRemo
     StartTrace(HITRACE_TAG_MSDP, "serviceUnSubscribeStart");
     devicestatusManager_->Unsubscribe(type, event, callback);
     FinishTrace(HITRACE_TAG_MSDP);
-    ReportSensorSysEvent(type, false);
-    WriteUnSubscribeHiSysEvent(appInfo->uid, appInfo->packageName, type);
+    ReportSensorSysEvent(static_cast<int32_t>(type), false);
+    WriteUnSubscribeHiSysEvent(appInfo->uid, appInfo->packageName, static_cast<int32_t>(type));
 }
 
 Data DeviceStatusService::GetCache(const Type& type)
@@ -323,7 +324,7 @@ void DeviceStatusService::OnDisconnected(SessionPtr s)
 
 int32_t DeviceStatusService::AddEpoll(EpollEventType type, int32_t fd)
 {
-    if (!(type >= EPOLL_EVENT_BEGIN && type < EPOLL_EVENT_END)) {
+    if (!(type >= EpollEventType::EPOLL_EVENT_BEGIN && type < EpollEventType::EPOLL_EVENT_END)) {
         FI_HILOGE("Invalid param type");
         return RET_ERR;
     }
@@ -356,7 +357,7 @@ int32_t DeviceStatusService::AddEpoll(EpollEventType type, int32_t fd)
 
 int32_t DeviceStatusService::DelEpoll(EpollEventType type, int32_t fd)
 {
-    if (!(type >= EPOLL_EVENT_BEGIN && type < EPOLL_EVENT_END)) {
+    if (!(type >= EpollEventType::EPOLL_EVENT_BEGIN && type < EpollEventType::EPOLL_EVENT_END)) {
         FI_HILOGE("Invalid param type");
         return RET_ERR;
     }
@@ -385,7 +386,7 @@ int32_t DeviceStatusService::InitDelegateTasks()
         FI_HILOGE("The delegate task init failed");
         return RET_ERR;
     }
-    auto ret = AddEpoll(EPOLL_EVENT_ETASK, delegateTasks_.GetReadFd());
+    auto ret = AddEpoll(EpollEventType::EPOLL_EVENT_ETASK, delegateTasks_.GetReadFd());
     if (ret != RET_OK) {
         FI_HILOGE("AddEpoll error ret:%{public}d", ret);
         return ret;
@@ -403,7 +404,7 @@ int32_t DeviceStatusService::InitTimerMgr()
         FI_HILOGE("TimerMgr init failed");
         return ret;
     }
-    ret = AddEpoll(EPOLL_EVENT_TIMER, timerMgr_.GetTimerFd());
+    ret = AddEpoll(EpollEventType::EPOLL_EVENT_TIMER, timerMgr_.GetTimerFd());
     if (ret != RET_OK) {
         FI_HILOGE("AddEpoll for timer fail");
         return ret;
@@ -425,15 +426,15 @@ void DeviceStatusService::OnThread()
         for (int32_t i = 0; i < count && state_ == ServiceRunningState::STATE_RUNNING; i++) {
             auto epollEvent = reinterpret_cast<device_status_epoll_event*>(ev[i].data.ptr);
             CHKPC(epollEvent);
-            if (epollEvent->event_type == EPOLL_EVENT_SOCKET) {
+            if (epollEvent->event_type == EpollEventType::EPOLL_EVENT_SOCKET) {
                 OnEpollEvent(ev[i]);
-            } else if (epollEvent->event_type == EPOLL_EVENT_SIGNAL) {
+            } else if (epollEvent->event_type == EpollEventType::EPOLL_EVENT_SIGNAL) {
                 OnSignalEvent(epollEvent->fd);
-            } else if (epollEvent->event_type == EPOLL_EVENT_ETASK) {
+            } else if (epollEvent->event_type == EpollEventType::EPOLL_EVENT_ETASK) {
                 OnDelegateTask(ev[i]);
-            } else if (epollEvent->event_type == EPOLL_EVENT_TIMER) {
+            } else if (epollEvent->event_type == EpollEventType::EPOLL_EVENT_TIMER) {
                 OnTimeout(ev[i]);
-            } else if (epollEvent->event_type == EPOLL_EVENT_DEVICE_MGR) {
+            } else if (epollEvent->event_type == EpollEventType::EPOLL_EVENT_DEVICE_MGR) {
                 OnDeviceMgr(ev[i]);
             } else {
                 FI_HILOGW("Unknown epoll event type:%{public}d", epollEvent->event_type);
@@ -531,7 +532,7 @@ int32_t DeviceStatusService::EnableDevMgr(int32_t nRetries)
             FI_HILOGE("Maximum number of retries exceeded, Failed to enable device manager");
         }
     } else {
-        AddEpoll(EPOLL_EVENT_DEVICE_MGR, devMgr_.GetFd());
+        AddEpoll(EpollEventType::EPOLL_EVENT_DEVICE_MGR, devMgr_.GetFd());
         if (timerId >= 0) {
             timerMgr_.RemoveTimer(timerId);
             timerId = -1;
@@ -542,7 +543,7 @@ int32_t DeviceStatusService::EnableDevMgr(int32_t nRetries)
 
 void DeviceStatusService::DisableDevMgr()
 {
-    DelEpoll(EPOLL_EVENT_DEVICE_MGR, devMgr_.GetFd());
+    DelEpoll(EpollEventType::EPOLL_EVENT_DEVICE_MGR, devMgr_.GetFd());
     devMgr_.Disable();
 }
 

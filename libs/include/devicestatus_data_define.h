@@ -26,21 +26,21 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-constexpr double PI { 3.141592653589793 };
-constexpr int32_t RESULTANT_ACC_LOW_THRHD { 7 };
-constexpr int32_t RESULTANT_ACC_UP_THRHD { 11 };
-constexpr double ACC_VALID_THRHD { 160.0 };
-constexpr double ANGLE_180_DEGREE { 180.0 };
-constexpr double ANGLE_HOR_UP_THRHD { 180.1 };
-constexpr double ANGLE_HOR_LOW_THRHD { 160.0 };
-constexpr double ANGLE_HOR_FLIPPED_THRHD { 5.0 };
-constexpr double ANGLE_VER_UP_THRHD { 110.0 };
-constexpr double ANGLE_VER_LOW_THRHD { 80.0 };
-constexpr double ANGLE_VER_FLIPPED_THRHD { 5.0 };
+inline constexpr double PI { 3.141592653589793 };
+inline constexpr int32_t RESULTANT_ACC_LOW_THRHD { 7 };
+inline constexpr int32_t RESULTANT_ACC_UP_THRHD { 11 };
+inline constexpr double ACC_VALID_THRHD { 160.0 };
+inline constexpr double ANGLE_180_DEGREE { 180.0 };
+inline constexpr double ANGLE_HOR_UP_THRHD { 180.1 };
+inline constexpr double ANGLE_HOR_LOW_THRHD { 160.0 };
+inline constexpr double ANGLE_HOR_FLIPPED_THRHD { 5.0 };
+inline constexpr double ANGLE_VER_UP_THRHD { 110.0 };
+inline constexpr double ANGLE_VER_LOW_THRHD { 80.0 };
+inline constexpr double ANGLE_VER_FLIPPED_THRHD { 5.0 };
 
-constexpr int32_t VALID_TIME_THRESHOLD { 500 };
-constexpr int32_t ACC_SAMPLE_PERIOD { 100 };
-constexpr int32_t COUNTER_THRESHOLD = VALID_TIME_THRESHOLD / ACC_SAMPLE_PERIOD;
+inline constexpr int32_t VALID_TIME_THRESHOLD { 500 };
+inline constexpr int32_t ACC_SAMPLE_PERIOD { 100 };
+inline constexpr int32_t COUNTER_THRESHOLD = VALID_TIME_THRESHOLD / ACC_SAMPLE_PERIOD;
 
 struct JsonParser {
     JsonParser() = default;

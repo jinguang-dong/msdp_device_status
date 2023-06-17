@@ -26,8 +26,8 @@ namespace DeviceStatus {
 class IdevicestatusStorage : public IRemoteBroker {
 public:
     struct DeviceStatusRecord {
-        Type type { TYPE_INVALID };
-        OnChangedValue value { VALUE_INVALID };
+        Type type { Type::TYPE_INVALID };
+        OnChangedValue value { OnChangedValue::VALUE_INVALID };
         std::string date;
         std::string time;
     };

@@ -134,7 +134,7 @@ int32_t DeviceStatusClient::UnsubscribeCallback(Type type, ActivityEvent event, 
     }
     CHKPR(devicestatusProxy_, RET_ERR);
 
-    if ((type < TYPE_INVALID) || (type > TYPE_MAX)) {
+    if ((type < Type::TYPE_INVALID) || (type > Type::TYPE_MAX)) {
         FI_HILOGE("type out of range");
         return RET_ERR;
     }

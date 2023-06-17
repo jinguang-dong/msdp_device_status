@@ -30,7 +30,6 @@ namespace OHOS {
 namespace Msdp {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "StreamSession" };
-const std::string FOUNDATION { "foundation" };
 } // namespace
 
 StreamSession::StreamSession(const std::string &programName, int32_t moduleType, int32_t fd, int32_t uid, int32_t pid)

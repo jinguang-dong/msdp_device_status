@@ -139,21 +139,22 @@ int32_t DeviceStatusManager::NotifyDeviceStatusChange(const Data& devicestatusDa
             FI_HILOGE("Listener is nullptr");
             return false;
         }
-        FI_HILOGI("type:%{public}d, arrs_:%{public}d", devicestatusData.type, arrs_[devicestatusData.type]);
-        switch (arrs_[devicestatusData.type]) {
-            case ENTER: {
-                if (devicestatusData.value == VALUE_ENTER) {
+        FI_HILOGI("type:%{public}d, arrs_:%{public}d",
+            devicestatusData.type, arrs_[static_cast<int32_t>(devicestatusData.type)]);
+        switch (arrs_[static_cast<int32_t>(devicestatusData.type)]) {
+            case static_cast<int32_t>(ActivityEvent::ENTER): {
+                if (devicestatusData.value == OnChangedValue::VALUE_ENTER) {
                     listener->OnDeviceStatusChanged(devicestatusData);
                 }
                 break;
             }
-            case EXIT: {
-                if (devicestatusData.value == VALUE_EXIT) {
+            case static_cast<int32_t>(ActivityEvent::EXIT): {
+                if (devicestatusData.value == OnChangedValue::VALUE_EXIT) {
                     listener->OnDeviceStatusChanged(devicestatusData);
                 }
                 break;
             }
-            case ENTER_EXIT: {
+            case static_cast<int32_t>(ActivityEvent::ENTER_EXIT): {
                 listener->OnDeviceStatusChanged(devicestatusData);
                 break;
             }
@@ -171,8 +172,8 @@ void DeviceStatusManager::Subscribe(Type type, ActivityEvent event, ReportLatenc
 {
     CALL_DEBUG_ENTER;
     CHKPV(callback);
-    event_ = event;
-    type_ = type;
+    event_ = static_cast<int32_t>(event);
+    type_ = static_cast<int32_t>(type);
     arrs_ [type_] = event_;
     FI_HILOGI("arr save:%{public}d, event:%{public}d", type_, event);
     std::set<const sptr<IRemoteDevStaCallback>, classcomp> listeners;

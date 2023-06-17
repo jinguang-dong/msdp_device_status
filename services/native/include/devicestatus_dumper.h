@@ -34,15 +34,15 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-constexpr int32_t RET_NG { -1 };
-constexpr size_t MAX_DEVICE_STATUS_SIZE { 10 };
+inline constexpr int32_t RET_NG { -1 };
+inline constexpr size_t MAX_DEVICE_STATUS_SIZE { 10 };
 struct AppInfo {
     std::string startTime;
     int32_t uid {};
     int32_t pid {};
     Security::AccessToken::AccessTokenID tokenId;
     std::string packageName;
-    Type type { TYPE_INVALID };
+    Type type { Type::TYPE_INVALID };
     sptr<IRemoteDevStaCallback> callback { nullptr };
 };
 struct DeviceStatusRecord {

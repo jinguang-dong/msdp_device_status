@@ -23,7 +23,7 @@ namespace Msdp {
 namespace DeviceStatus {
 class IDevice {
 public:
-    enum KeyboardType {
+    enum class KeyboardType {
         KEYBOARD_TYPE_NONE,
         KEYBOARD_TYPE_UNKNOWN,
         KEYBOARD_TYPE_ALPHABETICKEYBOARD,

@@ -55,7 +55,7 @@ inline constexpr size_t NBYTES(size_t nbits)
 class Device final : public IDevice,
                      public IEpollEventSource {
 public:
-    enum Capability {
+    enum class Capability {
         DEVICE_CAP_KEYBOARD,
         DEVICE_CAP_POINTER,
         DEVICE_CAP_TOUCH,
@@ -117,13 +117,13 @@ private:
     std::string uniq_;
     std::string dhid_;
     std::string networkId_;
-    std::bitset<DEVICE_CAP_MAX> caps_;
+    std::bitset<static_cast<size_t>(Capability::DEVICE_CAP_MAX)> caps_;
     uint8_t evBitmask_[NBYTES(EV_MAX)] {};
     uint8_t keyBitmask_[NBYTES(KEY_MAX)] {};
     uint8_t absBitmask_[NBYTES(ABS_MAX)] {};
     uint8_t relBitmask_[NBYTES(REL_MAX)] {};
     uint8_t propBitmask_[NBYTES(INPUT_PROP_MAX)] {};
-    IDevice::KeyboardType keyboardType_ { IDevice::KEYBOARD_TYPE_NONE };
+    IDevice::KeyboardType keyboardType_ { KeyboardType::KEYBOARD_TYPE_NONE };
 };
 
 inline int32_t Device::GetFd() const
@@ -198,12 +198,12 @@ inline IDevice::KeyboardType Device::GetKeyboardType() const
 
 inline bool Device::IsPointerDevice() const
 {
-    return caps_.test(DEVICE_CAP_POINTER);
+    return caps_.test(static_cast<size_t>(Capability::DEVICE_CAP_POINTER));
 }
 
 inline bool Device::IsKeyboard() const
 {
-    return caps_.test(DEVICE_CAP_KEYBOARD);
+    return caps_.test(static_cast<size_t>(Capability::DEVICE_CAP_KEYBOARD));
 }
 } // namespace DeviceStatus
 } // namespace Msdp

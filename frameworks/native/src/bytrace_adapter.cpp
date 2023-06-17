@@ -27,8 +27,8 @@ const std::string serviceUnsubscribe { "ServiceUnsubscribe" };
 void BytraceAdapter::StartBytrace(TraceBtn traceBtn, SubscribeType isSubscribe, SubscribeObject subscribeObject)
 {
     if (isSubscribe) {
-        if (traceBtn == TRACE_START) {
-            if (subscribeObject == CLIENT) {
+        if (traceBtn == TraceBtn::TRACE_START) {
+            if (subscribeObject == SubscribeObject::CLIENT) {
                 StartTrace(HITRACE_TAG_MSDP, clientSubscribe);
                 HITRACE_METER_NAME(HITRACE_TAG_MSDP, "client start subsvribe");
             } else {
@@ -39,8 +39,8 @@ void BytraceAdapter::StartBytrace(TraceBtn traceBtn, SubscribeType isSubscribe, 
             FinishTrace(HITRACE_TAG_MSDP);
         }
     } else {
-        if (traceBtn == TRACE_START) {
-            if (subscribeObject == CLIENT) {
+        if (traceBtn == TraceBtn::TRACE_START) {
+            if (subscribeObject == SubscribeObject::CLIENT) {
                 StartTrace(HITRACE_TAG_MSDP, clientUnsubscribe);
                 HITRACE_METER_NAME(HITRACE_TAG_MSDP, "client start unSubsvribe");
             } else {

@@ -39,9 +39,9 @@ DeviceStatusMsdpMock* g_msdpMock { nullptr };
 DeviceStatusMsdpMock::DeviceStatusMsdpMock()
 {
     enabledType_ = {
-        TYPE_STILL,
-        TYPE_RELATIVE_STILL,
-        TYPE_CAR_BLUETOOTH
+        Type::TYPE_STILL,
+        Type::TYPE_RELATIVE_STILL,
+        Type::TYPE_CAR_BLUETOOTH
     };
     if (dataParse_ == nullptr) {
         dataParse_ = std::make_unique<DeviceStatusDataParse>();
@@ -129,7 +129,7 @@ void DeviceStatusMsdpMock::InitTimer()
     if (!ret) {
         FI_HILOGW("insert timer fd failed");
     }
-    if (RegisterTimerCallback(timerFd_, EVENT_TIMER_FD)) {
+    if (RegisterTimerCallback(timerFd_, EventType::EVENT_TIMER_FD)) {
         FI_HILOGE("register timer fd failed");
         return;
     }
@@ -191,7 +191,7 @@ int32_t DeviceStatusMsdpMock::RegisterTimerCallback(int32_t fd, const EventType 
     CALL_DEBUG_ENTER;
     struct epoll_event ev;
     ev.events = EPOLLIN;
-    if (et == EVENT_TIMER_FD) {
+    if (et == EventType::EVENT_TIMER_FD) {
         ev.events |= EPOLLWAKEUP;
     }
 
