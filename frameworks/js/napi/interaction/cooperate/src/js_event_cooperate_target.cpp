@@ -599,7 +599,7 @@ void JsEventCooperateTarget::EmitCoordinationMessageEvent(uv_work_t *work, int32
         }
         napi_value deviceDescriptor = nullptr;
         CHKRV_SCOPE(item->env, napi_create_string_utf8(item->env, item->data.deviceDescriptor.c_str(),
-            NAPI_AUTO_LENGTH, &deviceDescriptor), CREATE_STRING_UTF8, scope);
+            item->data.deviceDescriptor.length(), &deviceDescriptor), CREATE_STRING_UTF8, scope);
         napi_value eventMsg = nullptr;
         auto iter = messageTransform.find(item->data.msg);
         if (iter == messageTransform.end()) {

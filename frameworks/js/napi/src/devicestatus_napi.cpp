@@ -504,7 +504,7 @@ napi_value DeviceStatusNapi::DeclareEventTypeInterface(napi_env env, napi_value 
         DECLARE_NAPI_STATIC_PROPERTY("ENTER_EXIT", enter_exit)
     };
     napi_value result = nullptr;
-    status = napi_define_class(env, "ActivityEvent", NAPI_AUTO_LENGTH,
+    status = napi_define_class(env, "ActivityEvent", sizeof("ActivityEvent"),
         EnumActivityEventConstructor, nullptr, sizeof(desc) / sizeof(*desc), desc, &result);
     if (status != napi_ok) {
         FI_HILOGE("Failed to define_class item");
