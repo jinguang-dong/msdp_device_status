@@ -36,8 +36,8 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceS
 using ConnFunc = int32_t (DeviceStatusSrvStub::*)(MessageParcel& data, MessageParcel& reply);
 } // namespace
 
-int32_t DeviceStatusSrvStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-    MessageOption &option)
+int32_t DeviceStatusSrvStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
+    MessageParcel &reply, MessageOption &option)
 {
     FI_HILOGD("cmd = %{public}d, flags = %{public}d", code, option.GetFlags());
     std::u16string descriptor = DeviceStatusSrvStub::GetDescriptor();
