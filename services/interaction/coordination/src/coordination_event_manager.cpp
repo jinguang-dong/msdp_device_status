@@ -55,7 +55,7 @@ void CoordinationEventManager::RemoveCoordinationEvent(sptr<EventInfo> event)
     }
     for (auto it = remoteCoordinationCallbacks_.begin(); it != remoteCoordinationCallbacks_.end(); ++it) {
         if ((*it)->sess == event->sess) {
-            remoteCoordinationCallbacks_.erase(it);
+            it = remoteCoordinationCallbacks_.erase(it);
             return;
         }
     }

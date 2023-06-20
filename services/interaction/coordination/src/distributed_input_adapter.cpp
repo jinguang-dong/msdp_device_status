@@ -170,7 +170,7 @@ void DistributedInputAdapter::ProcessDInputCallback(CallbackType type, int32_t s
         return;
     }
     it->second(status == RET_OK);
-    callbackMap_.erase(it);
+    it = callbackMap_.erase(it);
 }
 
 void DistributedInputAdapter::StartDInputCallback::OnResult(const std::string &devId, const uint32_t &inputTypes,

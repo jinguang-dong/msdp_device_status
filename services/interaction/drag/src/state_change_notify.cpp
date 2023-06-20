@@ -51,7 +51,7 @@ void StateChangeNotify::RemoveNotifyMsg(std::shared_ptr<MessageInfo> info)
             return *msgInfo == info;
         });
     if (it != msgInfos_.end()) {
-        msgInfos_.erase(it);
+        it = msgInfos_.erase(it);
     }
 }
 

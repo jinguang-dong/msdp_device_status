@@ -342,7 +342,7 @@ void CoordinationDeviceManager::OnDeviceRemoved(std::shared_ptr<IDevice> device)
     std::shared_ptr<Device> dev = iter->second;
     CHKPV(dev);
     auto dhids = GetCoordinationDhids(dev->GetId());
-    devices_.erase(iter);
+    iter = devices_.erase(iter);
     if (device->IsPointerDevice()) {
         COOR_SM->OnPointerOffline(dev->GetDhid(), dhids);
     } else if (device->IsKeyboard()) {

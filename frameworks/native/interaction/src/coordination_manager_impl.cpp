@@ -60,7 +60,7 @@ int32_t CoordinationManagerImpl::UnregisterCoordinationListener(CoordinationList
     }
     for (auto it = devCoordinationListener_.begin(); it != devCoordinationListener_.end(); ++it) {
         if (*it == listener) {
-            devCoordinationListener_.erase(it);
+            it = devCoordinationListener_.erase(it);
             goto listenerLabel;
         }
     }
@@ -198,7 +198,7 @@ void CoordinationManagerImpl::OnCoordinationMessageEvent(int32_t userData,
     CoordinationMsg event = iter->second.msg;
     CHKPV(event);
     event(deviceId, msg);
-    devCoordinationEvent_.erase(iter);
+    iter = devCoordinationEvent_.erase(iter);
 }
 
 void CoordinationManagerImpl::OnCoordinationStateEvent(int32_t userData, bool state)
@@ -213,7 +213,7 @@ void CoordinationManagerImpl::OnCoordinationStateEvent(int32_t userData, bool st
     CoordinationState event = iter->second.state;
     CHKPV(event);
     event(state);
-    devCoordinationEvent_.erase(iter);
+    iter = devCoordinationEvent_.erase(iter);
     FI_HILOGD("Coordination state event callback, userData:%{public}d, state:(%{public}d)", userData, state);
 }
 
