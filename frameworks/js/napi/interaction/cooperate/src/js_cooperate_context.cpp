@@ -375,7 +375,7 @@ void JsCooperateContext::DeclareDeviceCoordinationInterface(napi_env env, napi_v
     };
 
     napi_value eventMsg = nullptr;
-    CHKRV(napi_define_class(env, "EventMsg", NAPI_AUTO_LENGTH, EnumClassConstructor, nullptr,
+    CHKRV(napi_define_class(env, "EventMsg", sizeof("EventMsg"), EnumClassConstructor, nullptr,
         sizeof(msg) / sizeof(*msg), msg, &eventMsg), DEFINE_CLASS);
     CHKRV(napi_set_named_property(env, exports, "EventMsg", eventMsg), SET_NAMED_PROPERTY);
 }

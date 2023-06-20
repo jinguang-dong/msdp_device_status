@@ -217,7 +217,7 @@ void JsDragContext::DeclareDragData(napi_env env, napi_value exports)
     };
 
     napi_value eventMsg = nullptr;
-    CHKRV(napi_define_class(env, "NotifyMsg", NAPI_AUTO_LENGTH, EnumClassConstructor, nullptr,
+    CHKRV(napi_define_class(env, "NotifyMsg", sizeof("NotifyMsg"), EnumClassConstructor, nullptr,
         sizeof(msg) / sizeof(*msg), msg, &eventMsg), DEFINE_CLASS);
     CHKRV(napi_set_named_property(env, exports, "NotifyMsg", eventMsg), SET_NAMED_PROPERTY);
 }

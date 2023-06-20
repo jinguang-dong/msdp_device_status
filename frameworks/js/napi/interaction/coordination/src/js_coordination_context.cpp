@@ -418,7 +418,7 @@ void JsCoordinationContext::DeclareDeviceCoordinationInterface(napi_env env, nap
     };
 
     napi_value cooperateMsg = nullptr;
-    CHKRV(napi_define_class(env, "CooperateMsg", NAPI_AUTO_LENGTH, EnumClassConstructor, nullptr,
+    CHKRV(napi_define_class(env, "CooperateMsg", sizeof("CooperateMsg"), EnumClassConstructor, nullptr,
         sizeof(msg) / sizeof(*msg), msg, &cooperateMsg), DEFINE_CLASS);
     CHKRV(napi_set_named_property(env, exports, "CooperateMsg", cooperateMsg), SET_NAMED_PROPERTY);
 }
