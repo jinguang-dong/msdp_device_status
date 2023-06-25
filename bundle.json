@@ -44,7 +44,7 @@
         "graphic_standard"
       ],
       "third_party": [
-        "cjson",
+        "cJSON",
         "libxml2",
         "libuv",
         "openssl"
