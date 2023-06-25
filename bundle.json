@@ -28,7 +28,7 @@
         "eventhandler",
         "distributed_input",
         "libxml2",
-        "cjson",
+        "cJSON",
         "device_manager",
         "sensor",
         "jsoncpp",
