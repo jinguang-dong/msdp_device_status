@@ -349,9 +349,8 @@ int32_t DeviceStatusService::AddEpoll(EpollEventType type, int32_t fd)
         eventData = nullptr;
         ev.data.ptr = nullptr;
         FI_HILOGE("EpollCtl failed");
-        return ret;
     }
-    return RET_OK;
+    return ret;
 }
 
 int32_t DeviceStatusService::DelEpoll(EpollEventType type, int32_t fd)
@@ -368,9 +367,8 @@ int32_t DeviceStatusService::DelEpoll(EpollEventType type, int32_t fd)
     auto ret = EpollCtl(fd, EPOLL_CTL_DEL, ev, -1);
     if (ret < 0) {
         FI_HILOGE("DelEpoll failed");
-        return ret;
     }
-    return RET_OK;
+    return ret;
 }
 
 bool DeviceStatusService::IsRunning() const
@@ -406,9 +404,8 @@ int32_t DeviceStatusService::InitTimerMgr()
     ret = AddEpoll(EPOLL_EVENT_TIMER, timerMgr_.GetTimerFd());
     if (ret != RET_OK) {
         FI_HILOGE("AddEpoll for timer fail");
-        return ret;
     }
-    return RET_OK;
+    return ret;
 }
 
 void DeviceStatusService::OnThread()
@@ -709,9 +706,8 @@ int32_t DeviceStatusService::StartDrag(const DragData &dragData)
         std::bind(&DeviceStatusService::OnStartDrag, this, std::cref(dragData), pid));
     if (ret != RET_OK) {
         FI_HILOGE("On start drag failed, ret:%{public}d", ret);
-        return ret;
     }
-    return RET_OK;
+    return ret;
 }
 
 int32_t DeviceStatusService::StopDrag(DragResult result, bool hasCustomAnimation)
@@ -721,9 +717,8 @@ int32_t DeviceStatusService::StopDrag(DragResult result, bool hasCustomAnimation
         std::bind(&DeviceStatusService::OnStopDrag, this, result, hasCustomAnimation));
     if (ret != RET_OK) {
         FI_HILOGE("On stop drag failed, ret:%{public}d", ret);
-        return ret;
     }
-    return RET_OK;
+    return ret;
 }
 
 int32_t DeviceStatusService::SetDragWindowVisible(bool visible)
@@ -885,9 +880,8 @@ int32_t DeviceStatusService::OnActivateCoordination(int32_t pid,
     int32_t ret = COOR_SM->ActivateCoordination(remoteNetworkId, startDeviceId);
     if (ret != RET_OK) {
         FI_HILOGE("On activate coordination failed, ret:%{public}d", ret);
-        return ret;
     }
-    return RET_OK;
+    return ret;
 }
 
 int32_t DeviceStatusService::OnDeactivateCoordination(int32_t pid, int32_t userData, bool isUnchained)
@@ -906,9 +900,8 @@ int32_t DeviceStatusService::OnDeactivateCoordination(int32_t pid, int32_t userD
     if (ret != RET_OK) {
         FI_HILOGE("On deactivate coordination failed, ret:%{public}d", ret);
         COOR_EVENT_MGR->OnErrorMessage(event->type, CoordinationMessage(ret));
-        return ret;
     }
-    return RET_OK;
+    return ret;
 }
 
 int32_t DeviceStatusService::OnGetCoordinationState(
@@ -940,9 +933,8 @@ int32_t DeviceStatusService::OnStartDrag(const DragData &dragData, int32_t pid)
     int32_t ret = dragMgr_.StartDrag(dragData, sess);
     if (ret != RET_OK) {
         FI_HILOGE("StartDrag failed, ret:%{public}d", ret);
-        return ret;
     }
-    return RET_OK;
+    return ret;
 }
 
 int32_t DeviceStatusService::OnStopDrag(DragResult result, bool hasCustomAnimation)
@@ -951,9 +943,8 @@ int32_t DeviceStatusService::OnStopDrag(DragResult result, bool hasCustomAnimati
     int32_t ret = dragMgr_.StopDrag(result, hasCustomAnimation);
     if (ret != RET_OK) {
         FI_HILOGE("StopDrag failed, ret:%{public}d", ret);
-        return ret;
     }
-    return RET_OK;
+    return ret;
 }
 } // namespace DeviceStatus
 } // namespace Msdp
