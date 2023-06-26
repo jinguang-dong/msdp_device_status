@@ -300,7 +300,7 @@ int32_t DevicestatusMsdpClientImpl::LoadAlgoLib()
 
 int32_t DevicestatusMsdpClientImpl::UnloadAlgoLib()
 {
-   DEV_HILOGI(SERVICE, "Enter");
+    DEV_HILOGI(SERVICE, "Enter");
     std::lock_guard<std::mutex> lock(mutex_);
     if (algoHandler_.handle == nullptr) {
         DEV_HILOGE(SERVICE, "handle is nullptr");

@@ -25,6 +25,7 @@ config("module_private_config") {
     "//foundation/distributeddatamgr/distributeddatamgr/frameworks/innerkitsimpl/rdb/include",
     "//base/msdp/device_status/libs/interface",
     "//base/msdp/device_status/services/delegate_task/include",
+    "//base/msdp/device_status/utils/include",
   ]
 }
 

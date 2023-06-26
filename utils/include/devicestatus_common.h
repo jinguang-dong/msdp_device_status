@@ -66,6 +66,14 @@ namespace Msdp {
         }                                                                               \
     } while (0)
 
+#define CHKPV(cond) \
+    do { \
+        if ((cond) == nullptr) { \
+            DEV_HILOGE(COMMON,"CHKPV(%{public}s) is null", #cond); \
+            return; \
+        } \
+    } while (0)
+
 template<typename E>
 constexpr auto DevicestatusToUnderlying(E e) noexcept
 {
