@@ -34,7 +34,7 @@ public:
     DISALLOW_MOVE(InteractionManagerImpl);
     bool InitClient();
     int32_t RegisterCoordinationListener(std::shared_ptr<ICoordinationListener> listener);
-    int32_t UnregisterCoordinationListener(std::shared_ptr<ICoordinationListener> listener = nullptr);
+    int32_t UnregisterCoordinationListener(std::shared_ptr<ICoordinationListener> listener);
     int32_t PrepareCoordination(std::function<void(std::string, CoordinationMessage)> callback);
     int32_t UnprepareCoordination(std::function<void(std::string, CoordinationMessage)> callback);
     int32_t ActivateCoordination(const std::string &remoteNetworkId, int32_t startDeviceId,

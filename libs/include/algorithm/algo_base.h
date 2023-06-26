@@ -70,7 +70,7 @@ protected:
     void UpdateStateAndReport(OnChangedValue value, int32_t state, Type type);
 
     SensorCallback algoCallback_ { nullptr };
-    std::shared_ptr<IMsdp::MsdpAlgoCallback> callback_ { nullptr };
+    std::shared_ptr<IMsdp::MsdpAlgoCallback> callback_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

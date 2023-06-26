@@ -49,7 +49,7 @@ public:
         std::string MakeNetworkId(const std::string &phys) const;
         std::string GenerateDescriptor();
         std::string Sha256(const std::string &in) const;
-        std::shared_ptr<IDevice> device_ { nullptr };
+        std::shared_ptr<IDevice> device_;
         std::string dhid_;
         std::string networkId_;
     };
@@ -81,7 +81,7 @@ private:
     void OnDeviceAdded(std::shared_ptr<IDevice> device);
     void OnDeviceRemoved(std::shared_ptr<IDevice> device);
 
-    std::shared_ptr<DeviceObserver> devObserver_ { nullptr };
+    std::shared_ptr<DeviceObserver> devObserver_;
     std::unordered_map<int32_t, std::shared_ptr<Device>> devices_;
 };
 #define COOR_DEV_MGR OHOS::DelayedSingleton<CoordinationDeviceManager>::GetInstance()

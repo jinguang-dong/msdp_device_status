@@ -74,8 +74,8 @@ public:
     void SetScale(float scale);
 
 private:
-    std::shared_ptr<OHOS::Rosen::RSAnimatableProperty<float>> alpha_ { nullptr };
-    std::shared_ptr<OHOS::Rosen::RSAnimatableProperty<float>> scale_ { nullptr };
+    std::shared_ptr<OHOS::Rosen::RSAnimatableProperty<float>> alpha_;
+    std::shared_ptr<OHOS::Rosen::RSAnimatableProperty<float>> scale_;
 };
 
 class DragDrawing final {
@@ -108,14 +108,14 @@ private:
 
 private:
     int64_t startNum_ { -1 };
-    std::shared_ptr<OHOS::Rosen::RSCanvasNode> canvasNode_ { nullptr };
-    std::shared_ptr<DrawSVGModifier> drawSVGModifier_ { nullptr };
-    std::shared_ptr<DrawPixelMapModifier> drawPixelMapModifier_ { nullptr };
-    std::shared_ptr<DrawMouseIconModifier> drawMouseIconModifier_ { nullptr };
-    std::shared_ptr<DrawDynamicEffectModifier> drawDynamicEffectModifier_ { nullptr };
-    std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector_ { nullptr };
-    std::shared_ptr<OHOS::Rosen::VSyncReceiver> receiver_ { nullptr };
-    std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ { nullptr };
+    std::shared_ptr<OHOS::Rosen::RSCanvasNode> canvasNode_;
+    std::shared_ptr<DrawSVGModifier> drawSVGModifier_;
+    std::shared_ptr<DrawPixelMapModifier> drawPixelMapModifier_;
+    std::shared_ptr<DrawMouseIconModifier> drawMouseIconModifier_;
+    std::shared_ptr<DrawDynamicEffectModifier> drawDynamicEffectModifier_;
+    std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector_;
+    std::shared_ptr<OHOS::Rosen::VSyncReceiver> receiver_;
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -67,7 +67,7 @@ private:
     void OnResult(const Data& data) override;
 
 private:
-    std::shared_ptr<MsdpAlgoCallback> callback_ { nullptr };
+    std::shared_ptr<MsdpAlgoCallback> callback_;
     MsdpAlgoHandle mock_;
     MsdpAlgoHandle algo_;
     std::map<Type, uint32_t> algoCallCount_;

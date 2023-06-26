@@ -115,7 +115,7 @@ class CoordinationSM final {
         void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override;
         void OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const override;
     private:
-        std::function<void (std::shared_ptr<MMI::PointerEvent>)> callback_ { nullptr };
+        std::function<void (std::shared_ptr<MMI::PointerEvent>)> callback_;
     };
 
 public:
@@ -182,21 +182,21 @@ private:
     void NotifyMouseLocation(int32_t x, int32_t y);
     void SetPointerVisible();
 private:
-    std::shared_ptr<ICoordinationState> currentStateSM_ { nullptr };
+    std::shared_ptr<ICoordinationState> currentStateSM_;
     std::pair<std::string, std::string> preparedNetworkId_;
     std::string startDeviceDhid_;
     std::string remoteNetworkId_;
     std::string sinkNetworkId_;
     bool isUnchained_ { false };
     CoordinationState coordinationState_ { CoordinationState::STATE_FREE };
-    std::shared_ptr<DistributedHardware::DmInitCallback> initCallback_ { nullptr };
-    std::shared_ptr<DistributedHardware::DeviceStateCallback> stateCallback_ { nullptr };
+    std::shared_ptr<DistributedHardware::DmInitCallback> initCallback_;
+    std::shared_ptr<DistributedHardware::DeviceStateCallback> stateCallback_;
     std::vector<std::string> onlineDevice_;
     mutable std::mutex mutex_;
     std::atomic<bool> isStarting_ { false };
     std::atomic<bool> isStopping_ { false };
     std::pair<int32_t, int32_t> mouseLocation_ { std::make_pair(0, 0) };
-    std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ { nullptr };
+    std::shared_ptr<MMI::PointerEvent> lastPointerEvent_;
     int32_t displayX_ { -1 };
     int32_t displayY_ { -1 };
     int32_t interceptorId_ { -1 };

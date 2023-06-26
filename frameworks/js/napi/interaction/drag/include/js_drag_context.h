@@ -42,7 +42,7 @@ private:
     static napi_value EnumClassConstructor(napi_env env, napi_callback_info info);
     std::shared_ptr<JsDragManager> GetJsDragMgr();
 
-    std::shared_ptr<JsDragManager> mgr_ { nullptr };
+    std::shared_ptr<JsDragManager> mgr_;
     std::mutex mutex_;
     napi_ref contextRef_ { nullptr };
 };

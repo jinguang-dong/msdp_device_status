@@ -56,11 +56,11 @@ public:
     int32_t GetSensorTypeId(Type type);
 private:
     int32_t type_[Type::TYPE_MAX] { 0 };
-    std::shared_ptr<MsdpAlgoCallback> callback_ { nullptr };
+    std::shared_ptr<MsdpAlgoCallback> callback_;
     std::mutex mutex_;
-    std::shared_ptr<AlgoAbsoluteStill> still_ { nullptr };
-    std::shared_ptr<AlgoHorizontal> horizontalPosition_ { nullptr };
-    std::shared_ptr<AlgoVertical> verticalPosition_ { nullptr };
+    std::shared_ptr<AlgoAbsoluteStill> still_;
+    std::shared_ptr<AlgoHorizontal> horizontalPosition_;
+    std::shared_ptr<AlgoVertical> verticalPosition_;
     std::map<Type, int32_t> callAlgoNum_ {};
     Type algoType_ { TYPE_INVALID };
 };

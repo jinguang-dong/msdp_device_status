@@ -64,7 +64,7 @@ public:
 
 private:
     using Callback = std::function<void(DeviceStatusMsdpMock*)>;
-    std::shared_ptr<MsdpAlgoCallback> callback_ { nullptr };
+    std::shared_ptr<MsdpAlgoCallback> callback_;
     std::map<int32_t, Callback> callbacks_;
     std::unique_ptr<DeviceStatusDataParse> dataParse_ { nullptr };
     int32_t timerInterval_ { -1 };
@@ -73,7 +73,7 @@ private:
     std::mutex mutex_;
     std::vector<Type> enabledType_;
     std::atomic<bool> alive_ { false };
-    std::shared_ptr<std::thread> thread_ { nullptr };
+    std::shared_ptr<std::thread> thread_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

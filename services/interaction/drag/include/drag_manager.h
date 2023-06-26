@@ -69,7 +69,7 @@ public:
         void OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const override;
     private:
         IContext* context_ { nullptr };
-        std::function<void (std::shared_ptr<MMI::PointerEvent>)> callback_ { nullptr };
+        std::function<void (std::shared_ptr<MMI::PointerEvent>)> callback_;
     };
 private:
     int32_t AddDragEventInterceptor(int32_t sourceType);

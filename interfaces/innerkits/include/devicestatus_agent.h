@@ -55,7 +55,7 @@ private:
     void UnRegisterServiceEvent(const Type& type, const ActivityEvent& event);
 
     sptr<IRemoteDevStaCallback> callback_ { nullptr };
-    std::shared_ptr<DeviceStatusAgentEvent> agentEvent_ { nullptr };
+    std::shared_ptr<DeviceStatusAgentEvent> agentEvent_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

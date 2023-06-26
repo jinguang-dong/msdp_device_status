@@ -122,7 +122,7 @@ private:
     DeviceManager devMgr_;
     TimerManager timerMgr_;
     std::atomic<bool> ready_ { false };
-    std::shared_ptr<DeviceStatusManager> devicestatusManager_ { nullptr };
+    std::shared_ptr<DeviceStatusManager> devicestatusManager_;
     DragManager dragMgr_;
 #ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
     MotionDrag motionDrag_;

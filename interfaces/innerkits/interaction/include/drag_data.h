@@ -27,7 +27,7 @@ namespace Msdp {
 namespace DeviceStatus {
 constexpr size_t MAX_BUFFER_SIZE { 512 };
 struct ShadowInfo {
-    std::shared_ptr<OHOS::Media::PixelMap> pixelMap { nullptr };
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap;
     int32_t x { -1 };
     int32_t y { -1 };
 };

@@ -101,9 +101,9 @@ struct DrawingInfo {
     int32_t rootNodeHeight { -1 };
     sptr<OHOS::Rosen::Window> dragWindow { nullptr };
     std::vector<std::shared_ptr<OHOS::Rosen::RSCanvasNode>> nodes;
-    std::shared_ptr<OHOS::Rosen::RSNode> rootNode { nullptr };
-    std::shared_ptr<OHOS::Rosen::RSSurfaceNode> surfaceNode { nullptr };
-    std::shared_ptr<OHOS::Media::PixelMap> pixelMap { nullptr };
+    std::shared_ptr<OHOS::Rosen::RSNode> rootNode;
+    std::shared_ptr<OHOS::Rosen::RSSurfaceNode> surfaceNode;
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap;
 } g_drawingInfo;
 
 bool CheckNodesValid()

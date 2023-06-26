@@ -52,8 +52,8 @@ protected:
     virtual void OnStartRemoteInput(bool isSuccess, const std::string &remoteNetworkId, int32_t startDeviceId);
 
 protected:
-    std::shared_ptr<AppExecFwk::EventRunner> runner_ { nullptr };
-    std::shared_ptr<CoordinationEventHandler> eventHandler_ { nullptr };
+    std::shared_ptr<AppExecFwk::EventRunner> runner_;
+    std::shared_ptr<CoordinationEventHandler> eventHandler_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

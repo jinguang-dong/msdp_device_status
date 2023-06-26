@@ -49,7 +49,7 @@ public:
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 9
      */
-    int32_t UnregisterCoordinationListener(std::shared_ptr<ICoordinationListener> listener = nullptr);
+    int32_t UnregisterCoordinationListener(std::shared_ptr<ICoordinationListener> listener);
 
     /**
      * @brief Prepares for screen hopping.
@@ -157,7 +157,7 @@ public:
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 10
      */
-    int32_t RemoveDraglistener(std::shared_ptr<IDragListener> listener = nullptr);
+    int32_t RemoveDraglistener(std::shared_ptr<IDragListener> listener);
 
     /**
      * @brief Displays or hides the dragging window.
