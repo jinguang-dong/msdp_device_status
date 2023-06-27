@@ -30,9 +30,9 @@
 #include "drag_data.h"
 #include "drag_manager.h"
 #include "i_context.h"
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
+#ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
 #include "motion_drag.h"
-#endif // OHOS_BUILD_ENABLE_COORDINATION
+#endif // OHOS_BUILD_ENABLE_MOTION_DRAG
 #include "stationary_callback.h"
 #include "stationary_data.h"
 #include "stream_server.h"
@@ -82,6 +82,7 @@ public:
     int32_t RemoveDraglistener() override;
     int32_t SetDragWindowVisible(bool visible) override;
     int32_t GetShadowOffset(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height) override;
+    int32_t UpdateShadowPic(const ShadowInfo &shadowInfo) override;
     int32_t AllocSocketFd(const std::string &programName, int32_t moduleType,
         int32_t &toReturnClientFd, int32_t &tokenType) override;
     void OnConnected(SessionPtr s) override;
@@ -124,9 +125,9 @@ private:
     std::atomic<bool> ready_ { false };
     std::shared_ptr<DeviceStatusManager> devicestatusManager_ { nullptr };
     DragManager dragMgr_;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
+#ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
     MotionDrag motionDrag_;
-#endif // OHOS_BUILD_ENABLE_COORDINATION
+#endif // OHOS_BUILD_ENABLE_MOTION_DRAG
 };
 } // namespace DeviceStatus
 } // namespace Msdp

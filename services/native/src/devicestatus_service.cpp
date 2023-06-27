@@ -188,12 +188,12 @@ bool DeviceStatusService::Init()
         FI_HILOGE("Drag manager init failed");
         goto INIT_FAIL;
     }
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
+#ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
     if (motionDrag_.Init(this) != RET_OK) {
         FI_HILOGE("Drag adapter init failed");
         goto INIT_FAIL;
     }
-#endif // OHOS_BUILD_ENABLE_COORDINATION
+#endif // OHOS_BUILD_ENABLE_MOTION_DRAG
     if (DS_DUMPER->Init(this) != RET_OK) {
         FI_HILOGE("Dump init failed");
         goto INIT_FAIL;
@@ -748,6 +748,17 @@ int32_t DeviceStatusService::GetShadowOffset(int32_t& offsetX, int32_t& offsetY,
     return ret;
 }
 
+int32_t DeviceStatusService::UpdateShadowPic(const ShadowInfo &shadowInfo)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = delegateTasks_.PostSyncTask(
+        std::bind(&DragManager::UpdateShadowPic, &dragMgr_, std::cref(shadowInfo)));
+    if (ret != RET_OK) {
+        FI_HILOGE("Update shadow picture failed, ret:%{public}d", ret);
+    }
+    return ret;
+}
+
 int32_t DeviceStatusService::UpdateDragStyle(DragCursorStyle style)
 {
     CALL_DEBUG_ENTER;
@@ -828,7 +839,9 @@ int32_t DeviceStatusService::OnPrepareCoordination(int32_t pid, int32_t userData
         FI_HILOGE("Sending failed");
         return MSG_SEND_FAIL;
     }
+#ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
     motionDrag_.RegisterCallback();
+#endif // OHOS_BUILD_ENABLE_MOTION_DRAG
     return RET_OK;
 }
 
