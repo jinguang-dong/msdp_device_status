@@ -35,7 +35,7 @@ ohos_unittest("InteractionManagerTest") {
     "c_utils:utils",
     "hilog:libhilog",
     "input:libmmi-client",
-    "multimedia_image_framework:image_native",
+    "image_framework:image_native",
   ]
 }
 
@@ -53,7 +53,7 @@ ohos_unittest("InteractionDragDrawingTest") {
     "c_utils:utils",
     "hilog:libhilog",
     "input:libmmi-client",
-    "multimedia_image_framework:image_native",
+    "image_framework:image_native",
   ]
 }
 

@@ -63,7 +63,7 @@ ohos_shared_library("coordination") {
     "hitrace:hitrace_meter",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
+    "image_framework:image_native",
     "window_manager:libdm",
   ]
 

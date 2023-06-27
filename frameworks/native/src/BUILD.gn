@@ -41,7 +41,7 @@ ohos_shared_library("deviceagent") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
+    "image_framework:image_native",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"
