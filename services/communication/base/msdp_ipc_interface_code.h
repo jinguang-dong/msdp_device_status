@@ -40,7 +40,8 @@ enum class DeviceInterfaceCode {
     SET_DRAG_WINDOW_VISIBLE,
     GET_SHADOW_OFFSET,
     UPDATE_SHADOW_PIC,
-    ALLOC_SOCKET_FD = 40
+    ALLOC_SOCKET_FD = 40,
+	ALLOC_SOCKET_ACC
 };
 } // namespace Msdp
 } // namespace OHOS
