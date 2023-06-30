@@ -37,11 +37,10 @@
         "hitrace",
         "ability_base",
         "huks",
-        "graphic_standard",
         "udmf",
         "device_info_manager",
         "dsoftbus",
-        "graphic_standard"
+        "graphic_2d"
       ],
       "third_party": [
         "cjson",
