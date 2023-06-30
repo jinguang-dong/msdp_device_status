@@ -53,11 +53,9 @@ void CoordinationEventManager::RemoveCoordinationEvent(sptr<EventInfo> event)
         FI_HILOGE("Remove listener failed");
         return;
     }
-    for (auto it = remoteCoordinationCallbacks_.begin(); it != remoteCoordinationCallbacks_.end(); ++it) {
-        if ((*it)->sess == event->sess) {
-            remoteCoordinationCallbacks_.erase(it);
-            return;
-        }
+    if (remoteCoordinationCallbacks_.find(event->sess) != remoteCoordinationCallbacks_.end()) {
+        remoteCoordinationCallbacks_.erase(event->sess);
+        return;
     }
 }
 

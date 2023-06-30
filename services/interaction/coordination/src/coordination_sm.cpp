@@ -702,9 +702,8 @@ void CoordinationSM::OnDeviceOffline(const std::string &networkId)
     Reset(networkId);
     std::lock_guard<std::mutex> guard(mutex_);
     if (!onlineDevice_.empty()) {
-        auto it = std::find(onlineDevice_.begin(), onlineDevice_.end(), networkId);
-        if (it != onlineDevice_.end()) {
-            onlineDevice_.erase(it);
+        if (onlineDevice_.find(networkId) != onlineDevice_.end()) {
+            onlineDevice_.erase(networkId);
         }
     }
 }

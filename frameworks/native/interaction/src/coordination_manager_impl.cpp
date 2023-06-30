@@ -58,11 +58,9 @@ int32_t CoordinationManagerImpl::UnregisterCoordinationListener(CoordinationList
         devCoordinationListener_.clear();
         goto listenerLabel;
     }
-    for (auto it = devCoordinationListener_.begin(); it != devCoordinationListener_.end(); ++it) {
-        if (*it == listener) {
-            devCoordinationListener_.erase(it);
-            goto listenerLabel;
-        }
+    if (devCoordinationListener_.find(listener) != devCoordinationListener_.end()) {
+        devCoordinationListener_.erase(listener);
+        goto listenerLabel;
     }
 
 listenerLabel:
