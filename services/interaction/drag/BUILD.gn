@@ -49,7 +49,7 @@ ohos_shared_library("interaction_drag") {
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
+    "image_framework:image_native",
     "udmf:udmf_client",
     "window_manager:libdm",
     "window_manager:libwm",

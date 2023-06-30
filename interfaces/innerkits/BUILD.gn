@@ -77,7 +77,7 @@ ohos_shared_library("devicestatus_client") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
+    "image_framework:image_native",
     "samgr:samgr_proxy",
   ]
 
