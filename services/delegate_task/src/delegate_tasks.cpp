@@ -169,7 +169,6 @@ DelegateTasks::TaskPtr DelegateTasks::PostTask(DTaskCallback callback, Promise *
     return task->GetSharedPtr();
 }
 
-
 void DelegateTasks::Dispatch(const struct epoll_event &ev)
 {
     if ((ev.events & EPOLLIN) == 0) {

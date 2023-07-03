@@ -268,53 +268,6 @@ void DeviceManager::OnDeviceRemoved(std::shared_ptr<IDevice> dev)
     }
 }
 
-int32_t DeviceManager::EpollCreate()
-{
-    CALL_DEBUG_ENTER;
-    epollFd_ = epoll_create1(EPOLL_CLOEXEC);
-    if (epollFd_ < 0) {
-        FI_HILOGE("epoll_create1 failed");
-        return RET_ERR;
-    }
-    return RET_OK;
-}
-
-int32_t DeviceManager::EpollAdd(IEpollEventSource *source)
-{
-    CALL_DEBUG_ENTER;
-    CHKPR(source, RET_ERR);
-    struct epoll_event ev {};
-    ev.events = EPOLLIN | EPOLLHUP | EPOLLERR;
-    ev.data.ptr = source;
-    int32_t ret = epoll_ctl(epollFd_, EPOLL_CTL_ADD, source->GetFd(), &ev);
-    if (ret != 0) {
-        FI_HILOGE("epoll_ctl failed:%{public}s", strerror(errno));
-        return RET_ERR;
-    }
-    return RET_OK;
-}
-
-void DeviceManager::EpollDel(IEpollEventSource *source)
-{
-    CALL_DEBUG_ENTER;
-    CHKPV(source);
-    int32_t ret = epoll_ctl(epollFd_, EPOLL_CTL_DEL, source->GetFd(), nullptr);
-    if (ret != 0) {
-        FI_HILOGE("epoll_ctl failed:%{public}s", strerror(errno));
-    }
-}
-
-void DeviceManager::EpollClose()
-{
-    CALL_DEBUG_ENTER;
-    if (epollFd_ >= 0) {
-        if (close(epollFd_) < 0) {
-            FI_HILOGE("Close epoll fd failed, error:%{public}s, epollFd_:%{public}d", strerror(errno), epollFd_);
-        }
-        epollFd_ = -1;
-    }
-}
-
 void DeviceManager::Dispatch(const struct epoll_event &ev)
 {
     CALL_DEBUG_ENTER;
@@ -333,7 +286,7 @@ void DeviceManager::Dispatch(const struct epoll_event &ev)
 int32_t DeviceManager::OnEpollDispatch()
 {
     struct epoll_event evs[MAX_N_EVENTS];
-    int32_t cnt = epollManager_.EpollWait(epollFd_, evs, MAX_N_EVENTS, 0);
+    int32_t cnt = epollManager_.EpollWait(epollManager_.GetFd(), evs, MAX_N_EVENTS, 0);
     if (cnt < 0) {
         FI_HILOGE("epoll_wait failed");
         return RET_ERR;

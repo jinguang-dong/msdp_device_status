@@ -39,9 +39,9 @@ void StreamServer::UdsStop()
 {
     if (epollManager_.GetFd() != -1) {
         if (close(epollManager_.GetFd()) < 0) {
-            FI_HILOGE("Close epoll fd failed, error:%{public}s, epollFd_:%{public}d", strerror(errno), epollFd_);
+            FI_HILOGE("Close epoll fd failed, error:%{public}s, epollFd_:%{public}d", strerror(errno), epollManager_.GetFd());
         }
-        epollFd_ = -1;
+        epollManager_.SetFd(-1);
     }
 
     for (const auto &item : sessionsMap_) {
@@ -239,10 +239,9 @@ void StreamServer::OnEpollRecv(int32_t fd, struct epoll_event& ev)
     }
 }
 
-void StreamServer::Dispatch(struct epoll_event& ev)
+void StreamServer::Dispatch(const struct epoll_event &ev)
 {
     CHKPV(ev.data.ptr);
-    int32_t fd = *static_cast<int32_t*>(ev.data.ptr);
     if ((ev.events & EPOLLIN) == EPOLLIN) {
         struct epoll_event evs[MAX_N_EVENTS];
         int32_t epfd = epollManager_.GetFd();

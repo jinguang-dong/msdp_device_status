@@ -29,7 +29,6 @@ StreamSocket::StreamSocket() {}
 StreamSocket::~StreamSocket()
 {
     Close();
-    EpollClose();
 }
 
 void StreamSocket::OnReadPackets(CircleStreamBuffer &circBuf, StreamSocket::PacketCallBackFun callbackFun)

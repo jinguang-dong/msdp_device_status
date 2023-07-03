@@ -96,9 +96,6 @@ private:
     int32_t InitDelegateTasks();
     int32_t InitTimerMgr();
     void OnThread();
-    void OnDelegateTask(const epoll_event &ev);
-    void OnTimeout(const epoll_event &ev);
-    void OnDeviceMgr(const epoll_event &ev);
     int32_t EnableDevMgr(int32_t nRetries);
     void DisableDevMgr();
     int32_t OnStartDrag(const DragData &dragData, int32_t pid);

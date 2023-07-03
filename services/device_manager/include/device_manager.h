@@ -93,7 +93,7 @@ private:
 
 inline int32_t DeviceManager::GetFd() const
 {
-    return epollFd_;
+    return epollManager_.GetFd();
 }
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -43,11 +43,6 @@ constexpr int32_t DEFAULT_WAIT_TIME_MS { 1000 };
 constexpr int32_t WAIT_FOR_ONCE { 1 };
 constexpr int32_t MAX_N_RETRIES { 100 };
 
-struct device_status_epoll_event {
-    int32_t fd { 0 };
-    EpollEventType event_type { EPOLL_EVENT_BEGIN };
-};
-
 #ifndef OHOS_BUILD_ENABLE_RUST_IMPL
 const bool REGISTER_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSpSingleton<DeviceStatusService>::GetInstance().GetRefPtr());
@@ -382,32 +377,6 @@ void DeviceStatusService::OnThread()
         }
     }
     FI_HILOGD("Main worker thread stop, tid:%{public}" PRId64 "", tid);
-}
-
-void DeviceStatusService::OnDelegateTask(const epoll_event &ev)
-{
-    if ((ev.events & EPOLLIN) == 0) {
-        FI_HILOGW("Not epollin");
-        return;
-    }
-    DelegateTasks::TaskData data {};
-    ssize_t res = read(delegateTasks_.GetReadFd(), &data, sizeof(data));
-    if (res == -1) {
-        FI_HILOGW("Read failed erron:%{public}d", errno);
-    }
-    FI_HILOGD("RemoteRequest notify td:%{public}" PRId64 ", std:%{public}" PRId64 ""
-        ", taskId:%{public}d", GetThisThreadId(), data.tid, data.taskId);
-    delegateTasks_.ProcessTasks();
-}
-
-void DeviceStatusService::OnDeviceMgr(const epoll_event &ev)
-{
-    CALL_INFO_TRACE;
-    if ((ev.events & EPOLLIN) == EPOLLIN) {
-        devMgr_.Dispatch(ev);
-    } else if ((ev.events & (EPOLLHUP | EPOLLERR)) != 0) {
-        FI_HILOGE("Epoll hangup:%{public}s", strerror(errno));
-    }
 }
 
 int32_t DeviceStatusService::EnableDevMgr(int32_t nRetries)

@@ -30,7 +30,7 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class TimerManager final : public ITimerManager
+class TimerManager final : public ITimerManager,
                            public IEpollEventSource {
 public:
     TimerManager() = default;
@@ -77,7 +77,7 @@ private:
     std::list<std::unique_ptr<TimerItem>> timers_;
 };
 
-inline int32_t TimerManager::GetFd() const override
+inline int32_t TimerManager::GetFd() const
 {
     return timerFd_;
 }
