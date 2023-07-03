@@ -245,7 +245,7 @@ void StreamServer::Dispatch(const struct epoll_event &ev)
     if ((ev.events & EPOLLIN) == EPOLLIN) {
         struct epoll_event evs[MAX_N_EVENTS];
         int32_t epfd = epollManager_.GetFd();
-        int32_t cnt = epollManager_.EpollWait(epfd, evs, MAX_N_EVENTS, 0);
+        int32_t cnt = epollManager_.EpollWait(evs, MAX_N_EVENTS, 0);
         if (cnt < 0) {
             FI_HILOGE("epoll_wait failed");
         }

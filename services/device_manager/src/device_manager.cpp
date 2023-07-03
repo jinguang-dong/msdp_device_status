@@ -286,7 +286,7 @@ void DeviceManager::Dispatch(const struct epoll_event &ev)
 int32_t DeviceManager::OnEpollDispatch()
 {
     struct epoll_event evs[MAX_N_EVENTS];
-    int32_t cnt = epollManager_.EpollWait(epollManager_.GetFd(), evs, MAX_N_EVENTS, 0);
+    int32_t cnt = epollManager_.EpollWait(evs, MAX_N_EVENTS, 0);
     if (cnt < 0) {
         FI_HILOGE("epoll_wait failed");
         return RET_ERR;

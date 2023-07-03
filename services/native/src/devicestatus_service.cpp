@@ -365,7 +365,7 @@ void DeviceStatusService::OnThread()
 
     while (IsRunning()) {
         struct epoll_event evs[MAX_N_EVENTS] {};
-        int32_t count = epollManager_.EpollWait(epollManager_.GetFd(), evs, MAX_N_EVENTS, -1);
+        int32_t count = epollManager_.EpollWait(evs, MAX_N_EVENTS, -1);
         for (int32_t index = 0; index < count && IsRunning(); index++) {
             IEpollEventSource *source = reinterpret_cast<IEpollEventSource *>(evs[index].data.ptr);
             CHKPC(source);

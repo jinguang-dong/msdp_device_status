@@ -36,7 +36,7 @@ public:
     int32_t EpollAdd(IEpollEventSource *source);
     void EpollDel(IEpollEventSource *source);
     void EpollClose();
-    int32_t EpollWait(int32_t epollFd, struct epoll_event *events, int32_t maxevents, int32_t timeout);
+    int32_t EpollWait(struct epoll_event *events, int32_t maxevents, int32_t timeout);
 
 private:
     int32_t epollFd_ { -1 };
