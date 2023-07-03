@@ -29,10 +29,12 @@
 #include "devicestatus_srv_stub.h"
 #include "drag_data.h"
 #include "drag_manager.h"
+#include "epoll_manager.h"
 #include "i_context.h"
 #ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
 #include "motion_drag.h"
 #endif // OHOS_BUILD_ENABLE_MOTION_DRAG
+#include "proto.h"
 #include "stationary_callback.h"
 #include "stationary_data.h"
 #include "stream_server.h"
@@ -87,8 +89,6 @@ public:
         int32_t &toReturnClientFd, int32_t &tokenType) override;
     void OnConnected(SessionPtr s) override;
     void OnDisconnected(SessionPtr s) override;
-    int32_t AddEpoll(EpollEventType type, int32_t fd) override;
-    int32_t DelEpoll(EpollEventType type, int32_t fd);
     bool IsRunning() const override;
 
 private:

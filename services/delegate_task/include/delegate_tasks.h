@@ -23,12 +23,14 @@
 
 #include "id_factory.h"
 #include "i_delegate_tasks.h"
+#include "i_epoll_event_source.h"
 #include "util.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 class DelegateTasks final : public IDelegateTasks,
+                            public IEpollEventSource,
                             public IdFactory<int32_t> {
 public:
     struct TaskData {
@@ -76,8 +78,9 @@ public:
     void ProcessTasks();
     int32_t PostSyncTask(DTaskCallback callback) override;
     int32_t PostAsyncTask(DTaskCallback callback) override;
+    void Dispatch(const struct epoll_event &ev) override;
 
-    int32_t GetReadFd() const
+    int32_t GetFd() const override
     {
         return fds_[0];
     }

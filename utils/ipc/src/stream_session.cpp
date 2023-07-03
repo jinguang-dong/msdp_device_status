@@ -116,6 +116,8 @@ bool StreamSession::SendMsg(NetPacket &pkt) const
     pkt.MakeData(buf);
     return SendMsg(buf.Data(), buf.Size());
 }
+
+void StreamSession::Dispatch(const struct epoll_event &ev) {}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

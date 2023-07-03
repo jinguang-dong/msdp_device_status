@@ -25,6 +25,7 @@
 #include "nocopyable.h"
 
 #include "enumerator.h"
+#include "epoll_manager.h"
 #include "i_context.h"
 #include "i_device_mgr.h"
 #include "i_epoll_event_source.h"
@@ -74,10 +75,6 @@ private:
     int32_t OnAddDeviceObserver(std::weak_ptr<IDeviceObserver> observer);
     int32_t OnRemoveDeviceObserver(std::weak_ptr<IDeviceObserver> observer);
     int32_t OnRetriggerHotplug(std::weak_ptr<IDeviceObserver> observer);
-    int32_t EpollCreate();
-    int32_t EpollAdd(IEpollEventSource *source);
-    void EpollDel(IEpollEventSource *source);
-    void EpollClose();
     int32_t RunGetDevice(std::packaged_task<std::shared_ptr<IDevice>(int32_t)> &task, int32_t id) const;
     std::shared_ptr<IDevice> OnGetDevice(int32_t id) const;
     std::shared_ptr<IDevice> AddDevice(const std::string &devNode);
@@ -86,7 +83,7 @@ private:
 
 private:
     IContext *context_ { nullptr };
-    int32_t epollFd_ { -1 };
+    EpollManager epollManager_;
     Enumerator enumerator_;
     Monitor monitor_;
     HotplugHandler hotplug_;
