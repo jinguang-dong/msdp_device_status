@@ -77,7 +77,9 @@ void EpollManager::EpollClose()
 {
     CALL_DEBUG_ENTER;
     if (epollFd_ >= 0) {
-        close(epollFd_);
+        if (close(epollFd_) < 0) {
+            FI_HILOGE("Close epoll fd failed, error:%{public}s, epollFd_:%{public}d", strerror(errno), epollFd_);
+        }
         epollFd_ = -1;
     }
 }
@@ -91,9 +93,9 @@ int32_t EpollManager::EpollWait(int32_t epollFd, struct epoll_event *events, int
         FI_HILOGE("Invalid param epollFd");
         return RET_ERR;
     }
-    auto ret = epoll_wait(epollFd, events, maxevents, timeout);
+    int32_t ret = epoll_wait(epollFd, events, maxevents, timeout);
     if (ret < 0) {
-        FI_HILOGE("epoll_wait ret:%{public}d,errno:%{public}d", ret, errno);
+        FI_HILOGE("epoll_wait ret:%{public}d, errno:%{public}d", ret, errno);
     }
     return ret;
 }

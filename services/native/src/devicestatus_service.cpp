@@ -400,21 +400,6 @@ void DeviceStatusService::OnDelegateTask(const epoll_event &ev)
     delegateTasks_.ProcessTasks();
 }
 
-void DeviceStatusService::OnTimeout(const epoll_event &ev)
-{
-    CALL_INFO_TRACE;
-    if ((ev.events & EPOLLIN) == EPOLLIN) {
-        uint64_t expiration {};
-        ssize_t ret = read(timerMgr_.GetTimerFd(), &expiration, sizeof(expiration));
-        if (ret < 0) {
-            FI_HILOGE("Read expiration failed:%{public}s", strerror(errno));
-        }
-        timerMgr_.ProcessTimers();
-    } else if ((ev.events & (EPOLLHUP | EPOLLERR)) != 0) {
-        FI_HILOGE("Epoll hangup:%{public}s", strerror(errno));
-    }
-}
-
 void DeviceStatusService::OnDeviceMgr(const epoll_event &ev)
 {
     CALL_INFO_TRACE;

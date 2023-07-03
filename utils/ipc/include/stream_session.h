@@ -55,7 +55,7 @@ public:
         return shared_from_this();
     }
 
-    int32_t GetFd() const override
+    inline int32_t GetFd() const override
     {
         return fd_;
     }

@@ -239,7 +239,7 @@ void StreamServer::OnEpollRecv(int32_t fd, struct epoll_event& ev)
     }
 }
 
-void StreamServer::Dispatch(epoll_event& ev)
+void StreamServer::Dispatch(struct epoll_event& ev)
 {
     CHKPV(ev.data.ptr);
     int32_t fd = *static_cast<int32_t*>(ev.data.ptr);

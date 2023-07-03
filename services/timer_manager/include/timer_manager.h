@@ -77,7 +77,7 @@ private:
     std::list<std::unique_ptr<TimerItem>> timers_;
 };
 
-inline int32_t TimerManager::GetFd() const
+inline int32_t TimerManager::GetFd() const override
 {
     return timerFd_;
 }

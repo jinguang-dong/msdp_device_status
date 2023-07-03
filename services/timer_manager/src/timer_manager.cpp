@@ -310,7 +310,7 @@ void TimerManager::Dispatch(const struct epoll_event &ev)
     CALL_INFO_TRACE;
     if ((ev.events & EPOLLIN) == EPOLLIN) {
         uint64_t expiration {};
-        int ret = read(timerFd_, &expiration, sizeof(expiration));
+        ssize_t ret = read(timerFd_, &expiration, sizeof(expiration));
         if (ret < 0) {
             FI_HILOGE("Read expiration failed: %{public}s", strerror(errno));
         }
