@@ -340,7 +340,7 @@ int32_t DeviceStatusService::InitDelegateTasks()
         FI_HILOGE("AddEpoll error ret:%{public}d", ret);
         return ret;
     }
-    FI_HILOGI("AddEpoll, epollfd:%{public}d,fd:%{public}d", epollManager_.GetFd(), delegateTasks_.GetFd());
+    FI_HILOGI("AddEpoll, epollfd:%{public}d, fd:%{public}d", epollManager_.GetFd(), delegateTasks_.GetFd());
     return RET_OK;
 }
 
