@@ -34,7 +34,6 @@
 #ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
 #include "motion_drag.h"
 #endif // OHOS_BUILD_ENABLE_MOTION_DRAG
-#include "proto.h"
 #include "stationary_callback.h"
 #include "stationary_data.h"
 #include "stream_server.h"

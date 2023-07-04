@@ -39,7 +39,8 @@ void StreamServer::UdsStop()
 {
     if (epollManager_.GetFd() != -1) {
         if (close(epollManager_.GetFd()) < 0) {
-            FI_HILOGE("Close epoll fd failed, error:%{public}s, epollFd_:%{public}d", strerror(errno), epollManager_.GetFd());
+            FI_HILOGE("Close epoll fd failed, error:%{public}s, epollFd_:%{public}d",
+                            strerror(errno), epollManager_.GetFd());
         }
         epollManager_.SetFd(-1);
     }
@@ -252,12 +253,12 @@ void StreamServer::Dispatch(const struct epoll_event &ev)
         for (int32_t index = 0; index < cnt; ++index) {
             if ((evs[index].events & EPOLLERR) || (evs[index].events & EPOLLHUP)) {
                 FI_HILOGI("EPOLLERR or EPOLLHUP, epfd:%{public}d, evs[index].events:0x%{public}x",
-                            epfd, evs[index].events);
+                                 epfd, evs[index].events);
                 ReleaseSession(epfd, evs[index]);
             } else if (evs[index].events & EPOLLIN) {
                 OnEpollRecv(epfd, evs[index]);
             }
-        }    
+        }
     } else if ((ev.events & (EPOLLHUP | EPOLLERR)) != 0) {
         FI_HILOGE("Epoll hangup: %{public}s", strerror(errno));
     }
