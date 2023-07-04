@@ -17,14 +17,14 @@ import("../../device_status.gni")
 config("devicestatus_util_private_config") {
   include_dirs = [ 
     "include",
-    "../../services/context/include"
+    "../../services/context/include",
   ]
 }
 
 config("devicestatus_util_public_config") {
   include_dirs = [ 
     "include",
-    "../../services/context/include"
+    "../../services/context/include",
   ]
 }
 
