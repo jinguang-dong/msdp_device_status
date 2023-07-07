@@ -180,6 +180,10 @@ int32_t DragDrawing::Init(const DragData &dragData)
     CHKPR(shadowNode, INIT_FAIL);
     std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
     CHKPR(dragStyleNode, INIT_FAIL);
+    dragExtHandle = dlopen(DRAG_ANIMATION_EXTENSION_SO_PATH.c_str(), RTLD_LAZY);
+    if (dragExtHandle == nullptr) {
+        FI_HILOGE("Failed to open drag extension library");
+    }
     OnStartDrag(dragAnimationData, shadowNode, dragStyleNode);
     CHKPR(rsUiDirector_, INIT_FAIL);
     if (g_drawingInfo.sourceType != MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
@@ -410,15 +414,13 @@ void DragDrawing::OnStartDrag(const DragAnimationData &dragAnimationData,
         FI_HILOGE("Init draw style failed");
         return;
     }
-    auto extHandle = dlopen(DRAG_ANIMATION_EXTENSION_SO_PATH.c_str(), RTLD_LAZY);
-    if (extHandle == nullptr) {
+    if (dragExtHandle == nullptr) {
         FI_HILOGE("Failed to open drag extension library");
         return;
     }
-    auto animationExtFunc = reinterpret_cast<DragStartExtFunc>(dlsym(extHandle, "OnStartDragExt"));
+    auto animationExtFunc = reinterpret_cast<DragStartExtFunc>(dlsym(dragExtHandle, "OnStartDragExt"));
     if (animationExtFunc == nullptr) {
         FI_HILOGE("Failed to get drag extension func");
-        dlclose(extHandle);
         return;
     }
     if (handler_ == nullptr) {
@@ -429,7 +431,6 @@ void DragDrawing::OnStartDrag(const DragAnimationData &dragAnimationData,
     if (!handler_->PostTask(std::bind(animationExtFunc, dragAnimationData, shadowNode, dragStyleNode))) {
         FI_HILOGE("Send animationExtFunc failed");
     }
-    dlclose(extHandle);
 }
 
 void DragDrawing::OnDragStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode,
@@ -438,17 +439,15 @@ void DragDrawing::OnDragStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode
     CALL_DEBUG_ENTER;
     CHKPV(dragStyleNode);
     CHKPV(stylePixelMap);
-    auto extHandle = dlopen(DRAG_ANIMATION_EXTENSION_SO_PATH.c_str(), RTLD_LAZY);
-    if (extHandle == nullptr) {
+    if (dragExtHandle == nullptr) {
         FI_HILOGE("Failed to open drag extension library");
         DrawStyle(dragStyleNode, stylePixelMap);
         return;
     }
-    auto animationExtFunc = reinterpret_cast<DragStyleExtFunc>(dlsym(extHandle, "OnDragStyleExt"));
+    auto animationExtFunc = reinterpret_cast<DragStyleExtFunc>(dlsym(dragExtHandle, "OnDragStyleExt"));
     if (animationExtFunc == nullptr) {
         FI_HILOGE("Failed to get drag extension func");
         DrawStyle(dragStyleNode, stylePixelMap);
-        dlclose(extHandle);
         return;
     }
     if (handler_ == nullptr) {
@@ -460,24 +459,21 @@ void DragDrawing::OnDragStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode
         FI_HILOGE("Send animationExtFunc failed");
         DrawStyle(dragStyleNode, stylePixelMap);
     }
-    dlclose(extHandle);
 }
 
 void DragDrawing::OnStopDragSuccess(std::shared_ptr<Rosen::RSCanvasNode> shadowNode,
     std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode)
 {
     CALL_DEBUG_ENTER;
-    auto extHandle = dlopen(DRAG_ANIMATION_EXTENSION_SO_PATH.c_str(), RTLD_LAZY);
-    if (extHandle == nullptr) {
+    if (dragExtHandle == nullptr) {
         FI_HILOGE("Failed to open drag extension library");
         RunAnimation(END_ALPHA, END_SCALE_SUCCESS);
         return;
     }
-    auto animationExtFunc = reinterpret_cast<DragSuccessExtFunc>(dlsym(extHandle, "OnStopDragSuccessExt"));
+    auto animationExtFunc = reinterpret_cast<DragSuccessExtFunc>(dlsym(dragExtHandle, "OnStopDragSuccessExt"));
     if (animationExtFunc == nullptr) {
         FI_HILOGE("Failed to get drag extension func");
         RunAnimation(END_ALPHA, END_SCALE_SUCCESS);
-        dlclose(extHandle);
         return;
     }
     if (handler_ == nullptr) {
@@ -489,24 +485,21 @@ void DragDrawing::OnStopDragSuccess(std::shared_ptr<Rosen::RSCanvasNode> shadowN
         FI_HILOGE("Send animationExtFunc failed");
         RunAnimation(END_ALPHA, END_SCALE_SUCCESS);
     }
-    dlclose(extHandle);
 }
 
 void DragDrawing::OnStopDragFail(std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode,
     std::shared_ptr<Rosen::RSNode> rootNode)
 {
     CALL_DEBUG_ENTER;
-    auto extHandle = dlopen(DRAG_ANIMATION_EXTENSION_SO_PATH.c_str(), RTLD_LAZY);
-    if (extHandle == nullptr) {
+    if (dragExtHandle == nullptr) {
         FI_HILOGE("Failed to open drag extension library");
         RunAnimation(END_ALPHA, END_SCALE_FAIL);
         return;
     }
-    auto animationExtFunc = reinterpret_cast<DragFailExtFunc>(dlsym(extHandle, "OnStopDragFailExt"));
+    auto animationExtFunc = reinterpret_cast<DragFailExtFunc>(dlsym(dragExtHandle, "OnStopDragFailExt"));
     if (animationExtFunc == nullptr) {
         FI_HILOGE("Failed to get drag extension func");
         RunAnimation(END_ALPHA, END_SCALE_FAIL);
-        dlclose(extHandle);
         return;
     }
     if (handler_ == nullptr) {
@@ -518,7 +511,6 @@ void DragDrawing::OnStopDragFail(std::shared_ptr<Rosen::RSSurfaceNode> surfaceNo
         FI_HILOGE("Send animationExtFunc failed");
         RunAnimation(END_ALPHA, END_SCALE_FAIL);
     }
-    dlclose(extHandle);
 }
 
 void DragDrawing::OnStopAnimation()
@@ -1065,6 +1057,13 @@ void DragDrawing::SetDecodeOptions(Media::DecodeOptions &decodeOpts)
             .width = (DEVICE_INDEPENDENT_PIXEL + extendSvgWidth) * GetScaling(),
             .height = DEVICE_INDEPENDENT_PIXEL * GetScaling()
         };
+    }
+}
+
+DragDrawing::~DragDrawing() {
+    if (dragExtHandle != nullptr) {
+        dlclose(dragExtHandle);
+        dragExtHandle = nullptr;
     }
 }
 
