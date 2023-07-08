@@ -152,14 +152,14 @@ int32_t DeviceProfileAdapter::UnregisterCrossingStateListener(const std::string 
         std::list<ProfileEvent> failedEvents;
         DistributedDeviceProfileClient::GetInstance().UnsubscribeProfileEvents(profileEvents,
             it->second, failedEvents);
-        profileEventCallbacks_.erase(it);
+        it = profileEventCallbacks_.erase(it);
     }
     auto callbackIter = callbacks_.find(deviceId);
     if (callbackIter == callbacks_.end()) {
         FI_HILOGW("This device has no callback");
         return RET_OK;
     }
-    callbacks_.erase(callbackIter);
+    callbackIter = callbacks_.erase(callbackIter);
     return RET_OK;
 }
 
@@ -200,7 +200,7 @@ void DeviceProfileAdapter::OnProfileChanged(const std::string &deviceId)
         auto state = GetCrossingSwitchState(deviceId);
         it->second(deviceId, state);
     } else {
-        callbacks_.erase(it);
+        it = callbacks_.erase(it);
     }
 }
 

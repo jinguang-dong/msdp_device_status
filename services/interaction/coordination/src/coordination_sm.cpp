@@ -710,7 +710,7 @@ void CoordinationSM::OnDeviceOffline(const std::string &networkId)
     if (!onlineDevice_.empty()) {
         auto it = std::find(onlineDevice_.begin(), onlineDevice_.end(), networkId);
         if (it != onlineDevice_.end()) {
-            onlineDevice_.erase(it);
+            it = onlineDevice_.erase(it);
         }
     }
 }

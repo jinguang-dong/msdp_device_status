@@ -194,7 +194,7 @@ int32_t TimerManager::RemoveTimerInternal(int32_t timerId)
 {
     for (auto tIter = timers_.begin(); tIter != timers_.end(); ++tIter) {
         if ((*tIter)->id == timerId) {
-            timers_.erase(tIter);
+            tIter = timers_.erase(tIter);
             return RET_OK;
         }
     }
@@ -207,7 +207,7 @@ int32_t TimerManager::ResetTimerInternal(int32_t timerId)
     for (auto tIter = timers_.begin(); tIter != timers_.end(); ++tIter) {
         if ((*tIter)->id == timerId) {
             auto timer = std::move(*tIter);
-            timers_.erase(tIter);
+            tIter = timers_.erase(tIter);
             int64_t nowTime = GetMillisTime();
             if (!AddInt64(nowTime, timer->intervalMs, timer->nextCallTime)) {
                 FI_HILOGE("The addition of nextCallTime in TimerItem overflows");
@@ -263,7 +263,7 @@ void TimerManager::ProcessTimersInternal()
             break;
         }
         auto curTimer = std::move(*tIter);
-        timers_.erase(tIter);
+        tIter = timers_.erase(tIter);
         ++curTimer->callbackCount;
         if ((curTimer->repeatCount >= 1) && (curTimer->callbackCount >= curTimer->repeatCount)) {
             curTimer->callback();

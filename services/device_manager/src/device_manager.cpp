@@ -227,7 +227,7 @@ std::shared_ptr<IDevice> DeviceManager::RemoveDevice(const std::string &devNode)
         std::shared_ptr<IDevice> dev = devIter->second;
         CHKPC(dev);
         if (dev->GetDevPath() == devPath) {
-            devices_.erase(devIter);
+            devIter = devices_.erase(devIter);
             FI_HILOGD("\'%{public}s\' removed", dev->GetName().c_str());
             dev->Close();
             OnDeviceRemoved(dev);

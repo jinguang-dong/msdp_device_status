@@ -197,7 +197,7 @@ void StreamServer::ReleaseSession(int32_t fd, epoll_event& ev)
         ev.data.ptr = nullptr;
     }
     if (auto it = circleBufMap_.find(fd); it != circleBufMap_.end()) {
-        circleBufMap_.erase(it);
+        it = circleBufMap_.erase(it);
     }
     auto DeviceStatusService = DeviceStatus::DelayedSpSingleton<DeviceStatus::DeviceStatusService>::GetInstance();
     DeviceStatusService->DelEpoll(EPOLL_EVENT_SOCKET, fd);
@@ -336,7 +336,7 @@ void StreamServer::DelSession(int32_t fd)
     auto it = sessionsMap_.find(fd);
     if (it != sessionsMap_.end()) {
         NotifySessionDeleted(it->second);
-        sessionsMap_.erase(it);
+        it = sessionsMap_.erase(it);
     }
     DumpSession("DelSession");
 }
@@ -358,7 +358,7 @@ void StreamServer::NotifySessionDeleted(SessionPtr ses)
     auto it = callbacks_.find(ses->GetPid());
     if (it != callbacks_.end()) {
         it->second(ses);
-        callbacks_.erase(it);
+        it = callbacks_.erase(it);
     }
 }
 } // namespace DeviceStatus
