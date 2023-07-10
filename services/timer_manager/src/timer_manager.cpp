@@ -304,6 +304,21 @@ int32_t TimerManager::ArmTimer()
     }
     return RET_OK;
 }
+
+void TimerManager::Dispatch(const struct epoll_event &ev)
+{
+    CALL_INFO_TRACE;
+    if ((ev.events & EPOLLIN) == EPOLLIN) {
+        uint64_t expiration {};
+        ssize_t ret = read(timerFd_, &expiration, sizeof(expiration));
+        if (ret < 0) {
+            FI_HILOGE("Read expiration failed: %{public}s", strerror(errno));
+        }
+        ProcessTimers();
+    } else if ((ev.events & (EPOLLHUP | EPOLLERR)) != 0) {
+        FI_HILOGE("Epoll hangup: %{public}s", strerror(errno));
+    }
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

@@ -15,7 +15,6 @@
 #ifndef PROTO_H
 #define PROTO_H
 #include <sys/types.h>
-#define MAX_EVENT_SIZE 100
 static constexpr int32_t STREAM_BUF_READ_FAIL { 1 };
 static constexpr int32_t STREAM_BUF_WRITE_FAIL { 2 };
 static constexpr int32_t MAX_VECTOR_SIZE { 10 };
@@ -24,6 +23,7 @@ static constexpr int32_t MEMCPY_SEC_FUN_FAIL { 4 };
 static constexpr int32_t PARAM_INPUT_INVALID { 5 };
 static constexpr int32_t MAX_STREAM_BUF_SIZE { 256 };
 static constexpr size_t MAX_PACKET_BUF_SIZE { 256 };
+static constexpr int32_t MAX_N_EVENTS { 64 };
 static constexpr int32_t ONCE_PROCESS_NETPACKET_LIMIT { 100 };
 static constexpr int32_t INVALID_FD { 6 };
 static constexpr int32_t INVALID_PID { 7 };

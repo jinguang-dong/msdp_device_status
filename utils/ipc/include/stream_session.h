@@ -24,6 +24,7 @@
 
 #include "nocopyable.h"
 
+#include "i_epoll_event_source.h"
 #include "net_packet.h"
 #include "proto.h"
 
@@ -32,7 +33,8 @@ namespace Msdp {
 namespace DeviceStatus {
 class StreamSession;
 using SessionPtr = std::shared_ptr<StreamSession>;
-class StreamSession : public std::enable_shared_from_this<StreamSession> {
+class StreamSession : public std::enable_shared_from_this<StreamSession>,
+                      public IEpollEventSource {
 public:
     StreamSession(const std::string &programName, int32_t moduleType, int32_t fd, int32_t uid, int32_t pid);
     DISALLOW_COPY_AND_MOVE(StreamSession);
@@ -41,6 +43,7 @@ public:
     bool SendMsg(const char *buf, size_t size) const;
     bool SendMsg(NetPacket &pkt) const;
     void Close();
+    void Dispatch(const struct epoll_event &ev) override;
 
     int32_t GetPid() const
     {
@@ -52,7 +55,7 @@ public:
         return shared_from_this();
     }
 
-    int32_t GetFd() const
+    inline int32_t GetFd() const override
     {
         return fd_;
     }
@@ -74,7 +77,7 @@ protected:
     const int32_t pid_ { -1 };
     int32_t tokenType_ { TokenType::TOKEN_INVALID };
 };
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-} // namespace DeviceStatus
 #endif // STREAM_SESSION_H

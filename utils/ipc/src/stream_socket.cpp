@@ -29,60 +29,6 @@ StreamSocket::StreamSocket() {}
 StreamSocket::~StreamSocket()
 {
     Close();
-    EpollClose();
-}
-
-int32_t StreamSocket::EpollCreate(int32_t size)
-{
-    epollFd_ = epoll_create(size);
-    if (epollFd_ < 0) {
-        FI_HILOGE("epoll_create, return:%{public}d", epollFd_);
-    } else {
-        FI_HILOGI("epoll_create, epollFd_:%{public}d", epollFd_);
-    }
-    return epollFd_;
-}
-
-int32_t StreamSocket::EpollCtl(int32_t fd, int32_t op, struct epoll_event &event, int32_t epollFd)
-{
-    if (fd < 0) {
-        FI_HILOGE("Invalid fd");
-        return RET_ERR;
-    }
-    if (epollFd < 0) {
-        epollFd = epollFd_;
-    }
-    if (epollFd < 0) {
-        FI_HILOGE("Invalid param epollFd");
-        return RET_ERR;
-    }
-    int32_t ret;
-    if (op == EPOLL_CTL_DEL) {
-        ret = epoll_ctl(epollFd, op, fd, NULL);
-    } else {
-        ret = epoll_ctl(epollFd, op, fd, &event);
-    }
-    if (ret < 0) {
-        FI_HILOGE("epoll_ctl, return:%{public}d, epollFd_:%{public}d, op:%{public}d, fd:%{public}d, errno:%{public}d",
-            ret, epollFd, op, fd, errno);
-    }
-    return ret;
-}
-
-int32_t StreamSocket::EpollWait(int32_t maxevents, int32_t timeout, struct epoll_event &events, int32_t epollFd)
-{
-    if (epollFd < 0) {
-        epollFd = epollFd_;
-    }
-    if (epollFd < 0) {
-        FI_HILOGE("Invalid param epollFd");
-        return RET_ERR;
-    }
-    int32_t ret = epoll_wait(epollFd, &events, maxevents, timeout);
-    if (ret < 0) {
-        FI_HILOGE("epoll_wait, ret:%{public}d, errno:%{public}d", ret, errno);
-    }
-    return ret;
 }
 
 void StreamSocket::OnReadPackets(CircleStreamBuffer &circBuf, StreamSocket::PacketCallBackFun callbackFun)
@@ -124,16 +70,6 @@ void StreamSocket::OnReadPackets(CircleStreamBuffer &circBuf, StreamSocket::Pack
             circBuf.Reset();
             break;
         }
-    }
-}
-
-void StreamSocket::EpollClose()
-{
-    if (epollFd_ >= 0) {
-        if (close(epollFd_) < 0) {
-            FI_HILOGE("Close epoll fd failed, error:%{public}s, epollFd_:%{public}d", strerror(errno), epollFd_);
-        }
-        epollFd_ = -1;
     }
 }
 

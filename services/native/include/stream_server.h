@@ -23,24 +23,17 @@
 #include "nocopyable.h"
 
 #include "circle_stream_buffer.h"
+#include "epoll_manager.h"
 #include "i_stream_server.h"
 #include "stream_socket.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-enum EpollEventType {
-    EPOLL_EVENT_BEGIN = 0,
-    EPOLL_EVENT_INPUT = EPOLL_EVENT_BEGIN,
-    EPOLL_EVENT_SOCKET,
-    EPOLL_EVENT_ETASK,
-    EPOLL_EVENT_TIMER,
-    EPOLL_EVENT_DEVICE_MGR,
-    EPOLL_EVENT_END
-};
-
 using MsgServerFunCallback = std::function<void(SessionPtr, NetPacket&)>;
-class StreamServer : public StreamSocket, public IStreamServer {
+class StreamServer : public StreamSocket, 
+                     public IStreamServer,
+                     public IEpollEventSource {
 public:
     StreamServer() = default;
     DISALLOW_COPY_AND_MOVE(StreamServer);
@@ -56,17 +49,20 @@ public:
 
     SessionPtr GetSession(int32_t fd) const;
     SessionPtr GetSessionByPid(int32_t pid) const override;
+    void Dispatch(const struct epoll_event &ev) override;
+    int32_t GetFd() const override
+    {
+        return epollManager_.GetFd();
+    }
 
 protected:
     virtual void OnConnected(SessionPtr s);
     virtual void OnDisconnected(SessionPtr s);
-    virtual int32_t AddEpoll(EpollEventType type, int32_t fd);
 
     void SetRecvFun(MsgServerFunCallback fun);
-    void ReleaseSession(int32_t fd, epoll_event& ev);
+    void ReleaseSession(int32_t fd, struct epoll_event& ev);
     void OnPacket(int32_t fd, NetPacket& pkt);
-    void OnEpollRecv(int32_t fd, epoll_event& ev);
-    void OnEpollEvent(epoll_event& ev);
+    void OnEpollRecv(int32_t fd, struct epoll_event& ev);
     bool AddSession(SessionPtr ses);
     void DelSession(int32_t fd);
     void DumpSession(const std::string& title);
@@ -78,6 +74,7 @@ protected:
     std::map<int32_t, int32_t> idxPidMap_;
     std::map<int32_t, CircleStreamBuffer> circleBufMap_;
     std::map<int32_t, std::function<void(SessionPtr)>> callbacks_;
+    EpollManager epollManager_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

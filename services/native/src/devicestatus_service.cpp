@@ -43,11 +43,6 @@ constexpr int32_t DEFAULT_WAIT_TIME_MS { 1000 };
 constexpr int32_t WAIT_FOR_ONCE { 1 };
 constexpr int32_t MAX_N_RETRIES { 100 };
 
-struct device_status_epoll_event {
-    int32_t fd { 0 };
-    EpollEventType event_type { EPOLL_EVENT_BEGIN };
-};
-
 #ifndef OHOS_BUILD_ENABLE_RUST_IMPL
 const bool REGISTER_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSpSingleton<DeviceStatusService>::GetInstance().GetRefPtr());
@@ -169,7 +164,7 @@ bool DeviceStatusService::Init()
         FI_HILOGE("OnStart init fail");
         return false;
     }
-    if (EpollCreate(MAX_EVENT_SIZE) < 0) {
+    if (epollManager_.EpollCreate() < 0) {
         FI_HILOGE("Create epoll failed");
         return false;
     }
@@ -208,7 +203,7 @@ bool DeviceStatusService::Init()
     return true;
 
 INIT_FAIL:
-    EpollClose();
+    epollManager_.EpollClose();
     return false;
 }
 
@@ -323,58 +318,6 @@ void DeviceStatusService::OnDisconnected(SessionPtr s)
     FI_HILOGW("Enter, session desc:%{public}s, fd:%{public}d", s->GetDescript().c_str(), s->GetFd());
 }
 
-int32_t DeviceStatusService::AddEpoll(EpollEventType type, int32_t fd)
-{
-    if (!(type >= EPOLL_EVENT_BEGIN && type < EPOLL_EVENT_END)) {
-        FI_HILOGE("Invalid param type");
-        return RET_ERR;
-    }
-    if (fd < 0) {
-        FI_HILOGE("Invalid param fd_");
-        return RET_ERR;
-    }
-    auto eventData = static_cast<device_status_epoll_event*>(malloc(sizeof(device_status_epoll_event)));
-    if (!eventData) {
-        FI_HILOGE("Malloc failed");
-        return RET_ERR;
-    }
-    eventData->fd = fd;
-    eventData->event_type = type;
-    FI_HILOGD("userdata:[fd:%{public}d, type:%{public}d]", eventData->fd, eventData->event_type);
-
-    struct epoll_event ev {};
-    ev.events = EPOLLIN;
-    ev.data.ptr = eventData;
-    auto ret = EpollCtl(fd, EPOLL_CTL_ADD, ev, -1);
-    if (ret < 0) {
-        free(eventData);
-        eventData = nullptr;
-        ev.data.ptr = nullptr;
-        FI_HILOGE("EpollCtl failed");
-        return ret;
-    }
-    return RET_OK;
-}
-
-int32_t DeviceStatusService::DelEpoll(EpollEventType type, int32_t fd)
-{
-    if (!(type >= EPOLL_EVENT_BEGIN && type < EPOLL_EVENT_END)) {
-        FI_HILOGE("Invalid param type");
-        return RET_ERR;
-    }
-    if (fd < 0) {
-        FI_HILOGE("Invalid param fd_");
-        return RET_ERR;
-    }
-    struct epoll_event ev {};
-    auto ret = EpollCtl(fd, EPOLL_CTL_DEL, ev, -1);
-    if (ret < 0) {
-        FI_HILOGE("DelEpoll failed");
-        return ret;
-    }
-    return RET_OK;
-}
-
 bool DeviceStatusService::IsRunning() const
 {
     return (state_ == ServiceRunningState::STATE_RUNNING);
@@ -387,15 +330,14 @@ int32_t DeviceStatusService::InitDelegateTasks()
         FI_HILOGE("The delegate task init failed");
         return RET_ERR;
     }
-    auto ret = AddEpoll(EPOLL_EVENT_ETASK, delegateTasks_.GetReadFd());
+    auto ret = epollManager_.EpollAdd(&delegateTasks_);
     if (ret != RET_OK) {
         FI_HILOGE("AddEpoll error ret:%{public}d", ret);
         return ret;
     }
-    FI_HILOGI("AddEpoll, epollfd:%{public}d, fd:%{public}d", epollFd_, delegateTasks_.GetReadFd());
+    FI_HILOGI("AddEpoll, epollfd:%{public}d, fd:%{public}d", epollManager_.GetFd(), delegateTasks_.GetFd());
     return RET_OK;
 }
-
 
 int32_t DeviceStatusService::InitTimerMgr()
 {
@@ -405,7 +347,7 @@ int32_t DeviceStatusService::InitTimerMgr()
         FI_HILOGE("TimerMgr init failed");
         return ret;
     }
-    ret = AddEpoll(EPOLL_EVENT_TIMER, timerMgr_.GetTimerFd());
+    ret = epollManager_.EpollAdd(&timerMgr_);
     if (ret != RET_OK) {
         FI_HILOGE("AddEpoll for timer fail");
         return ret;
@@ -421,67 +363,20 @@ void DeviceStatusService::OnThread()
     FI_HILOGD("Main worker thread start, tid:%{public}" PRId64 "", tid);
     EnableDevMgr(MAX_N_RETRIES);
 
-    while (state_ == ServiceRunningState::STATE_RUNNING) {
-        epoll_event ev[MAX_EVENT_SIZE] {};
-        int32_t count = EpollWait(MAX_EVENT_SIZE, -1, ev[0]);
-        for (int32_t i = 0; i < count && state_ == ServiceRunningState::STATE_RUNNING; i++) {
-            auto epollEvent = reinterpret_cast<device_status_epoll_event*>(ev[i].data.ptr);
-            CHKPC(epollEvent);
-            if (epollEvent->event_type == EPOLL_EVENT_SOCKET) {
-                OnEpollEvent(ev[i]);
-            } else if (epollEvent->event_type == EPOLL_EVENT_ETASK) {
-                OnDelegateTask(ev[i]);
-            } else if (epollEvent->event_type == EPOLL_EVENT_TIMER) {
-                OnTimeout(ev[i]);
-            } else if (epollEvent->event_type == EPOLL_EVENT_DEVICE_MGR) {
-                OnDeviceMgr(ev[i]);
-            } else {
-                FI_HILOGW("Unknown epoll event type:%{public}d", epollEvent->event_type);
+    while (IsRunning()) {
+        struct epoll_event evs[MAX_N_EVENTS] {};
+        int32_t count = epollManager_.EpollWait(evs, MAX_N_EVENTS, -1);
+        for (int32_t index = 0; index < count && IsRunning(); index++) {
+            IEpollEventSource *source = reinterpret_cast<IEpollEventSource *>(evs[index].data.ptr);
+            CHKPC(source);
+            if ((evs[index].events & EPOLLIN) == EPOLLIN) {
+                source->Dispatch(evs[index]);
+            } else if ((evs[index].events & (EPOLLHUP | EPOLLERR)) != 0) {
+                FI_HILOGE("Epoll hangup: %{public}s", strerror(errno));
             }
         }
     }
     FI_HILOGD("Main worker thread stop, tid:%{public}" PRId64 "", tid);
-}
-
-void DeviceStatusService::OnDelegateTask(const epoll_event &ev)
-{
-    if ((ev.events & EPOLLIN) == 0) {
-        FI_HILOGW("Not epollin");
-        return;
-    }
-    DelegateTasks::TaskData data {};
-    ssize_t res = read(delegateTasks_.GetReadFd(), &data, sizeof(data));
-    if (res == -1) {
-        FI_HILOGW("Read failed erron:%{public}d", errno);
-    }
-    FI_HILOGD("RemoteRequest notify td:%{public}" PRId64 ", std:%{public}" PRId64 ""
-        ", taskId:%{public}d", GetThisThreadId(), data.tid, data.taskId);
-    delegateTasks_.ProcessTasks();
-}
-
-void DeviceStatusService::OnTimeout(const epoll_event &ev)
-{
-    CALL_INFO_TRACE;
-    if ((ev.events & EPOLLIN) == EPOLLIN) {
-        uint64_t expiration {};
-        ssize_t ret = read(timerMgr_.GetTimerFd(), &expiration, sizeof(expiration));
-        if (ret < 0) {
-            FI_HILOGE("Read expiration failed:%{public}s", strerror(errno));
-        }
-        timerMgr_.ProcessTimers();
-    } else if ((ev.events & (EPOLLHUP | EPOLLERR)) != 0) {
-        FI_HILOGE("Epoll hangup:%{public}s", strerror(errno));
-    }
-}
-
-void DeviceStatusService::OnDeviceMgr(const epoll_event &ev)
-{
-    CALL_INFO_TRACE;
-    if ((ev.events & EPOLLIN) == EPOLLIN) {
-        devMgr_.Dispatch(ev);
-    } else if ((ev.events & (EPOLLHUP | EPOLLERR)) != 0) {
-        FI_HILOGE("Epoll hangup:%{public}s", strerror(errno));
-    }
 }
 
 int32_t DeviceStatusService::EnableDevMgr(int32_t nRetries)
@@ -501,7 +396,7 @@ int32_t DeviceStatusService::EnableDevMgr(int32_t nRetries)
             FI_HILOGE("Maximum number of retries exceeded, Failed to enable device manager");
         }
     } else {
-        AddEpoll(EPOLL_EVENT_DEVICE_MGR, devMgr_.GetFd());
+        epollManager_.EpollAdd(&devMgr_);
         if (timerId >= 0) {
             timerMgr_.RemoveTimer(timerId);
             timerId = -1;
@@ -512,7 +407,7 @@ int32_t DeviceStatusService::EnableDevMgr(int32_t nRetries)
 
 void DeviceStatusService::DisableDevMgr()
 {
-    DelEpoll(EPOLL_EVENT_DEVICE_MGR, devMgr_.GetFd());
+    epollManager_.EpollDel(&devMgr_);
     devMgr_.Disable();
 }
 

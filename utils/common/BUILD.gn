@@ -15,16 +15,22 @@ import("//build/ohos.gni")
 import("../../device_status.gni")
 
 config("devicestatus_util_private_config") {
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "../../services/context/include",
+  ]
 }
 
 config("devicestatus_util_public_config") {
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "../../services/context/include",
+  ]
 }
 
 ohos_shared_library("devicestatus_util") {
-  version_script = "libdevicestatus_util_map"
   sources = [
+    "src/epoll_manager.cpp",
     "src/util.cpp",
     "src/util_napi.cpp",
     "src/util_napi_error.cpp",

@@ -167,6 +167,22 @@ DelegateTasks::TaskPtr DelegateTasks::PostTask(DTaskCallback callback, Promise *
     FI_HILOGD("Post %{public}s", taskType.c_str());
     return task->GetSharedPtr();
 }
+
+void DelegateTasks::Dispatch(const struct epoll_event &ev)
+{
+    if ((ev.events & EPOLLIN) == 0) {
+        FI_HILOGW("Not epollin");
+        return;
+    }
+    TaskData data {};
+    auto res = read(GetFd(), &data, sizeof(data));
+    if (res == -1) {
+        FI_HILOGW("Read failed erron:%{public}d", errno);
+    }
+    FI_HILOGD("RemoteRequest notify td:%{public}" PRId64 ",std:%{public}" PRId64 ""
+        ",taskId:%{public}d", GetThisThreadId(), data.tid, data.taskId);
+    ProcessTasks();
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

@@ -20,15 +20,18 @@
 #include <functional>
 #include <list>
 #include <memory>
+#include <unistd.h>
 
 #include "nocopyable.h"
 
 #include "i_context.h"
+#include "i_epoll_event_source.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class TimerManager final : public ITimerManager {
+class TimerManager final : public ITimerManager,
+                           public IEpollEventSource {
 public:
     TimerManager() = default;
     DISALLOW_COPY_AND_MOVE(TimerManager);
@@ -40,7 +43,8 @@ public:
     int32_t ResetTimer(int32_t timerId);
     bool IsExist(int32_t timerId) const;
     void ProcessTimers();
-    int32_t GetTimerFd() const;
+    int32_t GetFd() const override;
+    void Dispatch(const struct epoll_event &ev) override;
 
 private:
     struct TimerItem {
@@ -73,7 +77,7 @@ private:
     std::list<std::unique_ptr<TimerItem>> timers_;
 };
 
-inline int32_t TimerManager::GetTimerFd() const
+inline int32_t TimerManager::GetFd() const
 {
     return timerFd_;
 }

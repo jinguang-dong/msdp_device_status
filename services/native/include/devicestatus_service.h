@@ -29,6 +29,7 @@
 #include "devicestatus_srv_stub.h"
 #include "drag_data.h"
 #include "drag_manager.h"
+#include "epoll_manager.h"
 #include "i_context.h"
 #ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
 #include "motion_drag.h"
@@ -87,8 +88,6 @@ public:
         int32_t &toReturnClientFd, int32_t &tokenType) override;
     void OnConnected(SessionPtr s) override;
     void OnDisconnected(SessionPtr s) override;
-    int32_t AddEpoll(EpollEventType type, int32_t fd) override;
-    int32_t DelEpoll(EpollEventType type, int32_t fd);
     bool IsRunning() const override;
 
 private:
@@ -96,9 +95,6 @@ private:
     int32_t InitDelegateTasks();
     int32_t InitTimerMgr();
     void OnThread();
-    void OnDelegateTask(const epoll_event &ev);
-    void OnTimeout(const epoll_event &ev);
-    void OnDeviceMgr(const epoll_event &ev);
     int32_t EnableDevMgr(int32_t nRetries);
     void DisableDevMgr();
     int32_t OnStartDrag(const DragData &dragData, int32_t pid);

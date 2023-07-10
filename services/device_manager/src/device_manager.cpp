@@ -36,7 +36,6 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceManager" };
-constexpr int32_t MAX_N_EVENTS { 64 };
 constexpr size_t EXPECTED_N_SUBMATCHES { 2 };
 constexpr size_t EXPECTED_SUBMATCH { 1 };
 } // namespace
@@ -96,7 +95,7 @@ int32_t DeviceManager::Enable()
 int32_t DeviceManager::OnEnable()
 {
     CALL_DEBUG_ENTER;
-    int32_t ret = EpollCreate();
+    int32_t ret = epollManager_.EpollCreate();
     if (ret != RET_OK) {
         FI_HILOGE("EpollCreate failed");
         return ret;
@@ -106,7 +105,7 @@ int32_t DeviceManager::OnEnable()
         FI_HILOGE("Failed to enable monitor");
         goto CLOSE_EPOLL;
     }
-    ret = EpollAdd(&monitor_);
+    ret = epollManager_.EpollAdd(&monitor_);
     if (ret != RET_OK) {
         FI_HILOGE("EpollAdd failed");
         goto DISABLE_MONITOR;
@@ -118,7 +117,7 @@ DISABLE_MONITOR:
     monitor_.Disable();
 
 CLOSE_EPOLL:
-    EpollClose();
+    epollManager_.EpollClose();
     return ret;
 }
 
@@ -136,9 +135,9 @@ int32_t DeviceManager::Disable()
 
 int32_t DeviceManager::OnDisable()
 {
-    EpollDel(&monitor_);
+    epollManager_.EpollDel(&monitor_);
     monitor_.Disable();
-    EpollClose();
+    epollManager_.EpollClose();
     return RET_OK;
 }
 
@@ -269,53 +268,6 @@ void DeviceManager::OnDeviceRemoved(std::shared_ptr<IDevice> dev)
     }
 }
 
-int32_t DeviceManager::EpollCreate()
-{
-    CALL_DEBUG_ENTER;
-    epollFd_ = epoll_create1(EPOLL_CLOEXEC);
-    if (epollFd_ < 0) {
-        FI_HILOGE("epoll_create1 failed");
-        return RET_ERR;
-    }
-    return RET_OK;
-}
-
-int32_t DeviceManager::EpollAdd(IEpollEventSource *source)
-{
-    CALL_DEBUG_ENTER;
-    CHKPR(source, RET_ERR);
-    struct epoll_event ev {};
-    ev.events = EPOLLIN | EPOLLHUP | EPOLLERR;
-    ev.data.ptr = source;
-    int32_t ret = epoll_ctl(epollFd_, EPOLL_CTL_ADD, source->GetFd(), &ev);
-    if (ret != 0) {
-        FI_HILOGE("epoll_ctl failed:%{public}s", strerror(errno));
-        return RET_ERR;
-    }
-    return RET_OK;
-}
-
-void DeviceManager::EpollDel(IEpollEventSource *source)
-{
-    CALL_DEBUG_ENTER;
-    CHKPV(source);
-    int32_t ret = epoll_ctl(epollFd_, EPOLL_CTL_DEL, source->GetFd(), nullptr);
-    if (ret != 0) {
-        FI_HILOGE("epoll_ctl failed:%{public}s", strerror(errno));
-    }
-}
-
-void DeviceManager::EpollClose()
-{
-    CALL_DEBUG_ENTER;
-    if (epollFd_ >= 0) {
-        if (close(epollFd_) < 0) {
-            FI_HILOGE("Close epoll fd failed, error:%{public}s, epollFd_:%{public}d", strerror(errno), epollFd_);
-        }
-        epollFd_ = -1;
-    }
-}
-
 void DeviceManager::Dispatch(const struct epoll_event &ev)
 {
     CALL_DEBUG_ENTER;
@@ -334,7 +286,7 @@ void DeviceManager::Dispatch(const struct epoll_event &ev)
 int32_t DeviceManager::OnEpollDispatch()
 {
     struct epoll_event evs[MAX_N_EVENTS];
-    int32_t cnt = epoll_wait(epollFd_, evs, MAX_N_EVENTS, 0);
+    int32_t cnt = epollManager_.EpollWait(evs, MAX_N_EVENTS, 0);
     if (cnt < 0) {
         FI_HILOGE("epoll_wait failed");
         return RET_ERR;

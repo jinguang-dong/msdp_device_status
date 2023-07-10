@@ -20,7 +20,6 @@
 
 #include <sys/socket.h>
 
-#include "devicestatus_service.h"
 #include "fi_log.h"
 
 namespace OHOS {
@@ -38,11 +37,12 @@ StreamServer::~StreamServer()
 
 void StreamServer::UdsStop()
 {
-    if (epollFd_ != -1) {
-        if (close(epollFd_) < 0) {
-            FI_HILOGE("Close epoll fd failed, error:%{public}s, epollFd_:%{public}d", strerror(errno), epollFd_);
+    if (epollManager_.GetFd() != -1) {
+        if (close(epollManager_.GetFd()) < 0) {
+            FI_HILOGE("Close epoll fd failed, error:%{public}s, epollFd_:%{public}d",
+                            strerror(errno), epollManager_.GetFd());
         }
-        epollFd_ = -1;
+        epollManager_.SetFd(-1);
     }
 
     for (const auto &item : sessionsMap_) {
@@ -143,7 +143,7 @@ int32_t StreamServer::AddSocketPairInfo(const std::string& programName, int32_t 
         FI_HILOGE("AddSession fail errCode:%{public}d", ADD_SESSION_FAIL);
         goto CLOSE_SOCK;
     }
-    if (AddEpoll(EPOLL_EVENT_SOCKET, serverFd) != RET_OK) {
+    if (epollManager_.EpollAdd(sess.get()) != RET_OK) {
         FI_HILOGE("epoll_ctl EPOLL_CTL_ADD failed, errCode:%{public}d", EPOLL_MODIFY_FAIL);
         goto CLOSE_SOCK;
     }
@@ -174,18 +174,12 @@ void StreamServer::OnDisconnected(SessionPtr sess)
     FI_HILOGI("Session desc:%{public}s", sess->GetDescript().c_str());
 }
 
-int32_t StreamServer::AddEpoll(EpollEventType type, int32_t fd)
-{
-    FI_HILOGE("This information should not exist, subclasses should implement this function.");
-    return RET_ERR;
-}
-
 void StreamServer::SetRecvFun(MsgServerFunCallback fun)
 {
     recvFun_ = fun;
 }
 
-void StreamServer::ReleaseSession(int32_t fd, epoll_event& ev)
+void StreamServer::ReleaseSession(int32_t fd, struct epoll_event& ev)
 {
     auto secPtr = GetSession(fd);
     if (secPtr != nullptr) {
@@ -199,8 +193,7 @@ void StreamServer::ReleaseSession(int32_t fd, epoll_event& ev)
     if (auto it = circleBufMap_.find(fd); it != circleBufMap_.end()) {
         circleBufMap_.erase(it);
     }
-    auto DeviceStatusService = DeviceStatus::DelayedSpSingleton<DeviceStatus::DeviceStatusService>::GetInstance();
-    DeviceStatusService->DelEpoll(EPOLL_EVENT_SOCKET, fd);
+    epollManager_.EpollDel(static_cast<IEpollEventSource*>(ev.data.ptr));
     if (close(fd) < 0) {
         FI_HILOGE("Close fd failed, error:%{public}s, fd:%{public}d", strerror(errno), fd);
     }
@@ -213,7 +206,7 @@ void StreamServer::OnPacket(int32_t fd, NetPacket& pkt)
     recvFun_(sess, pkt);
 }
 
-void StreamServer::OnEpollRecv(int32_t fd, epoll_event& ev)
+void StreamServer::OnEpollRecv(int32_t fd, struct epoll_event& ev)
 {
     if (fd < 0) {
         FI_HILOGE("Invalid input param fd:%{public}d", fd);
@@ -247,19 +240,27 @@ void StreamServer::OnEpollRecv(int32_t fd, epoll_event& ev)
     }
 }
 
-void StreamServer::OnEpollEvent(epoll_event& ev)
+void StreamServer::Dispatch(const struct epoll_event &ev)
 {
     CHKPV(ev.data.ptr);
-    int32_t fd = *static_cast<int32_t*>(ev.data.ptr);
-    if (fd < 0) {
-        FI_HILOGE("The fd less than 0, errCode:%{public}d", PARAM_INPUT_INVALID);
-        return;
-    }
-    if ((ev.events & EPOLLERR) || (ev.events & EPOLLHUP)) {
-        FI_HILOGI("EPOLLERR or EPOLLHUP, fd:%{public}d, ev.events:0x%{public}x", fd, ev.events);
-        ReleaseSession(fd, ev);
-    } else if (ev.events & EPOLLIN) {
-        OnEpollRecv(fd, ev);
+    if ((ev.events & EPOLLIN) == EPOLLIN) {
+        struct epoll_event evs[MAX_N_EVENTS];
+        int32_t epfd = epollManager_.GetFd();
+        int32_t cnt = epollManager_.EpollWait(evs, MAX_N_EVENTS, 0);
+        if (cnt < 0) {
+            FI_HILOGE("epoll_wait failed");
+        }
+        for (int32_t index = 0; index < cnt; ++index) {
+            if ((evs[index].events & EPOLLERR) || (evs[index].events & EPOLLHUP)) {
+                FI_HILOGI("EPOLLERR or EPOLLHUP, epfd:%{public}d, evs[index].events:0x%{public}x",
+                                 epfd, evs[index].events);
+                ReleaseSession(epfd, evs[index]);
+            } else if (evs[index].events & EPOLLIN) {
+                OnEpollRecv(epfd, evs[index]);
+            }
+        }
+    } else if ((ev.events & (EPOLLHUP | EPOLLERR)) != 0) {
+        FI_HILOGE("Epoll hangup: %{public}s", strerror(errno));
     }
 }
 
