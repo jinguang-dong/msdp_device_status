@@ -139,7 +139,7 @@ private:
     std::shared_ptr<Rosen::RSUIDirector> rsUiDirector_ { nullptr };
     std::shared_ptr<Rosen::VSyncReceiver> receiver_ { nullptr };
     std::shared_ptr<AppExecFwk::EventHandler> handler_ { nullptr };
-    void* dragExtHandle = nullptr;
+    void* dragExtHandle_ = nullptr;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
