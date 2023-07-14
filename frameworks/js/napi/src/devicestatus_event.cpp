@@ -25,7 +25,6 @@
 #include "devicestatus_common.h"
 
 using namespace OHOS::Msdp;
-
 DeviceStatusEvent::DeviceStatusEvent(napi_env env)
 {
     env_ = env;
@@ -82,6 +81,19 @@ bool DeviceStatusEvent::On(int32_t eventType, napi_value handler, bool isOnce)
         DEV_HILOGI(JS_NAPI, "Add handler to list %{public}d", eventType);
     }
     napi_close_handle_scope(env_, scope);
+    return true;
+}
+
+bool DeviceStatusEvent::RemoveAllCallback(int32_t eventType)
+{
+    DEV_HILOGD(JS_NAPI, "Enter");
+    auto iter = eventMap_.find(eventType);
+    if (iter == eventMap_.end()) {
+        DEV_HILOGE(JS_NAPI, "evenType %{public}d not find", eventType);
+        return false;
+    }
+    eventMap_.erase(eventType);
+    DEV_HILOGD(JS_NAPI, "Exit");
     return true;
 }
 
