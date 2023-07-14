@@ -13,24 +13,22 @@
  * limitations under the License.
  */
 
-//! data definitions.
+#ifndef MONITOR_RUST_H
+#define MONITOR_RUST_H
+#include <cinttypes>
 
-extern crate hilog_rust;
-extern crate ipc_rust;
-extern crate fusion_utils_rust;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-mod constants;
-mod errors;
-mod ipc;
-mod plugin_manager;
+struct Monitor;
 
-pub use constants::{
-    DEV_INPUT_PATH
-};
-pub use errors::{ FusionErrorCode, FusionResult };
-pub use ipc::basic::{ BasicParamID, AllocSocketPairParam };
-pub use ipc::coordination::{ GeneralCoordinationParam, StartCoordinationParam,
-    StopCoordinationParam, GetCoordinationStateParam };
-pub use ipc::default::{ CallingContext, DefaultReply };
-pub use ipc::drag::{ CDragData, DragData };
-pub use plugin_manager::{ Intention, IPlugin };
+struct Monitor* CMonitorNew();
+int32_t CMonitorEnable(struct Monitor* raw);
+int32_t CMonitorDispatch(struct Monitor* raw, struct epoll_event* ev);
+int32_t CMonitorGetFd(struct Monitor* raw);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+#endif // MONITOR_H
