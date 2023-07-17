@@ -230,7 +230,7 @@ std::string DeviceStatusDumper::GetDeviceState(OnChangedValue value) const
     }
     return state;
 }
-
+ 
 std::string DeviceStatusDumper::GetStatusType(Type type) const
 {
     std::string stateType;
