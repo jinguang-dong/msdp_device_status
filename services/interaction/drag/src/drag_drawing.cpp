@@ -459,6 +459,11 @@ void DragDrawing::OnDragStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode
         CHKPV(runner);
         handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
     }
+    if (drawSVGModifier_ != nullptr) {
+        FI_HILOGI("remove old modifier");
+        dragStyleNode->RemoveModifier(drawSVGModifier_);
+        drawSVGModifier_ = nullptr;
+    }
     if (!handler_->PostTask(std::bind(animationExtFunc, dragStyleNode, stylePixelMap))) {
         FI_HILOGE("Send animationExtFunc failed");
         DrawStyle(dragStyleNode, stylePixelMap);
