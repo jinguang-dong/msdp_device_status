@@ -16,18 +16,27 @@
 #ifndef DEVICESTATUS_PERMISSION_H
 #define DEVICESTATUS_PERMISSION_H
 
-#include <string>
+#include "accesstoken_kit.h"
+#include "bundle_mgr_interface.h"
+#include "ipc_skeleton.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+using namespace OHOS::AppExecFwk;
+using namespace OHOS::Security::AccessToken;
 class DeviceStatusPermission {
 public:
-    /* check caller's permission by finding pid uid by system */
-    static bool CheckCallingPermission(const std::string &permissionName);
-
-    /* construct appIdInfo string */
-    static std::string FindAppIdInfo();
+    static bool HasSystemPermission();
+private:
+    static sptr<IBundleMgr> GetBundleMgr();
+    static bool IsTokenAplEquals(ATokenAplEnum  apl);
+    static bool IsSystemCoreTokenType();
+    static bool IsSystemBasicTokenType();
+    static bool IsSystemAplType();
+    static bool IsSystemHap();
 };
 } // namespace DeviceStatus
 } // namespace Msdp

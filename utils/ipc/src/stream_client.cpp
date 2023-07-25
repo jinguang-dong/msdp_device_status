@@ -14,8 +14,6 @@
  */
 #include "stream_client.h"
 
-#include "util.h"
-
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {

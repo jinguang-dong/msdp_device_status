@@ -15,34 +15,114 @@
 
 #include "devicestatus_permission.h"
 
-#include "ipc_skeleton.h"
-#include "accesstoken_kit.h"
-
 #include "fi_log.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
+static sptr<IBundleMgr> g_bundleMgr = nullptr;
 constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceStatusPermission" };
 } // namespace
 
-bool DeviceStatusPermission::CheckCallingPermission(const std::string &permissionName)
+sptr<IBundleMgr> DeviceStatusPermission::GetBundleMgr()
 {
-    Security::AccessToken::AccessTokenID callingToken = IPCSkeleton::GetCallingTokenID();
-    int32_t auth = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callingToken, permissionName);
-    if (auth != Security::AccessToken::TypePermissionState::PERMISSION_GRANTED) {
-        FI_HILOGD("has no permission.permission name = %{public}s", permissionName.c_str());
-        return ERR_NG;
+    FI_HILOGD("Enter");
+    if (g_bundleMgr != nullptr) {
+        FI_HILOGD("g_bundleMgr is not nullptr");
+        return g_bundleMgr;
     }
-    return ERR_OK;
+    auto sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sam == nullptr) {
+        FI_HILOGE("GetSystemAbilityManager is nullptr");
+        return nullptr;
+    }
+
+    auto bundleMgrSa = sam->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (bundleMgrSa == nullptr) {
+        FI_HILOGE("GetSystemAbility is nullptr");
+        return nullptr;
+    }
+    auto bundleMgr = iface_cast<IBundleMgr>(bundleMgrSa);
+    if (bundleMgr == nullptr) {
+        FI_HILOGE("bundleMgr is nullptr");
+        return nullptr;
+    }
+
+    g_bundleMgr = bundleMgr;
+    FI_HILOGD("Exit");
+    return g_bundleMgr;
 }
 
-std::string DeviceStatusPermission::GetAppInfo()
+bool DeviceStatusPermission::IsTokenAplEquals(ATokenAplEnum  apl)
 {
-    pid_t pid = IPCSkeleton::GetCallingPid();
-    uid_t uid = IPCSkeleton::GetCallingUid();
-    return Security::Permission::AppIdInfoHelper::CreateAppIdInfo(pid, uid);
+    FI_HILOGD("Enter");
+    AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
+    ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(tokenId);
+    if (type != ATokenTypeEnum::TOKEN_HAP) {
+        FI_HILOGE("type is error");
+        return false;
+    }
+    HapTokenInfo info;
+    if (AccessTokenKit::GetHapTokenInfo(tokenId, info) != 0) {
+        FI_HILOGE("GetHapTokenInfo failed!");
+        return false;
+    }
+    if (info.apl != apl) {
+        FI_HILOGE("Ability privilege level not match");
+        return false;
+    }
+    FI_HILOGD("Ability privilege level match ");
+    return true;
+}
+
+bool DeviceStatusPermission::IsSystemCoreTokenType()
+{
+    FI_HILOGD("Enter");
+    bool isMatch = IsTokenAplEquals(ATokenAplEnum::APL_SYSTEM_CORE);
+    if (!isMatch) {
+        FI_HILOGE("APL_SYSTEM_CORE accsess token denied");
+    }
+    FI_HILOGD("Exit");
+    return isMatch;
+}
+
+bool DeviceStatusPermission::IsSystemBasicTokenType()
+{
+    FI_HILOGD("Enter");
+    bool isMatch = IsTokenAplEquals(ATokenAplEnum::APL_SYSTEM_BASIC);
+    if (!isMatch) {
+        FI_HILOGE("APL_SYSTEM_BASIC accsess token denied");
+    }
+    FI_HILOGD("Exit");
+    return isMatch;
+}
+
+bool DeviceStatusPermission::IsSystemAplType()
+{
+    return IsSystemBasicTokenType() || IsSystemCoreTokenType();
+}
+
+bool DeviceStatusPermission::IsSystemHap()
+{
+    FI_HILOGD("Enter");
+    auto bundleMgr = GetBundleMgr();
+    if (bundleMgr == nullptr) {
+        FI_HILOGE("bundleMgr is nullptr");
+        return false;
+    }
+    auto isSystemApp = bundleMgr->CheckIsSystemAppByUid(IPCSkeleton::GetCallingUid());
+    if (!isSystemApp) {
+        FI_HILOGE("hap is not system app");
+        return false;
+    }
+    FI_HILOGE("hap is system app");
+    return true;
+}
+
+bool DeviceStatusPermission::HasSystemPermission()
+{
+    return IsSystemAplType() || IsSystemHap();
 }
 } // namespace DeviceStatus
 } // namespace Msdp

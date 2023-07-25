@@ -21,6 +21,7 @@
 #include "devicestatus_callback_proxy.h"
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
+#include "devicestatus_permission.h"
 #include "devicestatus_service.h"
 #include "devicestatus_srv_proxy.h"
 #include "fi_log.h"
@@ -101,9 +102,20 @@ int32_t DeviceStatusSrvStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
+bool DeviceStatusSrvStub::CheckPermission()
+{
+    FI_HILOGD("ENTER");
+    bool hasSystemPermission = DeviceStatusPermission::HasSystemPermission();
+    FI_HILOGD("EXIT");
+    return hasSystemPermission;
+}
 int32_t DeviceStatusSrvStub::SubscribeStub(MessageParcel& data, MessageParcel& reply)
 {
     CALL_DEBUG_ENTER;
+    if (!CheckPermission()) {
+        FI_HILOGE("SubscribeStub check permission fail");
+        return E_DEVICESTATUS_GET_SERVICE_FAILED;
+    }
     int32_t type = -1;
     READINT32(data, type, E_DEVICESTATUS_READ_PARCEL_ERROR);
     FI_HILOGD("Read type successfully");
@@ -128,6 +140,10 @@ int32_t DeviceStatusSrvStub::SubscribeStub(MessageParcel& data, MessageParcel& r
 int32_t DeviceStatusSrvStub::UnsubscribeStub(MessageParcel& data, MessageParcel& reply)
 {
     CALL_DEBUG_ENTER;
+    if (!CheckPermission()) {
+        FI_HILOGE("SubscribeStub check permission fail");
+        return E_DEVICESTATUS_GET_SERVICE_FAILED;
+    }
     int32_t type = -1;
     READINT32(data, type, E_DEVICESTATUS_READ_PARCEL_ERROR);
     int32_t event = -1;
@@ -144,6 +160,10 @@ int32_t DeviceStatusSrvStub::UnsubscribeStub(MessageParcel& data, MessageParcel&
 int32_t DeviceStatusSrvStub::GetLatestDeviceStatusDataStub(MessageParcel& data, MessageParcel& reply)
 {
     CALL_DEBUG_ENTER;
+    if (!CheckPermission()) {
+        FI_HILOGE("SubscribeStub check permission fail");
+        return E_DEVICESTATUS_GET_SERVICE_FAILED;
+    }
     int32_t type = -1;
     READINT32(data, type, E_DEVICESTATUS_READ_PARCEL_ERROR);
     Data devicestatusData = GetCache(static_cast<Type>(type));
@@ -157,6 +177,10 @@ int32_t DeviceStatusSrvStub::GetLatestDeviceStatusDataStub(MessageParcel& data, 
 int32_t DeviceStatusSrvStub::RegisterCoordinationMonitorStub(MessageParcel& data, MessageParcel& reply)
 {
     CALL_DEBUG_ENTER;
+    if (!CheckPermission()) {
+        FI_HILOGE("SubscribeStub check permission fail");
+        return E_DEVICESTATUS_GET_SERVICE_FAILED;
+    }
     int32_t ret = RegisterCoordinationListener();
     if (ret != RET_OK) {
         FI_HILOGE("Call registerCoordinationEvent failed, ret:%{public}d", ret);
@@ -167,6 +191,10 @@ int32_t DeviceStatusSrvStub::RegisterCoordinationMonitorStub(MessageParcel& data
 int32_t DeviceStatusSrvStub::UnregisterCoordinationMonitorStub(MessageParcel& data, MessageParcel& reply)
 {
     CALL_DEBUG_ENTER;
+    if (!CheckPermission()) {
+        FI_HILOGE("SubscribeStub check permission fail");
+        return E_DEVICESTATUS_GET_SERVICE_FAILED;
+    }
     int32_t ret = UnregisterCoordinationListener();
     if (ret != RET_OK) {
         FI_HILOGE("Call unregisterCoordinationEvent failed, ret:%{public}d", ret);
@@ -177,6 +205,10 @@ int32_t DeviceStatusSrvStub::UnregisterCoordinationMonitorStub(MessageParcel& da
 int32_t DeviceStatusSrvStub::PrepareCoordinationStub(MessageParcel& data, MessageParcel& reply)
 {
     CALL_DEBUG_ENTER;
+    if (!CheckPermission()) {
+        FI_HILOGE("SubscribeStub check permission fail");
+        return E_DEVICESTATUS_GET_SERVICE_FAILED;
+    }
     int32_t userData;
     READINT32(data, userData, E_DEVICESTATUS_READ_PARCEL_ERROR);
     int32_t ret = PrepareCoordination(userData);
@@ -189,6 +221,10 @@ int32_t DeviceStatusSrvStub::PrepareCoordinationStub(MessageParcel& data, Messag
 int32_t DeviceStatusSrvStub::UnPrepareCoordinationStub(MessageParcel& data, MessageParcel& reply)
 {
     CALL_DEBUG_ENTER;
+    if (!CheckPermission()) {
+        FI_HILOGE("SubscribeStub check permission fail");
+        return E_DEVICESTATUS_GET_SERVICE_FAILED;
+    }
     int32_t userData;
     READINT32(data, userData, E_DEVICESTATUS_READ_PARCEL_ERROR);
     int32_t ret = UnprepareCoordination(userData);
@@ -201,6 +237,10 @@ int32_t DeviceStatusSrvStub::UnPrepareCoordinationStub(MessageParcel& data, Mess
 int32_t DeviceStatusSrvStub::ActivateCoordinationStub(MessageParcel& data, MessageParcel& reply)
 {
     CALL_DEBUG_ENTER;
+    if (!CheckPermission()) {
+        FI_HILOGE("SubscribeStub check permission fail");
+        return E_DEVICESTATUS_GET_SERVICE_FAILED;
+    }
     int32_t userData;
     READINT32(data, userData, E_DEVICESTATUS_READ_PARCEL_ERROR);
     std::string remoteNetworkId;
@@ -217,6 +257,10 @@ int32_t DeviceStatusSrvStub::ActivateCoordinationStub(MessageParcel& data, Messa
 int32_t DeviceStatusSrvStub::DeactivateCoordinationStub(MessageParcel& data, MessageParcel& reply)
 {
     CALL_DEBUG_ENTER;
+    if (!CheckPermission()) {
+        FI_HILOGE("SubscribeStub check permission fail");
+        return E_DEVICESTATUS_GET_SERVICE_FAILED;
+    }
     int32_t userData;
     READINT32(data, userData, E_DEVICESTATUS_READ_PARCEL_ERROR);
     bool isUnchained;
@@ -231,6 +275,10 @@ int32_t DeviceStatusSrvStub::DeactivateCoordinationStub(MessageParcel& data, Mes
 int32_t DeviceStatusSrvStub::GetCoordinationStateStub(MessageParcel& data, MessageParcel& reply)
 {
     CALL_DEBUG_ENTER;
+    if (!CheckPermission()) {
+        FI_HILOGE("SubscribeStub check permission fail");
+        return E_DEVICESTATUS_GET_SERVICE_FAILED;
+    }
     int32_t userData;
     READINT32(data, userData, E_DEVICESTATUS_READ_PARCEL_ERROR);
     std::string deviceId;

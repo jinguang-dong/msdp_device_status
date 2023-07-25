@@ -60,6 +60,7 @@ private:
     int32_t SetDragWindowVisibleStub(MessageParcel& data, MessageParcel& reply);
     int32_t GetShadowOffsetStub(MessageParcel& data, MessageParcel& reply);
     int32_t UpdateShadowPicStub(MessageParcel& data, MessageParcel& reply);
+    bool CheckPermission();
 
 private:
     std::map<uint32_t, ConnFunc> mapConnFunc_;
