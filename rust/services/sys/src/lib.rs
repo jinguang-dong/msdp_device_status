@@ -18,8 +18,7 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-extern crate fusion_data_rust;
-extern crate fusion_utils_rust;
+mod service_impl;
 
 use std::ffi::{ c_char, c_int, CString };
 use std::ops::{ Deref, DerefMut };
@@ -28,6 +27,7 @@ use std::sync::Mutex;
 use hilog_rust::{ info, error, hilog, HiLogLabel, LogType };
 use fusion_data_rust::{ FusionResult };
 use fusion_utils_rust::{ call_debug_enter };
+use crate::service_impl::FusionDeviceImpl;
 
 const LOG_LABEL: HiLogLabel = HiLogLabel {
     log_type: LogType::LogCore,
@@ -105,6 +105,7 @@ impl Clone for FusionServiceHolder {
 /// Proxy for device status service.
 #[derive(Default)]
 pub struct FusionServiceProxy {
+    service_impl: Mutex<FusionDeviceImpl>,
     service_holder: Mutex<FusionServiceHolder>,
 }
 
@@ -175,9 +176,16 @@ impl FusionServiceProxy {
     }
 
     /// Called when service is starting.
-    pub fn on_start(&self)
-    {
+    pub fn on_start(&self) {
         call_debug_enter!("FusionServiceProxy:on_start");
+        match self.service_impl.lock() {
+            Ok(guard) => {
+                guard.on_start()
+            },
+            Err(err) => {
+                error!(LOG_LABEL, "error: {:?}", err);
+            }
+        }
         match self.service_holder.lock() {
             Ok(guard) => {
                 unsafe {
@@ -191,8 +199,7 @@ impl FusionServiceProxy {
     }
 
     /// Called when service is stopping.
-    pub fn on_stop(&self)
-    {
+    pub fn on_stop(&self) {
         call_debug_enter!("FusionServiceProxy:on_stop");
         match self.service_holder.lock() {
             Ok(guard) => {
@@ -250,6 +257,7 @@ impl Clone for FusionServiceProxy {
             }
         };
         Self {
+            service_impl: Mutex::new(self.service_impl.lock().unwrap().deref().clone()),
             service_holder: Mutex::new(FusionServiceHolder {
                 service,
             }),

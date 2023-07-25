@@ -13,24 +13,25 @@
  * limitations under the License.
  */
 
-//! data definitions.
+//! Wrappers of C calls.
 
-extern crate hilog_rust;
-extern crate ipc_rust;
-extern crate fusion_utils_rust;
+use std::ffi::{ c_int, CStr };
 
-mod constants;
-mod errors;
-mod ipc;
-mod plugin_manager;
+/// Retrieve system error number.
+pub fn errno() -> c_int {
+    unsafe {
+        *libc::__errno_location()
+    }
+}
 
-pub use constants::{
-    DEV_INPUT_PATH
-};
-pub use errors::{ FusionErrorCode, FusionResult };
-pub use ipc::basic::{ BasicParamID, AllocSocketPairParam };
-pub use ipc::coordination::{ GeneralCoordinationParam, StartCoordinationParam,
-    StopCoordinationParam, GetCoordinationStateParam };
-pub use ipc::default::{ CallingContext, DefaultReply };
-pub use ipc::drag::{ CDragData, DragData };
-pub use plugin_manager::{ Intention, IPlugin };
+/// Retrieve an descriptive error message of the last failed call.
+pub fn last_error() -> String {
+    let msg = unsafe {
+        CStr::from_ptr(libc::strerror(errno()))
+    };
+    if let Ok(serr) = msg.to_str() {
+        serr.to_string()
+    } else {
+        String::default()
+    }
+}

@@ -13,24 +13,7 @@
  * limitations under the License.
  */
 
-//! data definitions.
+//! Some constants represent global invariants.
 
-extern crate hilog_rust;
-extern crate ipc_rust;
-extern crate fusion_utils_rust;
-
-mod constants;
-mod errors;
-mod ipc;
-mod plugin_manager;
-
-pub use constants::{
-    DEV_INPUT_PATH
-};
-pub use errors::{ FusionErrorCode, FusionResult };
-pub use ipc::basic::{ BasicParamID, AllocSocketPairParam };
-pub use ipc::coordination::{ GeneralCoordinationParam, StartCoordinationParam,
-    StopCoordinationParam, GetCoordinationStateParam };
-pub use ipc::default::{ CallingContext, DefaultReply };
-pub use ipc::drag::{ CDragData, DragData };
-pub use plugin_manager::{ Intention, IPlugin };
+/// Represent the directory containing the file nodes for communicating with input devices.
+pub const DEV_INPUT_PATH: &str = "/dev/input/";

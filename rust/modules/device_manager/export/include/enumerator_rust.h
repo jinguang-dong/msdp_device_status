@@ -13,24 +13,19 @@
  * limitations under the License.
  */
 
-//! data definitions.
+#ifndef ENUMERATOR_RUST_H
+#define ENUMERATOR_RUST_H
+#include <cinttypes>
 
-extern crate hilog_rust;
-extern crate ipc_rust;
-extern crate fusion_utils_rust;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-mod constants;
-mod errors;
-mod ipc;
-mod plugin_manager;
+struct Enumerator;
 
-pub use constants::{
-    DEV_INPUT_PATH
-};
-pub use errors::{ FusionErrorCode, FusionResult };
-pub use ipc::basic::{ BasicParamID, AllocSocketPairParam };
-pub use ipc::coordination::{ GeneralCoordinationParam, StartCoordinationParam,
-    StopCoordinationParam, GetCoordinationStateParam };
-pub use ipc::default::{ CallingContext, DefaultReply };
-pub use ipc::drag::{ CDragData, DragData };
-pub use plugin_manager::{ Intention, IPlugin };
+int32_t CEnumeratorOpen();
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+#endif // ENUMERATOR_RUST_H

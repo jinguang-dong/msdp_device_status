@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,19 @@
  * limitations under the License.
  */
 
-//! Several utils.
+//! TODO: add documentation.
 
 #![feature(rustc_private)]
 
 extern crate libc;
 
-mod helpers;
-mod macros;
+mod device;
+mod device_collection;
+mod device_manager;
+mod enumerator;
+mod interfaces;
+mod linux_input;
+mod monitor;
 
-pub use helpers::{
-    errno,
-    last_error,
-};
-
-pub use macros::InnerFunctionTracer;
+pub use device_manager::DeviceManager;
+pub use monitor::Monitor;
