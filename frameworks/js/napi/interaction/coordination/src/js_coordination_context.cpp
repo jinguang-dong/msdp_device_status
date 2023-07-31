@@ -394,33 +394,33 @@ void JsCoordinationContext::DeclareDeviceCoordinationInterface(napi_env env, nap
     CHKRV(napi_create_int32(env, static_cast<int32_t>(CoordinationMessage::ACTIVATE_SUCCESS), &activateSuccess),
         CREATE_INT32);
     napi_value activateFail = nullptr;
-    CHKRV(napi_create_int32(env, static_cast<int32_t>(CoordinationMessage::ACTIVATE_FAIL), &activateFail),
+    CHKRV(napi_create_int32(env, static_cast<int32_t>(CoordinationMessage::ACTIVATE_FAILURE), &activateFail),
         CREATE_INT32);
     napi_value deactivateSuccess = nullptr;
     CHKRV(napi_create_int32(env, static_cast<int32_t>(CoordinationMessage::DEACTIVATE_SUCCESS), &deactivateSuccess),
         CREATE_INT32);
     napi_value deactivateFail = nullptr;
-    CHKRV(napi_create_int32(env, static_cast<int32_t>(CoordinationMessage::DEACTIVATE_FAIL), &deactivateFail),
+    CHKRV(napi_create_int32(env, static_cast<int32_t>(CoordinationMessage::DEACTIVATE_FAILURE), &deactivateFail),
         CREATE_INT32);
     napi_value sessionClosed = nullptr;
     CHKRV(napi_create_int32(env, static_cast<int32_t>(CoordinationMessage::SESSION_CLOSED), &sessionClosed),
         CREATE_INT32);
 
-    napi_property_descriptor msg[] = {
+    napi_property_descriptor message[] = {
         DECLARE_NAPI_STATIC_PROPERTY("COOPERATE_PREPARE", prepare),
         DECLARE_NAPI_STATIC_PROPERTY("COOPERATE_UNPREPARE", unprepare),
         DECLARE_NAPI_STATIC_PROPERTY("COOPERATE_ACTIVATE", activate),
         DECLARE_NAPI_STATIC_PROPERTY("COOPERATE_ACTIVATE_SUCCESS", activateSuccess),
-        DECLARE_NAPI_STATIC_PROPERTY("COOPERATE_ACTIVATE_FAIL", activateFail),
+        DECLARE_NAPI_STATIC_PROPERTY("COOPERATE_ACTIVATE_FAILURE", activateFail),
         DECLARE_NAPI_STATIC_PROPERTY("COOPERATE_DEACTIVATE_SUCCESS", deactivateSuccess),
-        DECLARE_NAPI_STATIC_PROPERTY("COOPERATE_DEACTIVATE_FAIL", deactivateFail),
-        DECLARE_NAPI_STATIC_PROPERTY("COOPERATE_SESSION_DISCONNECTED", sessionClosed)
+        DECLARE_NAPI_STATIC_PROPERTY("COOPERATE_DEACTIVATE_FAILURE", deactivateFail),
+        DECLARE_NAPI_STATIC_PROPERTY("COOPERATE_SESSION_DISCONNECT", sessionClosed)
     };
 
-    napi_value cooperateMsg = nullptr;
-    CHKRV(napi_define_class(env, "CooperateMsg", NAPI_AUTO_LENGTH, EnumClassConstructor, nullptr,
-        sizeof(msg) / sizeof(*msg), msg, &cooperateMsg), DEFINE_CLASS);
-    CHKRV(napi_set_named_property(env, exports, "CooperateMsg", cooperateMsg), SET_NAMED_PROPERTY);
+    napi_value cooperateMessage = nullptr;
+    CHKRV(napi_define_class(env, "CooperateMessage", NAPI_AUTO_LENGTH, EnumClassConstructor, nullptr,
+        sizeof(message) / sizeof(*message), message, &cooperateMessage), DEFINE_CLASS);
+    CHKRV(napi_set_named_property(env, exports, "CooperateMessage", cooperateMessage), SET_NAMED_PROPERTY);
 }
 
 void JsCoordinationContext::DeclareDeviceCoordinationData(napi_env env, napi_value exports)
