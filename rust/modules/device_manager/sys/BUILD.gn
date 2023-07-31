@@ -25,9 +25,7 @@ ohos_rust_shared_library("fusion_device_manager_rust") {
     "${device_status_root_path}/rust/utils:fusion_utils_rust",
   ]
 
-  external_deps = [
-    "hilog:hilog_rust",
-  ]
+  external_deps = [ "hilog:hilog_rust" ]
 
   crate_name = "fusion_device_manager_rust"
   crate_type = "dylib"
