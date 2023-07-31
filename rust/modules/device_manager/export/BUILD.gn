@@ -18,7 +18,7 @@ ohos_shared_library("fusion_device_manager_c") {
   include_dirs = [
     "include/device_rust.h",
     "include/monitor_rust.h",
-    "include/enumerator_rust.h"
+    "include/enumerator_rust.h",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"
