@@ -26,7 +26,7 @@ constexpr HiviewDFX::HiLogLabel LABEL { LOG_CORE, Msdp::MSDP_DOMAIN_ID, "FusionD
 }
 
 void StartDInputCallbackSink::OnResultDhids(const std::string &devId, const int32_t &status)
-{   
+{
     CALL_DEBUG_ENTER;
     callback_(devId.c_str(), status, id_, userData_);
 }
@@ -49,35 +49,39 @@ void UnPrepareStopDInputCallbackSink::OnResult(const std::string &devId, const i
     callback_(devId.c_str(), status, id_, userData_);
 }
 
-void StartDInputCallbackSink::SetData(const DInputCb &callback, const size_t &id, void* userData) {
+void StartDInputCallbackSink::SetData(const DInputCb &callback, const size_t &id, void* userData)
+{
     CALL_DEBUG_ENTER;
     callback_ = callback;
     id_ = id;
     userData_ = userData;
 }
 
-void StopDInputCallbackDHIds::SetData(const DInputCb &callback, const size_t &id, void* userData) {
+void StopDInputCallbackDHIds::SetData(const DInputCb &callback, const size_t &id, void* userData)
+{
     CALL_DEBUG_ENTER;
     callback_ = callback;
     id_ = id;
     userData_ = userData;
 }
 
-void PrepareStartDInputCallbackSink::SetData(const DInputCb &callback, const size_t &id, void* userData) {
+void PrepareStartDInputCallbackSink::SetData(const DInputCb &callback, const size_t &id, void* userData)
+{
     CALL_DEBUG_ENTER;
     callback_ = callback;
     id_ = id;
     userData_ = userData;
 }
 
-void UnPrepareStopDInputCallbackSink::SetData(const DInputCb &callback, const size_t &id, void* userData) {
+void UnPrepareStopDInputCallbackSink::SetData(const DInputCb &callback, const size_t &id, void* userData)
+{
     CALL_DEBUG_ENTER;
     callback_ = callback;
     id_ = id;
     userData_ = userData;
 }
 
-int32_t PrepareRemoteInput(const char* srcId, const char* sinkId, DInputCb callback, size_t id, void* userData) 
+int32_t PrepareRemoteInput(const char* srcId, const char* sinkId, DInputCb callback, size_t id, void* userData)
 {
     CALL_DEBUG_ENTER;
     sptr<PrepareStartDInputCallbackSink> prepareStartDinputCb = new (std::nothrow) PrepareStartDInputCallbackSink();
@@ -88,7 +92,7 @@ int32_t PrepareRemoteInput(const char* srcId, const char* sinkId, DInputCb callb
     return DistributedInputKit::PrepareRemoteInput(remote, origin, prepareStartDInputCbSink);
 }
 
-int32_t UnPrepareRemoteInput(const char* srcId, const char* sinkId, DInputCb callback, size_t id, void* userData) 
+int32_t UnPrepareRemoteInput(const char* srcId, const char* sinkId, DInputCb callback, size_t id, void* userData)
 {
     CALL_DEBUG_ENTER;
     sptr<UnPrepareStopDInputCallbackSink> unPrepareStartDinputCb = new (std::nothrow) UnPrepareStopDInputCallbackSink();
