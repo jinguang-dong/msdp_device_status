@@ -28,7 +28,7 @@
 #include "stop_d_input_call_back_stub.h"
 #include "unprepare_d_input_call_back_stub.h"
 
-using DInputCb = void (*)(const char *devId, int32_t status, size_t id, void* userData);
+using DInputCb = void (*)(const char* devId, int32_t status, size_t id, void* userData);
 
 class StopDInputCallbackDHIds final :
     public OHOS::DistributedHardware::DistributedInput::StartStopDInputsCallbackStub {
@@ -85,13 +85,13 @@ struct CBusinessEvent {
 extern "C" {
 #endif
 
-int32_t PrepareRemoteInput(const char *srcId, const char *sinkId, 
+int32_t PrepareRemoteInput(const char* srcId, const char* sinkId, 
     DInputCb callback, size_t id, void* userData);
-int32_t UnPrepareRemoteInput(const char *srcId, const char *sinkId, 
+int32_t UnPrepareRemoteInput(const char* srcId, const char* sinkId, 
     DInputCb callback, size_t id, void* userData);
-int32_t StartRemoteInput(const char *srcId, const char *sinkId, const char** dhIds, size_t nDhIds,
+int32_t StartRemoteInput(const char* srcId, const char* sinkId, const char** dhIds, size_t nDhIds,
     DInputCb callback, size_t id, void* userData);
-int32_t StopRemoteInput(const char *srcId, const char *sinkId, const char** dhIds, size_t nDhIds,
+int32_t StopRemoteInput(const char* srcId, const char* sinkId, const char** dhIds, size_t nDhIds,
     DInputCb callback, size_t id, void* userData);
 int32_t IsNeedFilterOut(const char* sinkId, const CBusinessEvent* event);
 
