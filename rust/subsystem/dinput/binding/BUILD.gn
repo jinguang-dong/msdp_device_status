@@ -30,7 +30,7 @@ ohos_shared_library("fusion_dinput_binding") {
 
   public_configs = [ ":fusion_dinput_binding_public_config" ]
 
-  deps = [ 
+  deps = [
     "${device_status_root_path}/utils/common:devicestatus_util",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
   ]
