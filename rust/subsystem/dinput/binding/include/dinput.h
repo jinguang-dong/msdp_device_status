@@ -85,9 +85,9 @@ struct CBusinessEvent {
 extern "C" {
 #endif
 
-int32_t PrepareRemoteInput(const char* srcId, const char* sinkId, 
+int32_t PrepareRemoteInput(const char* srcId, const char* sinkId,
     DInputCb callback, size_t id, void* userData);
-int32_t UnPrepareRemoteInput(const char* srcId, const char* sinkId, 
+int32_t UnPrepareRemoteInput(const char* srcId, const char* sinkId,
     DInputCb callback, size_t id, void* userData);
 int32_t StartRemoteInput(const char* srcId, const char* sinkId, const char** dhIds, size_t nDhIds,
     DInputCb callback, size_t id, void* userData);
