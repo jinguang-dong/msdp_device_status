@@ -77,7 +77,7 @@ void UnPrepareStopDInputCallbackSink::SetData(const DInputCb &callback, const si
     userData_ = userData;
 }
 
-int32_t PrepareRemoteInput(const char *srcId, const char *sinkId, DInputCb callback, size_t id, void* userData) 
+int32_t PrepareRemoteInput(const char* srcId, const char* sinkId, DInputCb callback, size_t id, void* userData) 
 {
     CALL_DEBUG_ENTER;
     sptr<PrepareStartDInputCallbackSink> prepareStartDinputCb = new (std::nothrow) PrepareStartDInputCallbackSink();
@@ -88,7 +88,7 @@ int32_t PrepareRemoteInput(const char *srcId, const char *sinkId, DInputCb callb
     return DistributedInputKit::PrepareRemoteInput(remote, origin, prepareStartDInputCbSink);
 }
 
-int32_t UnPrepareRemoteInput(const char *srcId, const char *sinkId, DInputCb callback, size_t id, void* userData) 
+int32_t UnPrepareRemoteInput(const char* srcId, const char* sinkId, DInputCb callback, size_t id, void* userData) 
 {
     CALL_DEBUG_ENTER;
     sptr<UnPrepareStopDInputCallbackSink> unPrepareStartDinputCb = new (std::nothrow) UnPrepareStopDInputCallbackSink();
@@ -99,7 +99,7 @@ int32_t UnPrepareRemoteInput(const char *srcId, const char *sinkId, DInputCb cal
     return DistributedInputKit::UnprepareRemoteInput(remote, origin, unPrepareStopDInputCbSink);
 }
 
-int32_t StartRemoteInput(const char *srcId, const char *sinkId, const char** dhIds, size_t nDhIds,
+int32_t StartRemoteInput(const char* srcId, const char* sinkId, const char** dhIds, size_t nDhIds,
     DInputCb callback, size_t id, void* userData)
 {
     CALL_DEBUG_ENTER;
@@ -119,7 +119,7 @@ int32_t StartRemoteInput(const char *srcId, const char *sinkId, const char** dhI
     return DistributedInputKit::StartRemoteInput(remote, origin, inputdhids, startDInputCbSink);
 }
 
-int32_t StopRemoteInput(const char *srcId, const char *sinkId, const char** dhIds, size_t nDhIds,
+int32_t StopRemoteInput(const char* srcId, const char* sinkId, const char** dhIds, size_t nDhIds,
     DInputCb callback, size_t id, void* userData)
 {
     CALL_DEBUG_ENTER;
@@ -145,7 +145,7 @@ int32_t IsNeedFilterOut(const char* sinkId, const CBusinessEvent* cbevent) {
     event.keyCode = cbevent->key_code;
     event.keyAction = cbevent->key_action;
     int size = cbevent->n_pressed_keys;
-    for(int i = 0; i < size; ++i) {
+    for (int i = 0; i < size; ++i) {
         event.pressedKeys.push_back(cbevent->pressed_keys[i]);
     }
     std::string deviceId = sinkId;
