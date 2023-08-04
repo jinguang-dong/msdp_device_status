@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//base/msdp/device_status/device_status.gni")
-##import("//build/test.gni")
 
 ohos_rust_shared_library("fusion_dinput_rust") {
   sources = [ "src/lib.rs" ]
