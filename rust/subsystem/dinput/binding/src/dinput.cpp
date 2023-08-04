@@ -143,7 +143,8 @@ int32_t StopRemoteInput(const char* srcId, const char* sinkId, const char** dhId
     return DistributedInputKit::StopRemoteInput(remote, origin, inputdhids, stopDInputCbDhids);
 }
 
-int32_t IsNeedFilterOut(const char* sinkId, const CBusinessEvent* cbevent) {
+int32_t IsNeedFilterOut(const char* sinkId, const CBusinessEvent* cbevent)
+{
     CALL_DEBUG_ENTER;
     BusinessEvent event;
     event.keyCode = cbevent->key_code;
