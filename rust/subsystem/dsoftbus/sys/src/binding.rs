@@ -45,7 +45,7 @@ pub const LINK_TYPE_WIFI_P2P: i32 = 3;
 ///LINK_TYPE_BR
 pub const LINK_TYPE_BR: i32 = 4;
 ///LINK_TYPE_MAX
-pub const LINK_TYPE_MAX: usize = 4;
+pub const LINK_TYPE_MAX: usize = 9;
 
 ///SessionType
 ///TYPE_MESSAGE
@@ -78,6 +78,8 @@ pub struct SessionAttribute {
     pub link_type_num: i32,
     pub link_type: [i32; LINK_TYPE_MAX],
     pub stream_attr: i32,
+    pub fast_trans_data: *const u8,
+    pub fast_trans_data_size: u16,
 }
 
 /// TODO: add documentation.

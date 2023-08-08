@@ -23,14 +23,11 @@ use std::ffi::{c_void, c_char, c_uchar, CString, CStr};
 use std::sync::{Once, Mutex, Arc, Condvar};
 use std::collections::HashMap;
 use std::time::Duration;
-use std::mem::MaybeUninit;
-use std::ptr::{ addr_of_mut };
 use fusion_data_rust::FusionResult;
 use fusion_utils_rust::{ call_debug_enter };
 use hilog_rust::{ error, info, hilog, HiLogLabel, LogType };
 use crate::binding::{ ISessionListener, StreamData, StreamFrameInfo, SessionAttribute, NodeBasicInfo,
     MessageId,
-    DataPacket,
     INTERCEPT_STRING_LENGTH,
     DINPUT_LINK_TYPE_MAX,
     DEVICE_ID_SIZE_MAX,
@@ -132,7 +129,7 @@ impl DSoftbusImpl {
     /// TODO: add documentation.
     fn init(&mut self) -> FusionResult<i32> {
         call_debug_enter!("DSoftbus::init");
-        let session_name = String::from("ohos.msdp.device_status");
+        let session_name_pre = String::from("ohos.msdp.device_status");
         self.sess_listener = ISessionListener {
             on_session_opened: Some(on_session_opened),
             on_session_closed: Some(on_session_closed),
@@ -142,18 +139,30 @@ impl DSoftbusImpl {
         };
 
         let local_network_id = self.local_network_id();
-        print!("local_network_id = {}", &local_network_id);
         if local_network_id.is_empty() {
-            error!(LOG_LABEL, "Local networkid is empty");
+            error!(LOG_LABEL, "init::Local networkid is empty");
             return Err(-1);
         }
-        let slice_local_network_id = &local_network_id[0..INTERCEPT_STRING_LENGTH];
-        self.local_session_name = session_name + slice_local_network_id;
+
+        let session_name = session_name_pre + &local_network_id[0..INTERCEPT_STRING_LENGTH];
+        if self.local_session_name.eq(&session_name) {
+            info!(LOG_LABEL, "init::Session server has already created");
+            return Ok(0);
+        }
+
         let fi_pkg_name: String = String::from("ohos.msdp.fusioninteraction");
+        if !self.local_session_name.is_empty() {
+            error!(LOG_LABEL, "init::Remove last sesison server, sessionName:{}", @public(self.local_session_name));
+            let ret = unsafe { RemoveSessionServer(fi_pkg_name.as_ptr(), self.local_session_name.as_ptr()) };
+            if ret != 0 {
+                error!(LOG_LABEL, "init::Remove session server failed, error code:{}", @public(ret));
+            }
+        } 
+
+        self.local_session_name = session_name;  
         let ret: i32 = unsafe { CreateSessionServer(fi_pkg_name.as_ptr(), self.local_session_name.as_ptr(), &self.sess_listener) };
-        call_debug_enter!("CreateSessionServer");
-        if ret == -1 {
-            error!(LOG_LABEL, "Create session server failed");
+        if ret != 0 {
+            error!(LOG_LABEL, "init::Create session server failed, error code:{}", @public(ret));
             return Err(-1);
         }
         Ok(0)
@@ -166,15 +175,18 @@ impl DSoftbusImpl {
             device_name: [0; 128],
             device_type_id: 0,
         };
+
         let fi_pkg_name: String = String::from("ohos.msdp.fusioninteraction");
         let ret = unsafe { GetLocalNodeDeviceInfo(fi_pkg_name.as_ptr(), &mut local_node as *mut NodeBasicInfo) };
         if ret != 0 {
-            error!(LOG_LABEL, "GetLocalNodeDeviceInfo result:{}", @public(ret));
+            error!(LOG_LABEL, "local_network_id::GetLocalNodeDeviceInfo result:{}", @public(ret));
             return String::from("");
         }
+
         let local_node_ptr: *const c_uchar =  local_node.network_id.as_ptr() as *const c_uchar;
         unsafe{ return CStr::from_ptr(local_node_ptr).to_str().unwrap().to_owned() };
     }
+
     /// TODO: add documentation.
     fn release(&mut self) {
         call_debug_enter!("DSoftbus::release");      
@@ -195,29 +207,49 @@ impl DSoftbusImpl {
         let group_id = String::from("fi_softbus_group_id");
 
         if self.check_device_session_state(remote_network_id) {
+            error!(LOG_LABEL, "open_input_softbus::Softbus session has already opened");
             return Ok(0);
         }
 
         let init_ret = self.init();
         if init_ret != Ok(0) {
-            error!(LOG_LABEL, "Init failed");
+            error!(LOG_LABEL, "open_input_softbus::init failed");
             return Err(-1);
         }
 
         let peer_session_name = session_name + &remote_network_id[0..INTERCEPT_STRING_LENGTH];
+        let data: u8 = 0;
         let session_attr =  SessionAttribute {
             data_type: TYPE_BYTES,
             link_type_num: DINPUT_LINK_TYPE_MAX,
-            link_type: [LINK_TYPE_WIFI_WLAN_2G, LINK_TYPE_WIFI_WLAN_5G, LINK_TYPE_WIFI_P2P, LINK_TYPE_BR],
+            link_type: [LINK_TYPE_WIFI_WLAN_2G, LINK_TYPE_WIFI_WLAN_5G, LINK_TYPE_WIFI_P2P,
+            LINK_TYPE_BR, 0, 0, 0, 0, 0],
             stream_attr: 0,
-        };
-        let session_id = unsafe { OpenSession(self.local_session_name.as_ptr(), peer_session_name.as_ptr(),
-        remote_network_id.as_ptr(), group_id.as_ptr(), &session_attr) };
+            fast_trans_data: data as *const u8,
+            fast_trans_data_size: 0,
+        };  
+        let session_id = unsafe { OpenSession(self.local_session_name.as_ptr() as *const c_char,
+            peer_session_name.as_ptr() as *const c_char, remote_network_id.as_ptr() as *const c_char,
+            group_id.as_ptr() as *const c_char, &session_attr as *const SessionAttribute) };
         if session_id < 0 {
-            error!(LOG_LABEL, "OpenSession failed");
+            error!(LOG_LABEL, "open_input_softbus::OpenSession failed, session_id:{}", @public(session_id));
             return Err(-1);
         }
+
         self.wait_session_opend(remote_network_id, session_id)
+    }
+
+    /// TODO: add documentation.
+    fn close_input_softbus(&mut self, remote_network_id: &String) {
+        call_debug_enter!("DSoftbus::close_input_softbus");
+        let get_result: Option<&i32> = self.session_dev_map.get(remote_network_id);
+        if get_result.is_none() {
+            error!(LOG_LABEL, "close_input_softbus::SessionDevIdMap not found");
+        }
+        let session_id = get_result.copied().unwrap();
+        unsafe { CloseSession(session_id) };
+        self.session_dev_map.remove(remote_network_id);
+        self.channel_status_map.remove(remote_network_id);
     }
 
     /// TODO: add documentation.
@@ -227,29 +259,27 @@ impl DSoftbusImpl {
         self.wait_cond = Arc::new((Mutex::new(false), Condvar::new()));
         let pair = Arc::clone(&self.wait_cond);
         let (lock, cvar) = &*pair;
-        loop {
-            let result = cvar.wait_timeout(self.operation_mutex.lock().unwrap(), Duration::from_secs(5)).unwrap();
-            let get_result = self.channel_status_map.get(remote_network_id);
-            if get_result.is_some() && self.channel_status_map.get(remote_network_id).copied().unwrap(){
-                break;                             
-            }
+        let result = (cvar.wait_timeout(self.operation_mutex.lock().unwrap(), Duration::from_secs(5))).unwrap();
+
+        let get_result = self.channel_status_map.get(remote_network_id);
+        if get_result.is_some() && !get_result.copied().unwrap(){
+            error!(LOG_LABEL, "wait_session_opend::OpenSession timeout");    
+            return Err(-1);
         }
         self.channel_status_map.insert(remote_network_id.to_string(), false);
-        error!(LOG_LABEL, "DSoftbus::wait_session_opend remote_network_id:{}", remote_network_id);
         Ok(0)
     }
 
     /// TODO: add documentation.
     fn on_session_opened(&mut self, session_id: i32, result: i32) -> FusionResult<i32> {
         call_debug_enter!("DSoftbus::on_session_opened");
-        let mut peer_dev_id: String = Default::default();
-        let session_id_temp = &session_id;
-        let getpeer_device_id_result: i32 = unsafe { GetPeerDeviceId(*session_id_temp, peer_dev_id.as_mut_ptr(), ((std::mem::size_of::<c_char>()) * DEVICE_ID_SIZE_MAX).try_into().unwrap()) };
+        let mut peer_dev_id: String = String::from("00000000000000000000000000000000000000000000000000000000000000000");
+        let getpeer_device_id_result: i32 = unsafe { GetPeerDeviceId(session_id, peer_dev_id.as_mut_ptr() as *mut c_char,
+            ((std::mem::size_of::<c_char>()) * DEVICE_ID_SIZE_MAX).try_into().unwrap()) };
 
         if result != 0 {
             let session_id_temp = &session_id;
             let device_id: String = self.find_device(*session_id_temp);
-            error!(LOG_LABEL, "Session open failed result");
             let get_result: Option<&i32> = self.session_dev_map.get(&device_id);
             if get_result.is_some() {
                 self.session_dev_map.remove(&device_id);
@@ -263,7 +293,6 @@ impl DSoftbusImpl {
         }
         let session_id_temp = &session_id;
         let session_side: i32 = unsafe { GetSessionSide(*session_id_temp) };
-        info!(LOG_LABEL, "session open succeed");
         if session_side == SESSION_SIDE_SERVER{
             if getpeer_device_id_result == 0 {
                 self.session_dev_map.insert(peer_dev_id, session_id);
@@ -322,7 +351,7 @@ impl DSoftbusImpl {
         let dt = unsafe {CStr::from_ptr(data as *const c_char)};
         let dt_slice: &str = dt.to_str().unwrap();
         let message: String = dt_slice.to_owned();
-        error!(LOG_LABEL, "on_bytes_received data:{}", message);
+        info!(LOG_LABEL, "on_bytes_received data:{}", @public(message));
         self.handle_session_data(session_id, message);
     }
 
@@ -330,7 +359,7 @@ impl DSoftbusImpl {
     fn check_device_session_state(&self, remote_network_id: &String) -> bool {
         call_debug_enter!("DSoftbus::check_device_session_state");
         let get_result: Option<&i32> = self.session_dev_map.get(remote_network_id);
-        if get_result.is_some() {
+        if get_result.is_none() {
             error!(LOG_LABEL, "Check session state error");
             return false;
         }
@@ -340,19 +369,10 @@ impl DSoftbusImpl {
     /// TODO: add documentation.
     fn send_data(&self, device_id: &String, message_id: MessageId, data: *const c_void, data_len: u32) -> FusionResult<i32>{
         call_debug_enter!("DSoftbus::send_data");
-        let mut data_packet: MaybeUninit<DataPacket> = MaybeUninit::uninit();
-        let ptr = data_packet.as_mut_ptr();
-        unsafe { addr_of_mut!((*ptr).message_id).write(message_id)}; 
-        unsafe { addr_of_mut!((*ptr).buf_len).write(data_len)}; 
-        unsafe { addr_of_mut!((*ptr).data).write(vec![data as *const c_char])};
-        unsafe { data_packet.assume_init() };
-        
-        let length: u32 = (std::mem::size_of::<DataPacket>() + data_len as usize).try_into().unwrap();
         let result: i32 = unsafe {SendBytes(self.session_dev_map.get(device_id).copied().unwrap_or(0),
-            ptr as *const c_void, length) };
-    
+            data, data_len) };
         if result != 0 {
-            error!(LOG_LABEL, "Send bytes failed");
+            error!(LOG_LABEL, "send_data::Send bytes failed, result:{}", @public(result));
             return Err(-1);
         }
         Ok(0)
@@ -415,6 +435,19 @@ impl DSoftbus {
             }
         }
     }
+
+     /// TODO: add documentation.
+     pub fn close_input_softbus(&self, remote_network_id: &String) {
+        match self.dsoftbus_impl.lock() {
+            Ok(guard) => {
+                guard.borrow_mut().close_input_softbus(remote_network_id);
+            }
+            Err(err) => {
+                error!(LOG_LABEL, "lock error: {}", err);
+            }
+        }
+    }   
+
     /// TODO: add documentation.
     pub fn wait_session_opend(&mut self, remote_network_id: &String, session_id: i32) -> FusionResult<i32> {
         match self.dsoftbus_impl.lock() {

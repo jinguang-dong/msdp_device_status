@@ -34,46 +34,88 @@ const LOG_LABEL: HiLogLabel = HiLogLabel {
     tag: "main"
 };
 
-use fusion_dsoftbus_rust::{ dsoftbus::DSoftbus, binding::GetAccessToken };
+use fusion_dsoftbus_rust::{ dsoftbus::DSoftbus, binding::{GetAccessToken, MessageId} };
 
 fn main() {
     debug!(LOG_LABEL, "Main:test");
     let mut buf = String::new();
     let std_in: Stdin = std::io::stdin();
     if std_in.read_line(&mut buf).is_ok() {
-        if "init\r\n" == buf {
-            println!("i am init");
+        let init = String::from("init\n");
+        if buf.eq(&init) {
+            println!("I am init");
             unsafe { GetAccessToken() };
             match DSoftbus::get_instance() {
                 Some(dsoftbus) => {
                     match dsoftbus.init() {
-                        Ok(ret) => { 0 }
-                        Err(err) => { err }
-                    }
+                        Ok(ret) => {
+                            println!("DSoftbus init success");
+                        }
+                        Err(err) => {
+                            println!("DSoftbus init failed");
+                        }
+                    };
+                    0
                 }
                 None => {
-                    error!(LOG_LABEL, "DSoftbus is none");
+                    error!(LOG_LABEL, "DSoftbus init failed");
                     -1
                 }
             };
-            
-        } else {
-            println!("i am open_input_softbus");
-            let remote_network_id: Vec<String> = std::env::args().collect();
-            error!(LOG_LABEL, "id={}", @public(&remote_network_id[0]));
-            match DSoftbus::get_instance() {
-                Some(dsoftbus) => {
-                    match dsoftbus.open_input_softbus(&remote_network_id[0]) {
-                        Ok(ret) => { 0 }
-                        Err(err) => { err }
-                    }
-                }
-                None => {
-                    error!(LOG_LABEL, "DSoftbus is none");
-                    -1
-                }
-            };
+            println!("init is sleeping");
             std::thread::sleep(std::time::Duration::from_millis(1000*60*10));
+        } else {
+            println!("I am open_input_softbus");
+            let mut buf = String::new();
+            let std_in: Stdin = std::io::stdin();
+            if std_in.read_line(&mut buf).is_ok() {     
+                println!("before remove, remote_network_id len= {}", buf.len());
+                if buf.len() > 64 {
+                    buf.remove(64);
+                    println!("after remove, remote_network_id len= {}", buf.len());
+                }
+                        
+                let remote_network_id = buf;
+                println!("init::remote_network_id = {}", &remote_network_id);
+                match DSoftbus::get_instance() {
+                    Some(dsoftbus) => {
+                        unsafe { GetAccessToken() };
+                        match dsoftbus.open_input_softbus(&remote_network_id) {
+                            Ok(ret) => {
+                                println!("DSoftbus open_input_softbus success");
+                            }
+                            Err(err) => {
+                                println!("DSoftbus open_input_softbus failed");
+                            }
+                        };
+                        println!("start open_input_softbus sleep 10 sec");
+                        std::thread::sleep(std::time::Duration::from_millis(1000*10));
+                        println!("stop open_input_softbus sleep 10 sec");
+                        let message = String::from("I am server!\n");
+                        let len = message.len().try_into().unwrap();
+                        match dsoftbus.send_data(&remote_network_id, MessageId::MinId,
+                            message.as_ptr() as *const c_char as *const c_void, len) {
+                            Ok(ret) => {
+                                println!("send success!!!");
+                                std::thread::sleep(std::time::Duration::from_millis(1000*10));
+                                dsoftbus.close_input_softbus(&remote_network_id);
+                            }
+                            Err(err) => {
+                                println!("send failed!!!");
+                            }
+                        };        
+                        println!("after send_data is sleeping");                  
+                        std::thread::sleep(std::time::Duration::from_millis(1000*60*10));
+                        0
+                    }
+                    None => {
+                        error!(LOG_LABEL, "DSoftbus open_input_softbus failed");
+                        -1
+                    }
+                };
+            } else {
+                println!("remote_network_id is empty!!!");
+            }
         }
     }
 }
