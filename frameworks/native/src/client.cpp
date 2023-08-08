@@ -239,7 +239,7 @@ void Client::OnConnected()
     CALL_DEBUG_ENTER;
     FI_HILOGI("Connection to server succeeded, fd:%{public}d", GetFd());
     isConnected_ = true;
-    if (funConnected_) {
+    if (funConnected_ != nullptr) {
         funConnected_(*this);
     }
     if (hasClient_ && !isRunning_ && fd_ >= 0 && eventHandler_ != nullptr) {
@@ -294,7 +294,7 @@ void Client::OnMsgHandler(const StreamClient& client, NetPacket& pkt)
         FI_HILOGE("Unknown msg id:%{public}d", id);
         return;
     }
-    auto ret = (*callback)(client, pkt);
+    int32_t ret = (*callback)(client, pkt);
     if (ret < 0) {
         FI_HILOGE("Msg handling failed, id:%{public}d, ret:%{public}d", id, ret);
         return;

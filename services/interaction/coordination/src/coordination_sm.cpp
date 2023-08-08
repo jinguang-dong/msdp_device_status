@@ -579,6 +579,7 @@ void CoordinationSM::UpdateState(CoordinationState state)
                 DeactivateCoordination(isUnchained_);
                 return;
             }
+            COOR_SOFTBUS_ADAPTER->ConfigTcpAlive();
             break;
         }
         case CoordinationState::STATE_OUT: {
@@ -594,6 +595,7 @@ void CoordinationSM::UpdateState(CoordinationState state)
                 DeactivateCoordination(isUnchained_);
                 return;
             }
+            COOR_SOFTBUS_ADAPTER->ConfigTcpAlive();
             break;
         }
         default:
@@ -603,8 +605,8 @@ void CoordinationSM::UpdateState(CoordinationState state)
 
 CoordinationState CoordinationSM::GetCurrentCoordinationState() const
 {
-    std::lock_guard<std::mutex> guard(mutex_);
-    return currentState_;
+    CoordinationState state = currentState_.load();
+    return state;
 }
 
 void CoordinationSM::UpdatePreparedDevices(const std::string &remoteNetworkId, const std::string &originNetworkId)
@@ -724,6 +726,12 @@ void CoordinationSM::OnDeviceOffline(const std::string &networkId)
         if (it != onlineDevice_.end()) {
             onlineDevice_.erase(it);
         }
+    }
+    if (currentState_ == CoordinationState::STATE_IN && sinkNetworkId_ == networkId) {
+        COOR_EVENT_MGR->OnCoordinationMessage(CoordinationMessage::SESSION_CLOSED);
+    }
+    if (currentState_ == CoordinationState::STATE_OUT && remoteNetworkId_ == networkId) {
+        COOR_EVENT_MGR->OnCoordinationMessage(CoordinationMessage::SESSION_CLOSED);
     }
 }
 

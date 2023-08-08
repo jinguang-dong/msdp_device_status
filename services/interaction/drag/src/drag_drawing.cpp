@@ -71,8 +71,8 @@ constexpr double ONETHOUSAND { 1000.0 };
 constexpr float BEGIN_ALPHA { 1.0f };
 constexpr float END_ALPHA { 0.0f };
 constexpr float BEGIN_SCALE { 1.0f };
-constexpr float END_SCALE_SUCCESS { 1.2f };
-constexpr float END_SCALE_FAIL { 0.1f };
+constexpr float END_SCALE_FAIL { 1.2f };
+constexpr float END_SCALE_SUCCESS { 0.1f };
 constexpr float PIVOT_X { 0.5f };
 constexpr float PIVOT_Y { 0.5f };
 constexpr float SVG_ORIGINAL_SIZE { 40.0f };;
@@ -215,7 +215,7 @@ void DragDrawing::Draw(int32_t displayId, int32_t displayX, int32_t displayY)
 int32_t DragDrawing::UpdateDragStyle(DragCursorStyle style)
 {
     CALL_DEBUG_ENTER;
-    if (style < DragCursorStyle::DEFAULT || style > DragCursorStyle::MOVE) {
+    if ((style < DragCursorStyle::DEFAULT) || (style > DragCursorStyle::MOVE)) {
         FI_HILOGE("Invalid style:%{public}d", style);
         return RET_ERR;
     }

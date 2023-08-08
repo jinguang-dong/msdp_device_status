@@ -280,12 +280,13 @@ void Device::CheckPointers()
             FI_HILOGD("This is touch device");
         }
     }
-    if (!caps_.test(DEVICE_CAP_TABLET_TOOL) &&
-        !caps_.test(DEVICE_CAP_POINTER) &&
-        !caps_.test(DEVICE_CAP_JOYSTICK) &&
-        hasMouseBtn && (hasRelCoords || !hasAbsCoords)) {
+    if (!caps_.test(DEVICE_CAP_TABLET_TOOL) && !caps_.test(DEVICE_CAP_POINTER) &&
+        !caps_.test(DEVICE_CAP_JOYSTICK) && hasMouseBtn && (hasRelCoords || !hasAbsCoords)) {
         caps_.set(DEVICE_CAP_POINTER);
         FI_HILOGD("This is mouse");
+    }
+    if (name_ == "M-Pencil Mouse") {
+        caps_.set(DEVICE_CAP_POINTER, 0);
     }
 }
 
@@ -332,16 +333,16 @@ int32_t Device::ReadConfigFile(const std::string &filePath)
     while (std::getline(cfgFile, tmp)) {
         Utility::RemoveSpace(tmp);
         size_t pos = tmp.find('#');
-        if (pos != tmp.npos && pos != COMMENT_SUBSCRIPT) {
+        if ((pos != tmp.npos) && (pos != COMMENT_SUBSCRIPT)) {
             FI_HILOGE("File format is error");
             cfgFile.close();
             return RET_ERR;
         }
-        if (tmp.empty() || tmp.front() == '#') {
+        if (tmp.empty() || (tmp.front() == '#')) {
             continue;
         }
         pos = tmp.find('=');
-        if (pos == (tmp.size() - 1) || pos == tmp.npos) {
+        if ((pos == (tmp.size() - 1)) || (pos == tmp.npos)) {
             FI_HILOGE("Find config item error");
             cfgFile.close();
             return RET_ERR;

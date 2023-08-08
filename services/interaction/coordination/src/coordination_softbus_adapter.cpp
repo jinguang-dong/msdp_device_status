@@ -18,12 +18,17 @@
 #include <chrono>
 #include <thread>
 
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <sys/socket.h>
+
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 
 #include "coordination_sm.h"
 #include "device_coordination_softbus_define.h"
 #include "devicestatus_define.h"
+#include "dfs_session.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -272,6 +277,7 @@ void CoordinationSoftbusAdapter::CloseInputSoftbus(const std::string &remoteNetw
     CloseSession(sessionId);
     sessionDevMap_.erase(remoteNetworkId);
     channelStatusMap_.erase(remoteNetworkId);
+    sessionId_ = -1;
 }
 
 std::shared_ptr<CoordinationSoftbusAdapter> CoordinationSoftbusAdapter::GetInstance()
@@ -506,7 +512,9 @@ void CoordinationSoftbusAdapter::HandleSessionData(int32_t sessionId, const std:
             return;
         }
         FI_HILOGI("Message:%{public}d", dataPacket->messageId);
-        if (dataPacket->messageId == DRAGGING_DATA || dataPacket->messageId == STOPDRAG_DATA) {
+        if ((dataPacket->messageId == DRAGGING_DATA) ||
+            (dataPacket->messageId == STOPDRAG_DATA) ||
+            (dataPacket->messageId == IS_PULL_UP)) {
             CHKPV(registerRecvMap_[dataPacket->messageId]);
             registerRecvMap_[dataPacket->messageId](dataPacket->data, dataPacket->dataLen);
         }
@@ -518,7 +526,7 @@ void CoordinationSoftbusAdapter::HandleSessionData(int32_t sessionId, const std:
 void CoordinationSoftbusAdapter::OnBytesReceived(int32_t sessionId, const void *data, uint32_t dataLen)
 {
     FI_HILOGD("dataLen:%{public}d", dataLen);
-    if (sessionId < 0 || data == nullptr || dataLen <= 0) {
+    if ((sessionId < 0) || (data == nullptr) || (dataLen <= 0)) {
         FI_HILOGE("Param check failed");
         return;
     }
@@ -554,6 +562,7 @@ int32_t CoordinationSoftbusAdapter::OnSessionOpened(int32_t sessionId, int32_t r
 {
     CALL_INFO_TRACE;
     char peerDevId[DEVICE_ID_SIZE_MAX] = {};
+    sessionId_ = sessionId;
     int32_t getPeerDeviceIdResult = GetPeerDeviceId(sessionId, peerDevId, sizeof(peerDevId));
     FI_HILOGD("Get peer device id ret:%{public}d", getPeerDeviceIdResult);
     if (result != RET_OK) {
@@ -599,6 +608,7 @@ void CoordinationSoftbusAdapter::OnSessionClosed(int32_t sessionId)
         channelStatusMap_.erase(deviceId);
     }
     COOR_SM->Reset(deviceId);
+    sessionId_ = -1;
 }
 
 void CoordinationSoftbusAdapter::RegisterRecvFunc(MessageId messageId, std::function<void(void*, uint32_t)> callback)
@@ -684,6 +694,46 @@ void CoordinationSoftbusAdapter::HandleCoordinationSessionData(int32_t sessionId
             break;
         }
     }
+}
+
+void CoordinationSoftbusAdapter::ConfigTcpAlive()
+{
+    CALL_DEBUG_ENTER;
+    if (sessionId_ < 0) {
+        FI_HILOGW("Invalid sessionId");
+        return;
+    }
+    int32_t handle { -1 };
+    int32_t ret = GetSessionHandle(sessionId_, &handle);
+    if (ret != RET_OK) {
+        FI_HILOGE("GetSessionHandle falied sessionId:%{public}d, handle:%{public}d", sessionId_, handle);
+        return;
+    }
+    int32_t keepAliveTimeout { 10 };
+    ret = setsockopt(handle, IPPROTO_TCP, TCP_KEEPIDLE, &keepAliveTimeout, sizeof(keepAliveTimeout));
+    if (ret != RET_OK) {
+        FI_HILOGE("Setsockopt set idle falied");
+        return;
+    }
+    int32_t keepAliveCount { 5 };
+    ret = setsockopt(handle, IPPROTO_TCP, TCP_KEEPCNT, &keepAliveCount, sizeof(keepAliveCount));
+    if (ret != RET_OK) {
+        FI_HILOGE("Setsockopt set cnt falied");
+        return;
+    }
+    int32_t interval { 1 };
+    ret = setsockopt(handle, IPPROTO_TCP, TCP_KEEPINTVL, &interval, sizeof(interval));
+    if (ret != RET_OK) {
+        FI_HILOGE("Setsockopt set intvl falied");
+        return;
+    }
+    int32_t enable { 1 };
+    ret = setsockopt(handle, SOL_SOCKET, SO_KEEPALIVE, &enable, sizeof(enable));
+    if (ret != RET_OK) {
+        FI_HILOGE("Setsockopt enable alive falied");
+        return;
+    }
+
 }
 } // namespace DeviceStatus
 } // namespace Msdp
