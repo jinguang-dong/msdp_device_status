@@ -179,7 +179,7 @@ impl DInputImpl {
     fn need_filter_out(&self, network_id: &str, event: &mut BusinessEvent) -> bool
     {
         let cevent = CBusinessEvent{
-            n_pressed_keys: event.pressed_keys.len(),
+            pressed_keys_len: event.pressed_keys.len(),
             pressed_keys: event.pressed_keys.as_mut_ptr(),
             key_code: event.key_code,
             key_action: event.key_action,
