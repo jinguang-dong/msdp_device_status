@@ -22,8 +22,8 @@ use std::ffi::{ c_void, c_char };
 /// TODO: add documentation.
 #[repr(C)]
 pub struct CBusinessEvent {
-    /// n_pressed_keys
-    pub n_pressed_keys: usize,
+    /// pressed_keys_len
+    pub pressed_keys_len: usize,
     /// pressed_keys
     pub pressed_keys: *const i32,
     /// key_code
