@@ -149,7 +149,7 @@ int32_t IsNeedFilterOut(const char* sinkId, const CBusinessEvent* cbevent)
     BusinessEvent event;
     event.keyCode = cbevent->key_code;
     event.keyAction = cbevent->key_action;
-    int size = cbevent->n_pressed_keys;
+    int size = cbevent->pressed_keys_len;
     for (int i = 0; i < size; ++i) {
         event.pressedKeys.push_back(cbevent->pressed_keys[i]);
     }
