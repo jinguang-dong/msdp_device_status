@@ -75,7 +75,7 @@ private:
 };
 
 struct CBusinessEvent {
-    size_t n_pressed_keys;
+    size_t pressed_keys_len;
     int32_t* pressed_keys;
     int32_t key_code;
     int32_t key_action;
