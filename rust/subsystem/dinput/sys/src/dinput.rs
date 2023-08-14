@@ -327,7 +327,7 @@ impl BusinessEvent {
         call_debug_enter!("BusinessEvent::from_c");
         let mut buf: Vec<i32> = Vec::new();
         let ts = unsafe {
-            std::slice::from_raw_parts(value.pressed_keys, value.n_pressed_keys)
+            std::slice::from_raw_parts(value.pressed_keys, value.pressed_keys_len)
         };
         info!(LOG_LABEL, "fill buffer");
         for item in ts.iter() {
