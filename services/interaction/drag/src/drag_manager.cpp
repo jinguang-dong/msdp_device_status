@@ -186,7 +186,7 @@ int32_t DragManager::NotifyDragResult(DragResult result)
 {
     CALL_DEBUG_ENTER;
     DragData dragData = DRAG_DATA_MGR.GetDragData();
-    int32_t targetPid = GetDragTargetPid();
+    //int32_t targetPid = GetDragTargetPid();
     NetPacket pkt(MessageId::DRAG_NOTIFY_RESULT);
     if ((result < DragResult::DRAG_SUCCESS) || (result > DragResult::DRAG_EXCEPTION)) {
         FI_HILOGE("Invalid result:%{public}d", static_cast<int32_t>(result));
