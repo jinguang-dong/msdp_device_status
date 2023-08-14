@@ -91,14 +91,14 @@ int32_t CBusinessEventFrom(const BusinessEvent *event, CBusinessEvent *cbevent)
         FI_HILOGE("memcpy_s not EOK");
         return RET_ERR;
     }
-    cbevent->n_pressed_keys = event->pressedKeys.size();
+    cbevent->pressed_keys_len = event->pressedKeys.size();
     cbevent->key_code = event->keyCode;
     cbevent->key_action = event->keyAction;
 
     return RET_OK;
 }
 
-int32_t PrepareRemoteInput(const char* srcId, const char* sinkId, DInputCb cb, size_t id, void* userData) 
+int32_t PrepareRemoteInput(const char* srcId, const char* sinkId, DInputCb callback, size_t id, void* userData) 
 {
     CALL_DEBUG_ENTER;
     sptr<PrepareStartDInputCallbackSink> prepareStartDinputCb = new (std::nothrow) PrepareStartDInputCallbackSink();
