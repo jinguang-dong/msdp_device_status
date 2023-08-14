@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <cstdint>
 #include "distributed_input_kit.h"
+#include "constants_dinput.h"
 #include "i_start_stop_d_inputs_call_back.h"
 #include "prepare_d_input_call_back_stub.h"
 #include "simulation_event_listener_stub.h"
@@ -28,6 +29,12 @@
 #include "stop_d_input_call_back_stub.h"
 #include "unprepare_d_input_call_back_stub.h"
 
+
+using DInputCallback = std::function<void(bool)>;
+struct Callbacks {
+    DInputCallback statuscb;
+};
+using CallbackInput = void (*)(bool status, Callbacks* callback);
 using DInputCb = void (*)(const char* devId, int32_t status, size_t id, void* userData);
 
 class StopDInputCallbackDHIds final :
@@ -80,6 +87,8 @@ struct CBusinessEvent {
     int32_t key_code;
     int32_t key_action;
 };
+
+int32_t CBusinessEventFrom(const OHOS::DistributedHardware::DistributedInput::BusinessEvent *event, CBusinessEvent *cEvent);
 
 #ifdef __cplusplus
 extern "C" {

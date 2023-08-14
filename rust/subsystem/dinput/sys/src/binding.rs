@@ -32,6 +32,14 @@ pub struct CBusinessEvent {
     pub key_action: i32,
 }
 
+/// TODO: add documentation.
+pub type CallbackInput = unsafe extern "C" fn (bool, *mut Callbacks);
+/// TODO: add documentation.
+#[repr(C)]
+pub struct Callbacks {
+    _private:[u8; 0],
+}
+
 /// type DInputCb
 pub type DInputCb = extern "C" fn (devId: *const c_char, status: i32, id: usize, userdata: *mut c_void);
 

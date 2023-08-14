@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+#include <securec.h>
 #include "dinput.h"
 #include "devicestatus_define.h"
-#include "constants_dinput.h"
 
 using namespace OHOS;
 using namespace OHOS::DistributedHardware::DistributedInput;
@@ -81,7 +81,24 @@ void UnPrepareStopDInputCallbackSink::SetData(const DInputCb &callback, const si
     userData_ = userData;
 }
 
-int32_t PrepareRemoteInput(const char* srcId, const char* sinkId, DInputCb callback, size_t id, void* userData)
+int32_t CBusinessEventFrom(const BusinessEvent *event, CBusinessEvent *cbevent)
+{
+    CALL_DEBUG_ENTER;
+    CHKPR(event, RET_ERR);
+    CHKPR(cbevent, RET_ERR);
+
+    if (memcpy_s(cbevent->pressed_keys, event->pressedKeys.size(), event->pressedKeys.data(), event->pressedKeys.size()) != EOK) {
+        FI_HILOGE("memcpy_s not EOK");
+        return RET_ERR;
+    }
+    cbevent->n_pressed_keys = event->pressedKeys.size();
+    cbevent->key_code = event->keyCode;
+    cbevent->key_action = event->keyAction;
+
+    return RET_OK;
+}
+
+int32_t PrepareRemoteInput(const char* srcId, const char* sinkId, DInputCb cb, size_t id, void* userData) 
 {
     CALL_DEBUG_ENTER;
     sptr<PrepareStartDInputCallbackSink> prepareStartDinputCb = new (std::nothrow) PrepareStartDInputCallbackSink();

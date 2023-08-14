@@ -163,7 +163,12 @@ impl DInputImpl {
         match callback {
             Some(callback) => {
                 call_debug_enter!("Some of process_callbacks");
-                callback(true);
+                if status == 0 {
+                    callback(true);
+                } else {
+                    callback(false);
+                }
+                
                 self.pending_callbacks.remove(&callback_id);
             }
             None => {
@@ -195,16 +200,6 @@ impl DInputImpl {
             true
         }
     }
-}
-
-/// TODO: add documentation.
-pub struct BusinessEvent {
-    /// TODO: add documentation.
-    pub pressed_keys: Vec<i32>,
-    /// TODO: add documentation.
-    pub key_code: i32,
-    /// TODO: add documentation.
-    pub key_action: i32,
 }
 
 /// TODO: add documentation.
@@ -315,3 +310,34 @@ impl DInput {
     }
 }
 
+/// TODO: add documentation.
+pub struct BusinessEvent {
+    /// TODO: add documentation.
+    pub pressed_keys: Vec<i32>,
+    /// TODO: add documentation.
+    pub key_code: i32,
+    /// TODO: add documentation.
+    pub key_action: i32,
+}
+
+impl BusinessEvent {
+    /// Converts `CBusinessEvent` type to `BusinessEvent` type
+    pub fn from_c(value: &mut CBusinessEvent) -> Self
+    {
+        call_debug_enter!("BusinessEvent::from_c");
+        let mut buf: Vec<i32> = Vec::new();
+        let ts = unsafe {
+            std::slice::from_raw_parts(value.pressed_keys, value.n_pressed_keys)
+        };
+        info!(LOG_LABEL, "fill buffer");
+        for item in ts.iter() {
+            buf.push(*item);
+        }
+        info!(LOG_LABEL, "new BusinessEvent instance");
+        Self {
+            pressed_keys: buf,
+            key_code: value.key_code,
+            key_action: value.key_action,
+        }
+    }
+}
