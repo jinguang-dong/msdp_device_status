@@ -57,8 +57,8 @@ class Device final : public IDevice,
 public:
     enum Capability {
         DEVICE_CAP_KEYBOARD = 0,
-        DEVICE_CAP_POINTER,
         DEVICE_CAP_TOUCH,
+        DEVICE_CAP_POINTER,
         DEVICE_CAP_TABLET_TOOL,
         DEVICE_CAP_TABLET_PAD,
         DEVICE_CAP_GESTURE,
@@ -98,6 +98,7 @@ private:
     bool HasMouseButton() const;
     bool HasJoystickAxesOrButtons() const;
     void CheckPointers();
+    void CheckPencilMouse();
     void CheckKeys();
     std::string MakeConfigFileName() const;
     int32_t ReadConfigFile(const std::string &filePath);
@@ -105,6 +106,7 @@ private:
     int32_t ReadTomlFile(const std::string &filePath);
     void JudgeKeyboardType();
     void LoadDeviceConfig();
+    void PrintCapsDevice() const;
 
     int32_t fd_ { -1 };
     int32_t deviceId_ { -1 };
