@@ -186,7 +186,7 @@ int32_t DragManager::NotifyDragResult(DragResult result)
 {
     CALL_DEBUG_ENTER;
     DragData dragData = DRAG_DATA_MGR.GetDragData();
-    //int32_t targetPid = GetDragTargetPid();
+    int32_t targetPid = GetDragTargetPid();
     NetPacket pkt(MessageId::DRAG_NOTIFY_RESULT);
     if ((result < DragResult::DRAG_SUCCESS) || (result > DragResult::DRAG_EXCEPTION)) {
         FI_HILOGE("Invalid result:%{public}d", static_cast<int32_t>(result));
@@ -577,6 +577,10 @@ int32_t DragManager::OnSetDragWindowVisible(bool visible)
     if (dragState_ == DragState::MOTION_DRAGGING) {
         FI_HILOGW("Currently in motion dragging");
         return RET_OK;
+    }
+    if (dragState_ == DragState::STOP) {
+        FI_HILOGW("No drag instance running, can not set drag window visible");
+        return RET_ERR;
     }
     DRAG_DATA_MGR.SetDragWindowVisible(visible);
     dragDrawing_.UpdateDragWindowState(visible);
