@@ -33,9 +33,7 @@ ohos_rust_shared_library("devicestatus_rust_socket") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":test_devicestatus_pkt",
-  ]
+  deps = [ ":test_devicestatus_pkt" ]
 }
 
 ohos_executable("test_devicestatus_pkt") {
