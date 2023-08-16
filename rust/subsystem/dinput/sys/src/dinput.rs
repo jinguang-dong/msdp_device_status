@@ -22,7 +22,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ffi::{ c_char, CString, c_void };
 use std::sync::{ Mutex, Once };
-use fusion_data_rust::{ FusionResult };
+use fusion_data_rust::{ FusionErrorCode, FusionResult };
 use fusion_utils_rust::{ call_debug_enter };
 use hilog_rust::{ info, hilog, error, HiLogLabel, LogType };
 use crate::binding::{ PrepareRemoteInput, UnPrepareRemoteInput, StartRemoteInput,
@@ -45,12 +45,12 @@ impl DInputImpl {
     {
         info!(LOG_LABEL, "on prepare remote input, status:{}", status);
         let user_data = userdata as *mut Self;
+        // SAFETY: no `None` here, cause `user_data` is valid
         unsafe {
-            if let Some(val_back) = user_data.as_mut() {
-                call_debug_enter!("on_prepare_remote_input user_data::process_callbacks");
-                val_back.process_callbacks(id, status);
+            if let Some(impl_back) = user_data.as_mut() {
+                impl_back.process_callbacks(id, status);
             }
-        }
+        }  
     }
 
     fn prepare_dinput<F>(&mut self, remote_network_id: &str, origin_network_id: &str, callback: F) -> FusionResult<i32>
@@ -60,15 +60,20 @@ impl DInputImpl {
         call_debug_enter!("DInputImpl::prepare_dinput");
         let id = self.save_callback(callback);
         let this = self as *mut Self as *mut c_void;
+        if remote_network_id.is_empty() || origin_network_id.is_empty() {
+            error!(LOG_LABEL, "nullptr in prepare_dinput fail");
+            return Err(FusionErrorCode::Fail.into());
+        }
+        // SAFETY: no `None` here
         let ret = unsafe {
             PrepareRemoteInput(remote_network_id.as_ptr() as *const c_char,
                 origin_network_id.as_ptr() as *const c_char, Some(DInputImpl::on_prepare_remote_input), id, this)
         };
         if ret != 0 {
             error!(LOG_LABEL, "Preparing remote input fail");
-            Err(-1)
+            Err(FusionErrorCode::Fail.into())
         } else {
-            Ok(0)
+            Ok(ret)
         }
     }
 
@@ -80,15 +85,20 @@ impl DInputImpl {
         call_debug_enter!("DInputImpl::unprepare_dinput");
         let id = self.save_callback(callback);
         let this = self as *mut Self as *mut c_void;
+        if remote_network_id.is_empty() || origin_network_id.is_empty() {
+            error!(LOG_LABEL, "nullptr in unprepare_dinput fail");
+            return Err(FusionErrorCode::Fail.into());
+        }
+        // SAFETY: no `None` here
         let ret = unsafe {
             UnPrepareRemoteInput(remote_network_id.as_ptr() as *const c_char,
                 origin_network_id.as_ptr() as *const c_char, Some(DInputImpl::on_prepare_remote_input), id, this)
         };
         if ret != 0 {
             error!(LOG_LABEL, "unprepare_dinput fail");
-            Err(-1)
+            Err(FusionErrorCode::Fail.into())
         } else {
-            Ok(0)
+            Ok(ret)
         }
     }
 
@@ -100,21 +110,26 @@ impl DInputImpl {
         call_debug_enter!("DInputImpl::start_dinput");
         let id = self.save_callback(callback);
         let this = self as *mut Self as *mut c_void;
+        if remote_network_id.is_empty() || origin_network_id.is_empty() {
+            error!(LOG_LABEL, "nullptr in start_dinput fail");
+            return Err(FusionErrorCode::Fail.into());
+        }
         let _c_args: Vec<CString> = input_device_dhids
             .iter()
             .map(|s| CString::new(s.clone()).unwrap())
             .collect();
         let c_args: Vec<*const c_char> =
             _c_args.iter().map(|s| s.as_ptr()).collect();
+        // SAFETY: no `None` here
         let ret = unsafe {
             StartRemoteInput(remote_network_id.as_ptr() as *const c_char, origin_network_id.as_ptr() as *const c_char,
                 c_args.as_ptr(), c_args.len(), Some(DInputImpl::on_prepare_remote_input), id, this)
         };
         if ret != 0 {
             error!(LOG_LABEL, "start_dinput fail");
-            Err(-1)
+            Err(FusionErrorCode::Fail.into())
         } else {
-            Ok(0)
+            Ok(ret)
         }
     }
 
@@ -126,21 +141,26 @@ impl DInputImpl {
         call_debug_enter!("DInputImpl::stop_dinput");
         let id = self.save_callback(callback);
         let this = self as *mut Self as *mut c_void;
+        if remote_network_id.is_empty() || origin_network_id.is_empty() {
+            error!(LOG_LABEL, "nullptr in stop_dinput fail");
+            return Err(FusionErrorCode::Fail.into());
+        }
         let _c_args: Vec<CString> = input_device_dhids
             .iter()
             .map(|s| CString::new(s.clone()).unwrap())
             .collect();
         let c_args: Vec<*const c_char> =
             _c_args.iter().map(|s| s.as_ptr()).collect();
+        // SAFETY: no `None` here
         let ret = unsafe {
             StopRemoteInput(remote_network_id.as_ptr() as *const c_char, origin_network_id.as_ptr() as *const c_char,
                 c_args.as_ptr(), c_args.len(), Some(DInputImpl::on_prepare_remote_input), id, this)
         };
         if ret != 0 {
             error!(LOG_LABEL, "stop_dinput fail");
-            Err(-1)
+            Err(FusionErrorCode::Fail.into())
         } else {
-            Ok(0)
+            Ok(ret)
         }
     }
 
@@ -189,7 +209,11 @@ impl DInputImpl {
             key_code: event.key_code,
             key_action: event.key_action,
         };
-
+        if network_id.is_empty() {
+            error!(LOG_LABEL, "nullptr in need_filter_out fail");
+            return false;
+        }
+        // SAFETY: no `None` here
         let ret = unsafe {
             IsNeedFilterOut(network_id.as_ptr() as *const c_char, &cevent as *const CBusinessEvent)
         };
@@ -213,6 +237,7 @@ impl DInput {
     pub fn get_instance() -> Option<&'static Self> {
         static mut DINPUT_ADAPTER: Option<DInput> = None;
         static INIT_ONCE: Once = Once::new();
+        // SAFETY: no `None` here. just Modifying the Static Variables
         unsafe {
             INIT_ONCE.call_once(|| {
                 DINPUT_ADAPTER = Some(Self::default());
@@ -234,7 +259,7 @@ impl DInput {
             }
             Err(err) => {
                 error!(LOG_LABEL, "lock error: {}", err);
-                Err(-1)
+                Err(FusionErrorCode::Fail.into())
             }
         }
     }
@@ -252,7 +277,7 @@ impl DInput {
             }
             Err(err) => {
                 error!(LOG_LABEL, "lock error: {}", err);
-                Err(-1)
+                Err(FusionErrorCode::Fail.into())
             }
         }
     }
@@ -270,7 +295,7 @@ impl DInput {
             }
             Err(err) => {
                 error!(LOG_LABEL, "lock error: {}", err);
-                Err(-1)
+                Err(FusionErrorCode::Fail.into())
             }
         }
     }
@@ -288,7 +313,7 @@ impl DInput {
             }
             Err(err) => {
                 error!(LOG_LABEL, "lock error: {}", err);
-                Err(-1)
+                Err(FusionErrorCode::Fail.into())
             }
         }
     }
@@ -326,6 +351,7 @@ impl BusinessEvent {
     {
         call_debug_enter!("BusinessEvent::from_c");
         let mut buf: Vec<i32> = Vec::new();
+        // SAFETY: no `None` here
         let ts = unsafe {
             std::slice::from_raw_parts(value.pressed_keys, value.pressed_keys_len)
         };

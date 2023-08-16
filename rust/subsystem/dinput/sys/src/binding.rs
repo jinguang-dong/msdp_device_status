@@ -22,13 +22,13 @@ use std::ffi::{ c_void, c_char };
 /// TODO: add documentation.
 #[repr(C)]
 pub struct CBusinessEvent {
-    /// pressed_keys_len
+    /// TODO: add documentation.
     pub pressed_keys_len: usize,
-    /// pressed_keys
+    /// TODO: add documentation.
     pub pressed_keys: *const i32,
-    /// key_code
+    /// TODO: add documentation.
     pub key_code: i32,
-    /// key_action
+    /// TODO: add documentation.
     pub key_action: i32,
 }
 
