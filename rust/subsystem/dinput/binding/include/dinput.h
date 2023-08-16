@@ -29,7 +29,6 @@
 #include "stop_d_input_call_back_stub.h"
 #include "unprepare_d_input_call_back_stub.h"
 
-
 using DInputCallback = std::function<void(bool)>;
 struct Callbacks {
     DInputCallback statuscb;
@@ -88,7 +87,8 @@ struct CBusinessEvent {
     int32_t key_action;
 };
 
-int32_t CBusinessEventFrom(const OHOS::DistributedHardware::DistributedInput::BusinessEvent *event, CBusinessEvent *cEvent);
+int32_t CBusinessEventFrom(const OHOS::DistributedHardware::DistributedInput::BusinessEvent *event,
+    CBusinessEvent *cEvent);
 
 #ifdef __cplusplus
 extern "C" {

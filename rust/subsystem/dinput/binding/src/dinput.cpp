@@ -87,7 +87,8 @@ int32_t CBusinessEventFrom(const BusinessEvent *event, CBusinessEvent *cbevent)
     CHKPR(event, RET_ERR);
     CHKPR(cbevent, RET_ERR);
 
-    if (memcpy_s(cbevent->pressed_keys, event->pressedKeys.size(), event->pressedKeys.data(), event->pressedKeys.size()) != EOK) {
+    if (memcpy_s(cbevent->pressed_keys, event->pressedKeys.size(),
+        event->pressedKeys.data(), event->pressedKeys.size()) != EOK) {
         FI_HILOGE("memcpy_s not EOK");
         return RET_ERR;
     }
@@ -98,7 +99,7 @@ int32_t CBusinessEventFrom(const BusinessEvent *event, CBusinessEvent *cbevent)
     return RET_OK;
 }
 
-int32_t PrepareRemoteInput(const char* srcId, const char* sinkId, DInputCb callback, size_t id, void* userData) 
+int32_t PrepareRemoteInput(const char* srcId, const char* sinkId, DInputCb callback, size_t id, void* userData)
 {
     CALL_DEBUG_ENTER;
     sptr<PrepareStartDInputCallbackSink> prepareStartDinputCb = new (std::nothrow) PrepareStartDInputCallbackSink();
