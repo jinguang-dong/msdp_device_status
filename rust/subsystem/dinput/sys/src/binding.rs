@@ -13,28 +13,28 @@
  * limitations under the License.
  */
 
-//! TODO: add documentation.
+//! Binding for calling c++
 
 #![allow(dead_code)]
 
 use std::ffi::{ c_void, c_char };
 
-/// TODO: add documentation.
+/// struct of CBusinessEvent
 #[repr(C)]
 pub struct CBusinessEvent {
-    /// TODO: add documentation.
+    /// number of vec elements
     pub pressed_keys_len: usize,
-    /// TODO: add documentation.
+    /// pointer of vec 
     pub pressed_keys: *const i32,
-    /// TODO: add documentation.
+    /// key_code
     pub key_code: i32,
-    /// TODO: add documentation.
+    /// key_action
     pub key_action: i32,
 }
 
-/// TODO: add documentation.
+/// callback type CallbackInput
 pub type CallbackInput = unsafe extern "C" fn (bool, *mut Callbacks);
-/// TODO: add documentation.
+/// struct of Callbacks
 #[repr(C)]
 pub struct Callbacks {
     _private:[u8; 0],
@@ -44,19 +44,19 @@ pub struct Callbacks {
 pub type DInputCb = extern "C" fn (devId: *const c_char, status: i32, id: usize, userdata: *mut c_void);
 
 extern "C" {
-    /// TODO: add documentation. 
+    /// interface of PrepareRemoteInput
     pub fn PrepareRemoteInput(srcId: *const c_char, sinkId: *const c_char, callback: Option<DInputCb>,
         id: usize, userdata: *mut c_void) -> i32;
-    /// TODO: add documentation.
+    /// interface of UnPrepareRemoteInput
     pub fn UnPrepareRemoteInput(srcId: *const c_char, sinkId: *const c_char, callback: Option<DInputCb>,
         id: usize, userdata: *mut c_void) -> i32;
-    /// TODO: add documentation.
+    /// interface of StartRemoteInput
     pub fn StartRemoteInput(srcId: *const c_char, sinkId: *const c_char, dhIds: *const *const c_char, nDhIds: usize,
         callback: Option<DInputCb>, id: usize, userdata: *mut c_void) -> i32;
-    /// TODO: add documentation.
+    /// interface of StopRemoteInput
     pub fn StopRemoteInput(srcId: *const c_char, sinkId: *const c_char, dhIds: *const *const c_char, nDhIds: usize,
         callback: Option<DInputCb>, id: usize, userdata: *mut c_void) -> i32;
-    /// TODO: add documentation.
+    /// interface of IsNeedFilterOut
     pub fn IsNeedFilterOut(sinkId: *const c_char, event: *const CBusinessEvent) -> i32;
 }
 

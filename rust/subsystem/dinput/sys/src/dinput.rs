@@ -12,8 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-//! TODO: add documentation.
+//! interface and impl in dinput.
 
 #![allow(dead_code)]
 #![allow(unused_variables)]
@@ -38,6 +37,17 @@ const LOG_LABEL: HiLogLabel = HiLogLabel {
 struct DInputImpl {
     id_radix: usize,
     pending_callbacks: HashMap<usize, Box<dyn Fn(bool)>>,
+}
+
+macro_rules! get_ret_and_return {
+    ($ret:expr, $target:expr, $function_name:expr) => {{
+        if $ret != $target {
+            error!(LOG_LABEL, "{} fail", @public($function_name));
+            return Err(FusionErrorCode::Fail.into());
+        } else {
+            return Ok($ret);
+        }
+    }};
 }
 
 impl DInputImpl {
@@ -69,12 +79,7 @@ impl DInputImpl {
             PrepareRemoteInput(remote_network_id.as_ptr() as *const c_char,
                 origin_network_id.as_ptr() as *const c_char, Some(DInputImpl::on_prepare_remote_input), id, this)
         };
-        if ret != 0 {
-            error!(LOG_LABEL, "Preparing remote input fail");
-            Err(FusionErrorCode::Fail.into())
-        } else {
-            Ok(ret)
-        }
+        get_ret_and_return!(ret, 0, "prepare_dinput");
     }
 
     fn unprepare_dinput<F>(&mut self, remote_network_id: &str,
@@ -94,12 +99,7 @@ impl DInputImpl {
             UnPrepareRemoteInput(remote_network_id.as_ptr() as *const c_char,
                 origin_network_id.as_ptr() as *const c_char, Some(DInputImpl::on_prepare_remote_input), id, this)
         };
-        if ret != 0 {
-            error!(LOG_LABEL, "unprepare_dinput fail");
-            Err(FusionErrorCode::Fail.into())
-        } else {
-            Ok(ret)
-        }
+        get_ret_and_return!(ret, 0, "unprepare_dinput");
     }
 
     fn start_dinput<F>(&mut self, remote_network_id: &str, origin_network_id: &str,
@@ -125,12 +125,7 @@ impl DInputImpl {
             StartRemoteInput(remote_network_id.as_ptr() as *const c_char, origin_network_id.as_ptr() as *const c_char,
                 c_args.as_ptr(), c_args.len(), Some(DInputImpl::on_prepare_remote_input), id, this)
         };
-        if ret != 0 {
-            error!(LOG_LABEL, "start_dinput fail");
-            Err(FusionErrorCode::Fail.into())
-        } else {
-            Ok(ret)
-        }
+        get_ret_and_return!(ret, 0, "start_dinput");
     }
 
     fn stop_dinput<F>(&mut self, remote_network_id: &str, origin_network_id: &str,
@@ -156,12 +151,7 @@ impl DInputImpl {
             StopRemoteInput(remote_network_id.as_ptr() as *const c_char, origin_network_id.as_ptr() as *const c_char,
                 c_args.as_ptr(), c_args.len(), Some(DInputImpl::on_prepare_remote_input), id, this)
         };
-        if ret != 0 {
-            error!(LOG_LABEL, "stop_dinput fail");
-            Err(FusionErrorCode::Fail.into())
-        } else {
-            Ok(ret)
-        }
+        get_ret_and_return!(ret, 0, "stop_dinput");
     }
 
     fn save_callback<F>(&mut self, callback: F) -> usize
@@ -201,7 +191,7 @@ impl DInputImpl {
         call_debug_enter!("DInputImpl::remove_timmer");
     }
 
-    fn need_filter_out(&self, network_id: &str, event: &mut BusinessEvent) -> bool
+    fn is_need_filter_out(&self, network_id: &str, event: &mut BusinessEvent) -> bool
     {
         let cevent = CBusinessEvent{
             pressed_keys_len: event.pressed_keys.len(),
@@ -210,7 +200,7 @@ impl DInputImpl {
             key_action: event.key_action,
         };
         if network_id.is_empty() {
-            error!(LOG_LABEL, "nullptr in need_filter_out fail");
+            error!(LOG_LABEL, "nullptr in is_need_filter_out fail");
             return false;
         }
         // SAFETY: no `None` here
@@ -218,7 +208,7 @@ impl DInputImpl {
             IsNeedFilterOut(network_id.as_ptr() as *const c_char, &cevent as *const CBusinessEvent)
         };
         if ret != 0 {
-            error!(LOG_LABEL, "need_filter_out fail");
+            error!(LOG_LABEL, "is_need_filter_out fail");
             false
         } else {
             true
@@ -226,14 +216,14 @@ impl DInputImpl {
     }
 }
 
-/// TODO: add documentation.
+/// struct of DInpt
 #[derive(Default)]
 pub struct DInput {
     dinput_impl: Mutex<RefCell<DInputImpl>>,
 }
 
 impl DInput {
-    /// TODO: add documentation.
+    /// to get_instance
     pub fn get_instance() -> Option<&'static Self> {
         static mut DINPUT_ADAPTER: Option<DInput> = None;
         static INIT_ONCE: Once = Once::new();
@@ -246,7 +236,7 @@ impl DInput {
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of prepare_dinput
     pub fn prepare_dinput<F>(&self, remote_network_id: &str, origin_network_id: &str,
         callback: F) -> FusionResult<i32>
     where
@@ -258,13 +248,13 @@ impl DInput {
                 guard.borrow_mut().prepare_dinput(remote_network_id, origin_network_id, callback)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 Err(FusionErrorCode::Fail.into())
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of unprepare_dinput
     pub fn unprepare_dinput<F>(&self, remote_network_id: &str, origin_network_id: &str,
         callback: F) -> FusionResult<i32>
     where
@@ -276,13 +266,13 @@ impl DInput {
                 guard.borrow_mut().unprepare_dinput(remote_network_id, origin_network_id, callback)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 Err(FusionErrorCode::Fail.into())
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of start_dinput
     pub fn start_dinput<F>(&self, remote_network_id: &str, origin_network_id: &str,
         input_device_dhids: &[String], callback: F) -> FusionResult<i32>
     where
@@ -294,13 +284,13 @@ impl DInput {
                 guard.borrow_mut().start_dinput(remote_network_id, origin_network_id, input_device_dhids, callback)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 Err(FusionErrorCode::Fail.into())
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of stop_dinput
     pub fn stop_dinput<F>(&self, remote_network_id: &str, origin_network_id: &str,
         input_device_dhids: &[String], callback: F) -> FusionResult<i32>
     where
@@ -312,46 +302,46 @@ impl DInput {
                 guard.borrow_mut().stop_dinput(remote_network_id, origin_network_id, input_device_dhids, callback)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 Err(FusionErrorCode::Fail.into())
             }
         }
     }
 
-    /// TODO: add documentation.
-    pub fn need_filter_out(&self, network_id: &str, event: &mut BusinessEvent) -> bool
+    /// interface of is_need_filter_out
+    pub fn is_need_filter_out(&self, network_id: &str, event: &mut BusinessEvent) -> bool
     {
-        call_debug_enter!("DInput::need_filter_out");
+        call_debug_enter!("DInput::is_need_filter_out");
         match self.dinput_impl.lock() {
             Ok(guard) => {
-                let iret = guard.borrow_mut().need_filter_out(network_id, event);
+                let iret = guard.borrow_mut().is_need_filter_out(network_id, event);
                 iret
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 false
             }
         }
     }
 }
 
-/// TODO: add documentation.
+/// struct BusinessEvent
 pub struct BusinessEvent {
-    /// TODO: add documentation.
+    /// Vec pressed_keys
     pub pressed_keys: Vec<i32>,
-    /// TODO: add documentation.
+    /// the key code
     pub key_code: i32,
-    /// TODO: add documentation.
+    /// the key action
     pub key_action: i32,
 }
 
 impl BusinessEvent {
     /// Converts `CBusinessEvent` type to `BusinessEvent` type
-    pub fn from_c(value: &mut CBusinessEvent) -> Self
+    pub fn from_raw(value: &mut CBusinessEvent) -> Self
     {
-        call_debug_enter!("BusinessEvent::from_c");
+        call_debug_enter!("BusinessEvent::from_raw");
         let mut buf: Vec<i32> = Vec::new();
-        // SAFETY: no `None` here
+        // SAFETY: no `None` here, pressed_keys_len is the number of elements
         let ts = unsafe {
             std::slice::from_raw_parts(value.pressed_keys, value.pressed_keys_len)
         };
