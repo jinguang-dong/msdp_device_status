@@ -300,14 +300,14 @@ Data DeviceStatusMsdpClientImpl::SaveObserverData(const Data& data)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard guard(mutex_);
-    for (auto iter = deviceStatusDataMap_.begin(); iter != deviceStatusDataMap_.end(); ++iter) {
+    for (auto iter = deviceStatusDatas_.begin(); iter != deviceStatusDatas_.end(); ++iter) {
         if (iter->first == data.type) {
             iter->second = data.value;
             notifyManagerFlag_ = true;
             return data;
         }
     }
-    auto ret = deviceStatusDataMap_.insert(std::make_pair(data.type, data.value));
+    auto ret = deviceStatusDatas_.insert(std::make_pair(data.type, data.value));
     if (!ret.second) {
         FI_HILOGW("type is duplicated");
         return data;
@@ -318,7 +318,7 @@ Data DeviceStatusMsdpClientImpl::SaveObserverData(const Data& data)
 
 std::map<ClientType, ClientValue> DeviceStatusMsdpClientImpl::GetObserverData() const
 {
-    return deviceStatusDataMap_;
+    return deviceStatusDatas_;
 }
 
 void DeviceStatusMsdpClientImpl::GetDeviceStatusTimestamp()

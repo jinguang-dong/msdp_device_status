@@ -68,8 +68,8 @@ private:
     std::mutex mutex_;
     sptr<IRemoteObject::DeathRecipient> devicestatusCBDeathRecipient_ { nullptr };
     std::shared_ptr<DeviceStatusMsdpClientImpl> msdpImpl_ { nullptr };
-    std::map<Type, OnChangedValue> msdpData_;
-    std::map<Type, std::set<const sptr<IRemoteDevStaCallback>, classcomp>> listenerMap_;
+    std::map<Type, OnChangedValue> msdpDatas_;
+    std::map<Type, std::set<const sptr<IRemoteDevStaCallback>, classcomp>> listeners_;
     int32_t type_ { -1 };
     int32_t event_ { -1 };
     int32_t arrs_[argSize_] {};
