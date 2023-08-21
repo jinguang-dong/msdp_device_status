@@ -116,7 +116,7 @@ int32_t DeviceStatusManager::InitDataCallback()
     DeviceStatusMsdpClientImpl::CallbackManager callback =
         std::bind(&DeviceStatusManager::MsdpDataCallback, this, std::placeholders::_1);
     if (msdpImpl_->RegisterImpl(callback) == RET_ERR) {
-        FI_HILOGE("Register impl failed");
+        FI_HILOGE("register impl failed");
     }
     return true;
 }
