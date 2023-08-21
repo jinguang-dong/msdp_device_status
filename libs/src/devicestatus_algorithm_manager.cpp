@@ -133,7 +133,7 @@ ErrCode AlgoMgr::Enable(Type type)
 {
     CALL_DEBUG_ENTER;
     if (!StartSensor(type)) {
-        FI_HILOGE("sensor init failed");
+        FI_HILOGE("Sensor init failed");
         return RET_ERR;
     }
     switch (type) {

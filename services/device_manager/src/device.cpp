@@ -452,7 +452,7 @@ void Device::LoadDeviceConfig()
     } else {
         keyboardType_ = IDevice::KEYBOARD_TYPE_NONE;
     }
-    FI_HILOGD("keyboard type:%{public}d", keyboardType_);
+    FI_HILOGD("Keyboard type:%{public}d", keyboardType_);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

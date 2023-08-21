@@ -37,7 +37,7 @@ SensorDataCallback::~SensorDataCallback()
     alive_ = false;
     CHKPV(algorithmThread_);
     if (!algorithmThread_->joinable()) {
-        FI_HILOGE("thread join fail");
+        FI_HILOGE("Thread join fail");
         return;
     }
     sem_post(&sem_);
