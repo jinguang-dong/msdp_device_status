@@ -116,7 +116,7 @@ int32_t DeviceStatusManager::InitDataCallback()
     DeviceStatusMsdpClientImpl::CallbackManager callback =
         std::bind(&DeviceStatusManager::MsdpDataCallback, this, std::placeholders::_1);
     if (msdpImpl_->RegisterImpl(callback) == RET_ERR) {
-        FI_HILOGE("register impl failed");
+        FI_HILOGE("Register impl failed");
     }
     return true;
 }
@@ -200,7 +200,7 @@ void DeviceStatusManager::Subscribe(Type type, ActivityEvent event, ReportLatenc
         }
         auto [_, ret] = listenerMap_.insert(std::make_pair(type, listeners));
         if (!ret) {
-            FI_HILOGW("type is duplicated");
+            FI_HILOGW("Type is duplicated");
         }
     } else {
         FI_HILOGI("callbacklist.size:%{public}zu", listenerMap_[dtTypeIter->first].size());
