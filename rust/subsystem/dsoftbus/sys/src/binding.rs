@@ -47,7 +47,7 @@ pub const LINK_TYPE_BR: i32 = 4;
 ///LINK_TYPE_MAX
 pub const LINK_TYPE_MAX: usize = 9;
 
-///SessionType
+// for SessionType enum 
 ///TYPE_MESSAGE
 pub const TYPE_MESSAGE: i32 = 1;
 ///TYPE_BYTES
@@ -62,6 +62,14 @@ pub const TYPE_BUTT: i32 = 5;
 pub const NETWORK_ID_BUF_LEN: i32 = 65;
 ///DEVICE_NAME_BUF_LEN
 pub const DEVICE_NAME_BUF_LEN: i32 = 128;
+
+/// for adapter
+pub const FILTER_WAIT_TIMEOUT_SECOND: u64 = 1;
+pub const MSG_MAX_SIZE: usize = 45 * 1024;
+pub const STREAM_BUF_READ_FAIL: i32 = 1;
+pub const MAX_STREAM_BUF_SIZE: usize = 256;
+pub const PARAM_INPUT_INVALID: i32 = 5;
+pub const MEM_OUT_OF_BOUNDS: i32 = 3;
 
 /// TODO: add documentation.
 #[repr(C)]
@@ -106,6 +114,14 @@ pub enum MessageId {
     MaxId,
 }
 
+// for adapter
+#[repr(C)]
+pub enum ErrorStatus {
+    ErrorStatusOk,
+    ErrorStatusRead,
+    ErrorStatusWrite,
+}
+
 /// TODO: add documentation.
 #[repr(C)]
 pub struct StreamFrameInfo {
@@ -142,6 +158,55 @@ pub struct ISessionListener {
     pub on_stream_received: Option<OnstreamReceived>,
 }
 
+/// struct CPointerEvent
+#[repr(C)]
+pub struct CPointerEvent {
+    /// Corresponding to the C-side 'void' type, one way to avoid using 'unsafe'
+    _private: [u8; 0],
+}
+
+/// struct CPointerEvent
+#[repr(C)]
+pub struct CJsonStruct {
+    /// Corresponding to the C-side 'void' type, one way to avoid using 'unsafe'
+    _private: [u8; 0],
+}
+
+/// TODO: add documentation.
+#[repr(C)]
+pub enum CoordStatusType{
+    RemoteCoordinationStart = 1,
+    RemoteCoordinationStartRes = 2,
+    RemoteCoordinationStop = 3,
+    RemoteCoordinationStopRes = 4,
+    RemoteCoordinationStopOtherRes = 5,
+    NotifyUnChainedRes = 6,
+    NotifyFilterAdded = 7
+}
+
+// C interface for coordination_sm
+extern "C" {
+    pub fn CGetLastPointerEvent() -> *const CPointerEvent;
+    pub fn CGetPressedButtons(cPointerEvent: *const CPointerEvent) -> bool;
+}
+
+// C interface for adapter
+extern "C" {
+    pub fn CGetCJsonObj() -> *const CJsonStruct;
+    pub fn CAddNumber(cJsonObj: *const CJsonStruct, value: i32, str: *const c_char) -> bool;
+    pub fn CAddbool(cJsonObj: *const CJsonStruct, value: bool, str: *const c_char) -> bool;
+    pub fn CAddString(cJsonObj: *const CJsonStruct, value: *const c_char, str: *const c_char) -> bool;
+    pub fn CJsonPrint(cJsonObj: *const CJsonStruct, msg: *mut c_char) ->bool;
+    pub fn CJsonDelete(cJsonObj: *const CJsonStruct);
+    pub fn CJsonFree(str: *const c_char);
+}
+
+// C interface for main
+extern "C" {
+    pub fn GetAccessToken();
+}
+
+// C interface for session
 extern "C" {
     pub fn CreateSessionServer(pkg_name: *const c_char, session_name: *const c_char, session_listener: *const ISessionListener) -> i32;
     pub fn RemoveSessionServer(pkg_name: *const c_char, session_name: *const c_char) -> i32;
@@ -152,5 +217,4 @@ extern "C" {
     pub fn GetSessionSide(session_id: i32) -> i32;
     pub fn GetLocalNodeDeviceInfo(pkg_name: *const c_char, info: *mut NodeBasicInfo) -> i32;
     pub fn SendBytes(session_id: i32, data: *const c_void, len: u32) -> i32;
-    pub fn GetAccessToken();
 }

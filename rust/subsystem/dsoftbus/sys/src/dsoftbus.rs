@@ -90,7 +90,7 @@ extern "C" fn on_bytes_received(session_id: i32, data: *const c_void, data_len: 
         }
     }
 }
-
+    
 extern "C" fn on_message_received(session_id: i32, data: *const c_void, data_len: u32) {
     let _id = session_id;
     let _dt = data;
@@ -377,6 +377,24 @@ impl DSoftbusImpl {
         }
         Ok(0)
     }
+
+    /// TODO: add documentation.
+    fn get_session_dev_map(&self) -> HashMap<String, i32>{
+        let map = self.session_dev_map.clone();
+        map
+    }
+
+    /// TODO: add documentation.
+    fn get_wait_cond(&self) -> Arc<(Mutex<bool>, Condvar)>{
+        let wait_cond = self.wait_cond.clone();
+        wait_cond
+    }
+
+    /// TODO: add documentation.
+    fn get_operation_mutex(&self) -> Mutex<HashMap<String, i32>>{
+        let mutex = self.operation_mutex.lock().unwrap().clone();
+        mutex.into()
+    }
 }
 
 /// TODO: add documentation.
@@ -556,7 +574,56 @@ impl DSoftbus {
 
     /// TODO: add documentation.
     pub fn on_stream_received(&self, session_id: i32, data: *const StreamData,
-        ext: *const StreamData, param: *const StreamFrameInfo){
+        ext: *const StreamData, param: *const StreamFrameInfo) {
 
+    }
+
+    /// TODO: add documentation.
+    pub fn get_session_dev_map(&self, result: &mut bool) -> HashMap<String, i32>{
+        match self.dsoftbus_impl.lock() {
+            Ok(guard) => {
+                *result = true;
+                guard.borrow_mut().get_session_dev_map()
+            }
+            Err(err) => {
+                error!(LOG_LABEL, "lock error: {}", err);
+                *result = false;
+                let map: HashMap<String, i32> = HashMap::new();
+                map
+            }
+        }
+    }
+
+    /// TODO: add documentation.
+    pub fn get_wait_cond(&self, result: &mut bool) -> Arc<(Mutex<bool>, Condvar)> {
+        match self.dsoftbus_impl.lock() {
+            Ok(guard) => {
+                *result = true;
+                guard.borrow_mut().get_wait_cond()
+            }
+            Err(err) => {
+                error!(LOG_LABEL, "lock error: {}", err);
+                *result = false;
+                let wait_cond = Arc::new((Mutex::new(false), Condvar::new()));
+                wait_cond
+            }
+        }
+    }
+
+    /// TODO: add documentation.
+    pub fn get_operation_mutex(&self, result: &mut bool) -> Mutex<HashMap<String, i32>>{
+        match self.dsoftbus_impl.lock() {
+            Ok(guard) => {
+                *result = true;
+                guard.borrow_mut().get_operation_mutex()
+            }
+            Err(err) => {
+                error!(LOG_LABEL, "lock error: {}", err);
+                *result = false;
+                let map: HashMap<String, i32> = HashMap::new();
+                let mutex: Mutex<HashMap<String, i32>>= Mutex::new(map);
+                mutex
+            }
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,18 @@
  * limitations under the License.
  */
 
-//! TODO: add documentation.
+#ifndef COORDINATION_SM_RUST_INTERNAL_H
+#define COORDINATION_SM_RUST_INTERNAL_H
 
-pub mod binding;
-pub mod dsoftbus;
-pub mod adapter;
-//pub mod streambuffer;
+#include "coordination_sm_rust.h"
+
+struct CPointerEvent {
+    std::shared_ptr<OHOS::MMI::PointerEvent> event;
+
+    CPointerEvent(std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent)
+    {
+        event = pointerEvent;
+    }
+};
+
+#endif // COORDINATION_SM_RUST_INTERNAL_H

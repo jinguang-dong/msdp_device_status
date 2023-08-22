@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,21 @@
  * limitations under the License.
  */
 
-//! TODO: add documentation.
+#ifndef COORDINATION_SM_RUST_H
+#define COORDINATION_SM_RUST_H
+#include <cinttypes>
 
-pub mod binding;
-pub mod dsoftbus;
-pub mod adapter;
-//pub mod streambuffer;
+#include "devicestatus_define.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+struct CPointerEvent;
+CPointerEvent* CGetLastPointerEvent();
+bool CGetPressedButtons(CPointerEvent* cPointerEvent);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+#endif // COORDINATION_SM_H
