@@ -267,6 +267,19 @@ void Device::CheckPointers()
     bool hasMouseBtn { HasMouseButton() };
     bool hasJoystickFeature { HasJoystickAxesOrButtons() };
 
+    AbsCoordsHandle(hasAbsCoords, stylusOrPen, fingerButNoPen, isDirect, hasMouseBtn, hasTouch, hasJoystickFeature);
+    MtcoordsHandle(hasAbsCoords, stylusOrPen, fingerButNoPen, isDirect, hasTouch);
+
+    if (!caps_.test(DEVICE_CAP_TABLET_TOOL) && !caps_.test(DEVICE_CAP_POINTER) &&
+        !caps_.test(DEVICE_CAP_JOYSTICK) && hasMouseBtn && (hasRelCoords || !hasAbsCoords)) {
+        caps_.set(DEVICE_CAP_POINTER);
+    }
+    PrintCapsDevice();
+}
+
+void Device::AbsCoordsHandle(bool hasAbsCoords, bool stylusOrPen, bool fingerButNoPen, bool isDirect, 
+bool hasMouseBtn, bool hasTouch, bool hasJoystickFeature)
+{
     if (hasAbsCoords) {
         if (stylusOrPen) {
             caps_.set(DEVICE_CAP_TABLET_TOOL);
@@ -282,6 +295,11 @@ void Device::CheckPointers()
     } else if (hasJoystickFeature) {
         caps_.set(DEVICE_CAP_JOYSTICK);
     }
+}
+
+void Device::MtcoordsHandle(bool hasMtCoords, bool stylusOrPen, bool fingerButNoPen, bool isDirect,
+bool hasTouch)
+{
     if (hasMtCoords) {
         if (stylusOrPen) {
             caps_.set(DEVICE_CAP_TABLET_TOOL);
@@ -291,11 +309,6 @@ void Device::CheckPointers()
             caps_.set(DEVICE_CAP_TOUCH);
         }
     }
-    if (!caps_.test(DEVICE_CAP_TABLET_TOOL) && !caps_.test(DEVICE_CAP_POINTER) &&
-        !caps_.test(DEVICE_CAP_JOYSTICK) && hasMouseBtn && (hasRelCoords || !hasAbsCoords)) {
-        caps_.set(DEVICE_CAP_POINTER);
-    }
-    PrintCapsDevice();
 }
 
 void Device::CheckPencilMouse()
