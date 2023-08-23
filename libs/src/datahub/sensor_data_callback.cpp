@@ -189,6 +189,7 @@ bool SensorDataCallback::UnregisterCallbackSensor(int32_t sensorTypeId)
     ret = UnsubscribeSensor(sensorTypeId, &user_);
     if (ret != 0) {
         FI_HILOGE("UnsubscribeSensor failed");
+        // 
         return false;
     }
     return true;
