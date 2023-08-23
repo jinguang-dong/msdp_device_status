@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-//! TODO: add documentation.
+//! mods for dsoftbus
 
 pub mod binding;
 pub mod dsoftbus;

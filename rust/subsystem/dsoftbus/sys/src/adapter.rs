@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-//! TODO: add documentation.
+//! adapter for coordination
 
 #![allow(dead_code)]
 #![allow(unused_variables)]
@@ -47,7 +47,7 @@ const LOG_LABEL: HiLogLabel = HiLogLabel {
     tag: "Adapter"
 };
 
-/// TODO: add documentation.
+/// Provide for cpp to call
 /// # Safety
 #[no_mangle]
 extern "C" fn StartRemoteCoordination(local_network_id: &String, remote_network_id: &String) -> i32 {
@@ -62,7 +62,7 @@ extern "C" fn StartRemoteCoordination(local_network_id: &String, remote_network_
     }
 }
 
-/// TODO: add documentation.
+/// Provide for cpp to call
 /// # Safety
 #[no_mangle]
 extern "C" fn StartRemoteCoordinationResult(remote_network_id: &String, is_success: bool,
@@ -79,7 +79,7 @@ extern "C" fn StartRemoteCoordinationResult(remote_network_id: &String, is_succe
     }
 }
 
-/// TODO: add documentation.
+/// Provide for cpp to call
 /// # Safety
 #[no_mangle]
 extern "C" fn StopRemoteCoordination(remote_network_id: &String, is_unchained: bool) -> i32 {
@@ -94,7 +94,7 @@ extern "C" fn StopRemoteCoordination(remote_network_id: &String, is_unchained: b
     }
 }
 
-/// TODO: add documentation.
+/// Provide for cpp to call
 /// # Safety
 #[no_mangle]
 extern "C" fn StopRemoteCoordinationResult(remote_network_id: &String, is_success: bool) -> i32 {
@@ -109,7 +109,7 @@ extern "C" fn StopRemoteCoordinationResult(remote_network_id: &String, is_succes
     }
 }
 
-/// TODO: add documentation.
+/// Provide for cpp to call
 /// # Safety
 #[no_mangle]
 extern "C" fn NotifyUnchainedResult(local_network_id: &String, remote_network_id: &String, is_success: bool) -> i32 {
@@ -124,7 +124,7 @@ extern "C" fn NotifyUnchainedResult(local_network_id: &String, remote_network_id
     }
 }
 
-/// TODO: add documentation.
+/// Provide for cpp to call
 /// # Safety
 #[no_mangle]
 extern "C" fn NotifyFilterAdded(remote_network_id: &String) -> i32 {
@@ -153,12 +153,13 @@ impl From<CoordStatusType> for i32 {
     }
 }
 
+/// struct AdapterImpl
 #[derive(Default)]
 struct AdapterImpl {
 }
 
 impl AdapterImpl {
-    /// TODO: add documentation.
+    /// implementation of start_remote_coordination
     pub fn start_remote_coordination(&mut self, local_network_id: &String, remote_network_id: &String) -> i32 {
         call_debug_enter!("Adapter::start_remote_coordination");
         let session_id = match DSoftbus::get_instance() {
@@ -178,7 +179,7 @@ impl AdapterImpl {
             }
             None => {
                 error!(LOG_LABEL, "DSoftbus get_instance failed");
-                -1
+                return -1;
             }
         };
         
@@ -247,7 +248,7 @@ impl AdapterImpl {
         0
     }
 
-    /// TODO: add documentation.
+    /// implementation of start_remote_coordination_result
     pub fn start_remote_coordination_result(&mut self, remote_network_id: &String, is_success: bool,
         start_device_dhid: &String, x_percent: i32, y_percent: i32) -> i32 {
         call_debug_enter!("Adapter::start_remote_coordination_result");
@@ -268,7 +269,7 @@ impl AdapterImpl {
             }
             None => {
                 error!(LOG_LABEL, "DSoftbus get_instance failed");
-                -1
+                return -1;
             }
         };       
         let c_json_obj = unsafe {
@@ -301,7 +302,7 @@ impl AdapterImpl {
         0
     }
 
-    /// TODO: add documentation.
+    /// implementation of stop_remote_coordination
     pub fn stop_remote_coordination(&mut self, remote_network_id: &String, is_unchained: bool) -> i32 {
         call_debug_enter!("Adapter::stop_remote_coordination");
         let session_id = match DSoftbus::get_instance() {
@@ -321,7 +322,7 @@ impl AdapterImpl {
             }
             None => {
                 error!(LOG_LABEL, "DSoftbus get_instance failed");
-                -1
+                return -1;
             }
         };
         let c_json_obj = unsafe {
@@ -351,7 +352,7 @@ impl AdapterImpl {
         0
     }
 
-    /// TODO: add documentation.
+    /// implementation of stop_remote_coordination_result
     pub fn stop_remote_coordination_result(&mut self, remote_network_id: &String, is_success: bool) -> i32 {
         call_debug_enter!("Adapter::stop_remote_coordination_result");
         let session_id = match DSoftbus::get_instance() {
@@ -371,7 +372,7 @@ impl AdapterImpl {
             }
             None => {
                 error!(LOG_LABEL, "DSoftbus get_instance failed");
-                -1
+                return -1;
             }
         };
         let c_json_obj = unsafe {
@@ -401,7 +402,7 @@ impl AdapterImpl {
         0
     }
 
-    /// TODO: add documentation.
+    /// implementation of notify_unchained_result
     pub fn notify_unchained_result(&mut self, local_network_id: &String, remote_network_id: &String, result: bool) -> i32 {
         call_debug_enter!("Adapter::notify_unchained_result");
         let session_id = match DSoftbus::get_instance() {
@@ -421,7 +422,7 @@ impl AdapterImpl {
             }
             None => {
                 error!(LOG_LABEL, "DSoftbus get_instance failed");
-                -1
+                return -1;
             }
         };
         let c_json_obj = unsafe {
@@ -453,7 +454,7 @@ impl AdapterImpl {
         0
     }
 
-    /// TODO: add documentation.
+    /// implementation of notify_filter_added
     pub fn notify_filter_added(&mut self, remote_network_id: &String) -> i32 {
         call_debug_enter!("Adapter::notify_filter_added");
         let session_id = match DSoftbus::get_instance() {
@@ -473,7 +474,7 @@ impl AdapterImpl {
             }
             None => {
                 error!(LOG_LABEL, "DSoftbus get_instance failed");
-                -1
+                return -1;
             }
         };
         let c_json_obj = unsafe {
@@ -502,7 +503,7 @@ impl AdapterImpl {
         0
     }
 
-    /// TODO: add documentation.
+    /// implementation of send_msg
     pub fn send_msg(&mut self, session_id: i32, message: &String) -> i32 {
         call_debug_enter!("Adapter::send_msg");
         let message_len = std::mem::size_of_val(message);
@@ -514,14 +515,14 @@ impl AdapterImpl {
     }
 }
 
-/// TODO: add documentation.
+/// struct Adapter
 #[derive(Default)]
 pub struct Adapter {
     adapter_impl: Mutex<RefCell<AdapterImpl>>,
 }
 
 impl Adapter {
-    /// TODO: add documentation.
+    /// interface of get_instance
     pub fn get_instance() -> Option<&'static Self> {
         static mut ADAPTER: Option<Adapter> = None;
         static INIT_ONCE: Once = Once::new();
@@ -533,20 +534,20 @@ impl Adapter {
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of start_remote_coordination
     pub fn start_remote_coordination(&self, local_network_id: &String, remote_network_id: &String) -> i32 {
         match self.adapter_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().start_remote_coordination(local_network_id, remote_network_id)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 -1
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of start_remote_coordination_result
     pub fn start_remote_coordination_result(&self, remote_network_id: &String, is_success: bool,
         start_device_dhid: &String, x_percent: i32, y_percent: i32) -> i32 {
         match self.adapter_impl.lock() {
@@ -555,59 +556,59 @@ impl Adapter {
                     x_percent, y_percent)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 -1
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of stop_remote_coordination
     pub fn stop_remote_coordination(&self, remote_network_id: &String, is_unchained: bool) -> i32 {
         match self.adapter_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().stop_remote_coordination(remote_network_id, is_unchained)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 -1
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of stop_remote_coordination_result
     pub fn stop_remote_coordination_result(&self, remote_network_id: &String, is_success: bool) -> i32 {
         match self.adapter_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().stop_remote_coordination_result(remote_network_id, is_success)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 -1
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of notify_unchained_result
     pub fn notify_unchained_result(&self, local_network_id: &String, remote_network_id: &String, is_success: bool) -> i32 {
         match self.adapter_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().notify_unchained_result(local_network_id, remote_network_id, is_success)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 -1
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of notify_filter_added
     pub fn notify_filter_added(&self, remote_network_id: &String) -> i32 {
         match self.adapter_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().notify_filter_added(remote_network_id)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 -1
             }
         }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-//! TODO: add documentation.
+//! streambuffer for message buffering
 
 #![allow(dead_code)]
 #![allow(unused_variables)]
@@ -46,6 +46,7 @@ impl From<ErrorStatus> for i32 {
     }
 }
 
+///struct StreambufferImpl
 #[derive(Default)]
 struct StreambufferImpl {
     r_pos: usize,
@@ -56,7 +57,7 @@ struct StreambufferImpl {
 }
 
 impl StreambufferImpl {
-    /// TODO: add documentation.
+    /// implementation of read
     pub fn read(&self, buf: &String) -> bool {
         call_debug_enter!("Streambuffer::read");
         if self.r_pos == self.w_pos {
@@ -70,13 +71,13 @@ impl StreambufferImpl {
         return buf_len > 0;
     }
 
-    /// TODO: add documentation.
+    /// implementation of read_buf
     pub fn read_buf(&self) ->  *const c_char{
         call_debug_enter!("Streambuffer::read_buf");
         &(self.sz_buff[self.r_pos])
     }
 
-    /// TODO: add documentation.
+    /// implementation of write
     pub fn write(&self, buf: String) -> bool {
         call_debug_enter!("Streambuffer::write");
         if self.chk_rw_error() {
@@ -101,11 +102,13 @@ impl StreambufferImpl {
         return true;
     }
 
+    /// implementation of chk_rw_error
     pub fn chk_rw_error(&self) -> bool {
         call_debug_enter!("Streambuffer::chk_rw_error");
         return self.rw_error_status != ErrorStatus::from(ErrorStatus::ErrorStatusOk);
     }
 
+    /// implementation of get_available_buf_size
     pub fn get_available_buf_size(&self) -> i32 {
         call_debug_enter!("Streambuffer::get_available_buf_size");
         if self.w_pos >= MAX_STREAM_BUF_SIZE {
@@ -117,14 +120,14 @@ impl StreambufferImpl {
     }
 }
 
-/// TODO: add documentation.
+/// struct Streambuffer
 #[derive(Default)]
 pub struct Streambuffer {
     adapter_impl: Mutex<RefCell<StreambufferImpl>>,
 }
 
 impl Streambuffer {
-    /// TODO: add documentation.
+    /// interface of get_instance
     pub fn get_instance() -> Option<&'static Self> {
         static mut ADAPTER: Option<Streambuffer> = None;
         static INIT_ONCE: Once = Once::new();
@@ -136,27 +139,27 @@ impl Streambuffer {
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of read
     pub fn read(&self, buf: &String) -> bool {
         match self.adapter_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().read()
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 -1
             }
         }
     }
     
-    /// TODO: add documentation.
+    /// interface of write
     pub fn write(&self, buf: String) -> bool {
         match self.adapter_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().write(buf)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 -1
             }
         }

@@ -13,54 +13,30 @@
  * limitations under the License.
  */
 
-//! TODO: add documentation.
+//! rust input binding sys
 
 #![allow(dead_code)]
 #![allow(missing_docs)]
 
 use std::ffi::{ c_void, c_char };
 
-///INTERCEPT_STRING_LENGTH
+///for dsoftbus
 pub const INTERCEPT_STRING_LENGTH: usize = 20;
-
-///DINPUT_LINK_TYPE_MAX
 pub const DINPUT_LINK_TYPE_MAX: i32 = 4;
-
-///DEVICE_ID_SIZE_MAX
 pub const DEVICE_ID_SIZE_MAX: usize = 65;
-
-///SESSION_SIDE_SERVER
 pub const SESSION_SIDE_SERVER: i32 = 0;
-
-///UNSUCCESSFUL
 pub const UNSUCCESSFUL: i32 = 0;
-
-///link_type
-///LINK_TYPE_WIFI_WLAN_5G
 pub const LINK_TYPE_WIFI_WLAN_5G: i32 = 1;
-///LINK_TYPE_WIFI_WLAN_2G
 pub const LINK_TYPE_WIFI_WLAN_2G: i32 = 2;
-///LINK_TYPE_WIFI_P2P
 pub const LINK_TYPE_WIFI_P2P: i32 = 3;
-///LINK_TYPE_BR
 pub const LINK_TYPE_BR: i32 = 4;
-///LINK_TYPE_MAX
 pub const LINK_TYPE_MAX: usize = 9;
-
-// for SessionType enum 
-///TYPE_MESSAGE
 pub const TYPE_MESSAGE: i32 = 1;
-///TYPE_BYTES
 pub const TYPE_BYTES: i32 = 2;
-///TYPE_FILE
 pub const TYPE_FILE: i32 = 3;
-///TYPE_STREAM
 pub const TYPE_STREAM: i32 = 4;
-///TYPE_BUTT
 pub const TYPE_BUTT: i32 = 5;
-///NETWORK_ID_BUF_LEN
 pub const NETWORK_ID_BUF_LEN: i32 = 65;
-///DEVICE_NAME_BUF_LEN
 pub const DEVICE_NAME_BUF_LEN: i32 = 128;
 
 /// for adapter
@@ -71,7 +47,7 @@ pub const MAX_STREAM_BUF_SIZE: usize = 256;
 pub const PARAM_INPUT_INVALID: i32 = 5;
 pub const MEM_OUT_OF_BOUNDS: i32 = 3;
 
-/// TODO: add documentation.
+/// struct for dsoftbus
 #[repr(C)]
 pub struct NodeBasicInfo {
     pub network_id: [i8; NETWORK_ID_BUF_LEN as usize],
@@ -79,7 +55,7 @@ pub struct NodeBasicInfo {
     pub device_type_id: u16,
 }
 
-/// TODO: add documentation.
+/// struct for dsoftbus
 #[repr(C)]
 pub struct SessionAttribute {
     pub data_type: i32,
@@ -90,14 +66,14 @@ pub struct SessionAttribute {
     pub fast_trans_data_size: u16,
 }
 
-/// TODO: add documentation.
+/// struct for dsoftbus
 #[repr(C)]
 pub struct StreamData {
     pub buf_data: c_char,
     pub buf_len: i32,
 }
 
-/// TODO: add documentation.
+/// struct for dsoftbus
 #[repr(C)]
 pub struct DataPacket {
     pub message_id: MessageId,
@@ -105,7 +81,7 @@ pub struct DataPacket {
     pub data: Vec<*const c_char>,
 }
 
-/// TODO: add documentation.
+/// enum for adapter
 #[repr(C)]
 pub enum MessageId {
     MinId,
@@ -114,7 +90,7 @@ pub enum MessageId {
     MaxId,
 }
 
-// for adapter
+/// enum for adapter
 #[repr(C)]
 pub enum ErrorStatus {
     ErrorStatusOk,
@@ -122,7 +98,7 @@ pub enum ErrorStatus {
     ErrorStatusWrite,
 }
 
-/// TODO: add documentation.
+/// struct for dsoftbus
 #[repr(C)]
 pub struct StreamFrameInfo {
     pub frame_type: i32,
@@ -135,19 +111,7 @@ pub struct StreamFrameInfo {
     pub tv_list: i32,
 }
 
-/// TODO: add documentation.
-pub type OnSessionOpened = extern "C" fn (session_id: i32, resultValue: i32) -> i32;
-/// TODO: add documentation.
-pub type OnSessionClosed = extern "C" fn (session_id: i32);
-/// TODO: add documentation.
-pub type OnBytesReceived = extern "C" fn (session_id: i32, byteData: *const c_void, data_len: u32);
-/// TODO: add documentation.
-pub type OnMessageReceived = extern "C" fn (session_id: i32, byteData: *const c_void, data_len: u32);
-/// TODO: add documentation.
-pub type OnstreamReceived = extern "C" fn (session_id: i32, byteData: *const StreamData,
-    extData: *const StreamData, paramData: *const StreamFrameInfo);
-
-/// TODO: add documentation.
+/// struct for dsoftbus
 #[repr(C)]
 #[derive(Default)]
 pub struct ISessionListener {
@@ -158,21 +122,21 @@ pub struct ISessionListener {
     pub on_stream_received: Option<OnstreamReceived>,
 }
 
-/// struct CPointerEvent
+/// struct for adapter
 #[repr(C)]
 pub struct CPointerEvent {
     /// Corresponding to the C-side 'void' type, one way to avoid using 'unsafe'
     _private: [u8; 0],
 }
 
-/// struct CPointerEvent
+/// struct for adapter
 #[repr(C)]
 pub struct CJsonStruct {
     /// Corresponding to the C-side 'void' type, one way to avoid using 'unsafe'
     _private: [u8; 0],
 }
 
-/// TODO: add documentation.
+/// enum for adapter
 #[repr(C)]
 pub enum CoordStatusType{
     RemoteCoordinationStart = 1,
@@ -184,37 +148,67 @@ pub enum CoordStatusType{
     NotifyFilterAdded = 7
 }
 
-// C interface for coordination_sm
+/// callback type OnSessionOpened
+pub type OnSessionOpened = extern "C" fn (session_id: i32, resultValue: i32) -> i32;
+/// callback type OnSessionClosed
+pub type OnSessionClosed = extern "C" fn (session_id: i32);
+/// callback type OnBytesReceived
+pub type OnBytesReceived = extern "C" fn (session_id: i32, byteData: *const c_void, data_len: u32);
+/// callback type OnMessageReceived
+pub type OnMessageReceived = extern "C" fn (session_id: i32, byteData: *const c_void, data_len: u32);
+/// callback type OnstreamReceived
+pub type OnstreamReceived = extern "C" fn (session_id: i32, byteData: *const StreamData,
+    extData: *const StreamData, paramData: *const StreamFrameInfo);
+
+// C interface for adapter,function definition in coordination_sm_rust.cpp
 extern "C" {
+    /// interface of CGetLastPointerEvent
     pub fn CGetLastPointerEvent() -> *const CPointerEvent;
+    /// interface of CGetPressedButtons
     pub fn CGetPressedButtons(cPointerEvent: *const CPointerEvent) -> bool;
 }
 
-// C interface for adapter
+// C interface for adapter,function definition in message_packing.cpp
 extern "C" {
+    /// interface of CGetCJsonObj
     pub fn CGetCJsonObj() -> *const CJsonStruct;
+    /// interface of CAddNumber
     pub fn CAddNumber(cJsonObj: *const CJsonStruct, value: i32, str: *const c_char) -> bool;
+    /// interface of CAddbool
     pub fn CAddbool(cJsonObj: *const CJsonStruct, value: bool, str: *const c_char) -> bool;
+    /// interface of CAddString
     pub fn CAddString(cJsonObj: *const CJsonStruct, value: *const c_char, str: *const c_char) -> bool;
+    /// interface of CJsonPrint
     pub fn CJsonPrint(cJsonObj: *const CJsonStruct, msg: *mut c_char) ->bool;
+    /// interface of CJsonDelete
     pub fn CJsonDelete(cJsonObj: *const CJsonStruct);
+    /// interface of CJsonFree
     pub fn CJsonFree(str: *const c_char);
 }
 
 // C interface for main
 extern "C" {
+    /// interface of GetAccessToken
     pub fn GetAccessToken();
 }
 
-// C interface for session
+// C interface for dsoftbus,function definition in lib: dsoftbus:softbus_client
 extern "C" {
+    /// interface of CreateSessionServer
     pub fn CreateSessionServer(pkg_name: *const c_char, session_name: *const c_char, session_listener: *const ISessionListener) -> i32;
+    /// interface of RemoveSessionServer
     pub fn RemoveSessionServer(pkg_name: *const c_char, session_name: *const c_char) -> i32;
+    /// interface of CloseSession
     pub fn CloseSession(session_id: i32);
+    /// interface of OpenSession
     pub fn OpenSession(my_session_name: *const c_char, peer_session_name: *const c_char, peer_device_id: *const c_char,
         groupId: *const c_char, attr: *const SessionAttribute) -> i32;
+    /// interface of GetPeerDeviceId
     pub fn GetPeerDeviceId(session_id: i32, peer_dev_id: *mut c_char, len: u32) -> i32;
+    /// interface of GetSessionSide
     pub fn GetSessionSide(session_id: i32) -> i32;
+    /// interface of GetLocalNodeDeviceInfo
     pub fn GetLocalNodeDeviceInfo(pkg_name: *const c_char, info: *mut NodeBasicInfo) -> i32;
+    /// interface of SendBytes
     pub fn SendBytes(session_id: i32, data: *const c_void, len: u32) -> i32;
 }

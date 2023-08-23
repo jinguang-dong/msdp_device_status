@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "message_packing.h"
 
 #include "message_packing_internal.h"

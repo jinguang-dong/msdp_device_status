@@ -23,7 +23,7 @@ use std::ffi::{c_void, c_char, c_uchar, CString, CStr};
 use std::sync::{Once, Mutex, Arc, Condvar};
 use std::collections::HashMap;
 use std::time::Duration;
-use fusion_data_rust::FusionResult;
+use fusion_data_rust::{FusionResult, FusionErrorCode};
 use fusion_utils_rust::{ call_debug_enter };
 use hilog_rust::{ error, info, hilog, HiLogLabel, LogType };
 use crate::binding::{ ISessionListener, StreamData, StreamFrameInfo, SessionAttribute, NodeBasicInfo,
@@ -54,6 +54,8 @@ const LOG_LABEL: HiLogLabel = HiLogLabel {
     tag: "DSoftbus"
 };
 
+/// Provide for cpp to call
+/// # Safety
 extern "C" fn on_session_opened(session_id: i32, result: i32) -> i32 {
     match DSoftbus::get_instance() {
         Some(dsoftbus) => {
@@ -69,6 +71,8 @@ extern "C" fn on_session_opened(session_id: i32, result: i32) -> i32 {
     }
 }
 
+/// Provide for cpp to call
+/// # Safety
 extern "C" fn on_session_closed(session_id: i32) {
     match DSoftbus::get_instance() {
         Some(dsoftbus) => {
@@ -80,6 +84,8 @@ extern "C" fn on_session_closed(session_id: i32) {
     }
 }
 
+/// Provide for cpp to call
+/// # Safety
 extern "C" fn on_bytes_received(session_id: i32, data: *const c_void, data_len: u32) {
     match DSoftbus::get_instance() {
         Some(dsoftbus) => {
@@ -91,12 +97,16 @@ extern "C" fn on_bytes_received(session_id: i32, data: *const c_void, data_len: 
     }
 }
     
+/// Provide for cpp to call
+/// # Safety
 extern "C" fn on_message_received(session_id: i32, data: *const c_void, data_len: u32) {
     let _id = session_id;
     let _dt = data;
     let _len = data_len;
 }
 
+/// Provide for cpp to call
+/// # Safety
 extern "C" fn on_stream_received(session_id: i32, data: *const StreamData, ext: *const StreamData, param: *const StreamFrameInfo) {
     let _id = session_id;
     let _dt = data;
@@ -115,6 +125,7 @@ impl From<MessageId> for i32 {
     }
 }
 
+///struct DSoftbusImpl
 #[derive(Default)]
 struct DSoftbusImpl {
     sess_listener: ISessionListener,
@@ -126,7 +137,7 @@ struct DSoftbusImpl {
 }
 
 impl DSoftbusImpl {
-    /// TODO: add documentation.
+    /// implementation of init
     fn init(&mut self) -> FusionResult<i32> {
         call_debug_enter!("DSoftbus::init");
         let session_name_pre = String::from("ohos.msdp.device_status");
@@ -168,6 +179,7 @@ impl DSoftbusImpl {
         Ok(0)
     }
 
+    /// implementation of local_network_id
     fn local_network_id(&mut self) -> String {
         call_debug_enter!("DSoftbus::local_network_id");
         let mut local_node = NodeBasicInfo {
@@ -187,7 +199,7 @@ impl DSoftbusImpl {
         unsafe{ return CStr::from_ptr(local_node_ptr).to_str().unwrap().to_owned() };
     }
 
-    /// TODO: add documentation.
+    /// implementation of release
     fn release(&mut self) {
         call_debug_enter!("DSoftbus::release");      
         for (_key, value) in self.session_dev_map.iter() {
@@ -200,7 +212,7 @@ impl DSoftbusImpl {
         self.channel_status_map.clear();
     }
 
-    /// TODO: add documentation.
+    /// implementation of open_input_softbus
     fn open_input_softbus(&mut self, remote_network_id: &String) -> FusionResult<i32> {
         call_debug_enter!("DSoftbus::open_input_softbus");
         let session_name = String::from("ohos.msdp.device_status");
@@ -239,7 +251,7 @@ impl DSoftbusImpl {
         self.wait_session_opend(remote_network_id, session_id)
     }
 
-    /// TODO: add documentation.
+    /// implementation of close_input_softbus
     fn close_input_softbus(&mut self, remote_network_id: &String) {
         call_debug_enter!("DSoftbus::close_input_softbus");
         let get_result: Option<&i32> = self.session_dev_map.get(remote_network_id);
@@ -252,7 +264,7 @@ impl DSoftbusImpl {
         self.channel_status_map.remove(remote_network_id);
     }
 
-    /// TODO: add documentation.
+    /// implementation of wait_session_opend
     fn wait_session_opend(&mut self, remote_network_id: &String, session_id: i32) -> FusionResult<i32> {
         call_debug_enter!("DSoftbus::wait_session_opend");
         self.session_dev_map.insert(remote_network_id.to_string(), session_id);
@@ -270,7 +282,7 @@ impl DSoftbusImpl {
         Ok(0)
     }
 
-    /// TODO: add documentation.
+    /// implementation of on_session_opened
     fn on_session_opened(&mut self, session_id: i32, result: i32) -> FusionResult<i32> {
         call_debug_enter!("DSoftbus::on_session_opened");
         let mut peer_dev_id: String = String::from("00000000000000000000000000000000000000000000000000000000000000000");
@@ -305,7 +317,7 @@ impl DSoftbusImpl {
         Ok(0)
     }
 
-    /// TODO: add documentation.
+    /// implementation of find_device
     fn find_device(&self, session_id: i32) -> String {
         call_debug_enter!("DSoftbus::find_device");
         for (key, value) in self.session_dev_map.iter() {
@@ -317,7 +329,7 @@ impl DSoftbusImpl {
         String::from("")
     }
 
-    /// TODO: add documentation.
+    /// implementation of on_session_closed
     fn on_session_closed(&mut self, session_id: i32) {
         call_debug_enter!("DSoftbus::on_session_closed");
         let device_id = self.find_device(session_id);
@@ -330,7 +342,7 @@ impl DSoftbusImpl {
         }
     }
 
-    /// TODO: add documentation.
+    /// implementation of handle_session_data
     fn handle_session_data(&self, session_id: i32, message: String) {
         call_debug_enter!("handle_session_data");
         if message.is_empty(){
@@ -340,7 +352,7 @@ impl DSoftbusImpl {
         let _id = session_id;
     }
 
-    /// TODO: add documentation.
+    /// implementation of on_bytes_received
     fn on_bytes_received(&self, session_id: i32, data: *const c_void, data_len: u32) {
         call_debug_enter!("DSoftbus::on_bytes_received");
         if session_id < 0 || data.is_null()|| data_len == 0 {
@@ -355,7 +367,7 @@ impl DSoftbusImpl {
         self.handle_session_data(session_id, message);
     }
 
-    /// TODO: add documentation.
+    /// implementation of check_device_session_state
     fn check_device_session_state(&self, remote_network_id: &String) -> bool {
         call_debug_enter!("DSoftbus::check_device_session_state");
         let get_result: Option<&i32> = self.session_dev_map.get(remote_network_id);
@@ -366,7 +378,7 @@ impl DSoftbusImpl {
         true
     }
 
-    /// TODO: add documentation.
+    /// implementation of send_data
     fn send_data(&self, device_id: &String, message_id: MessageId, data: *const c_void, data_len: u32) -> FusionResult<i32>{
         call_debug_enter!("DSoftbus::send_data");
         let result: i32 = unsafe {SendBytes(self.session_dev_map.get(device_id).copied().unwrap_or(0),
@@ -378,33 +390,33 @@ impl DSoftbusImpl {
         Ok(0)
     }
 
-    /// TODO: add documentation.
+    /// implementation of get_session_dev_map
     fn get_session_dev_map(&self) -> HashMap<String, i32>{
         let map = self.session_dev_map.clone();
         map
     }
 
-    /// TODO: add documentation.
+    /// implementation of get_wait_cond
     fn get_wait_cond(&self) -> Arc<(Mutex<bool>, Condvar)>{
         let wait_cond = self.wait_cond.clone();
         wait_cond
     }
 
-    /// TODO: add documentation.
+    /// implementation of get_operation_mutex
     fn get_operation_mutex(&self) -> Mutex<HashMap<String, i32>>{
         let mutex = self.operation_mutex.lock().unwrap().clone();
         mutex.into()
     }
 }
 
-/// TODO: add documentation.
+/// struct DSoftbus
 #[derive(Default)]
 pub struct DSoftbus {
     dsoftbus_impl: Mutex<RefCell<DSoftbusImpl>>,
 }
 
 impl DSoftbus {
-    /// TODO: add documentation.
+    /// interface of get_instance
     pub fn get_instance() -> Option<&'static Self> {
         static mut DSOFTBUS: Option<DSoftbus> = None;
         static INIT_ONCE: Once = Once::new();
@@ -416,169 +428,169 @@ impl DSoftbus {
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of init
     pub fn init(&self) -> FusionResult<i32> {
         match self.dsoftbus_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().init()
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
-                Err(-1)
+                error!(LOG_LABEL, "lock error: {:?}", err);
+                Err(FusionErrorCode::Fail.into())
             }
         }
     }
    
-   /// TODO: add documentation.
+   /// interface of release
    pub fn release(&self){
         match self.dsoftbus_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().release();
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of open_input_softbus
     pub fn open_input_softbus(&self, remote_network_id: &String) -> FusionResult<i32> {
         match self.dsoftbus_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().open_input_softbus(remote_network_id)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
-                Err(-1)
+                error!(LOG_LABEL, "lock error: {:?}", err);
+                Err(FusionErrorCode::Fail.into())
             }
         }
     }
 
-     /// TODO: add documentation.
-     pub fn close_input_softbus(&self, remote_network_id: &String) {
+    /// interface of close_input_softbus
+    pub fn close_input_softbus(&self, remote_network_id: &String) {
         match self.dsoftbus_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().close_input_softbus(remote_network_id);
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
             }
         }
     }   
 
-    /// TODO: add documentation.
+    /// interface of wait_session_opend
     pub fn wait_session_opend(&mut self, remote_network_id: &String, session_id: i32) -> FusionResult<i32> {
         match self.dsoftbus_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().wait_session_opend(remote_network_id, session_id)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
-                Err(-1)
+                error!(LOG_LABEL, "lock error: {:?}", err);
+                Err(FusionErrorCode::Fail.into())
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of on_session_opened
     pub fn on_session_opened(&self, session_id: i32, result: i32) -> FusionResult<i32>{
         match self.dsoftbus_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().on_session_opened(session_id, result)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
-                Err(-1)
+                error!(LOG_LABEL, "lock error: {:?}", err);
+                Err(FusionErrorCode::Fail.into())
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of on_session_closed
     pub fn on_session_closed(&self, session_id: i32) {
         match self.dsoftbus_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().on_session_closed(session_id);
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of find_device
     pub fn find_device(&self, session_id: i32) -> String {
         match self.dsoftbus_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().find_device(session_id)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 String::from("")
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of handle_session_data
     pub fn handle_session_data(&self, session_id: i32, message: String) {
         match self.dsoftbus_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().handle_session_data(session_id, message);
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of on_bytes_received
     pub fn on_bytes_received(&self, session_id: i32, data: *const c_void, data_len: u32) {
         match self.dsoftbus_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().on_bytes_received(session_id, data, data_len);
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of check_device_session_state
     pub fn check_device_session_state(&self, remote_network_id: &String) -> bool {
         match self.dsoftbus_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().check_device_session_state(remote_network_id)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 false
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of send_data
     pub fn send_data(&self, device_id: &String, message_id: MessageId, data: *const c_void, data_len: u32) -> FusionResult<i32>{
         match self.dsoftbus_impl.lock() {
             Ok(guard) => {
                 guard.borrow_mut().send_data(device_id, message_id, data, data_len)
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
-                Err(-1)
+                error!(LOG_LABEL, "lock error: {:?}", err);
+                Err(FusionErrorCode::Fail.into())
             }
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of on_message_received
     pub fn on_message_received(&self, session_id: i32, data: *const c_void, data_len: u32) {
 
     }
 
-    /// TODO: add documentation.
+    /// interface of on_stream_received
     pub fn on_stream_received(&self, session_id: i32, data: *const StreamData,
         ext: *const StreamData, param: *const StreamFrameInfo) {
 
     }
 
-    /// TODO: add documentation.
+    /// interface of get_session_dev_map
     pub fn get_session_dev_map(&self, result: &mut bool) -> HashMap<String, i32>{
         match self.dsoftbus_impl.lock() {
             Ok(guard) => {
@@ -586,7 +598,7 @@ impl DSoftbus {
                 guard.borrow_mut().get_session_dev_map()
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 *result = false;
                 let map: HashMap<String, i32> = HashMap::new();
                 map
@@ -594,7 +606,7 @@ impl DSoftbus {
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of get_wait_cond
     pub fn get_wait_cond(&self, result: &mut bool) -> Arc<(Mutex<bool>, Condvar)> {
         match self.dsoftbus_impl.lock() {
             Ok(guard) => {
@@ -602,7 +614,7 @@ impl DSoftbus {
                 guard.borrow_mut().get_wait_cond()
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 *result = false;
                 let wait_cond = Arc::new((Mutex::new(false), Condvar::new()));
                 wait_cond
@@ -610,7 +622,7 @@ impl DSoftbus {
         }
     }
 
-    /// TODO: add documentation.
+    /// interface of get_operation_mutex
     pub fn get_operation_mutex(&self, result: &mut bool) -> Mutex<HashMap<String, i32>>{
         match self.dsoftbus_impl.lock() {
             Ok(guard) => {
@@ -618,7 +630,7 @@ impl DSoftbus {
                 guard.borrow_mut().get_operation_mutex()
             }
             Err(err) => {
-                error!(LOG_LABEL, "lock error: {}", err);
+                error!(LOG_LABEL, "lock error: {:?}", err);
                 *result = false;
                 let map: HashMap<String, i32> = HashMap::new();
                 let mutex: Mutex<HashMap<String, i32>>= Mutex::new(map);
