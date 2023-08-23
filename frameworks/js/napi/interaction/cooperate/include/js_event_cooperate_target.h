@@ -81,7 +81,7 @@ private:
         { CoordinationMessage::ACTIVATE_FAIL, CooperateMessage::INFO_FAIL }
     };
     inline static std::map<std::string_view, std::vector<std::unique_ptr<JsUtilCooperate::CallbackInfo>>>
-        coordinationListener_ {};
+        coordinationListeners_ {};
     std::atomic_bool isListeningProcess_ { false };
 };
 } // namespace DeviceStatus
