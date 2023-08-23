@@ -136,21 +136,8 @@ float GetScaling()
 int32_t DragDrawing::Init(const DragData &dragData)
 {
     CALL_DEBUG_ENTER;
-    if (g_drawingInfo.isRunning) {
-        FI_HILOGE("Drag drawing is running, can not init again");
-        return INIT_CANCEL;
-    }
-    CHKPR(dragData.shadowInfo.pixelMap, INIT_FAIL);
-    if ((dragData.sourceType != MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
-        (dragData.sourceType != MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) {
-        FI_HILOGE("Invalid sourceType:%{public}d", dragData.sourceType);
-        return INIT_FAIL;
-    }
-    if (dragData.dragNum < 0) {
-        FI_HILOGE("Invalid dragNum:%{public}d", dragData.dragNum);
-        return INIT_FAIL;
-    }
-    InitDrawingInfo(dragData);
+    InitPrejudgment(dragData);
+    InitDrawingInfo(dragData); 
     CreateWindow(dragData.displayX, dragData.displayY);
     CHKPR(g_drawingInfo.surfaceNode, INIT_FAIL);
     if (InitLayer() != RET_OK) {
@@ -186,6 +173,25 @@ int32_t DragDrawing::Init(const DragData &dragData)
     }
     rsUiDirector_->SendMessages();
     return INIT_SUCCESS;
+}
+
+int32_t DragDrawing::InitPrejudgment(const DragData &dragData)
+{
+    CALL_DEBUG_ENTER;
+    if (g_drawingInfo.isRunning) {
+    FI_HILOGE("Drag drawing is running, can not init again");
+    return INIT_CANCEL;
+    }
+    CHKPR(dragData.shadowInfo.pixelMap, INIT_FAIL);
+    if ((dragData.sourceType != MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
+        (dragData.sourceType != MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) {
+        FI_HILOGE("Invalid sourceType:%{public}d", dragData.sourceType);
+        return INIT_FAIL;
+    }
+    if (dragData.dragNum < 0) {
+        FI_HILOGE("Invalid dragNum:%{public}d", dragData.dragNum);
+        return INIT_FAIL;
+    }
 }
 
 void DragDrawing::Draw(int32_t displayId, int32_t displayX, int32_t displayY)

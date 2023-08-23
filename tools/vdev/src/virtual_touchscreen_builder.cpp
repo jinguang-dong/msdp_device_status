@@ -230,15 +230,7 @@ void VirtualTouchScreenBuilder::Act(int32_t argc, char *argv[])
 {
     CALL_DEBUG_ENTER;
     int32_t opt = getopt(argc, argv, "d:u:m:M:f:r:w:D:");
-    if (opt < 0) {
-        std::cout << "Vdevadm act: required option is missing" << std::endl;
-        ShowUsage();
-        return;
-    }
-    if (VirtualTouchScreen::GetDevice() == nullptr) {
-        std::cout << "No virtual touchscreen." << std::endl;
-        return;
-    }
+    Optprejudgment(opt);
     do {
         switch (opt) {
             case 'd': {
@@ -279,6 +271,20 @@ void VirtualTouchScreenBuilder::Act(int32_t argc, char *argv[])
             }
         }
     } while ((opt = getopt(argc, argv, "d:u:m:M:f:r:w:D:")) >= 0);
+}
+
+void VirtualTouchScreenBuilder::Optprejudgment(int32_t *opt)
+{
+    CALL_DEBUG_ENTER;
+    if (opt < 0) {
+        std::cout << "Vdevadm act: required option is missing" << std::endl;
+        ShowUsage();
+        return;
+    }
+    if (VirtualTouchScreen::GetDevice() == nullptr) {
+        std::cout << "No virtual touchscreen." << std::endl;
+        return;
+    }
 }
 
 void VirtualTouchScreenBuilder::ReadDownAction(int32_t argc, char *argv[])
