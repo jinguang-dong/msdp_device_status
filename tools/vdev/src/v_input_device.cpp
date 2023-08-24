@@ -300,7 +300,7 @@ void VInputDevice::CheckPointers()
     bool hasJoystickFeature { HasJoystickAxesOrButtons() };
 
     AbsCoordsHandle(hasAbsCoords, stylusOrPen, fingerButNoPen, isDirect, hasMouseBtn, hasTouch, hasJoystickFeature);
-    MtcoordsHandle(hasAbsCoords, stylusOrPen, fingerButNoPen, isDirect, hasTouch);
+    MtcoordsHandle(hasMtCoords, stylusOrPen, fingerButNoPen, isDirect, hasTouch);
 
     if (!caps_.test(DEVICE_CAP_TABLET_TOOL) && !caps_.test(DEVICE_CAP_POINTER) &&
         !caps_.test(DEVICE_CAP_JOYSTICK) && hasMouseBtn && (hasRelCoords || !hasAbsCoords)) {

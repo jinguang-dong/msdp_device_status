@@ -143,7 +143,7 @@ void VirtualDeviceBuilder::Unmount(const char *name, const char *id)
     std::cout << "Mo backing process for virtual " << name << " was found." << std::endl;
 }
 
-void VirtualDeviceBuilder::UnmountCourse(std::ostringstream spath, const char *id, struct dirent *dent, std::regex *pattern)
+void VirtualDeviceBuilder::UnmountCourse(std::ostringstream spath, const char *id, struct dirent& dent, std::regex *pattern)
 {
     std::ifstream stream(spath.str(), std::ios::in);
     if (!stream.is_open()) {
