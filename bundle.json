@@ -42,7 +42,8 @@
         "dsoftbus",
         "graphic_2d",
         "common",
-        "motion"
+        "motion",
+        "bundle_framework"
       ],
       "third_party": [
         "cJSON",
