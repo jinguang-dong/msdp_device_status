@@ -277,8 +277,7 @@ void Device::CheckPointers()
     PrintCapsDevice();
 }
 
-void Device::AbsCoordsHandle(bool hasAbsCoords, bool stylusOrPen, bool fingerButNoPen, bool isDirect, 
-bool hasMouseBtn, bool hasTouch, bool hasJoystickFeature)
+void Device::AbsCoordsHandle(bool hasAbsCoords, bool stylusOrPen, bool fingerButNoPen, bool isDirect, bool hasMouseBtn, bool hasTouch, bool hasJoystickFeature)
 {
     if (hasAbsCoords) {
         if (stylusOrPen) {
@@ -297,8 +296,7 @@ bool hasMouseBtn, bool hasTouch, bool hasJoystickFeature)
     }
 }
 
-void Device::MtcoordsHandle(bool hasMtCoords, bool stylusOrPen, bool fingerButNoPen, bool isDirect,
-bool hasTouch)
+void Device::MtcoordsHandle(bool hasMtCoords, bool stylusOrPen, bool fingerButNoPen, bool isDirect, bool hasTouch)
 {
     if (hasMtCoords) {
         if (stylusOrPen) {

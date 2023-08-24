@@ -309,8 +309,7 @@ void VInputDevice::CheckPointers()
     PrintCapsDevice();
 }
 
-void VInputDevice::AbsCoordsHandle(bool hasAbsCoords, bool stylusOrPen, bool fingerButNoPen, bool isDirect, 
-bool hasMouseBtn, bool hasTouch, bool hasJoystickFeature)
+void VInputDevice::AbsCoordsHandle(bool hasAbsCoords, bool stylusOrPen, bool fingerButNoPen, bool isDirect, bool hasMouseBtn, bool hasTouch, bool hasJoystickFeature)
 {
     if (hasAbsCoords) {
         if (stylusOrPen) {
@@ -329,8 +328,7 @@ bool hasMouseBtn, bool hasTouch, bool hasJoystickFeature)
     }
 }
 
-void VInputDevice::MtcoordsHandle(bool hasMtCoords, bool stylusOrPen, bool fingerButNoPen, bool isDirect,
-bool hasTouch)
+void VInputDevice::MtcoordsHandle(bool hasMtCoords, bool stylusOrPen, bool fingerButNoPen, bool isDirect, bool hasTouch)
 {
     if (hasMtCoords) {
         if (stylusOrPen) {
