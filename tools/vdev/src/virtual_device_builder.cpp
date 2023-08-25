@@ -117,7 +117,7 @@ void VirtualDeviceBuilder::Unmount(const char *name, const char *id)
 
     std::ostringstream sPattern;
     sPattern << "^vdevadm_(mount|clone)_-t_?" << id;
-    std::regex pattern { sPattern.str() };
+    std::string patternStr = sPattern.str();
     struct dirent *dent;
 
     while ((dent = readdir(procDir)) != nullptr) {
@@ -138,13 +138,14 @@ void VirtualDeviceBuilder::Unmount(const char *name, const char *id)
         }
         spath << "/cmdline";
 
-        UnmountCourse(spath, id, dent, pattern);
+        UnmountCourse(spath, id, dent, patternStr);
     }
     std::cout << "Mo backing process for virtual " << name << " was found." << std::endl;
 }
 
-void VirtualDeviceBuilder::UnmountCourse(std::ostringstream spath, const char *id, struct dirent& dent, std::regex *pattern)
+void VirtualDeviceBuilder::UnmountCourse(std::ostringstream spath, const char *id, struct dirent& dent, const std::string& patternStr)
 {
+    std::regex pattern { patternStr };
     std::ifstream stream(spath.str(), std::ios::in);
     if (!stream.is_open()) {
         continue;
