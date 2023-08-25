@@ -14,6 +14,9 @@
  */
 
 #include "drag_data_manager_test.h"
+
+#include <ipc_skeleton.h>
+
 #include "fi_log.h"
 
 namespace OHOS {
@@ -51,6 +54,40 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest001, TestSize.Level0)
 
     DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::MOVE);
     EXPECT_TRUE(DRAG_DATA_MGR.GetDragStyle() == DragCursorStyle::MOVE);
+}
+
+/**
+ * @tc.name: DragDataManagerTest002
+ * @tc.desc: test normal get devicestatus data in ipc
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest002, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t targetTid = static_cast<int32_t>(IPCSkeleton::GetCallingTokenID());
+    DRAG_DATA_MGR.SetTargetTid(targetTid);
+    EXPECT_TRUE(targetTid == DRAG_DATA_MGR.GetTargetTid());
+
+    int32_t targetPid = IPCSkeleton::GetCallingPid();
+    DRAG_DATA_MGR.SetTargetPid(targetPid);
+    EXPECT_TRUE(targetPid == DRAG_DATA_MGR.GetTargetPid());
+}
+
+/**
+ * @tc.name: DragDataManagerTest003
+ * @tc.desc: test abnormal get devicestatus data in ipc
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest003, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t targetTid = static_cast<int32_t>(IPCSkeleton::GetCallingTokenID());
+    DRAG_DATA_MGR.SetTargetTid(targetTid);
+    EXPECT_FALSE(targetTid != DRAG_DATA_MGR.GetTargetTid());
+
+    int32_t targetPid = IPCSkeleton::GetCallingPid();
+    DRAG_DATA_MGR.SetTargetPid(targetPid);
+    EXPECT_FALSE(targetPid != DRAG_DATA_MGR.GetTargetPid());
 }
 } // namespace
 } // namespace DeviceStatus
