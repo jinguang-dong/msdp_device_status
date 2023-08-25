@@ -48,6 +48,23 @@ CJson::~CJson()
 {
 }
 
-#define COOR_SM OHOS::DelayedSingleton<CJson>::GetInstance()
+using HandleCb = void (*)(int32_t session_id, const char* message);
+
+class HandRecvMsg
+{
+public:
+    HandleCb cb {nullptr}; 
+public:
+    HandRecvMsg();
+    ~HandRecvMsg();
+};
+
+HandRecvMsg::HandRecvMsg()
+{
+}
+
+HandRecvMsg::~HandRecvMsg()
+{
+}
 
 #endif // MESSAGE_PACKING_INTERNAL_H

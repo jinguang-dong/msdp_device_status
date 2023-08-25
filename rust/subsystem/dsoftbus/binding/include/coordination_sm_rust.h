@@ -24,8 +24,14 @@ extern "C" {
 #endif
 
 struct CPointerEvent;
+
 CPointerEvent* CGetLastPointerEvent();
+
 bool CGetPressedButtons(CPointerEvent* cPointerEvent);
+
+void CStartRemoteCoordinationResult(bool isSuccess, const char* startDeviceDhid, int32_t xPercent, int32_t yPercent);
+
+void CStartRemoteCoordination(const char* remoteNetworkId, bool buttonIsPressed);
 
 #ifdef __cplusplus
 }

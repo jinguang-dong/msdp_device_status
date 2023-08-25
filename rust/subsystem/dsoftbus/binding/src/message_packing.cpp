@@ -27,6 +27,16 @@ CJsonStruct* CGetCJsonObj() {
     return cJsonObj;
 }
 
+void CSaveHandleCb(const HandleCb callback) {
+    CALL_DEBUG_ENTER;
+    OHOS::DelayedSingleton<HandRecvMsg>::GetInstance()->cb = callback;
+}
+
+HandleCb CGetHandleCb() {
+    CALL_DEBUG_ENTER;
+    return OHOS::DelayedSingleton<HandRecvMsg>::GetInstance()->cb;
+}
+
 bool CAddNumber(CJsonStruct* cJsonObj, int32_t value, const char* str) {
     CALL_DEBUG_ENTER;
     if (cJsonObj == nullptr) {
@@ -78,7 +88,60 @@ bool CJsonDelete(CJsonStruct* cJsonObj) {
 }
 
 void CJsonFree(char* str) {
+    CALL_DEBUG_ENTER;
     cJSON_free((void*)str);
 }
 
+void CParse(const char* message, CJsonStruct* cJsonObj) {
+    CALL_DEBUG_ENTER;
+    cJsonObj->cJsonObj = cJSON_Parse(message);
+    
+}
 
+bool CIsJsonObj(CJsonStruct* cJsonObj) {
+    CALL_DEBUG_ENTER;
+    return cJSON_IsObject(cJsonObj->cJsonObj);
+}
+
+bool CIsNumber(CJsonStruct* cJsonObj) {
+    CALL_DEBUG_ENTER;
+    return cJSON_IsNumber(cJsonObj->cJsonObj);
+}
+
+bool CIsBool(CJsonStruct* cJsonObj) {
+    CALL_DEBUG_ENTER;
+    return cJSON_IsBool(cJsonObj->cJsonObj);
+}
+
+bool CIsString(CJsonStruct* cJsonObj) {
+    CALL_DEBUG_ENTER;
+    return cJSON_IsString(cJsonObj->cJsonObj);
+}
+
+bool CIsTrue(CJsonStruct* cJsonObj) {
+    CALL_DEBUG_ENTER;
+    return cJSON_IsTrue(cJsonObj->cJsonObj);
+}
+
+int32_t CGetValueInt(CJsonStruct* cJsonObj) {
+    CALL_DEBUG_ENTER;
+    return cJsonObj->cJsonObj->valueint;
+}
+
+// bool CGetValueBool(CJsonStruct* cJsonObj) {
+//     CALL_DEBUG_ENTER;
+//     return cJsonObj->cJsonObj->valuebool;
+// }
+
+const char* CGetValueString(CJsonStruct* cJsonObj) {
+    return cJsonObj->cJsonObj->valuestring;
+}
+
+bool CGetObjectItemCaseSensitive(CJsonStruct* cJsonObj, const char* type, CJsonStruct* comType) {
+    CALL_DEBUG_ENTER;
+    if (cJsonObj == nullptr) {
+        return false;
+    }
+    comType->cJsonObj = cJSON_GetObjectItemCaseSensitive(cJsonObj->cJsonObj, type);
+    return true;
+}

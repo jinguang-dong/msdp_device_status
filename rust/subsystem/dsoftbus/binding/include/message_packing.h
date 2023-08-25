@@ -22,6 +22,12 @@ extern "C" {
 #endif
 struct CJsonStruct;
 
+using HandleCb = void (*)(int32_t session_id, const char* str);
+
+void CSaveHandleCb(HandleCb callback);
+
+HandleCb CGetHandleCb();
+
 CJsonStruct* CGetCJsonObj();
 
 bool CAddNumber(CJsonStruct* cJsonObj, int32_t value, const char* str);
@@ -35,6 +41,27 @@ bool CJsonPrint(CJsonStruct* cJsonObj, char* msg);
 bool CJsonDelete(CJsonStruct* cJsonObj);
 
 void CJsonFree(char* str);
+
+void CParse(const char* message, CJsonStruct* cJsonObj);
+
+bool CIsJsonObj(CJsonStruct* cJsonObj);
+
+bool CIsNumber(CJsonStruct* cJsonObj);
+
+bool CIsBool(CJsonStruct* cJsonObj);
+
+bool CIsString(CJsonStruct* cJsonObj);
+
+bool CIsTrue(CJsonStruct* cJsonObj);
+
+int32_t CGetValueInt(CJsonStruct* cJsonObj);
+
+//bool CGetValueBool(CJsonStruct* cJsonObj);
+
+const char* CGetValueString(CJsonStruct* cJsonObj);
+
+bool CGetObjectItemCaseSensitive(CJsonStruct* cJsonObj, const char* cmd_type, CJsonStruct* comType);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

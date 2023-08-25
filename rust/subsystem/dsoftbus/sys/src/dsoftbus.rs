@@ -32,7 +32,7 @@ use crate::binding::{ ISessionListener, StreamData, StreamFrameInfo, SessionAttr
     DINPUT_LINK_TYPE_MAX,
     DEVICE_ID_SIZE_MAX,
     SESSION_SIDE_SERVER,
-    UNSUCCESSFUL,
+    SUCCESSFUL,
     LINK_TYPE_WIFI_WLAN_5G,
     LINK_TYPE_WIFI_WLAN_2G,
     LINK_TYPE_WIFI_P2P,
@@ -46,6 +46,8 @@ use crate::binding::{ ISessionListener, StreamData, StreamFrameInfo, SessionAttr
     RemoveSessionServer,
     GetLocalNodeDeviceInfo,
     SendBytes,
+    CGetHandleCb,
+    OnHandleRecvData,
 };
 
 const LOG_LABEL: HiLogLabel = HiLogLabel {
@@ -120,6 +122,7 @@ impl From<MessageId> for i32 {
             MessageId::MinId => 0,
             MessageId::DraggingData => 1,
             MessageId::StopdragData => 2,
+            MessageId::IsPullUp => 3,
             MessageId::MaxId => 50,
         }
     }
@@ -134,12 +137,16 @@ struct DSoftbusImpl {
     channel_status_map: HashMap<String, bool>,
     operation_mutex: Mutex<HashMap<String, i32>>,
     wait_cond: Arc<(Mutex<bool>, Condvar)>,
+    call_back_handle_msg: Option<OnHandleRecvData>,
 }
 
 impl DSoftbusImpl {
     /// implementation of init
     fn init(&mut self) -> FusionResult<i32> {
         call_debug_enter!("DSoftbus::init");
+
+        self.call_back_handle_msg = unsafe { CGetHandleCb() };
+
         let session_name_pre = String::from("ohos.msdp.device_status");
         self.sess_listener = ISessionListener {
             on_session_opened: Some(on_session_opened),
@@ -337,7 +344,7 @@ impl DSoftbusImpl {
         if get_result.is_some() {
             self.session_dev_map.remove(&device_id);
         }
-        if unsafe { GetSessionSide(session_id) } != UNSUCCESSFUL {
+        if unsafe { GetSessionSide(session_id) } != SUCCESSFUL {
             self.channel_status_map.remove(&device_id);
         }
     }
@@ -347,9 +354,7 @@ impl DSoftbusImpl {
         call_debug_enter!("handle_session_data");
         if message.is_empty(){
             error!(LOG_LABEL, "Message is empty");
-            return;
         }
-        let _id = session_id;
     }
 
     /// implementation of on_bytes_received
@@ -364,7 +369,9 @@ impl DSoftbusImpl {
         let dt_slice: &str = dt.to_str().unwrap();
         let message: String = dt_slice.to_owned();
         info!(LOG_LABEL, "on_bytes_received data:{}", @public(message));
-        self.handle_session_data(session_id, message);
+        if let Some(call_back) = self.call_back_handle_msg {
+            call_back(session_id, message.as_ptr() as *const c_char);
+        }
     }
 
     /// implementation of check_device_session_state

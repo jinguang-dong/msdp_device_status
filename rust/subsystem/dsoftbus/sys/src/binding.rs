@@ -25,7 +25,7 @@ pub const INTERCEPT_STRING_LENGTH: usize = 20;
 pub const DINPUT_LINK_TYPE_MAX: i32 = 4;
 pub const DEVICE_ID_SIZE_MAX: usize = 65;
 pub const SESSION_SIDE_SERVER: i32 = 0;
-pub const UNSUCCESSFUL: i32 = 0;
+pub const SUCCESSFUL: i32 = 0;
 pub const LINK_TYPE_WIFI_WLAN_5G: i32 = 1;
 pub const LINK_TYPE_WIFI_WLAN_2G: i32 = 2;
 pub const LINK_TYPE_WIFI_P2P: i32 = 3;
@@ -83,10 +83,13 @@ pub struct DataPacket {
 
 /// enum for adapter
 #[repr(C)]
+#[derive(Eq, Hash, PartialEq)]
+#[derive(Copy, Clone)]
 pub enum MessageId {
     MinId,
     DraggingData,
     StopdragData,
+    IsPullUp,
     MaxId,
 }
 
@@ -159,6 +162,7 @@ pub type OnMessageReceived = extern "C" fn (session_id: i32, byteData: *const c_
 /// callback type OnstreamReceived
 pub type OnstreamReceived = extern "C" fn (session_id: i32, byteData: *const StreamData,
     extData: *const StreamData, paramData: *const StreamFrameInfo);
+pub type OnHandleRecvData = extern "C" fn (session_id: i32, message: *const c_char);
 
 // C interface for adapter,function definition in coordination_sm_rust.cpp
 extern "C" {
@@ -171,19 +175,49 @@ extern "C" {
 // C interface for adapter,function definition in message_packing.cpp
 extern "C" {
     /// interface of CGetCJsonObj
-    pub fn CGetCJsonObj() -> *const CJsonStruct;
+    pub fn CGetCJsonObj() -> *mut CJsonStruct;
     /// interface of CAddNumber
-    pub fn CAddNumber(cJsonObj: *const CJsonStruct, value: i32, str: *const c_char) -> bool;
+    pub fn CAddNumber(cJsonObj: *mut CJsonStruct, value: i32, str: *const c_char) -> bool;
     /// interface of CAddbool
-    pub fn CAddbool(cJsonObj: *const CJsonStruct, value: bool, str: *const c_char) -> bool;
+    pub fn CAddbool(cJsonObj: *mut CJsonStruct, value: bool, str: *const c_char) -> bool;
     /// interface of CAddString
-    pub fn CAddString(cJsonObj: *const CJsonStruct, value: *const c_char, str: *const c_char) -> bool;
+    pub fn CAddString(cJsonObj: *mut CJsonStruct, value: *const c_char, str: *const c_char) -> bool;
     /// interface of CJsonPrint
     pub fn CJsonPrint(cJsonObj: *const CJsonStruct, msg: *mut c_char) ->bool;
     /// interface of CJsonDelete
-    pub fn CJsonDelete(cJsonObj: *const CJsonStruct);
+    pub fn CJsonDelete(cJsonObj: *mut CJsonStruct);
     /// interface of CJsonFree
     pub fn CJsonFree(str: *const c_char);
+    /// interface of CSaveHandleCb
+    pub fn CSaveHandleCb(call_back: Option<OnHandleRecvData>);
+    /// interface of CGetHandleCb
+    pub fn CGetHandleCb() -> Option<OnHandleRecvData>;
+    /// interface of CParse
+    pub fn CParse(message: *const c_char, cJsonObj: *mut CJsonStruct);
+    /// interface of CIsJsonObj
+    pub fn CIsJsonObj(cJsonObj: *mut CJsonStruct) -> bool;
+    /// interface of CGetObjectItemCaseSensitive
+    pub fn CGetObjectItemCaseSensitive(cJsonObj: *mut CJsonStruct, cmd_type: *const c_char,
+        com_type: *mut CJsonStruct) -> bool;
+    /// interface of CIsNumber
+    pub fn CIsNumber(cJsonObj: *mut CJsonStruct) -> bool;
+    /// interface of CIsBool
+    pub fn CIsBool(cJsonObj: *mut CJsonStruct) -> bool;
+    /// interface of CIsString
+    pub fn CIsString(cJsonObj: *mut CJsonStruct) -> bool;
+    /// interface of CIsTrue
+    pub fn CIsTrue(cJsonObj: *mut CJsonStruct) -> bool;
+    /// interface of CGetValueInt
+    pub fn CGetValueInt(cJsonObj: *mut CJsonStruct) -> i32;
+    /// interface of CGetValueString
+    pub fn CGetValueString(cJsonObj: *mut CJsonStruct) -> *const c_char;
+    /// interface of CGetValueBool
+    //pub fn CGetValueBool(cJsonObj: *const CJsonStruct) -> bool;
+    /// interface of CStartRemoteCoordinationResult
+    pub fn CStartRemoteCoordinationResult(is_success: bool, start_device_dhid: *const c_char, x_percent: i32,
+        y_percent: i32);
+    /// interface of CStartRemoteCoordination
+    pub fn CStartRemoteCoordination(remoteNetworkId: *const c_char, buttonIsPressed: bool);
 }
 
 // C interface for main

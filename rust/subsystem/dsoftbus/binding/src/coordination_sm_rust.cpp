@@ -19,14 +19,26 @@
 #include "coordination_sm.h"
 #include "coordination_sm_rust_internal.h"
 
+#define COOR_SM_INSTANCE OHOS::DelayedSingleton<OHOS::Msdp::DeviceStatus::CoordinationSM>::GetInstance()
+
 namespace {
 constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, ::OHOS::Msdp::MSDP_DOMAIN_ID, "CoordinationSMRust" };
 } // namespace
 
 CPointerEvent* CGetLastPointerEvent() {
     CALL_DEBUG_ENTER;
-    auto cPointerEvent = new (std::nothrow) CPointerEvent(OHOS::DelayedSingleton<OHOS::Msdp::DeviceStatus::CoordinationSM>::GetInstance()->GetLastPointerEvent());
+    auto cPointerEvent = new (std::nothrow) CPointerEvent(COOR_SM_INSTANCE->GetLastPointerEvent());
     return cPointerEvent;
+}
+
+void CStartRemoteCoordinationResult(bool isSuccess, const char* startDeviceDhid, int32_t xPercent, int32_t yPercent) {
+    CALL_DEBUG_ENTER;
+    COOR_SM_INSTANCE->StartRemoteCoordinationResult(isSuccess, startDeviceDhid, xPercent, yPercent);
+}
+
+void CStartRemoteCoordination(const char* remoteNetworkId, bool buttonIsPressed) {
+    CALL_DEBUG_ENTER;
+    COOR_SM_INSTANCE->StartRemoteCoordination(remoteNetworkId, buttonIsPressed);
 }
 
 bool CGetPressedButtons(CPointerEvent* cPointerEvent)
