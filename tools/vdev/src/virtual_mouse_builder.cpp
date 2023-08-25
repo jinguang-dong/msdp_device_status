@@ -202,15 +202,7 @@ void VirtualMouseBuilder::Act(int32_t argc, char *argv[])
 {
     CALL_DEBUG_ENTER;
     int32_t opt = getopt(argc, argv, "d:u:s:m:M:f:r:w:D:");
-    if (opt < 0) {
-        std::cout << "Vdevadm act: required option is missing" << std::endl;
-        VirtualMouseBuilder::ShowUsage();
-        return;
-    }
-    if (VirtualMouse::GetDevice() == nullptr) {
-        std::cout << "No virtual mouse." << std::endl;
-        return;
-    }
+    Optprejudgment(opt);
     do {
         switch (opt) {
             case 'd': {
@@ -255,6 +247,20 @@ void VirtualMouseBuilder::Act(int32_t argc, char *argv[])
             }
         }
     } while ((opt = getopt(argc, argv, "d:u:s:m:M:f:r:w:D:")) >= 0);
+}
+
+void VirtualMouseBuilder::Optprejudgment(int32_t opt)
+{
+    CALL_DEBUG_ENTER;
+    if (opt < 0) {
+        std::cout << "Vdevadm act: required option is missing" << std::endl;
+        VirtualMouseBuilder::ShowUsage();
+        return;
+    }
+    if (VirtualMouse::GetDevice() == nullptr) {
+        std::cout << "No virtual mouse." << std::endl;
+        return;
+    }
 }
 
 void VirtualMouseBuilder::ReadDownAction()

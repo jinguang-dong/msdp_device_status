@@ -117,7 +117,7 @@ void VirtualDeviceBuilder::Unmount(const char *name, const char *id)
 
     std::ostringstream sPattern;
     sPattern << "^vdevadm_(mount|clone)_-t_?" << id;
-    std::regex pattern { sPattern.str() };
+    std::string patternStr = sPattern.str();
     struct dirent *dent;
 
     while ((dent = readdir(procDir)) != nullptr) {
@@ -138,47 +138,55 @@ void VirtualDeviceBuilder::Unmount(const char *name, const char *id)
         }
         spath << "/cmdline";
 
-        std::ifstream stream(spath.str(), std::ios::in);
-        if (!stream.is_open()) {
-            continue;
-        }
-        std::string sLine;
+        UnmountCourse(spath, id, dent, patternStr);
+    }
+    std::cout << "Mo backing process for virtual " << name << " was found." << std::endl;
+}
 
-        while (std::getline(stream, sLine)) {
-            auto s = sLine.begin();
+void VirtualDeviceBuilder::UnmountCourse(std::ostringstream spath, const char *id, struct dirent& dent, const std::string& patternStr)
+{
+    std::regex pattern { patternStr };
+    std::ifstream stream(spath.str(), std::ios::in);
+    if (!stream.is_open()) {
+        continue;
+    }
+    std::string sLine;
+    while (std::getline(stream, sLine)) {
+        auto s = sLine.begin();
+        while (s != sLine.end() && (isspace(*s) || (*s == '\0'))) {
+            s = sLine.erase(s);
+        }
+        while (s != sLine.end()) {
+            while (s != sLine.end() && !isspace(*s) && *s != '\0') {
+                ++s;
+            }
+            auto t = s;
+            while (t != sLine.end() && (isspace(*t) || (*t == '\0'))) {
+                ++t;
+            }
+            if (t != sLine.end()) {
+                *s++ = '_';
+            }
             while (s != sLine.end() && (isspace(*s) || (*s == '\0'))) {
                 s = sLine.erase(s);
             }
-            while (s != sLine.end()) {
-                while (s != sLine.end() && !isspace(*s) && *s != '\0') {
-                    ++s;
-                }
-                auto t = s;
-                while (t != sLine.end() && (isspace(*t) || (*t == '\0'))) {
-                    ++t;
-                }
-                if (t != sLine.end()) {
-                    *s++ = '_';
-                }
-                while (s != sLine.end() && (isspace(*s) || (*s == '\0'))) {
-                    s = sLine.erase(s);
-                }
-            }
+        }
 
-            if (std::regex_search(sLine, pattern)) {
-                std::cout << "\tfound: \'" << dent->d_name << "\'" << std::endl;
-                int32_t pid = std::atoi(dent->d_name);
-                if (kill(static_cast<pid_t>(pid), SIGTERM) != 0) {
-                    std::cout << "Failed to stop backing process [" << pid << "]: " << strerror(errno) << std::endl;
-                } else {
-                    std::cout << "Unmount virtual " << name << " successfully." << std::endl;
-                }
-                goto EXIT;
+        if (std::regex_search(sLine, pattern)) {
+            std::cout << "\tfound: \'" << dent->d_name << "\'" << std::endl;
+            int32_t pid = std::atoi(dent->d_name);
+            if (kill(static_cast<pid_t>(pid), SIGTERM) != 0) {
+                std::cout << "Failed to stop backing process [" << pid << "]: " << strerror(errno) << std::endl;
+            } else {
+                std::cout << "Unmount virtual " << name << " successfully." << std::endl;
             }
+            Exit(procDir);
         }
     }
-    std::cout << "Mo backing process for virtual " << name << " was found." << std::endl;
-EXIT:
+}
+
+void VirtualDeviceBuilder::Exit(DIR *procDir)
+{
     if (closedir(procDir) != 0) {
         FI_HILOGE("closedir error:%{public}s", strerror(errno));
     }

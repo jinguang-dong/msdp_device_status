@@ -53,6 +53,7 @@ public:
     void AddSessionDeletedCallback(int32_t pid, std::function<void(SessionPtr)> callback);
     int32_t AddSocketPairInfo(const std::string& programName, int32_t moduleType, int32_t uid, int32_t pid,
         int32_t& serverFd, int32_t& toReturnClientFd, int32_t& tokenType) override;
+    int32_t SockOptSetProcess(int32_t& serverFd, int32_t& toReturnClientFd, int32_t& tokenType);
 
     SessionPtr GetSession(int32_t fd) const;
     SessionPtr GetSessionByPid(int32_t pid) const override;
