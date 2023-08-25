@@ -16,6 +16,7 @@
 #ifndef VIRTUAL_DEVICE_BUILDER_H
 #define VIRTUAL_DEVICE_BUILDER_H
 
+#include <dirent.h>
 #include <memory>
 #include <vector>
 
