@@ -249,7 +249,7 @@ void VirtualMouseBuilder::Act(int32_t argc, char *argv[])
     } while ((opt = getopt(argc, argv, "d:u:s:m:M:f:r:w:D:")) >= 0);
 }
 
-void VirtualMouseBuilder::Optprejudgment(int32_t *opt)
+void VirtualMouseBuilder::Optprejudgment(int32_t opt)
 {
     CALL_DEBUG_ENTER;
     if (opt < 0) {

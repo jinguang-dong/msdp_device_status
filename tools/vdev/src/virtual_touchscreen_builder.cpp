@@ -273,7 +273,7 @@ void VirtualTouchScreenBuilder::Act(int32_t argc, char *argv[])
     } while ((opt = getopt(argc, argv, "d:u:m:M:f:r:w:D:")) >= 0);
 }
 
-void VirtualTouchScreenBuilder::Optprejudgment(int32_t *opt)
+void VirtualTouchScreenBuilder::Optprejudgment(int32_t opt)
 {
     CALL_DEBUG_ENTER;
     if (opt < 0) {

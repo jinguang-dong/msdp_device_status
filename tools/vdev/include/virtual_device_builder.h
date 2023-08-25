@@ -43,6 +43,8 @@ public:
 protected:
     static void Daemonize();
     static void Unmount(const char *name, const char *id);
+    static void UnmountCourse(std::ostringstream spath, const char *id, struct dirent& dent, std::regex *pattern);
+    static void Exit(DIR *procDir);
     static void WaitFor(const char *path, const char *name);
     static void WaitFor(const char *name, int32_t timeout);
     static int32_t ReadFile(const char *path, json &model);
