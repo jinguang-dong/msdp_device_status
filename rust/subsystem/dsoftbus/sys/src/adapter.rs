@@ -56,6 +56,10 @@ use crate::binding::{
     //CGetValueBool,
     CStartRemoteCoordinationResult,
     CStartRemoteCoordination,
+    CStopRemoteCoordination,
+    CStopRemoteCoordinationResult,
+    CStartCoordinationOtherResult,
+    CNotifyUnchainedResult,
     CJsonStruct,
 };
 
@@ -628,19 +632,19 @@ impl AdapterImpl {
             self.response_start_remote_coordination_result(session_id, c_json_obj);
         }
         else if value == i32::from(CoordStatusType::RemoteCoordinationStop) {
-            let i = Some(1);
+            self.response_stop_remote_coordination(session_id, c_json_obj);
         }
         else if value == i32::from(CoordStatusType::RemoteCoordinationStopRes) {
-            let i = Some(2);
+            self.response_stop_remote_coordination_result(session_id, c_json_obj);
         }
         else if value == i32::from(CoordStatusType::RemoteCoordinationStopOtherRes) {
-            let i = Some(3);
+            self.response_start_remote_coordination_other_result(session_id, c_json_obj);
         }
         else if value == i32::from(CoordStatusType::NotifyUnChainedRes) {
-            let i = Some(4);
+            self.response_notify_unchained_result(session_id, c_json_obj);
         }
         else if value == i32::from(CoordStatusType::NotifyFilterAdded) {
-            let i = Some(5);
+            self.response_notify_filter_added();
         }
         else {
             error!(LOG_LABEL, "OnBytesRecevied cmdType is undefined");
@@ -677,7 +681,7 @@ impl AdapterImpl {
 
     // implementation of response_start_remote_coordination 
     pub fn response_start_remote_coordination(&mut self, session_id: i32, c_json_obj: *mut CJsonStruct) {
-        call_debug_enter!("Adapter::response_start_remote_coordination_result");
+        call_debug_enter!("Adapter::response_start_remote_coordination");
         let device_id = unsafe { CGetCJsonObj() };
         unsafe { CGetObjectItemCaseSensitive(c_json_obj,
             String::from("fi_softbus_key_local_device_id").as_ptr() as *const c_char, device_id) };
@@ -692,6 +696,81 @@ impl AdapterImpl {
         }
 
         unsafe { CStartRemoteCoordination( CGetValueString(device_id), CIsTrue(button_is_pressed)) };
+    }
+
+    // implementation of response_stop_remote_coordination 
+    pub fn response_stop_remote_coordination(&mut self, session_id: i32, c_json_obj: *mut CJsonStruct) {
+        call_debug_enter!("Adapter::response_stop_remote_coordination");
+        let result = unsafe { CGetCJsonObj() };
+    
+        if !unsafe { CIsBool(result) } {
+            error!(LOG_LABEL, "OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE, data type is error");
+            return;
+        }
+
+        unsafe { CStopRemoteCoordination( CIsTrue(result)) };       
+    }
+
+    // implementation of response_stop_remote_coordination_result 
+    pub fn response_stop_remote_coordination_result(&mut self, session_id: i32, c_json_obj: *mut CJsonStruct) {
+        call_debug_enter!("Adapter::response_stop_remote_coordination_result");
+        let result = unsafe { CGetCJsonObj() };
+    
+        if !unsafe { CIsBool(result) } {
+            error!(LOG_LABEL, "OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE, data type is error");
+            return;
+        }
+
+        unsafe { CStopRemoteCoordinationResult( CIsTrue(result)) };       
+    }
+
+    // implementation of response_start_remote_coordination_other_result 
+    pub fn response_start_remote_coordination_other_result(&mut self, session_id: i32, c_json_obj: *mut CJsonStruct) {
+        call_debug_enter!("Adapter::response_start_remote_coordination_other_result");
+        let device_id = unsafe { CGetCJsonObj() };
+    
+        if !unsafe { CIsString(device_id) } {
+            error!(LOG_LABEL, "OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE, data type is error");
+            return;
+        }
+
+        unsafe { CStartCoordinationOtherResult( CGetValueString(device_id)) };       
+    }
+
+    // implementation of response_notify_unchained_result 
+    pub fn response_notify_unchained_result(&mut self, session_id: i32, c_json_obj: *mut CJsonStruct) {
+        call_debug_enter!("Adapter::response_notify_unchained_result");
+        let device_id = unsafe { CGetCJsonObj() };
+        unsafe { CGetObjectItemCaseSensitive(c_json_obj,
+            String::from("fi_softbus_key_local_device_id").as_ptr() as *const c_char, device_id) };
+
+        let result = unsafe { CGetCJsonObj() };
+        unsafe { CGetObjectItemCaseSensitive(c_json_obj,
+            String::from("fi_softbus_key_result").as_ptr() as *const c_char, result) };
+
+        if !unsafe { CIsString(device_id) } || !unsafe { CIsBool(result) }{
+            error!(LOG_LABEL, "OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE, data type is error");
+            return;
+        }
+
+        unsafe { CNotifyUnchainedResult( CGetValueString(device_id), CIsTrue(result)) };       
+    }
+
+    pub fn response_notify_filter_added(&mut self) {
+        call_debug_enter!("Adapter::response_notify_filter_added");
+        match DSoftbus::get_instance() {
+            Some(dsoftbus) => {
+                let mut result = false;
+                let wait_cond = dsoftbus.get_wait_cond(&mut result);   
+                if !result {
+                    error!(LOG_LABEL, "get waitCond failed");                 
+                }
+                wait_cond.1.notify_all();                                             
+            }
+            None => {
+                error!(LOG_LABEL, "DSoftbus get_instance failed");
+            }
+        };
     }
 }
 

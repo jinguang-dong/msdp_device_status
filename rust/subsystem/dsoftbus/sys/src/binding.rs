@@ -218,6 +218,14 @@ extern "C" {
         y_percent: i32);
     /// interface of CStartRemoteCoordination
     pub fn CStartRemoteCoordination(remoteNetworkId: *const c_char, buttonIsPressed: bool);
+    /// interface of CStartRemoteCoordination
+    pub fn CStopRemoteCoordination(result: bool);
+    /// interface of CStopRemoteCoordinationResult
+    pub fn CStopRemoteCoordinationResult(result: bool);
+    /// interface of CStopRemoteCoordinationOtherResult
+    pub fn CStartCoordinationOtherResult(device_id: *const c_char);
+    /// interface of CNotifyUnchaniedResult
+    pub fn CNotifyUnchainedResult(device_id: *const c_char, result: bool);
 }
 
 // C interface for main

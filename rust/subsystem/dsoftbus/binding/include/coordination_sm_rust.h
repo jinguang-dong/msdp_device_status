@@ -33,6 +33,14 @@ void CStartRemoteCoordinationResult(bool isSuccess, const char* startDeviceDhid,
 
 void CStartRemoteCoordination(const char* remoteNetworkId, bool buttonIsPressed);
 
+void CStopRemoteCoordination (bool result);
+
+void CStopRemoteCoordinationResult (bool result);
+
+void CStartCoordinationOtherResult (const char* device_id);
+
+void CNotifyUnchainedResult(const char* device_id, bool result);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

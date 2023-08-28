@@ -41,6 +41,26 @@ void CStartRemoteCoordination(const char* remoteNetworkId, bool buttonIsPressed)
     COOR_SM_INSTANCE->StartRemoteCoordination(remoteNetworkId, buttonIsPressed);
 }
 
+void CStopRemoteCoordination (bool result) {
+    CALL_DEBUG_ENTER;
+    COOR_SM_INSTANCE->StopRemoteCoordination(result);
+}
+
+void CStopRemoteCoordinationResult (bool result) {
+    CALL_DEBUG_ENTER;
+    COOR_SM_INSTANCE->StopRemoteCoordinationResult(result);
+}
+
+void CStartCoordinationOtherResult (const char* device_id) {
+    CALL_DEBUG_ENTER;
+    COOR_SM_INSTANCE->StartCoordinationOtherResult(device_id);
+}
+
+void CNotifyUnchainedResult(const char* device_id, bool result) {
+    CALL_DEBUG_ENTER;
+    COOR_SM_INSTANCE->NotifyUnchainedResult(device_id, result);
+}
+
 bool CGetPressedButtons(CPointerEvent* cPointerEvent)
 {
     CALL_DEBUG_ENTER;
