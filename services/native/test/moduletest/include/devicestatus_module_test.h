@@ -34,6 +34,10 @@ public:
         virtual void OnDeviceStatusChanged(const Data& devicestatusData) override;
     };
     static Type g_moduleTest;
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
 };
 } // namespace DeviceStatus
 } // namespace Msdp

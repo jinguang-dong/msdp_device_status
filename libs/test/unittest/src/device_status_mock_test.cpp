@@ -18,6 +18,8 @@
 #include <gtest/gtest.h>
 
 #include "accesstoken_kit.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
 #include "devicestatus_data_define.h"
 #include "devicestatus_define.h"
 #define private public
@@ -33,9 +35,43 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
+using namespace OHOS;
+using namespace std;
+using namespace Security::AccessToken;
 namespace {
 std::shared_ptr<DeviceStatusMsdpMock> g_testMock;
 constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceStatusMsdpMocKTest" };
+AccessTokenID tokenID_ = 0;
+PermissionDef g_infoManagerTestPermDef = {
+    .permissionName = "ohos.permission.ACTIVITY_MOTION",
+    .bundleName = "device_status_mock_test",
+    .grantMode = 1,
+    .label = "label",
+    .labelId = 1,
+    .description = "test device_status_mock_test",
+    .descriptionId = 1,
+    .availableLevel = APL_NORMAL
+};
+PermissionStateFull g_infoManagerTestState = {
+    .grantFlags = { 1 },
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .isGeneral = true,
+    .permissionName = "ohos.permission.ACTIVITY_MOTION",
+    .resDeviceID = { "localTest" }
+};
+HapPolicyParams g_infoManagerTestPolicyParams = {
+    .apl = APL_NORMAL,
+    .domain = "test.domain",
+    .permList = { g_infoManagerTestPermDef },
+    .permStateList = { g_infoManagerTestState },
+};
+
+HapInfoParams g_infoManagerTestInfoParams = {
+    .bundleName = "device_status_mock_test",
+    .userID = 1,
+    .instIndex = 0,
+    .appIDDesc = "device_status_mock_test"
+};
 #ifdef __aarch64__
 const std::string DEVICESTATUS_MOCK_LIB_PATH { "/system/lib64/libdevicestatus_mock.z.so" };
 #else
@@ -55,11 +91,20 @@ public:
 
 void DeviceStatusMsdpMocKTest::SetUpTestCase()
 {
+    AccessTokenIDEx tokenIdEx = {0};
+    tokenIdEx = AccessTokenKit::AllocHapToken(g_infoManagerTestInfoParams, g_infoManagerTestPolicyParams);
+    tokenID_ = tokenIdEx.tokenIdExStruct.tokenID;
+    GTEST_LOG_(INFO) << "tokenID:" << tokenID_;
+    ASSERT_NE(0, tokenID_);
+    ASSERT_EQ(0, SetSelfTokenID(tokenID_));
     g_testMock = std::make_shared<DeviceStatusMsdpMock>();
 }
 
 void DeviceStatusMsdpMocKTest::TearDownTestCase()
 {
+    ASSERT_NE(0, tokenID_);
+    int32_t ret = AccessTokenKit::DeleteToken(tokenID_);
+    ASSERT_EQ(RET_SUCCESS, ret);
     g_testMock = nullptr;
 }
 

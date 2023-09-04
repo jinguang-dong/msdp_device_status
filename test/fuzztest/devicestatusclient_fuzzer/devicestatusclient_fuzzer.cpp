@@ -22,9 +22,16 @@
 
 #include "fi_log.h"
 
+#include "securec.h"
+
+#include "accesstoken_kit.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
+
 using namespace std;
 using namespace OHOS;
 using namespace OHOS::Msdp::DeviceStatus;
+using namespace Security::AccessToken;
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, OHOS::Msdp::MSDP_DOMAIN_ID, "DeviceStatusClientFuzzTest" };
 constexpr int32_t WAIT_TIME { 1000 };
@@ -33,6 +40,30 @@ constexpr int32_t WAIT_TIME { 1000 };
 auto stationaryMgr = StationaryManager::GetInstance();
 sptr<DeviceStatusClientFuzzer::DeviceStatusTestCallback> cb =
     new (std::nothrow) DeviceStatusClientFuzzer::DeviceStatusTestCallback();
+
+void SetUpTestCase()
+{
+    const char **perms = new (std::nothrow) const char *[1];
+    if (perms == nullptr) {
+        return;
+    }
+    perms[0] = "ohos.permission.ACTIVITY_MOTION";
+    TokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 1,
+        .aclsNum = 0,
+        .dcaps = nullptr,
+        .perms = perms,
+        .acls = nullptr,
+        .processName = "OnRemoteRequest",
+        .aplStr = "system_core",
+    };
+    uint64_t tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
+    AccessTokenKit::ReloadNativeTokenInfo();
+    delete[] perms;
+}
+
 void DeviceStatusClientFuzzer::DeviceStatusTestCallback::OnDeviceStatusChanged(const \
     Data& devicestatusData)
 {
@@ -85,6 +116,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
+    SetUpTestCase();
     /* Run your code on data */
     DoSomethingInterestingWithMyAPI(data, size);
     return 0;

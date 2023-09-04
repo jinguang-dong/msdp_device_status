@@ -17,6 +17,9 @@
 #include <gtest/gtest.h>
 
 #include "accesstoken_kit.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
+#include <ipc_skeleton.h>
 
 #include "devicestatus_common.h"
 #include "devicestatus_msdp_client_impl.h"
@@ -27,8 +30,43 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
+using namespace OHOS;
+using namespace std;
+using namespace Security::AccessToken;
+using Security::AccessToken::AccessTokenID;
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceStatusDatahubTest" };
+AccessTokenID tokenID_ = 0;
+PermissionDef g_infoManagerTestPermDef = {
+    .permissionName = "ohos.permission.ACTIVITY_MOTION",
+    .bundleName = "device_status_datahub_test",
+    .grantMode = 1,
+    .label = "label",
+    .labelId = 1,
+    .description = "test device_status_datahub_test",
+    .descriptionId = 1,
+    .availableLevel = APL_NORMAL
+};
+PermissionStateFull g_infoManagerTestState = {
+    .grantFlags = { 1 },
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .isGeneral = true,
+    .permissionName = "ohos.permission.ACTIVITY_MOTION",
+    .resDeviceID = { "localTest" }
+};
+HapPolicyParams g_infoManagerTestPolicyParams = {
+    .apl = APL_NORMAL,
+    .domain = "test.domain",
+    .permList = { g_infoManagerTestPermDef },
+    .permStateList = { g_infoManagerTestState },
+};
+
+HapInfoParams g_infoManagerTestInfoParams = {
+    .bundleName = "device_status_datahub_test",
+    .userID = 1,
+    .instIndex = 0,
+    .appIDDesc = "device_status_datahub_test"
+};
 } // namespace
 
 class DeviceStatusDatahubTest : public testing::Test {
@@ -41,10 +79,21 @@ public:
 
 void DeviceStatusDatahubTest::SetUpTestCase()
 {
+    AccessTokenIDEx tokenIdEx = {0};
+    tokenIdEx = AccessTokenKit::AllocHapToken(g_infoManagerTestInfoParams, g_infoManagerTestPolicyParams);
+    tokenID_ = tokenIdEx.tokenIdExStruct.tokenID;
+    GTEST_LOG_(INFO) << "tokenID:" << tokenID_;
+    ASSERT_NE(0, tokenID_);
+    ASSERT_EQ(0, SetSelfTokenID(tokenID_));
     SENSOR_DATA_CB.Init();
 }
 
-void DeviceStatusDatahubTest::TearDownTestCase() {}
+void DeviceStatusDatahubTest::TearDownTestCase()
+{
+    ASSERT_NE(0, tokenID_);
+    int32_t ret = AccessTokenKit::DeleteToken(tokenID_);
+    ASSERT_EQ(RET_SUCCESS, ret);
+}
 
 void DeviceStatusDatahubTest::SetUp() {}
 

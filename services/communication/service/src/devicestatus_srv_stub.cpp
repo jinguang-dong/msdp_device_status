@@ -21,6 +21,7 @@
 #include "devicestatus_callback_proxy.h"
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
+#include "devicestatus_permission.h"
 #include "devicestatus_service.h"
 #include "devicestatus_srv_proxy.h"
 #include "fi_log.h"
@@ -104,6 +105,10 @@ int32_t DeviceStatusSrvStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
 int32_t DeviceStatusSrvStub::SubscribeStub(MessageParcel& data, MessageParcel& reply)
 {
     CALL_DEBUG_ENTER;
+    if (!DeviceStatusPermission::CheckDeviceStatusPermission(GetCallingTokenID())) {
+        FI_HILOGE("SubscribeStub check permission fail");
+        return RET_ERR;
+    }
     int32_t type = -1;
     READINT32(data, type, E_DEVICESTATUS_READ_PARCEL_ERROR);
     FI_HILOGD("Read type successfully");
@@ -128,6 +133,10 @@ int32_t DeviceStatusSrvStub::SubscribeStub(MessageParcel& data, MessageParcel& r
 int32_t DeviceStatusSrvStub::UnsubscribeStub(MessageParcel& data, MessageParcel& reply)
 {
     CALL_DEBUG_ENTER;
+    if (!DeviceStatusPermission::CheckDeviceStatusPermission(GetCallingTokenID())) {
+        FI_HILOGE("UnsubscribeStub check permission fail");
+        return RET_ERR;
+    }
     int32_t type = -1;
     READINT32(data, type, E_DEVICESTATUS_READ_PARCEL_ERROR);
     int32_t event = -1;
@@ -144,6 +153,10 @@ int32_t DeviceStatusSrvStub::UnsubscribeStub(MessageParcel& data, MessageParcel&
 int32_t DeviceStatusSrvStub::GetLatestDeviceStatusDataStub(MessageParcel& data, MessageParcel& reply)
 {
     CALL_DEBUG_ENTER;
+    if (!DeviceStatusPermission::CheckDeviceStatusPermission(GetCallingTokenID())) {
+        FI_HILOGE("GetLatestDeviceStatusDataStub check permission fail");
+        return RET_ERR;
+    }
     int32_t type = -1;
     READINT32(data, type, E_DEVICESTATUS_READ_PARCEL_ERROR);
     Data devicestatusData = GetCache(static_cast<Type>(type));

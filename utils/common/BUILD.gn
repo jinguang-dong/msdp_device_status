@@ -25,6 +25,7 @@ config("devicestatus_util_public_config") {
 ohos_shared_library("devicestatus_util") {
   version_script = "libdevicestatus_util_map"
   sources = [
+    "src/devicestatus_permission.cpp",
     "src/util.cpp",
     "src/util_napi.cpp",
     "src/util_napi_error.cpp",
@@ -36,6 +37,7 @@ ohos_shared_library("devicestatus_util") {
   public_configs = [ ":devicestatus_util_public_config" ]
 
   external_deps = [
+    "access_token:libaccesstoken_sdk",
     "c_utils:utils",
     "hilog:libhilog",
     "napi:ace_napi",

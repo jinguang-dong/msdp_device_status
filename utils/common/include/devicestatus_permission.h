@@ -16,20 +16,19 @@
 #ifndef DEVICESTATUS_PERMISSION_H
 #define DEVICESTATUS_PERMISSION_H
 
-#include <string>
+#include "accesstoken_kit.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace Msdp {
-namespace DeviceStatus {
+const std::string ACTIVITY_MOTION_PERMISSION = "ohos.permission.ACTIVITY_MOTION";
+
+using namespace Security::AccessToken;
 class DeviceStatusPermission {
 public:
     /* check caller's permission by finding pid uid by system */
-    static bool CheckCallingPermission(const std::string &permissionName);
-
-    /* construct appIdInfo string */
-    static std::string FindAppIdInfo();
+    static bool CheckDeviceStatusPermission(AccessTokenID callerToken);
 };
-} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
 #endif // DEVICESTATUS_PERMISSION_H

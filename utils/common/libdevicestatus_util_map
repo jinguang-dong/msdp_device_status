@@ -17,6 +17,7 @@
     global:
         extern "C++" {
             "OHOS::Msdp::DeviceStatus::GetThisThreadId()";
+            "OHOS::Msdp::DeviceStatusPermission::CheckDeviceStatusPermission(unsigned int)";
             "OHOS::Msdp::DeviceStatus::GetPid()";
             "OHOS::Msdp::DeviceStatus::GetProgramName()";
             "OHOS::Msdp::DeviceStatus::IsValidSvgFile(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";

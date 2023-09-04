@@ -19,6 +19,8 @@
 #include <gtest/gtest.h>
 
 #include "accesstoken_kit.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
 
 #define private public
 #include "devicestatus_algorithm_manager.h"
@@ -35,6 +37,37 @@ using namespace testing::ext;
 namespace {
 std::shared_ptr<AlgoMgr> g_manager { nullptr };
 constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceStatusAlgorithmTest" };
+AccessTokenID tokenID_ = 0;
+PermissionDef g_infoManagerTestPermDef = {
+    .permissionName = "ohos.permission.ACTIVITY_MOTION",
+    .bundleName = "device_status_algorithm_test",
+    .grantMode = 1,
+    .label = "label",
+    .labelId = 1,
+    .description = "test device_status_algorithm_test",
+    .descriptionId = 1,
+    .availableLevel = APL_NORMAL
+};
+PermissionStateFull g_infoManagerTestState = {
+    .grantFlags = { 1 },
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .isGeneral = true,
+    .permissionName = "ohos.permission.ACTIVITY_MOTION",
+    .resDeviceID = { "localTest" }
+};
+HapPolicyParams g_infoManagerTestPolicyParams = {
+    .apl = APL_NORMAL,
+    .domain = "test.domain",
+    .permList = { g_infoManagerTestPermDef },
+    .permStateList = { g_infoManagerTestState },
+};
+
+HapInfoParams g_infoManagerTestInfoParams = {
+    .bundleName = "device_status_algorithm_test",
+    .userID = 1,
+    .instIndex = 0,
+    .appIDDesc = "device_status_algorithm_test"
+};
 #ifdef __aarch64__
 const std::string DEVICESTATUS_ALGO_LIB_PATH { "/system/lib64/libdevicestatus_algo.z.so" };
 #else
@@ -60,11 +93,20 @@ public:
 
 void DeviceStatusAlgorithmTest::SetUpTestCase()
 {
+    AccessTokenIDEx tokenIdEx = {0};
+    tokenIdEx = AccessTokenKit::AllocHapToken(g_infoManagerTestInfoParams, g_infoManagerTestPolicyParams);
+    tokenID_ = tokenIdEx.tokenIdExStruct.tokenID;
+    GTEST_LOG_(INFO) << "tokenID:" << tokenID_;
+    ASSERT_NE(0, tokenID_);
+    ASSERT_EQ(0, SetSelfTokenID(tokenID_));
     g_manager = std::make_shared<AlgoMgr>();
 }
 
 void DeviceStatusAlgorithmTest::TearDownTestCase()
 {
+    ASSERT_NE(0, tokenID_);
+    int32_t ret = AccessTokenKit::DeleteToken(tokenID_);
+    ASSERT_EQ(RET_SUCCESS, ret);
     g_manager = nullptr;
 }
 
