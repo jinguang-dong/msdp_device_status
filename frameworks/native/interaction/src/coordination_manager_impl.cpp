@@ -31,7 +31,7 @@ int32_t CoordinationManagerImpl::RegisterCoordinationListener(CoordinationListen
     CALL_DEBUG_ENTER;
     CHKPR(listener, RET_ERR);
     std::lock_guard<std::mutex> guard(mtx_);
-    for (const auto &item : devCoordinationListener_) {
+    for (const auto &item : devcoordinationListeners_) {
         if (item == listener) {
             FI_HILOGW("The listener already exists");
             return RET_ERR;
@@ -46,7 +46,7 @@ int32_t CoordinationManagerImpl::RegisterCoordinationListener(CoordinationListen
         }
         isListeningProcess_ = true;
     }
-    devCoordinationListener_.push_back(listener);
+    devcoordinationListeners_.push_back(listener);
     return RET_OK;
 }
 
@@ -55,18 +55,18 @@ int32_t CoordinationManagerImpl::UnregisterCoordinationListener(CoordinationList
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
     if (listener == nullptr) {
-        devCoordinationListener_.clear();
+        devcoordinationListeners_.clear();
         goto listenerLabel;
     }
-    for (auto it = devCoordinationListener_.begin(); it != devCoordinationListener_.end(); ++it) {
+    for (auto it = devcoordinationListeners_.begin(); it != devcoordinationListeners_.end(); ++it) {
         if (*it == listener) {
-            devCoordinationListener_.erase(it);
+            devcoordinationListeners_.erase(it);
             goto listenerLabel;
         }
     }
 
 listenerLabel:
-    if (isListeningProcess_ && devCoordinationListener_.empty()) {
+    if (isListeningProcess_ && devcoordinationListeners_.empty()) {
         isListeningProcess_ = false;
         return DeviceStatusClient::GetInstance().UnregisterCoordinationListener();
     }
@@ -88,7 +88,7 @@ int32_t CoordinationManagerImpl::PrepareCoordination(FuncCoordinationMessage cal
         FI_HILOGE("Prepare coordination failed");
         return ret;
     }
-    devCoordinationEvent_[userData_] = event;
+    devCoordinationEvents_[userData_] = event;
     userData_++;
     return RET_OK;
 }
@@ -108,7 +108,7 @@ int32_t CoordinationManagerImpl::UnprepareCoordination(FuncCoordinationMessage c
         FI_HILOGE("Unprepare coordination failed");
         return ret;
     }
-    devCoordinationEvent_[userData_] = event;
+    devCoordinationEvents_[userData_] = event;
     userData_++;
     return RET_OK;
 }
@@ -130,7 +130,7 @@ int32_t CoordinationManagerImpl::ActivateCoordination(const std::string &remoteN
         FI_HILOGE("Activate coordination failed");
         return ret;
     }
-    devCoordinationEvent_[userData_] = event;
+    devCoordinationEvents_[userData_] = event;
     userData_++;
     return RET_OK;
 }
@@ -150,7 +150,7 @@ int32_t CoordinationManagerImpl::DeactivateCoordination(bool isUnchained, FuncCo
         FI_HILOGE("Deactivate coordination failed");
         return ret;
     }
-    devCoordinationEvent_[userData_] = event;
+    devCoordinationEvents_[userData_] = event;
     userData_++;
     return RET_OK;
 }
@@ -171,7 +171,7 @@ int32_t CoordinationManagerImpl::GetCoordinationState(
         FI_HILOGE("Get coordination state failed");
         return ret;
     }
-    devCoordinationEvent_[userData_] = event;
+    devCoordinationEvents_[userData_] = event;
     userData_++;
     return RET_OK;
 }
@@ -180,7 +180,7 @@ void CoordinationManagerImpl::OnDevCoordinationListener(const std::string device
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
-    for (const auto &item : devCoordinationListener_) {
+    for (const auto &item : devcoordinationListeners_) {
         item->OnCoordinationMessage(deviceId, msg);
     }
 }
@@ -191,14 +191,14 @@ void CoordinationManagerImpl::OnCoordinationMessageEvent(int32_t userData,
     CALL_DEBUG_ENTER;
     CHK_PID_AND_TID();
     std::lock_guard<std::mutex> guard(mtx_);
-    auto iter = devCoordinationEvent_.find(userData);
-    if (iter == devCoordinationEvent_.end()) {
+    auto iter = devCoordinationEvents_.find(userData);
+    if (iter == devCoordinationEvents_.end()) {
         return;
     }
     CoordinationMsg event = iter->second.msg;
     CHKPV(event);
     event(deviceId, msg);
-    devCoordinationEvent_.erase(iter);
+    devCoordinationEvents_.erase(iter);
 }
 
 void CoordinationManagerImpl::OnCoordinationStateEvent(int32_t userData, bool state)
@@ -206,14 +206,14 @@ void CoordinationManagerImpl::OnCoordinationStateEvent(int32_t userData, bool st
     CALL_DEBUG_ENTER;
     CHK_PID_AND_TID();
     std::lock_guard<std::mutex> guard(mtx_);
-    auto iter = devCoordinationEvent_.find(userData);
-    if (iter == devCoordinationEvent_.end()) {
+    auto iter = devCoordinationEvents_.find(userData);
+    if (iter == devCoordinationEvents_.end()) {
         return;
     }
     CoordinationState event = iter->second.state;
     CHKPV(event);
     event(state);
-    devCoordinationEvent_.erase(iter);
+    devCoordinationEvents_.erase(iter);
     FI_HILOGD("Coordination state event callback, userData:%{public}d, state:(%{public}d)", userData, state);
 }
 
@@ -226,15 +226,15 @@ int32_t CoordinationManagerImpl::GetUserData() const
 const CoordinationManagerImpl::CoordinationMsg *CoordinationManagerImpl::GetCoordinationMessageEvent(
     int32_t userData) const
 {
-    auto iter = devCoordinationEvent_.find(userData);
-    return iter == devCoordinationEvent_.end() ? nullptr : &iter->second.msg;
+    auto iter = devCoordinationEvents_.find(userData);
+    return iter == devCoordinationEvents_.end() ? nullptr : &iter->second.msg;
 }
 
 const CoordinationManagerImpl::CoordinationState *CoordinationManagerImpl::GetCoordinationStateEvent(
     int32_t userData) const
 {
-    auto iter = devCoordinationEvent_.find(userData);
-    return iter == devCoordinationEvent_.end() ? nullptr : &iter->second.state;
+    auto iter = devCoordinationEvents_.find(userData);
+    return iter == devCoordinationEvents_.end() ? nullptr : &iter->second.state;
 }
 
 int32_t CoordinationManagerImpl::OnCoordinationListener(const StreamClient& client, NetPacket& pkt)

@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef REGISTERCOORDINATIONLISTENER_FUZZER_H
-#define REGISTERCOORDINATIONLISTENER_FUZZER_H
+#ifndef REGISTERcoordinationListeners_FUZZER_H
+#define REGISTERcoordinationListeners_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "registercoordinationlistener_fuzzer"
+#define FUZZ_PROJECT_NAME "registercoordinationListeners_fuzzer"
 
-#endif // REGISTERCOORDINATIONLISTENER_FUZZER_H
+#endif // REGISTERcoordinationListeners_FUZZER_H
