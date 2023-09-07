@@ -14,7 +14,7 @@
  */
 #include "stream_client.h"
 
-#include "util.h"
+#include "../../common/include/util.h"
 
 namespace OHOS {
 namespace Msdp {
