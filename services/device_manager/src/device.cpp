@@ -63,6 +63,51 @@ Device::~Device()
     Close();
 }
 
+bool Device::HasAbsCoords() const
+{
+    return TestBit(ABS_X, absBitmask_) && TestBit(ABS_Y, absBitmask_);
+}
+
+bool Device::HasMtCoords() const 
+{
+    return TestBit(ABS_MT_POSITION_X, absBitmask_) && TestBit(ABS_MT_POSITION_Y, absBitmask_);
+}
+
+bool Device::IsDirect() const
+{
+    return TestBit(INPUT_PROP_DIRECT, propBitmask_);
+}
+
+bool Device::HasTouch() const
+{
+    return TestBit(BTN_TOUCH, keyBitmask_);
+}
+
+bool Device::HasRelCoords() const
+{
+    return TestBit(REL_X, relBitmask_) && TestBit(REL_Y, relBitmask_);
+}
+
+bool Device::StylusOrPen() const
+{
+    return TestBit(BTN_STYLUS, keyBitmask_) || TestBit(BTN_TOOL_PEN, keyBitmask_);
+}
+
+bool Device::FingerButNoPen() const
+{
+    return TestBit(BTN_TOOL_FINGER, keyBitmask_) && !TestBit(BTN_TOOL_PEN, keyBitmask_);
+}
+
+bool Device::HasMouseBtn() const
+{
+    return HasMouseButton();
+}
+
+bool Device::HasJoystickFeature() const
+{
+    return HasJoystickAxesOrButtons();
+}
+
 int32_t Device::Open()
 {
     CALL_DEBUG_ENTER;
@@ -257,45 +302,46 @@ void Device::PrintCapsDevice() const
 void Device::CheckPointers()
 {
     CALL_DEBUG_ENTER;
-    bool hasAbsCoords { TestBit(ABS_X, absBitmask_) && TestBit(ABS_Y, absBitmask_) };
-    bool hasMtCoords { TestBit(ABS_MT_POSITION_X, absBitmask_) && TestBit(ABS_MT_POSITION_Y, absBitmask_) };
-    bool isDirect { TestBit(INPUT_PROP_DIRECT, propBitmask_) };
-    bool hasTouch { TestBit(BTN_TOUCH, keyBitmask_) };
-    bool hasRelCoords { TestBit(REL_X, relBitmask_) && TestBit(REL_Y, relBitmask_) };
-    bool stylusOrPen { TestBit(BTN_STYLUS, keyBitmask_) || TestBit(BTN_TOOL_PEN, keyBitmask_) };
-    bool fingerButNoPen { TestBit(BTN_TOOL_FINGER, keyBitmask_) && !TestBit(BTN_TOOL_PEN, keyBitmask_) };
-    bool hasMouseBtn { HasMouseButton() };
-    bool hasJoystickFeature { HasJoystickAxesOrButtons() };
+    AbsCoordsHandle();
+    MtcoordsHandle();
 
-    if (hasAbsCoords) {
-        if (stylusOrPen) {
-            caps_.set(DEVICE_CAP_TABLET_TOOL);
-        } else if (fingerButNoPen && !isDirect) {
-            caps_.set(DEVICE_CAP_POINTER);
-        } else if (hasMouseBtn) {
-            caps_.set(DEVICE_CAP_POINTER);
-        } else if (hasTouch || isDirect) {
-            caps_.set(DEVICE_CAP_TOUCH);
-        } else if (hasJoystickFeature) {
-            caps_.set(DEVICE_CAP_JOYSTICK);
-        }
-    } else if (hasJoystickFeature) {
-        caps_.set(DEVICE_CAP_JOYSTICK);
-    }
-    if (hasMtCoords) {
-        if (stylusOrPen) {
-            caps_.set(DEVICE_CAP_TABLET_TOOL);
-        } else if (fingerButNoPen && !isDirect) {
-            caps_.set(DEVICE_CAP_POINTER);
-        } else if (hasTouch || isDirect) {
-            caps_.set(DEVICE_CAP_TOUCH);
-        }
-    }
     if (!caps_.test(DEVICE_CAP_TABLET_TOOL) && !caps_.test(DEVICE_CAP_POINTER) &&
-        !caps_.test(DEVICE_CAP_JOYSTICK) && hasMouseBtn && (hasRelCoords || !hasAbsCoords)) {
+        !caps_.test(DEVICE_CAP_JOYSTICK) && HasMouseBtn() && (HasRelCoords() || !HasAbsCoords())) {
         caps_.set(DEVICE_CAP_POINTER);
     }
     PrintCapsDevice();
+}
+
+void Device::AbsCoordsHandle()
+{
+    if (HasAbsCoords()) {
+        if (StylusOrPen()) {
+            caps_.set(DEVICE_CAP_TABLET_TOOL);
+        } else if (FingerButNoPen() && !IsDirect()) {
+            caps_.set(DEVICE_CAP_POINTER);
+        } else if (HasMouseBtn()) {
+            caps_.set(DEVICE_CAP_POINTER);
+        } else if (HasTouch() || IsDirect()) {
+            caps_.set(DEVICE_CAP_TOUCH);
+        } else if (HasJoystickFeature()) {
+            caps_.set(DEVICE_CAP_JOYSTICK);
+        }
+    } else if (HasJoystickFeature()) {
+        caps_.set(DEVICE_CAP_JOYSTICK);
+    }
+}
+
+void Device::MtcoordsHandle()
+{
+    if (HasMtCoords()) {
+        if (StylusOrPen()) {
+            caps_.set(DEVICE_CAP_TABLET_TOOL);
+        } else if (FingerButNoPen() && !IsDirect()) {
+            caps_.set(DEVICE_CAP_POINTER);
+        } else if (HasTouch() || IsDirect()) {
+            caps_.set(DEVICE_CAP_TOUCH);
+        }
+    }
 }
 
 void Device::CheckPencilMouse()
