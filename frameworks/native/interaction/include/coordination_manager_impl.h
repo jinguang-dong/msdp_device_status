@@ -64,8 +64,8 @@ private:
     const CoordinationState *GetCoordinationStateEvent(int32_t userData) const;
 
 private:
-    std::list<CoordinationListenerPtr> devCoordinationListener_;
-    std::map<int32_t, CoordinationEvent> devCoordinationEvent_;
+    std::list<CoordinationListenerPtr> devcoordinationListeners_;
+    std::map<int32_t, CoordinationEvent> devCoordinationEvents_;
     mutable std::mutex mtx_;
     int32_t userData_ { 0 };
     std::atomic_bool isListeningProcess_ { false };

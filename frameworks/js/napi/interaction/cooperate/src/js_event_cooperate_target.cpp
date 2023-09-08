@@ -38,7 +38,7 @@ std::mutex mutex_;
 JsEventCooperateTarget::JsEventCooperateTarget()
 {
     CALL_DEBUG_ENTER;
-    auto ret = coordinationListener_.insert({ COORDINATION,
+    auto ret = coordinationListeners_.insert({ COORDINATION,
         std::vector<std::unique_ptr<JsUtilCooperate::CallbackInfo>>()});
     if (!ret.second) {
         FI_HILOGW("Failed to insert, errCode:%{public}d", static_cast<int32_t>(DeviceStatus::VAL_NOT_EXP));
@@ -159,8 +159,8 @@ void JsEventCooperateTarget::AddListener(napi_env env, const std::string &type, 
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
-    auto iter = coordinationListener_.find(type);
-    if (iter == coordinationListener_.end()) {
+    auto iter = coordinationListeners_.find(type);
+    if (iter == coordinationListeners_.end()) {
         FI_HILOGE("Find %{public}s failed", type.c_str());
         return;
     }
@@ -188,8 +188,8 @@ void JsEventCooperateTarget::RemoveListener(napi_env env, const std::string &typ
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
-    auto iter = coordinationListener_.find(type);
-    if (iter == coordinationListener_.end()) {
+    auto iter = coordinationListeners_.find(type);
+    if (iter == coordinationListeners_.end()) {
         FI_HILOGE("Find %{public}s failed", type.c_str());
         return;
     }
@@ -238,8 +238,8 @@ void JsEventCooperateTarget::OnCoordinationMessage(const std::string &deviceId, 
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
-    auto changeEvent = coordinationListener_.find(COORDINATION);
-    if (changeEvent == coordinationListener_.end()) {
+    auto changeEvent = coordinationListeners_.find(COORDINATION);
+    if (changeEvent == coordinationListeners_.end()) {
         FI_HILOGE("Find %{public}s failed", std::string(COORDINATION).c_str());
         return;
     }
@@ -581,8 +581,8 @@ void JsEventCooperateTarget::EmitCoordinationMessageEvent(uv_work_t *work, int32
     auto temp = static_cast<std::unique_ptr<JsUtilCooperate::CallbackInfo>*>(work->data);
     JsUtilCooperate::DeletePtr<uv_work_t*>(work);
 
-    auto messageEvent = coordinationListener_.find(COORDINATION);
-    if (messageEvent == coordinationListener_.end()) {
+    auto messageEvent = coordinationListeners_.find(COORDINATION);
+    if (messageEvent == coordinationListeners_.end()) {
         FI_HILOGE("Find messageEvent failed");
         return;
     }

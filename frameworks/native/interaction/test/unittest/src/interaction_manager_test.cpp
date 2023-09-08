@@ -349,12 +349,12 @@ void InputEventCallbackTest::OnInputEvent(std::shared_ptr<MMI::PointerEvent> poi
 }
 
 /**
- * @tc.name: InteractionManagerTest_RegisterCoordinationListener_001
+ * @tc.name: InteractionManagerTest_RegistercoordinationListeners_001
  * @tc.desc: Register coordination listener
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationListener_001, TestSize.Level1)
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegistercoordinationListeners_001, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::shared_ptr<ICoordinationListener> consumer = nullptr;
@@ -367,12 +367,12 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationList
 }
 
 /**
- * @tc.name: InteractionManagerTest_RegisterCoordinationListener_002
+ * @tc.name: InteractionManagerTest_RegistercoordinationListeners_002
  * @tc.desc: Register coordination listener
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationListener_002, TestSize.Level1)
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegistercoordinationListeners_002, TestSize.Level1)
 {
     CALL_DEBUG_ENTER;
     class CoordinationListenerTest : public ICoordinationListener {

@@ -33,7 +33,7 @@ group("device_status_fuzztest") {
     "setdragwindowvisible_fuzzer:fuzztest",
     "startdrag_fuzzer:fuzztest",
     "stopdrag_fuzzer:fuzztest",
-    "unregistercoordinationlistener_fuzzer:fuzztest",
+    "unregistercoordinationListeners_fuzzer:fuzztest",
     "updatedragstyle_fuzzer:fuzztest",
     "updateshadowpic_fuzzer:fuzztest",
   ]
@@ -43,7 +43,7 @@ group("device_status_fuzztest") {
       "deactivatecoordination_fuzzer:fuzztest",
       "getcoordinationstate_fuzzer:fuzztest",
       "preparecoordination_fuzzer:fuzztest",
-      "registercoordinationlistener_fuzzer:fuzztest",
+      "registercoordinationListeners_fuzzer:fuzztest",
       "unpreparecoordination_fuzzer:fuzztest",
     ]
   }
