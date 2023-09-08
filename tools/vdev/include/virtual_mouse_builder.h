@@ -38,6 +38,7 @@ public:
     static void Clone();
     static void Monitor();
     static void Act(int32_t argc, char *argv[]);
+    static void Optprejudgment(int32_t opt);
 
 private:
     static void ReadActions(const char *path);

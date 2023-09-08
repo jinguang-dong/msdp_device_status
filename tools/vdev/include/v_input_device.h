@@ -94,12 +94,23 @@ public:
     bool IsTouchscreen() const;
 
 private:
+    bool HasAbsCoords() const;
+    bool HasMtCoords() const;
+    bool IsDirect() const;
+    bool HasTouch() const;
+    bool HasRelCoords() const;
+    bool StylusOrPen() const;
+    bool FingerButNoPen() const;
+    bool HasMouseBtn() const;
+    bool HasJoystickFeature() const;
     void QueryDeviceInfo();
     void QuerySupportedEvents();
     void UpdateCapability();
     bool HasMouseButton() const;
     bool HasJoystickAxesOrButtons() const;
     void CheckPointers();
+    void AbsCoordsHandle();
+    void MtcoordsHandle();
     void CheckKeys();
     void GetEventMask(const std::string &eventName, uint32_t type, std::size_t arrayLength,
         uint8_t *whichBitMask) const;

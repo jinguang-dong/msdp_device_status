@@ -92,12 +92,23 @@ public:
     bool IsKeyboard() const override;
 
 private:
+    bool HasAbsCoords() const;
+    bool HasMtCoords() const;
+    bool IsDirect() const;
+    bool HasTouch() const;
+    bool HasRelCoords() const;
+    bool StylusOrPen() const;
+    bool FingerButNoPen() const;
+    bool HasMouseBtn() const;
+    bool HasJoystickFeature() const;
     void QueryDeviceInfo();
     void QuerySupportedEvents();
     void UpdateCapability();
     bool HasMouseButton() const;
     bool HasJoystickAxesOrButtons() const;
     void CheckPointers();
+    void AbsCoordsHandle();
+    void MtcoordsHandle();
     void CheckPencilMouse();
     void CheckKeys();
     std::string MakeConfigFileName() const;
