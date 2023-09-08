@@ -41,8 +41,8 @@ public:
     ~DeviceManager() = default;
 
     int32_t Init(IContext *context);
-    int32_t Enable();
-    int32_t Disable();
+    int32_t Enable() override;
+    int32_t Disable() override;
     int32_t GetFd() const override;
     void Dispatch(const struct epoll_event &ev) override;
     std::shared_ptr<IDevice> GetDevice(int32_t id) const override;
@@ -98,6 +98,8 @@ inline int32_t DeviceManager::GetFd() const
 {
     return epollFd_;
 }
+extern "C" IDeviceManager* CreateDeviceManager(IContext* context);
+extern "C" void ReleaseDeviceManager(IDeviceManager* deviceManager, IContext* context);
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

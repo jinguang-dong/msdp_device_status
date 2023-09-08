@@ -33,8 +33,15 @@ constexpr size_t NETWORK_ID_NUMS { 3 };
 constexpr size_t DESCRIPTOR_INDEX { 2 };
 } // namespace
 
-CoordinationDeviceManager::CoordinationDeviceManager() {}
-CoordinationDeviceManager::~CoordinationDeviceManager() {}
+CoordinationDeviceManager::CoordinationDeviceManager()
+{
+    CALL_DEBUG_ENTER;
+}
+
+CoordinationDeviceManager::~CoordinationDeviceManager()
+{
+    CALL_DEBUG_ENTER;
+}
 
 CoordinationDeviceManager::Device::Device(std::shared_ptr<IDevice> dev)
     : device_(dev)
@@ -193,8 +200,20 @@ void CoordinationDeviceManager::Init()
     auto* context = COOR_EVENT_MGR->GetIContext();
     CHKPV(context);
     devObserver_ = std::make_shared<DeviceObserver>(*this);
-    context->GetDeviceManager().AddDeviceObserver(devObserver_);
-    context->GetDeviceManager().RetriggerHotplug(devObserver_);
+    IDeviceManager* deviceManager = context->GetPluginManager().GetDeviceManager();
+    CHKPV(deviceManager);
+    deviceManager->AddDeviceObserver(devObserver_);
+    deviceManager->RetriggerHotplug(devObserver_);
+}
+
+void CoordinationDeviceManager::RemoveObserver()
+{
+    CALL_INFO_TRACE;
+    auto* context = COOR_EVENT_MGR->GetIContext();
+    CHKPV(context);
+    IDeviceManager* deviceManager = context->GetPluginManager().GetDeviceManager();
+    CHKPV(deviceManager);
+    deviceManager->RemoveDeviceObserver(devObserver_);
 }
 
 bool CoordinationDeviceManager::IsRemote(int32_t id)

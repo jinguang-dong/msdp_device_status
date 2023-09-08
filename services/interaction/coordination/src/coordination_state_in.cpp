@@ -30,7 +30,15 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CoordinationStateIn" };
 } // namespace
 
-CoordinationStateIn::CoordinationStateIn(const std::string &startDeviceDhid) : startDeviceDhid_(startDeviceDhid) {}
+CoordinationStateIn::CoordinationStateIn(const std::string &startDeviceDhid) : startDeviceDhid_(startDeviceDhid)
+{
+    CALL_DEBUG_ENTER;
+}
+
+CoordinationStateIn::~CoordinationStateIn()
+{
+    CALL_DEBUG_ENTER;
+}
 
 int32_t CoordinationStateIn::ActivateCoordination(const std::string &remoteNetworkId,
     int32_t startDeviceId)

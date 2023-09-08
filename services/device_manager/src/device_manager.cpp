@@ -23,9 +23,6 @@
 #include <sys/epoll.h>
 #include <sys/stat.h>
 
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#include "coordination_util.h"
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 #include "device.h"
 #include "devicestatus_define.h"
 #include "fi_log.h"
@@ -318,10 +315,10 @@ void DeviceManager::Dispatch(const struct epoll_event &ev)
     CALL_DEBUG_ENTER;
     if ((ev.events & EPOLLIN) == EPOLLIN) {
         CHKPV(context_);
-        int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
+        int32_t ret = context_->GetDelegateTasks().PostSyncTask(
             std::bind(&DeviceManager::OnEpollDispatch, this));
         if (ret != RET_OK) {
-            FI_HILOGE("PostAsyncTask failed");
+            FI_HILOGE("PostSyncTask failed");
         }
     } else if ((ev.events & (EPOLLHUP | EPOLLERR)) != 0) {
         FI_HILOGE("Epoll hangup:%{public}s", strerror(errno));
@@ -384,7 +381,7 @@ void DeviceManager::RetriggerHotplug(std::weak_ptr<IDeviceObserver> observer)
 {
     CALL_INFO_TRACE;
     CHKPV(context_);
-    int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask(
         std::bind(&DeviceManager::OnRetriggerHotplug, this, observer));
     if (ret != RET_OK) {
         FI_HILOGE("Post task failed");
@@ -410,7 +407,7 @@ int32_t DeviceManager::AddDeviceObserver(std::weak_ptr<IDeviceObserver> observer
 {
     CALL_INFO_TRACE;
     CHKPR(context_, RET_ERR);
-    int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask(
         std::bind(&DeviceManager::OnAddDeviceObserver, this, observer));
     if (ret != RET_OK) {
         FI_HILOGE("Post task failed");
@@ -433,7 +430,7 @@ void DeviceManager::RemoveDeviceObserver(std::weak_ptr<IDeviceObserver> observer
 {
     CALL_INFO_TRACE;
     CHKPV(context_);
-    int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask(
         std::bind(&DeviceManager::OnRemoveDeviceObserver, this, observer));
     if (ret != RET_OK) {
         FI_HILOGE("Post task failed");
@@ -446,6 +443,26 @@ int32_t DeviceManager::OnRemoveDeviceObserver(std::weak_ptr<IDeviceObserver> obs
     CHKPR(observer, RET_ERR);
     observers_.erase(observer);
     return RET_OK;
+}
+
+IDeviceManager* CreateDeviceManager(IContext *context)
+{
+    CALL_DEBUG_ENTER;
+    CHKPP(context);
+    DeviceManager* deviceManager = new (std::nothrow) DeviceManager();
+    CHKPP(deviceManager);
+    deviceManager->Init(context);
+    return deviceManager;
+}
+
+void ReleaseDeviceManager(IDeviceManager* deviceManager, IContext* context)
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(deviceManager);
+    if (context != nullptr) {
+        context->DisableDeviceManager();
+    }
+    delete deviceManager;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

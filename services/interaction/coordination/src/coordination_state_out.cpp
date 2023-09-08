@@ -32,7 +32,14 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "Coordin
 
 CoordinationStateOut::CoordinationStateOut(const std::string& startDeviceDhid)
     : startDeviceDhid_(startDeviceDhid)
-{}
+{
+    CALL_DEBUG_ENTER;
+}
+
+CoordinationStateOut::~CoordinationStateOut()
+{
+    CALL_DEBUG_ENTER;
+}
 
 int32_t CoordinationStateOut::DeactivateCoordination(const std::string &remoteNetworkId, bool isUnchained,
     const std::pair<std::string, std::string> &preparedNetworkId)

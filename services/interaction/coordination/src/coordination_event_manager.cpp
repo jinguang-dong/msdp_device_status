@@ -23,8 +23,15 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CoordinationEventManager" };
 } // namespace
 
-CoordinationEventManager::CoordinationEventManager() {}
-CoordinationEventManager::~CoordinationEventManager() {}
+CoordinationEventManager::CoordinationEventManager()
+{
+    CALL_DEBUG_ENTER;
+}
+
+CoordinationEventManager::~CoordinationEventManager()
+{
+    CALL_DEBUG_ENTER;
+}
 
 void CoordinationEventManager::AddCoordinationEvent(sptr<EventInfo> event)
 {

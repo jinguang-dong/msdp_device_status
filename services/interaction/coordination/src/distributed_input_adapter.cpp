@@ -31,12 +31,15 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "Distrib
 constexpr int32_t DEFAULT_DELAY_TIME { 4000 };
 constexpr int32_t RETRY_TIME { 2 };
 } // namespace
-DistributedInputAdapter::DistributedInputAdapter() = default;
+DistributedInputAdapter::DistributedInputAdapter()
+{
+    CALL_DEBUG_ENTER;
+}
 
 DistributedInputAdapter::~DistributedInputAdapter()
 {
-    CALL_INFO_TRACE;
-    std::lock_guard<std::mutex> guard(adapterLock_);
+    CALL_DEBUG_ENTER;
+    // std::lock_guard<std::mutex> guard(adapterLock_);
     callbackMap_.clear();
 }
 

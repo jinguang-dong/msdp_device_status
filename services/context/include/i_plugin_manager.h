@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,26 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef COORDINATION_EVENT_HANDLER_H
-#define COORDINATION_EVENT_HANDLER_H
+#ifndef I_PLUGIN_MANAGER_H
+#define I_PLUGIN_MANAGER_H
 
-#include <memory>
-
-#include "event_handler.h"
-#include "event_runner.h"
+#include "i_coordination.h"
+#include "i_device_manager.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class CoordinationEventHandler final : public AppExecFwk::EventHandler {
+class IPluginManager {
 public:
-    explicit CoordinationEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
-    ~CoordinationEventHandler() override;
-    bool ProxyPostTask(const Callback &callback, int64_t delayTime);
-    bool ProxyPostTask(const Callback &callback, const std::string &name = std::string(), int64_t delayTime = 0);
-    void ProxyRemoveTask(const std::string &name);
+    IPluginManager() = default;
+    ~IPluginManager() = default;
+
+    virtual IDeviceManager* GetDeviceManager() = 0;
+    virtual ICoordination* GetCoordination() = 0;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // COORDINATION_EVENT_HANDLER_H
+#endif // I_PLUGIN_MANAGER_H

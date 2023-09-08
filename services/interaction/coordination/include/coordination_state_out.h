@@ -25,6 +25,7 @@ class CoordinationStateOut final : public ICoordinationState {
 public:
     CoordinationStateOut() = default;
     explicit CoordinationStateOut(const std::string &startDeviceDhid);
+    ~CoordinationStateOut();
     int32_t DeactivateCoordination(const std::string &remoteNetworkId, bool isUnchained,
         const std::pair<std::string, std::string> &preparedNetworkId) override;
     void OnKeyboardOnline(const std::string &dhid, const std::pair<std::string, std::string> &networkIds) override;
