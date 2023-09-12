@@ -55,6 +55,8 @@ ohos_unittest("device_status_algorithm_test") {
   external_deps = [
     "ability_base:base",
     "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -89,6 +91,8 @@ ohos_unittest("device_status_datahub_test") {
   external_deps = [
     "ability_base:base",
     "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -123,6 +127,8 @@ ohos_unittest("device_status_mock_test") {
   external_deps = [
     "ability_base:base",
     "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image_native",

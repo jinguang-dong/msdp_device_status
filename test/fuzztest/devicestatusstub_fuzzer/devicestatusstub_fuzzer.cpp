@@ -21,16 +21,44 @@
 #include "securec.h"
 #include "singleton.h"
 
+#include "accesstoken_kit.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
+
 #define private public
 #include "devicestatus_service.h"
 #include "message_parcel.h"
 
+using namespace OHOS;
 using namespace OHOS::Msdp::DeviceStatus;
 
 namespace OHOS {
 constexpr size_t FOO_MAX_LEN { 1024 };
 constexpr size_t MIN_SIZE { 4 };
 const std::u16string FORMMGR_DEVICE_TOKEN { u"ohos.msdp.Idevicestatus" };
+
+void SetUpTestCase()
+{
+    const char **perms = new (std::nothrow) const char *[1];
+    if (perms == nullptr) {
+        return;
+    }
+    perms[0] = "ohos.permission.ACTIVITY_MOTION";
+    TokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 1,
+        .aclsNum = 0,
+        .dcaps = nullptr,
+        .perms = perms,
+        .acls = nullptr,
+        .processName = "OnRemoteRequest",
+        .aplStr = "system_core",
+    };
+    uint64_t tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
+    AccessTokenKit::ReloadNativeTokenInfo();
+    delete[] perms;
+}
 
 uint32_t GetU32Data(const char* ch, size_t size)
 {
@@ -70,6 +98,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if ((size < OHOS::MIN_SIZE) || (size > OHOS::FOO_MAX_LEN)) {
         return 0;
     }
+    SetUpTestCase();
     const char* ch = reinterpret_cast<const char*>(data);
     OHOS::DoSomethingWithMyAPI(ch, size);
     return 0;

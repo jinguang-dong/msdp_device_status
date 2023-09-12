@@ -15,23 +15,75 @@
 
 #include "devicestatus_agent_test.h"
 
+#include "accesstoken_kit.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
+
 #include "devicestatus_define.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
+using namespace OHOS;
+using namespace std;
+using namespace Security::AccessToken;
+using Security::AccessToken::AccessTokenID;
+
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceStatusAgentTest" };
+AccessTokenID tokenID_ = 0;
+PermissionDef g_infoManagerTestPermDef = {
+    .permissionName = "ohos.permission.ACTIVITY_MOTION",
+    .bundleName = "devicestatus_service_test",
+    .grantMode = 1,
+    .label = "label",
+    .labelId = 1,
+    .description = "test devicestatus_service_test",
+    .descriptionId = 1,
+    .availableLevel = APL_NORMAL
+};
+PermissionStateFull g_infoManagerTestState = {
+    .grantFlags = { 1 },
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .isGeneral = true,
+    .permissionName = "ohos.permission.ACTIVITY_MOTION",
+    .resDeviceID = { "localTest" }
+};
+HapPolicyParams g_infoManagerTestPolicyParams = {
+    .apl = APL_NORMAL,
+    .domain = "test.domain",
+    .permList = { g_infoManagerTestPermDef },
+    .permStateList = { g_infoManagerTestState },
+};
+
+HapInfoParams g_infoManagerTestInfoParams = {
+    .bundleName = "devicestatus_service_test",
+    .userID = 1,
+    .instIndex = 0,
+    .appIDDesc = "devicestatus_service_test"
+};
 std::shared_ptr<DeviceStatusAgent> g_agent1;
 std::shared_ptr<DeviceStatusAgent> g_agent2;
 } // namespace
 
 Type DeviceStatusAgentTest::g_agentTest = Type::TYPE_INVALID;
 
-void DeviceStatusAgentTest::SetUpTestCase() {}
+void DeviceStatusAgentTest::SetUpTestCase() {
+    AccessTokenIDEx tokenIdEx = {0};
+    tokenIdEx = AccessTokenKit::AllocHapToken(g_infoManagerTestInfoParams, g_infoManagerTestPolicyParams);
+    tokenID_ = tokenIdEx.tokenIdExStruct.tokenID;
+    GTEST_LOG_(INFO) << "tokenID:" << tokenID_;
+    ASSERT_NE(0, tokenID_);
+    ASSERT_EQ(0, SetSelfTokenID(tokenID_));
+}
 
-void DeviceStatusAgentTest::TearDownTestCase() {}
+void DeviceStatusAgentTest::TearDownTestCase()
+{
+    ASSERT_NE(0, tokenID_);
+    int32_t ret = AccessTokenKit::DeleteToken(tokenID_);
+    ASSERT_EQ(RET_SUCCESS, ret);
+}
 
 void DeviceStatusAgentTest::SetUp()
 {
