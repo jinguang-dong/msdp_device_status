@@ -32,5 +32,6 @@ group("device_status_tests") {
     "frameworks/native/interaction/test:interaction_manager_test",
     "services/native/test:devicestatussrv_test",
     "test/fuzztest:device_status_fuzztest",
+    "${device_status_root_path}/rust/modules/scheduler/test:fusion_scheduler_test",
   ]
 }

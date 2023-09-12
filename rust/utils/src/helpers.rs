@@ -13,17 +13,25 @@
  * limitations under the License.
  */
 
-//! Several utils.
+//! Wrappers of C calls.
 
-#![feature(rustc_private)]
-extern crate libc;
+use std::ffi::{ c_int, CStr };
 
-mod helpers;
-mod macros;
+/// Retrieve system error number.
+pub fn errno() -> c_int {
+   unsafe {
+       *libc::__errno_location()
+   }
+}
 
-pub use helpers::{
-    errno,
-    last_error,
-};
-
-pub use macros::InnerFunctionTracer;
+/// Retrieve an descriptive error message of the last failed call.
+pub fn last_error() -> String {
+   let msg = unsafe {
+       CStr::from_ptr(libc::strerror(errno()))
+   };
+   if let Ok(serr) = msg.to_str() {
+       serr.to_string()
+   } else {
+       String::default()
+   }
+}
