@@ -18,6 +18,7 @@
 
 #include <vector>
 
+#include "cJSON.h"
 #include "event_handler.h"
 #include "event_runner.h"
 #include "libxml/tree.h"
@@ -72,6 +73,22 @@ private:
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> scale_ { nullptr };
 };
 
+struct JsonParser {
+    JsonParser() = default;
+    ~JsonParser()
+    {
+        if (json != nullptr) {
+            cJSON_Delete(json);
+            json = nullptr;
+        }
+    }
+    operator cJSON *()
+    {
+        return json;
+    }
+    cJSON *json { nullptr };
+};
+
 struct DrawingInfo {
     std::atomic_bool isRunning { false };
     std::atomic_bool isPreviousDefaultStyle { false };
@@ -94,6 +111,15 @@ struct DrawingInfo {
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode { nullptr };
     std::shared_ptr<Media::PixelMap> pixelMap { nullptr };
     std::shared_ptr<Media::PixelMap> stylePixelMap { nullptr };
+    std::string filterInfo;
+    std::string arkExtraInfo;
+};
+
+struct FilterInfo {
+    std::string componentType;
+    int32_t blurStyle;
+    int32_t cornerRadius;
+    float dipScale;
 };
 
 class DragDrawing : public IDragAnimation {
@@ -147,7 +173,7 @@ private:
     int32_t GetFilePath(std::string &filePath);
     bool NeedAdjustSvgInfo();
     void SetDecodeOptions(Media::DecodeOptions &decodeOpts);
-
+    bool ParserFilterInfo(FilterInfo& filterInfo);
 private:
     int64_t startNum_ { -1 };
     std::shared_ptr<Rosen::RSCanvasNode> canvasNode_ { nullptr };
