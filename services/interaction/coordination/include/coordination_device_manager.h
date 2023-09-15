@@ -77,6 +77,7 @@ public:
     std::string GetOriginNetworkId(const std::string &dhid) const;
     std::string GetDhid(int32_t deviceId) const;
     bool HasLocalPointerDevice() const;
+    void RemoveObserver();
 
 private:
     void OnDeviceAdded(std::shared_ptr<IDevice> device);

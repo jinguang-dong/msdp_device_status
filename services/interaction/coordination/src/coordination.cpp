@@ -15,6 +15,7 @@
 
 #include "coordination.h"
 
+#include "coordination_device_manager.h"
 #include "coordination_event_manager.h"
 #include "coordination_sm.h"
 #include "coordination_util.h"
@@ -27,6 +28,16 @@ namespace DeviceStatus {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "Coordination" };
 } // namespace
+
+Coordination::Coordination()
+{
+    CALL_DEBUG_ENTER;
+}
+
+Coordination::~Coordination()
+{
+    CALL_DEBUG_ENTER;
+}
 
 void Coordination::PrepareCoordination()
 {
@@ -41,23 +52,42 @@ void Coordination::UnprepareCoordination()
 int32_t Coordination::ActivateCoordination(SessionPtr sess, int32_t userData,
     const std::string& remoteNetworkId, int32_t startDeviceId)
 {
+    CALL_DEBUG_ENTER;
+    CHKPR(sess, RET_ERR);
     sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
     CHKPR(event, RET_ERR);
     event->type = CoordinationEventManager::EventType::START;
     event->sess = sess;
     event->msgId = MessageId::COORDINATION_MESSAGE;
     event->userData = userData;
+    if (COOR_SM->GetCurrentCoordinationState() == CoordinationState::STATE_OUT ||
+        (COOR_SM->GetCurrentCoordinationState() == CoordinationState::STATE_FREE &&
+        COOR_DEV_MGR->IsRemote(startDeviceId))) {
+        FI_HILOGW("It is currently worn out");
+        NetPacket pkt(event->msgId);
+        pkt << userData << "" << static_cast<int32_t>(CoordinationMessage::ACTIVATE_SUCCESS);
+        if (pkt.ChkRWError()) {
+            FI_HILOGE("Packet write data failed");
+            return RET_ERR;
+        }
+        if (!sess->SendMsg(pkt)) {
+            FI_HILOGE("Sending failed");
+            return RET_ERR;
+        }
+        return RET_OK;
+    }
     COOR_EVENT_MGR->AddCoordinationEvent(event);
     int32_t ret = COOR_SM->ActivateCoordination(remoteNetworkId, startDeviceId);
     if (ret != RET_OK) {
-        FI_HILOGE("ActivateCoordination failed, ret:%{public}d", ret);
-        COOR_EVENT_MGR->OnErrorMessage(event->type, static_cast<CoordinationMessage>(ret));
+        FI_HILOGE("On activate coordination failed, ret:%{public}d", ret);
     }
     return ret;
 }
 
 int32_t Coordination::DeactivateCoordination(SessionPtr sess, int32_t userData, bool isUnchained)
 {
+    CALL_DEBUG_ENTER;
+    CHKPR(sess, RET_ERR);
     sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
     CHKPR(event, RET_ERR);
     event->type = CoordinationEventManager::EventType::STOP;
@@ -67,14 +97,16 @@ int32_t Coordination::DeactivateCoordination(SessionPtr sess, int32_t userData, 
     COOR_EVENT_MGR->AddCoordinationEvent(event);
     int32_t ret = COOR_SM->DeactivateCoordination(isUnchained);
     if (ret != RET_OK) {
-        FI_HILOGE("Deactivate coordination failed, ret:%{public}d", ret);
-        COOR_EVENT_MGR->OnErrorMessage(event->type, static_cast<CoordinationMessage>(ret));
+        FI_HILOGE("On deactivate coordination failed, ret:%{public}d", ret);
+        COOR_EVENT_MGR->OnErrorMessage(event->type, CoordinationMessage(ret));
     }
     return ret;
 }
 
 int32_t Coordination::GetCoordinationState(SessionPtr sess, int32_t userData, const std::string &deviceId)
 {
+    CALL_DEBUG_ENTER;
+    CHKPR(sess, RET_ERR);
     sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
     CHKPR(event, RET_ERR);
     event->type = CoordinationEventManager::EventType::STATE;
@@ -91,6 +123,8 @@ int32_t Coordination::GetCoordinationState(SessionPtr sess, int32_t userData, co
 
 int32_t Coordination::RegisterCoordinationListener(SessionPtr sess)
 {
+    CALL_DEBUG_ENTER;
+    CHKPR(sess, RET_ERR);
     sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
     CHKPR(event, RET_ERR);
     event->type = CoordinationEventManager::EventType::LISTENER;
@@ -102,6 +136,8 @@ int32_t Coordination::RegisterCoordinationListener(SessionPtr sess)
 
 int32_t Coordination::UnregisterCoordinationListener(SessionPtr sess)
 {
+    CALL_DEBUG_ENTER;
+    CHKPR(sess, RET_ERR);
     sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
     CHKPR(event, RET_ERR);
     event->type = CoordinationEventManager::EventType::LISTENER;
@@ -115,13 +151,32 @@ void Coordination::Dump(int32_t fd)
     COOR_SM->Dump(fd);
 }
 
-ICoordination* CreateICoordination(IContext *context)
+void Coordination::OnSessionLost(SessionPtr session)
 {
+    CALL_DEBUG_ENTER;
+    return; // lzc
+    COOR_SM->OnSessionLost(session);
+}
+
+ICoordination* CreateCoordination(IContext *context)
+{
+    CALL_DEBUG_ENTER;
     CHKPP(context);
-    COOR_EVENT_MGR->SetIContext(context);
-    ICoordination *coord = new (std::nothrow) Coordination();
-    CHKPP(coord);
-    return coord;
+    // COOR_EVENT_MGR->SetIContext(context); // lzc
+    ICoordination *coor = new (std::nothrow) Coordination();
+    CHKPP(coor);
+    return coor; // lzc
+    COOR_SM->Init();
+    return coor;
+}
+
+void ReleaseCoordination(ICoordination* coor)
+{
+    CALL_DEBUG_ENTER;
+    // COOR_DEV_MGR->RemoveObserver(); // lzc
+    if (coor != nullptr) {
+        delete coor;
+    }
 }
 } // namespace DeviceStatus
 } // namespace Msdp

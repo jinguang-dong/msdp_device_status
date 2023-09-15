@@ -30,9 +30,17 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "ICoordi
 
 ICoordinationState::ICoordinationState()
 {
+    CALL_DEBUG_ENTER;
     runner_ = AppExecFwk::EventRunner::Create(true);
     CHKPL(runner_);
     eventHandler_ = std::make_shared<CoordinationEventHandler>(runner_);
+}
+
+ICoordinationState::~ICoordinationState()
+{
+    CALL_DEBUG_ENTER;
+    std::string threadName = runner_->GetRunnerThreadName();
+    FI_HILOGE("threadName:%{public}s", threadName.c_str());
 }
 
 int32_t ICoordinationState::PrepareAndStart(const std::string &remoteNetworkId, int32_t startDeviceId)

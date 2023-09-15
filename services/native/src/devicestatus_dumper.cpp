@@ -27,9 +27,6 @@
 #include "string_ex.h"
 #include "unique_fd.h"
 
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#include "coordination_sm.h"
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
 #include "drag_manager.h"
@@ -46,11 +43,11 @@ constexpr size_t MAX_DEVICE_STATUS_SIZE { 10 };
 DeviceStatusDumper::DeviceStatusDumper() {}
 DeviceStatusDumper::~DeviceStatusDumper() {}
 
-int32_t DeviceStatusDumper::Init(IContext *context)
+int32_t DeviceStatusDumper::Init(IDragContext *dragContext)
 {
     CALL_DEBUG_ENTER;
-    CHKPR(context, RET_ERR);
-    context_ = context;
+    CHKPR(dragContext, RET_ERR);
+    dragContext_ = dragContext;
     return RET_OK;
 }
 
@@ -121,16 +118,12 @@ void DeviceStatusDumper::ExecutDump(int32_t fd, const std::vector<Data> &datas, 
             break;
         }
         case 'o': {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-            COOR_SM->Dump(fd);
-#else
             dprintf(fd, "device coordination is not supported\n");
-#endif // OHOS_BUILD_ENABLE_COORDINATION
             break;
         }
         case 'd': {
-            CHKPV(context_);
-            context_->GetDragManager().Dump(fd);
+            CHKPV(dragContext_);
+            dragContext_->GetDragManager().Dump(fd);
             break;
         }
         case 'm': {

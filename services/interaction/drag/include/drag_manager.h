@@ -27,6 +27,7 @@
 #include "drag_data.h"
 #include "drag_drawing.h"
 #include "i_context.h"
+#include "i_drag_context.h"
 #include "state_change_notify.h"
 #include "stream_session.h"
 
