@@ -18,7 +18,6 @@
 
 #include <vector>
 
-#include "cJSON.h"
 #include "event_handler.h"
 #include "event_runner.h"
 #include "libxml/tree.h"
@@ -71,22 +70,6 @@ public:
 private:
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> alpha_ { nullptr };
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> scale_ { nullptr };
-};
-
-struct JsonParser {
-    JsonParser() = default;
-    ~JsonParser()
-    {
-        if (json != nullptr) {
-            cJSON_Delete(json);
-            json = nullptr;
-        }
-    }
-    operator cJSON *()
-    {
-        return json;
-    }
-    cJSON *json { nullptr };
 };
 
 struct DrawingInfo {

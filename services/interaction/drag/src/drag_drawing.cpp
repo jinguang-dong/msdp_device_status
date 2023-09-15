@@ -38,6 +38,7 @@
 #include "ui/rs_surface_node.h"
 #include "ui/rs_ui_director.h"
 
+#include "devicestatus_data_define.h"
 #include "devicestatus_define.h"
 #include "drag_data_manager.h"
 #include "util.h"
@@ -1142,7 +1143,7 @@ void DragDrawing::ProcessFilter(std::shared_ptr<Rosen::RSCanvasNode> filterNode)
                 g_drawingInfo.pixelMap->GetHeight());
             filterNode->SetCornerRadius(filterInfo.cornerRadius * filterInfo.dipScale);
         } else {
-            FI_HILOGE("Create backgroundFilter failed");
+            FI_HILOGE("Add backgroundFilter failed");
         }
     }
 }

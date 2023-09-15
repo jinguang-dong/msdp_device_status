@@ -25,6 +25,7 @@ ohos_shared_library("interaction_drag") {
   include_dirs = [
     "include",
     "${device_status_interfaces_path}/innerkits/interaction/include",
+    "${device_status_libs_path}/include",
     "${device_status_utils_path}/include",
     "${device_status_service_path}/context/include",
     "${device_status_service_path}/native/include",
