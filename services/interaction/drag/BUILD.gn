@@ -25,9 +25,11 @@ ohos_shared_library("interaction_drag") {
   include_dirs = [
     "include",
     "${device_status_interfaces_path}/innerkits/interaction/include",
+    "${device_status_libs_path}/include",
     "${device_status_utils_path}/include",
     "${device_status_service_path}/context/include",
     "${device_status_service_path}/native/include",
+    "//third_party/cJSON",
   ]
 
   sources = [
@@ -49,6 +51,7 @@ ohos_shared_library("interaction_drag") {
     "${device_status_root_path}/etc/drag_icon:device_status_drag_icon",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
     "${device_status_utils_path}:devicestatus_util",
+    "//third_party/cJSON:cjson",
     "//third_party/libxml2:xml2",
   ]
 
@@ -56,6 +59,7 @@ ohos_shared_library("interaction_drag") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "graphic_2d:libcomposer",
+    "graphic_2d:librender_service_base",
     "graphic_2d:window_animation",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
