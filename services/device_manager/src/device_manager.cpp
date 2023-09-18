@@ -181,8 +181,8 @@ std::shared_ptr<IDevice> DeviceManager::AddDevice(const std::string &devNode)
         return nullptr;
     }
 
-    int32_t deviceId = ParseDeviceId(devNode);
-    if (deviceId < 0) {
+    int32_t networkId = ParseDeviceId(devNode);
+    if (networkId < 0) {
         FI_HILOGE("Parsing device name failed:%{public}s", devNode.c_str());
         return nullptr;
     }
@@ -200,7 +200,7 @@ std::shared_ptr<IDevice> DeviceManager::AddDevice(const std::string &devNode)
         return nullptr;
     }
 
-    dev = std::make_shared<Device>(deviceId);
+    dev = std::make_shared<Device>(networkId);
     dev->SetDevPath(devPath);
     dev->SetSysPath(std::string(rpath));
     if (dev->Open() != RET_OK) {

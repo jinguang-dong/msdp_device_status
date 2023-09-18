@@ -35,7 +35,7 @@ class JsUtilCooperate {
 public:
     struct UserData {
         int32_t userData { 0 };
-        int32_t deviceId { 0 };
+        int32_t networkId { 0 };
         napi_value handle { nullptr };
         std::vector<int32_t> keys;
     };

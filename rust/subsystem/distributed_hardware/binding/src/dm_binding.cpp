@@ -99,9 +99,9 @@ CDmDeviceInfo* DmDeviceStateCallback::CreateCDeviceInfo(const OHOS::DistributedH
 {
     CALL_DEBUG_ENTER;
     CDmDeviceInfo* cDeviceInfo = new (std::nothrow) CDmDeviceInfo;
-    cDeviceInfo->deviceId = new (std::nothrow) char[sizeof(deviceInfo.deviceId)];
-    if (strcpy_s(cDeviceInfo->deviceId, sizeof(deviceInfo.deviceId), deviceInfo.deviceId) != EOK) {
-        FI_HILOGE("Invalid device id:\'%{public}s\'", deviceInfo.deviceId);
+    cDeviceInfo->networkId = new (std::nothrow) char[sizeof(deviceInfo.networkId)];
+    if (strcpy_s(cDeviceInfo->networkId, sizeof(deviceInfo.networkId), deviceInfo.networkId) != EOK) {
+        FI_HILOGE("Invalid device id:\'%{public}s\'", deviceInfo.networkId);
         return nullptr;
     }
     cDeviceInfo->deviceName = new (std::nothrow) char[sizeof(deviceInfo.deviceName)];

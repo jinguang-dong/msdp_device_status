@@ -69,13 +69,13 @@ public:
     void TearDown();
     static void SetUpTestCase();
     static std::vector<int32_t> GetInputDeviceIds();
-    static std::shared_ptr<MMI::InputDevice> GetDevice(int32_t deviceId);
+    static std::shared_ptr<MMI::InputDevice> GetDevice(int32_t networkId);
     static std::pair<int32_t, int32_t> GetMouseAndTouch();
     static std::shared_ptr<Media::PixelMap> CreatePixelMap(int32_t width, int32_t height);
     static std::optional<DragData> CreateDragData(const std::pair<int32_t, int32_t> &pixelMapSize, int32_t sourceType,
         int32_t pointerId, int32_t displayId, const std::pair<int32_t, int32_t> &location);
     static MMI::PointerEvent::PointerItem CreatePointerItem(int32_t pointerId,
-        int32_t deviceId, const std::pair<int32_t, int32_t> &displayLocation, bool isPressed);
+        int32_t networkId, const std::pair<int32_t, int32_t> &displayLocation, bool isPressed);
     static std::shared_ptr<MMI::PointerEvent> SetupPointerEvent(const std::pair<int32_t, int32_t> &displayLocation,
         int32_t action, int32_t sourceType, int32_t pointerId, bool isPressed);
     static void SimulateDownEvent(const std::pair<int32_t, int32_t> &location, int32_t sourceType, int32_t pointerId);
@@ -135,13 +135,13 @@ std::vector<int32_t> InteractionManagerTest::GetInputDeviceIds()
     return realDeviceIds;
 }
 
-std::shared_ptr<MMI::InputDevice> InteractionManagerTest::GetDevice(int32_t deviceId)
+std::shared_ptr<MMI::InputDevice> InteractionManagerTest::GetDevice(int32_t networkId)
 {
     std::shared_ptr<MMI::InputDevice> inputDevice;
     auto callback = [&inputDevice](std::shared_ptr<MMI::InputDevice> device) {
         inputDevice = device;
     };
-    int32_t ret = MMI::InputManager::GetInstance()->GetDevice(deviceId, callback);
+    int32_t ret = MMI::InputManager::GetInstance()->GetDevice(networkId, callback);
     if (ret != RET_OK || inputDevice == nullptr) {
         FI_HILOGE("Get device failed");
         return nullptr;
@@ -234,12 +234,12 @@ std::optional<DragData> InteractionManagerTest::CreateDragData(const std::pair<i
     return dragData;
 }
 
-MMI::PointerEvent::PointerItem InteractionManagerTest::CreatePointerItem(int32_t pointerId, int32_t deviceId,
+MMI::PointerEvent::PointerItem InteractionManagerTest::CreatePointerItem(int32_t pointerId, int32_t networkId,
     const std::pair<int32_t, int32_t> &displayLocation, bool isPressed)
 {
     MMI::PointerEvent::PointerItem item;
     item.SetPointerId(pointerId);
-    item.SetDeviceId(deviceId);
+    item.SetDeviceId(networkId);
     item.SetDisplayX(displayLocation.first);
     item.SetDisplayY(displayLocation.second);
     item.SetPressed(isPressed);
@@ -378,10 +378,10 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationList
     class CoordinationListenerTest : public ICoordinationListener {
     public:
         CoordinationListenerTest() : ICoordinationListener() {}
-        void OnCoordinationMessage(const std::string &deviceId, CoordinationMessage msg) override
+        void OnCoordinationMessage(const std::string &networkId, CoordinationMessage msg) override
         {
             FI_HILOGD("Register coordination listener test");
-            (void) deviceId;
+            (void) networkId;
         };
     };
     std::shared_ptr<CoordinationListenerTest> consumer =
@@ -521,11 +521,11 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_DeactivateCoordination, 
 HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Abnormal, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    const std::string deviceId("");
+    const std::string networkId("");
     auto fun = [](bool state) {
         FI_HILOGD("Get coordination state failed, state:%{public}d", state);
     };
-    int32_t ret = InteractionManager::GetInstance()->GetCoordinationState(deviceId, fun);
+    int32_t ret = InteractionManager::GetInstance()->GetCoordinationState(networkId, fun);
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_NE(ret, RET_OK);
 #else
@@ -544,12 +544,12 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Nor
     CALL_TEST_DEBUG;
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
-    const std::string deviceId("deviceId");
+    const std::string networkId("networkId");
     auto fun = [&promiseFlag](bool state) {
         FI_HILOGD("Get coordination state success, state:%{public}d", state);
         promiseFlag.set_value(true);
     };
-    int32_t ret = InteractionManager::GetInstance()->GetCoordinationState(deviceId, fun);
+    int32_t ret = InteractionManager::GetInstance()->GetCoordinationState(networkId, fun);
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
     ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);

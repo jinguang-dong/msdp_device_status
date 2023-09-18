@@ -206,13 +206,13 @@ bool CoordinationDeviceManager::IsRemote(int32_t id)
     return false;
 }
 
-std::vector<std::string> CoordinationDeviceManager::GetCoordinationDhids(int32_t deviceId) const
+std::vector<std::string> CoordinationDeviceManager::GetCoordinationDhids(int32_t networkId) const
 {
     CALL_INFO_TRACE;
     std::vector<std::string> inputDeviceDhids;
-    auto devIter = devices_.find(deviceId);
+    auto devIter = devices_.find(networkId);
     if (devIter == devices_.end()) {
-        FI_HILOGW("Cannot find pointer id:%{public}d", deviceId);
+        FI_HILOGW("Cannot find pointer id:%{public}d", networkId);
         return inputDeviceDhids;
     }
     if (devIter->second == nullptr) {
@@ -246,15 +246,15 @@ std::vector<std::string> CoordinationDeviceManager::GetCoordinationDhids(int32_t
 
 std::vector<std::string> CoordinationDeviceManager::GetCoordinationDhids(const std::string &dhid) const
 {
-    int32_t deviceId { -1 };
+    int32_t networkId { -1 };
     for (const auto &[id, dev] : devices_) {
         CHKPC(dev);
         if (dev->GetDhid() == dhid) {
-            deviceId = id;
+            networkId = id;
             break;
         }
     }
-    return GetCoordinationDhids(deviceId);
+    return GetCoordinationDhids(networkId);
 }
 
 std::string CoordinationDeviceManager::GetOriginNetworkId(int32_t id) const
@@ -290,10 +290,10 @@ std::string CoordinationDeviceManager::GetOriginNetworkId(const std::string &dhi
     return {};
 }
 
-std::string CoordinationDeviceManager::GetDhid(int32_t deviceId) const
+std::string CoordinationDeviceManager::GetDhid(int32_t networkId) const
 {
     CALL_INFO_TRACE;
-    if (auto devIter = devices_.find(deviceId); devIter != devices_.end()) {
+    if (auto devIter = devices_.find(networkId); devIter != devices_.end()) {
         if (devIter->second != nullptr) {
             return devIter->second->GetDhid();
         }
