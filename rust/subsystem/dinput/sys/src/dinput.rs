@@ -1,0 +1,359 @@
+/*
+ * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+//! interface and impl in dinput.
+
+#![allow(dead_code)]
+#![allow(unused_variables)]
+
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::ffi::{ c_char, CString, c_void };
+use std::sync::{ Mutex, Once };
+use fusion_data_rust::{ FusionErrorCode, FusionResult };
+use fusion_utils_rust::{ call_debug_enter };
+use hilog_rust::{ info, hilog, error, HiLogLabel, LogType };
+use crate::binding::{ PrepareRemoteInput, UnPrepareRemoteInput, StartRemoteInput,
+                      StopRemoteInput, IsNeedFilterOut, CBusinessEvent };
+
+const LOG_LABEL: HiLogLabel = HiLogLabel {
+    log_type: LogType::LogCore,
+    domain: 0xD002220,
+    tag: "DInput",
+};
+
+#[derive(Default)]
+struct DInputImpl {
+    id_radix: usize,
+    pending_callbacks: HashMap<usize, Box<dyn Fn(bool)>>,
+}
+
+macro_rules! get_ret_and_return {
+    ($ret:expr, $target:expr, $function_name:expr) => {{
+        if $ret != $target {
+            error!(LOG_LABEL, "{} fail", @public($function_name));
+            return Err(FusionErrorCode::Fail.into());
+        } else {
+            return Ok($ret);
+        }
+    }};
+}
+
+impl DInputImpl {
+    extern "C" fn on_prepare_remote_input(dev_id: *const c_char, status: i32, id: usize, userdata: *mut c_void)
+    {
+        info!(LOG_LABEL, "on prepare remote input, status:{}", status);
+        let user_data = userdata as *mut Self;
+        // SAFETY: no `None` here, cause `user_data` is valid
+        unsafe {
+            if let Some(impl_back) = user_data.as_mut() {
+                impl_back.process_callbacks(id, status);
+            }
+        }  
+    }
+
+    fn prepare_dinput<F>(&mut self, remote_network_id: &str, origin_network_id: &str, callback: F) -> FusionResult<i32>
+    where
+        F: Fn(bool) + 'static
+    {
+        call_debug_enter!("DInputImpl::prepare_dinput");
+        let id = self.save_callback(callback);
+        let this = self as *mut Self as *mut c_void;
+        if remote_network_id.is_empty() || origin_network_id.is_empty() {
+            error!(LOG_LABEL, "nullptr in prepare_dinput fail");
+            return Err(FusionErrorCode::Fail.into());
+        }
+        // SAFETY: no `None` here
+        let ret = unsafe {
+            PrepareRemoteInput(remote_network_id.as_ptr() as *const c_char,
+                origin_network_id.as_ptr() as *const c_char, Some(DInputImpl::on_prepare_remote_input), id, this)
+        };
+        get_ret_and_return!(ret, 0, "prepare_dinput");
+    }
+
+    fn unprepare_dinput<F>(&mut self, remote_network_id: &str,
+        origin_network_id: &str, callback: F) -> FusionResult<i32>
+    where
+        F: Fn(bool) + 'static
+    {
+        call_debug_enter!("DInputImpl::unprepare_dinput");
+        let id = self.save_callback(callback);
+        let this = self as *mut Self as *mut c_void;
+        if remote_network_id.is_empty() || origin_network_id.is_empty() {
+            error!(LOG_LABEL, "nullptr in unprepare_dinput fail");
+            return Err(FusionErrorCode::Fail.into());
+        }
+        // SAFETY: no `None` here
+        let ret = unsafe {
+            UnPrepareRemoteInput(remote_network_id.as_ptr() as *const c_char,
+                origin_network_id.as_ptr() as *const c_char, Some(DInputImpl::on_prepare_remote_input), id, this)
+        };
+        get_ret_and_return!(ret, 0, "unprepare_dinput");
+    }
+
+    fn start_dinput<F>(&mut self, remote_network_id: &str, origin_network_id: &str,
+        input_device_dhids: &[String], callback: F) -> FusionResult<i32>
+    where
+        F: Fn(bool) + 'static
+    {
+        call_debug_enter!("DInputImpl::start_dinput");
+        let id = self.save_callback(callback);
+        let this = self as *mut Self as *mut c_void;
+        if remote_network_id.is_empty() || origin_network_id.is_empty() {
+            error!(LOG_LABEL, "nullptr in start_dinput fail");
+            return Err(FusionErrorCode::Fail.into());
+        }
+        let _c_args: Vec<CString> = input_device_dhids
+            .iter()
+            .map(|s| CString::new(s.clone()).unwrap())
+            .collect();
+        let c_args: Vec<*const c_char> =
+            _c_args.iter().map(|s| s.as_ptr()).collect();
+        // SAFETY: no `None` here
+        let ret = unsafe {
+            StartRemoteInput(remote_network_id.as_ptr() as *const c_char, origin_network_id.as_ptr() as *const c_char,
+                c_args.as_ptr(), c_args.len(), Some(DInputImpl::on_prepare_remote_input), id, this)
+        };
+        get_ret_and_return!(ret, 0, "start_dinput");
+    }
+
+    fn stop_dinput<F>(&mut self, remote_network_id: &str, origin_network_id: &str,
+        input_device_dhids: &[String], callback: F) -> FusionResult<i32>
+    where
+        F: Fn(bool) + 'static
+    {
+        call_debug_enter!("DInputImpl::stop_dinput");
+        let id = self.save_callback(callback);
+        let this = self as *mut Self as *mut c_void;
+        if remote_network_id.is_empty() || origin_network_id.is_empty() {
+            error!(LOG_LABEL, "nullptr in stop_dinput fail");
+            return Err(FusionErrorCode::Fail.into());
+        }
+        let _c_args: Vec<CString> = input_device_dhids
+            .iter()
+            .map(|s| CString::new(s.clone()).unwrap())
+            .collect();
+        let c_args: Vec<*const c_char> =
+            _c_args.iter().map(|s| s.as_ptr()).collect();
+        // SAFETY: no `None` here
+        let ret = unsafe {
+            StopRemoteInput(remote_network_id.as_ptr() as *const c_char, origin_network_id.as_ptr() as *const c_char,
+                c_args.as_ptr(), c_args.len(), Some(DInputImpl::on_prepare_remote_input), id, this)
+        };
+        get_ret_and_return!(ret, 0, "stop_dinput");
+    }
+
+    fn save_callback<F>(&mut self, callback: F) -> usize
+    where
+        F: Fn(bool) + 'static
+    {
+        call_debug_enter!("DInputImpl::save_callback");
+        let id = self.id_radix;
+        self.id_radix += 1;
+        self.pending_callbacks.insert(id, Box::new(callback));
+        id
+    }
+
+    pub fn process_callbacks(&mut self, callback_id: usize, status: i32)
+    {
+        call_debug_enter!("DInputImpl::process_callbacks");
+        self.remove_timmer(callback_id);
+        let callback = self.pending_callbacks.get(&callback_id);
+        match callback {
+            Some(callback) => {
+                call_debug_enter!("Some of process_callbacks");
+                if status == 0 {
+                    callback(true);
+                } else {
+                    callback(false);
+                }
+                
+                self.pending_callbacks.remove(&callback_id);
+            }
+            None => {
+                call_debug_enter!("Some of process_callbacks None");
+            }
+        }
+    }
+
+    fn remove_timmer(&self, callback_id: usize) {
+        call_debug_enter!("DInputImpl::remove_timmer");
+    }
+
+    fn is_need_filter_out(&self, network_id: &str, event: &mut BusinessEvent) -> bool
+    {
+        let cevent = CBusinessEvent{
+            pressed_keys_len: event.pressed_keys.len(),
+            pressed_keys: event.pressed_keys.as_mut_ptr(),
+            key_code: event.key_code,
+            key_action: event.key_action,
+        };
+        if network_id.is_empty() {
+            error!(LOG_LABEL, "nullptr in is_need_filter_out fail");
+            return false;
+        }
+        // SAFETY: no `None` here
+        let ret = unsafe {
+            IsNeedFilterOut(network_id.as_ptr() as *const c_char, &cevent as *const CBusinessEvent)
+        };
+        if ret != 0 {
+            error!(LOG_LABEL, "is_need_filter_out fail");
+            false
+        } else {
+            true
+        }
+    }
+}
+
+/// struct of DInpt
+#[derive(Default)]
+pub struct DInput {
+    dinput_impl: Mutex<RefCell<DInputImpl>>,
+}
+
+impl DInput {
+    /// to get_instance
+    pub fn get_instance() -> Option<&'static Self> {
+        static mut DINPUT_ADAPTER: Option<DInput> = None;
+        static INIT_ONCE: Once = Once::new();
+        // SAFETY: no `None` here. just Modifying the Static Variables
+        unsafe {
+            INIT_ONCE.call_once(|| {
+                DINPUT_ADAPTER = Some(Self::default());
+            });
+            DINPUT_ADAPTER.as_ref()
+        }
+    }
+
+    /// interface of prepare_dinput
+    pub fn prepare_dinput<F>(&self, remote_network_id: &str, origin_network_id: &str,
+        callback: F) -> FusionResult<i32>
+    where
+        F: Fn(bool) + 'static
+    {
+        call_debug_enter!("DInput::prepare_dinput");
+        match self.dinput_impl.lock() {
+            Ok(guard) => {
+                guard.borrow_mut().prepare_dinput(remote_network_id, origin_network_id, callback)
+            }
+            Err(err) => {
+                error!(LOG_LABEL, "lock error: {:?}", err);
+                Err(FusionErrorCode::Fail.into())
+            }
+        }
+    }
+
+    /// interface of unprepare_dinput
+    pub fn unprepare_dinput<F>(&self, remote_network_id: &str, origin_network_id: &str,
+        callback: F) -> FusionResult<i32>
+    where
+        F: Fn(bool) + 'static
+    {
+        call_debug_enter!("DInput::unprepare_dinput");
+        match self.dinput_impl.lock() {
+            Ok(guard) => {
+                guard.borrow_mut().unprepare_dinput(remote_network_id, origin_network_id, callback)
+            }
+            Err(err) => {
+                error!(LOG_LABEL, "lock error: {:?}", err);
+                Err(FusionErrorCode::Fail.into())
+            }
+        }
+    }
+
+    /// interface of start_dinput
+    pub fn start_dinput<F>(&self, remote_network_id: &str, origin_network_id: &str,
+        input_device_dhids: &[String], callback: F) -> FusionResult<i32>
+    where
+        F: Fn(bool) + 'static
+    {
+        call_debug_enter!("DInput::start_dinput");
+        match self.dinput_impl.lock() {
+            Ok(guard) => {
+                guard.borrow_mut().start_dinput(remote_network_id, origin_network_id, input_device_dhids, callback)
+            }
+            Err(err) => {
+                error!(LOG_LABEL, "lock error: {:?}", err);
+                Err(FusionErrorCode::Fail.into())
+            }
+        }
+    }
+
+    /// interface of stop_dinput
+    pub fn stop_dinput<F>(&self, remote_network_id: &str, origin_network_id: &str,
+        input_device_dhids: &[String], callback: F) -> FusionResult<i32>
+    where
+        F: Fn(bool) + 'static
+    {
+        call_debug_enter!("DInput::stop_dinput");
+        match self.dinput_impl.lock() {
+            Ok(guard) => {
+                guard.borrow_mut().stop_dinput(remote_network_id, origin_network_id, input_device_dhids, callback)
+            }
+            Err(err) => {
+                error!(LOG_LABEL, "lock error: {:?}", err);
+                Err(FusionErrorCode::Fail.into())
+            }
+        }
+    }
+
+    /// interface of is_need_filter_out
+    pub fn is_need_filter_out(&self, network_id: &str, event: &mut BusinessEvent) -> bool
+    {
+        call_debug_enter!("DInput::is_need_filter_out");
+        match self.dinput_impl.lock() {
+            Ok(guard) => {
+                let iret = guard.borrow_mut().is_need_filter_out(network_id, event);
+                iret
+            }
+            Err(err) => {
+                error!(LOG_LABEL, "lock error: {:?}", err);
+                false
+            }
+        }
+    }
+}
+
+/// struct BusinessEvent
+pub struct BusinessEvent {
+    /// Vec pressed_keys
+    pub pressed_keys: Vec<i32>,
+    /// the key code
+    pub key_code: i32,
+    /// the key action
+    pub key_action: i32,
+}
+
+impl BusinessEvent {
+    /// Converts `CBusinessEvent` type to `BusinessEvent` type
+    pub fn from_raw(value: &mut CBusinessEvent) -> Self
+    {
+        call_debug_enter!("BusinessEvent::from_raw");
+        let mut buf: Vec<i32> = Vec::new();
+        // SAFETY: no `None` here, pressed_keys_len is the number of elements
+        let ts = unsafe {
+            std::slice::from_raw_parts(value.pressed_keys, value.pressed_keys_len)
+        };
+        info!(LOG_LABEL, "fill buffer");
+        for item in ts.iter() {
+            buf.push(*item);
+        }
+        info!(LOG_LABEL, "new BusinessEvent instance");
+        Self {
+            pressed_keys: buf,
+            key_code: value.key_code,
+            key_action: value.key_action,
+        }
+    }
+}
