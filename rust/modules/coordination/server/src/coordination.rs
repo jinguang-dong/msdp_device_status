@@ -20,8 +20,8 @@
 use std::ffi::{ c_char, CString };
 use crate::hilog_rust::{ hilog, HiLogLabel, LogType };
 use crate::fusion_data_rust::{ GeneralCoordinationParam, StartCoordinationParam, CallingContext,
-    StopCoordinationParam, GetCoordinationStateParam, FusionResult };
-use crate::fusion_utils_rust::{ call_debug_enter };
+    StopCoordinationParam, GetCoordinationStateParam };
+use crate::fusion_utils_rust::{ call_debug_enter, FusionResult, FusionErrorCode };
 
 const LOG_LABEL: HiLogLabel = HiLogLabel {
     log_type: LogType::LogCore,
@@ -38,55 +38,55 @@ pub struct Coordination {
 impl Coordination {
     /// TODO: add documentation.
     pub fn enable(&self, context: &CallingContext,
-        param: &GeneralCoordinationParam) -> FusionResult<i32>
+        param: &GeneralCoordinationParam) -> FusionResult<()>
     {
         call_debug_enter!("Coordination::enable");
-        Err(-1)
+        Err(FusionErrorCode::Fail)
     }
 
     /// TODO: add documentation.
     pub fn disable(&self, context: &CallingContext,
-        param: &GeneralCoordinationParam) -> FusionResult<i32>
+        param: &GeneralCoordinationParam) -> FusionResult<()>
     {
         call_debug_enter!("Coordination::disable");
-        Err(-1)
+        Err(FusionErrorCode::Fail)
     }
 
     /// TODO: add documentation.
     pub fn start(&self, context: &CallingContext,
-        param: &StartCoordinationParam) -> FusionResult<i32>
+        param: &StartCoordinationParam) -> FusionResult<()>
     {
         call_debug_enter!("Coordination::start");
-        Err(-1)
+        Err(FusionErrorCode::Fail)
     }
 
     /// TODO: add documentation.
     pub fn stop(&self, context: &CallingContext,
-        param: &StopCoordinationParam) -> FusionResult<i32>
+        param: &StopCoordinationParam) -> FusionResult<()>
     {
         call_debug_enter!("Coordination::stop");
-        Err(-1)
+        Err(FusionErrorCode::Fail)
     }
 
     /// TODO: add documentation.
     pub fn get_state(&self, context: &CallingContext,
-        param: &GetCoordinationStateParam) -> FusionResult<i32>
+        param: &GetCoordinationStateParam) -> FusionResult<()>
     {
         call_debug_enter!("Coordination::get_state");
-        Err(-1)
+        Err(FusionErrorCode::Fail)
     }
 
     pub fn register_listener(&self, context: &CallingContext,
-        param: &GeneralCoordinationParam) -> FusionResult<i32>
+        param: &GeneralCoordinationParam) -> FusionResult<()>
     {
         call_debug_enter!("Coordination::register_listener");
-        Err(-1)
+        Err(FusionErrorCode::Fail)
     }
 
     pub fn unregister_listener(&self, context: &CallingContext,
-        param: &GeneralCoordinationParam) -> FusionResult<i32>
+        param: &GeneralCoordinationParam) -> FusionResult<()>
     {
         call_debug_enter!("Coordination::unregister_listener");
-        Err(-1)
+        Err(FusionErrorCode::Fail)
     }
 }
