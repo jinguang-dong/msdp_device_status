@@ -20,6 +20,8 @@
 #include "input_manager.h"
 #include "pixel_map.h"
 #include "pointer_style.h"
+#include "udmf_client.h"
+#include "unified_types.h"
 
 #include "devicestatus_define.h"
 #include "drag_data.h"
@@ -27,15 +29,13 @@
 #include "fi_log.h"
 #include "proto.h"
 
-#include "udmf_client.h"
-#include "unified_types.h"
-
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DragManager" };
 constexpr int32_t TIMEOUT_MS { 2000 };
+constexpr int32_t SUBSTR_UDKEY_LEN { 6 };
 #ifdef OHOS_DRAG_ENABLE_INTERCEPTOR
 constexpr int32_t DRAG_PRIORITY { 500 };
 std::atomic<int64_t> g_startFilterTime { -1 };
@@ -85,13 +85,14 @@ int32_t DragManager::StartDrag(const DragData &dragData, SessionPtr sess)
     FI_HILOGD("PixelFormat:%{public}d, PixelAlphaType:%{public}d, PixelAllocatorType:%{public}d,"
         " PixelWidth:%{public}d, PixelHeight:%{public}d, shadowX:%{public}d, shadowY:%{public}d,"
         " sourceType:%{public}d, pointerId:%{public}d, displayId:%{public}d, displayX:%{public}d,"
-        " displayY:%{public}d, dragNum:%{public}d, hasCanceledAnimation:%{public}d",
+        " displayY:%{public}d, dragNum:%{public}d, hasCanceledAnimation:%{public}d, udKey:%{public}s",
         static_cast<int32_t>(dragData.shadowInfo.pixelMap->GetPixelFormat()),
         static_cast<int32_t>(dragData.shadowInfo.pixelMap->GetAlphaType()),
         static_cast<int32_t>(dragData.shadowInfo.pixelMap->GetAllocatorType()),
         dragData.shadowInfo.pixelMap->GetWidth(), dragData.shadowInfo.pixelMap->GetHeight(),
         dragData.shadowInfo.x, dragData.shadowInfo.y, dragData.sourceType, dragData.pointerId,
-        dragData.displayId, dragData.displayX, dragData.displayY, dragData.dragNum, dragData.hasCanceledAnimation);
+        dragData.displayId, dragData.displayX, dragData.displayY, dragData.dragNum, dragData.hasCanceledAnimation,
+        dragData.udKey.substr(0, SUBSTR_UDKEY_LEN).c_str());
     if (dragState_ == DragState::START) {
         FI_HILOGE("Drag instance is running, can not start drag again");
         return RET_ERR;
@@ -365,11 +366,11 @@ void DragManager::Dump(int32_t fd) const
         udKey = "";
     }
     dprintf(fd, "dragData = {\n"
-            "\tshadowInfoX:%d\n\tshadowInfoY:%d\n\tudKey:%s\n\tsourceType:%d\n\tdragNum:%d\n\tpointerId:%d\n"
-            "\tdisplayX:%d\n\tdisplayY:%d\n""\tdisplayId:%d\n\thasCanceledAnimation:%s\n",
-            dragData.shadowInfo.x, dragData.shadowInfo.y, udKey.c_str(), dragData.sourceType, dragData.dragNum,
-            dragData.pointerId, dragData.displayX, dragData.displayY, dragData.displayId,
-            dragData.hasCanceledAnimation ? "true" : "false");
+            "\tshadowInfoX:%d\n\tshadowInfoY:%d\n\tudKey:%s\n\tfilterInfo:%s\n\textraInfo:%s\n\tsourceType:%d"
+            "\tdragNum:%d\n\tpointerId:%d\n\tdisplayX:%d\n\tdisplayY:%d\n""\tdisplayId:%d\n\thasCanceledAnimation:%s\n",
+            dragData.shadowInfo.x, dragData.shadowInfo.y, udKey.c_str(), dragData.filterInfo.c_str(),
+            dragData.extraInfo.c_str(), dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX,
+            dragData.displayY, dragData.displayId, dragData.hasCanceledAnimation ? "true" : "false");
     if (dragState_ != DragState::STOP) {
         std::shared_ptr<Media::PixelMap> pixelMap = dragData.shadowInfo.pixelMap;
         CHKPV(pixelMap);
@@ -481,12 +482,7 @@ MMI::ExtraData DragManager::CreateExtraData(bool appended)
 int32_t DragManager::InitDataManager(const DragData &dragData) const
 {
     CALL_DEBUG_ENTER;
-    MMI::PointerStyle pointerStyle;
-    if (MMI::InputManager::GetInstance()->GetPointerStyle(MMI::GLOBAL_WINDOW_ID, pointerStyle) != RET_OK) {
-        FI_HILOGE("Get pointer style failed");
-        return RET_ERR;
-    }
-    DRAG_DATA_MGR.Init(dragData, pointerStyle);
+    DRAG_DATA_MGR.Init(dragData);
     return RET_OK;
 }
 
@@ -540,7 +536,6 @@ int32_t DragManager::OnStartDrag()
         FI_HILOGE("Init drag drawing cancel, drag animation is running");
         return RET_ERR;
     }
-    dragDrawing_.Draw(dragData.displayId, dragData.displayX, dragData.displayY);
     ret = AddDragEventHandler(dragData.sourceType);
     if (ret != RET_OK) {
 #ifdef OHOS_DRAG_ENABLE_MONITOR
