@@ -348,7 +348,8 @@ void VirtualKeyboardBuilder::ReadRawModel(const nlohmann::json &model, int32_t l
     }
     if (model.is_object()) {
         auto typeIter = model.find("type");
-        if ((typeIter == model.cend()) || !typeIter->is_string() || (std::string(typeIter.value()).compare("raw") != 0)) {
+        if ((typeIter == model.cend()) || !typeIter->is_string() || 
+        (std::string(typeIter.value()).compare("raw") != 0)) {
             std::cout << "Expect raw input data." << std::endl;
             return;
         }
