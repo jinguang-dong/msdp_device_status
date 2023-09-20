@@ -488,7 +488,7 @@ void VirtualMouseBuilder::ReadRawModel(const nlohmann::json &model, int32_t leve
     CALL_DEBUG_ENTER;
     if (model.is_object()) {
         auto typeIter = model.find("type");
-        if ((typeIter == model.cend()) || !typeIter->is_string() || 
+        if ((typeIter == model.cend()) || !typeIter->is_string() ||
         (std::string(typeIter.value()).compare("raw") != 0)) {
             std::cout << "Expect raw input data." << std::endl;
             return;
