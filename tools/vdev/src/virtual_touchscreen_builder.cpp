@@ -453,21 +453,6 @@ void VirtualTouchScreenBuilder::HandleDown(const nlohmann::json &model)
 
 void VirtualTouchScreenBuilder::HandleMove(const nlohmann::json &model)
 {
-    int32_t slot = -1;
-    auto it = model.find("slot");
-    if ((it != model.cend()) && it->is_number_integer()) {
-        slot = it.value();
-    }
-    int32_t dx = 0;
-    it = model.find("dx");
-    if ((it != model.cend()) && it->is_number_integer()) {
-        dx = it.value();
-    }
-    int32_t dy = 0;
-    it = model.find("dy");
-    if ((it != model.cend()) && it->is_number_integer()) {
-        dy = it.value();
-    }
     int32_t slot = VirtualTouchScreenBuilder::GetModelValue(model, "slot", DEFAULT_VALUE_MINUS_ONE);
 
     int32_t dx = VirtualTouchScreenBuilder::GetModelValue(model, "dx", DEFAULT_VALUE_ZERO);
@@ -480,11 +465,6 @@ void VirtualTouchScreenBuilder::HandleMove(const nlohmann::json &model)
 
 void VirtualTouchScreenBuilder::HandleUp(const nlohmann::json &model)
 {
-    int32_t slot = -1;
-    auto it = model.find("slot");
-    if ((it != model.cend()) && it->is_number_integer()) {
-        slot = it.value();
-    }
     int32_t slot = VirtualTouchScreenBuilder::GetModelValue(model, "slot", DEFAULT_VALUE_MINUS_ONE);
 
     std::cout << "[touchscreen] release: [" << slot << "]" << std::endl;
@@ -493,21 +473,6 @@ void VirtualTouchScreenBuilder::HandleUp(const nlohmann::json &model)
 
 void VirtualTouchScreenBuilder::HandleMoveTo(const nlohmann::json &model)
 {
-    int32_t slot = -1;
-    auto it = model.find("slot");
-    if ((it != model.cend()) && it->is_number_integer()) {
-        slot = it.value();
-    }
-    int32_t x = -1;
-    it = model.find("x");
-    if ((it != model.cend()) && it->is_number_integer()) {
-        x = it.value();
-    }
-    int32_t y = -1;
-    it = model.find("y");
-    if ((it != model.cend()) && it->is_number_integer()) {
-        y = it.value();
-    }
     int32_t slot = VirtualTouchScreenBuilder::GetModelValue(model, "slot", DEFAULT_VALUE_MINUS_ONE);
 
     int32_t x = VirtualTouchScreenBuilder::GetModelValue(model, "x", DEFAULT_VALUE_MINUS_ONE);
