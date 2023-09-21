@@ -15,10 +15,13 @@
 
 #include "drag_data_manager_test.h"
 
+#include <ipc_skeleton.h>
+
 #include "pointer_event.h"
 #include "securec.h"
 
 #include "devicestatus_define.h"
+#define private public
 #include "drag_drawing.h"
 
 namespace OHOS {
@@ -39,8 +42,10 @@ constexpr int32_t DISPLAY_X { 50 };
 constexpr int32_t DISPLAY_Y { 50 };
 constexpr int32_t DRAG_NUM_ONE { 1 };
 constexpr bool HAS_CANCELED_ANIMATION { true };
+constexpr bool DRAG_WINDOW_VISIBLE { true };
 constexpr int32_t INT32_BYTE { 4 };
 constexpr uint32_t DEFAULT_ICON_COLOR { 0xFF };
+constexpr int64_t START_TIME { 181154000809 };
 const std::string UD_KEY { "Unified data key" };
 }
 void DragDataManagerTest::SetUpTestCase() {}
@@ -114,8 +119,8 @@ std::optional<DragData> DragDataManagerTest::CreateDragData(int32_t sourceType,
 
 namespace {
 /**
- * @tc.name: DragDataManagerTest
- * @tc.desc: test devicestatus callback in proxy
+ * @tc.name: DragDataManagerTest001
+ * @tc.desc: test normal SetDragStyle and GetDragStyle in devicestatus
  * @tc.type: FUNC
  */
 HWTEST_F(DragDataManagerTest, DragDataManagerTest001, TestSize.Level0)
@@ -135,11 +140,66 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: DragDataManagerTest002
+ * @tc.desc: test abnormal SetDragStyle and GetDragStyle in devicestatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest002, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::DEFAULT);
+    EXPECT_FALSE(DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::DEFAULT);
+
+    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::FORBIDDEN);
+    EXPECT_FALSE(DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::FORBIDDEN);
+
+    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::COPY);
+    EXPECT_FALSE(DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::COPY);
+
+    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::MOVE);
+    EXPECT_FALSE(DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::MOVE);
+}
+
+/**
+ * @tc.name: DragDataManagerTest003
+ * @tc.desc: test normal get devicestatus data in ipc
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest003, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t targetTid = static_cast<int32_t>(IPCSkeleton::GetCallingTokenID());
+    DRAG_DATA_MGR.SetTargetTid(targetTid);
+    EXPECT_TRUE(targetTid == DRAG_DATA_MGR.GetTargetTid());
+
+    int32_t targetPid = IPCSkeleton::GetCallingPid();
+    DRAG_DATA_MGR.SetTargetPid(targetPid);
+    EXPECT_TRUE(targetPid == DRAG_DATA_MGR.GetTargetPid());
+}
+
+/**
  * @tc.name: DragDataManagerTest004
- * @tc.desc: test get devicestatus drag data
+ * @tc.desc: test abnormal get devicestatus data in ipc
  * @tc.type: FUNC
  */
 HWTEST_F(DragDataManagerTest, DragDataManagerTest004, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t targetTid = static_cast<int32_t>(IPCSkeleton::GetCallingTokenID());
+    DRAG_DATA_MGR.SetTargetTid(targetTid);
+    EXPECT_FALSE(targetTid != DRAG_DATA_MGR.GetTargetTid());
+
+    int32_t targetPid = IPCSkeleton::GetCallingPid();
+    DRAG_DATA_MGR.SetTargetPid(targetPid);
+    EXPECT_FALSE(targetPid != DRAG_DATA_MGR.GetTargetPid());
+}
+
+/**
+ * @tc.name: DragDataManagerTest005
+ * @tc.desc: test get devicestatus drag data
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest005, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
@@ -150,8 +210,7 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest004, TestSize.Level0)
     dragData.shadowInfo.y = SHADOWINFO_Y;
     dragData.displayX = DISPLAY_X;
     dragData.displayY = DISPLAY_Y;
-    MMI::PointerStyle pointerStyle;
-    DRAG_DATA_MGR.Init(dragData, pointerStyle);
+    DRAG_DATA_MGR.Init(dragData);
     DragData dragDataFirst = DRAG_DATA_MGR.GetDragData();
     EXPECT_TRUE(dragDataFirst.displayX == DISPLAY_X);
     EXPECT_TRUE(dragDataFirst.displayY == DISPLAY_Y);
@@ -171,11 +230,11 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest004, TestSize.Level0)
 }
 
 /**
- * @tc.name: DragDataManagerTest005
+ * @tc.name: DragDataManagerTest006
  * @tc.desc: test pixelMap is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(DragDataManagerTest, DragDataManagerTest005, TestSize.Level0)
+HWTEST_F(DragDataManagerTest, DragDataManagerTest006, TestSize.Level0)
 {
     DragData dragData;
     dragData.shadowInfo.pixelMap = nullptr;
@@ -183,8 +242,7 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest005, TestSize.Level0)
     dragData.shadowInfo.y = SHADOWINFO_Y;
     dragData.displayX = DISPLAY_X;
     dragData.displayY = DISPLAY_Y;
-    MMI::PointerStyle pointerStyle;
-    DRAG_DATA_MGR.Init(dragData, pointerStyle);
+    DRAG_DATA_MGR.Init(dragData);
     int32_t offsetX = 0;
     int32_t offsetY = 0;
     int32_t width = 0;
@@ -194,49 +252,103 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest005, TestSize.Level0)
 }
 
 /**
- * @tc.name: DragDataManagerTest006
- * @tc.desc: abnormal test DragDrawing initialization
- * @tc.type: FUNC
- */
-HWTEST_F(DragDataManagerTest, DragDataManagerTest006, TestSize.Level0)
-{
-    std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD, POINTER_ID, DRAG_NUM_ONE);
-    EXPECT_FALSE(dragData == std::nullopt);
-    DragDrawing dragDrawing;
-    int32_t ret = dragDrawing.Init(dragData.value());
-    ASSERT_EQ(ret, INIT_FAIL);
-}
-
-/**
  * @tc.name: DragDataManagerTest007
- * @tc.desc: normal test DragDrawing initialization
+ * @tc.desc: abnormal test DragDrawing initialization
  * @tc.type: FUNC
  */
 HWTEST_F(DragDataManagerTest, DragDataManagerTest007, TestSize.Level0)
 {
     std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE);
-    EXPECT_FALSE(dragData == std::nullopt);
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD, POINTER_ID, DRAG_NUM_ONE);
+    ASSERT_FALSE(dragData == std::nullopt);
     DragDrawing dragDrawing;
+    dragDrawing.UpdateDragWindowState(DRAG_WINDOW_VISIBLE);
+    dragDrawing.InitDrawingInfo(dragData.value());
     int32_t ret = dragDrawing.Init(dragData.value());
-    ASSERT_EQ(ret, INIT_SUCCESS);
+    EXPECT_EQ(ret, INIT_CANCEL);
+    dragDrawing.UpdateDrawingState();
+    ret = dragDrawing.Init(dragData.value());
+    EXPECT_EQ(ret, INIT_FAIL);
+    dragDrawing.DestroyDragWindow();
+    EXPECT_EQ(dragDrawing.startNum_, START_TIME);
+    dragDrawing.UpdateDragWindowState(!DRAG_WINDOW_VISIBLE);
 }
 
 /**
  * @tc.name: DragDataManagerTest008
- * @tc.desc: normal test DragDrawing initialization
+ * @tc.desc: abnormal test DragDrawing initialization
  * @tc.type: FUNC
  */
 HWTEST_F(DragDataManagerTest, DragDataManagerTest008, TestSize.Level0)
 {
     std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD, POINTER_ID, DRAG_NUM_ONE);
+    ASSERT_FALSE(dragData == std::nullopt);
+    DragDrawing dragDrawing;
+    dragDrawing.UpdateDragWindowState(DRAG_WINDOW_VISIBLE);
+    int32_t ret = dragDrawing.Init(dragData.value());
+    EXPECT_EQ(ret, INIT_FAIL);
+    dragDrawing.DestroyDragWindow();
+    EXPECT_EQ(dragDrawing.startNum_, START_TIME);
+    dragDrawing.UpdateDragWindowState(!DRAG_WINDOW_VISIBLE);
+}
+
+/**
+ * @tc.name: DragDataManagerTest009
+ * @tc.desc: normal test DragDrawing initialization
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest009, TestSize.Level0)
+{
+    std::optional<DragData> dragData = CreateDragData(
         MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE);
-    EXPECT_FALSE(dragData == std::nullopt);
-    struct DrawingInfo g_drawingInfo;
+    ASSERT_FALSE(dragData == std::nullopt);
     DragDrawing dragDrawing;
     int32_t ret = dragDrawing.Init(dragData.value());
-    ASSERT_EQ(ret, INIT_CANCEL);
+    dragDrawing.UpdateDragWindowState(DRAG_WINDOW_VISIBLE);
+    EXPECT_EQ(ret, INIT_SUCCESS);
+    dragDrawing.DestroyDragWindow();
+    EXPECT_EQ(dragDrawing.startNum_, START_TIME);
+    dragDrawing.EraseMouseIcon();
+    dragDrawing.UpdateDragWindowState(!DRAG_WINDOW_VISIBLE);
+}
+
+/**
+ * @tc.name: DragDataManagerTest010
+ * @tc.desc: normal test DragDrawing initialization
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest010, TestSize.Level0)
+{
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE);
+    ASSERT_FALSE(dragData == std::nullopt);
+    DragDrawing dragDrawing;
+    int32_t ret = dragDrawing.Init(dragData.value());
+    dragDrawing.UpdateDragWindowState(DRAG_WINDOW_VISIBLE);
+    EXPECT_EQ(ret, INIT_CANCEL);
+    dragDrawing.DestroyDragWindow();
+    EXPECT_EQ(dragDrawing.startNum_, START_TIME);
+    dragDrawing.UpdateDragWindowState(!DRAG_WINDOW_VISIBLE);
+}
+
+ /**
+ * @tc.name: DragDataManagerTest011
+ * @tc.desc: normal test DragDrawing drawing
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest011, TestSize.Level0)
+{
+    auto pointerEvent = MMI::PointerEvent::Create();
+    EXPECT_FALSE(pointerEvent == nullptr);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    FI_HILOGD("SourceType:%{public}d, pointerId:%{public}d, displayX:%{public}d, displayY:%{public}d",
+        pointerEvent->GetSourceType(), pointerEvent->GetPointerId(),
+        pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+    ASSERT_LT(pointerEvent->GetTargetDisplayId(), 0);
+    DragDrawing dragDrawing;
+    dragDrawing.Draw(pointerEvent->GetTargetDisplayId(), pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
 }
 } // namespace
 } // namespace DeviceStatus
