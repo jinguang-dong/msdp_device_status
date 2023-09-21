@@ -41,9 +41,9 @@ const SessionAttribute g_sessionAttr = {
     .dataType = SessionType::TYPE_BYTES,
     .linkTypeNum = DINPUT_LINK_TYPE_MAX,
     .linkType = {
+        LINK_TYPE_WIFI_P2P,
         LINK_TYPE_WIFI_WLAN_2G,
-        LINK_TYPE_WIFI_WLAN_5G,
-        LINK_TYPE_WIFI_P2P
+        LINK_TYPE_WIFI_WLAN_5G
     }
 };
 
@@ -173,7 +173,7 @@ int32_t CoordinationSoftbusAdapter::Init()
     std::string sessionName = SESSION_NAME + localNetworkId.substr(0, INTERCEPT_STRING_LENGTH);
     if (sessionName == localSessionName_) {
         FI_HILOGI("Session server has already created");
-        return  RET_OK;
+        return RET_OK;
     }
     int32_t ret = RET_ERR;
     if (!localSessionName_.empty()) {
@@ -228,7 +228,7 @@ int32_t CoordinationSoftbusAdapter::OpenInputSoftbus(const std::string &remoteNe
     const std::string SESSION_NAME = "ohos.msdp.device_status.";
     const std::string GROUP_ID = "fi_softbus_group_id";
     if (CheckDeviceSessionState(remoteNetworkId)) {
-        FI_HILOGD("Softbus session has already  opened");
+        FI_HILOGD("Softbus session has already opened");
         return RET_OK;
     }
 
@@ -290,7 +290,7 @@ std::shared_ptr<CoordinationSoftbusAdapter> CoordinationSoftbusAdapter::GetInsta
 }
 
 int32_t CoordinationSoftbusAdapter::StartRemoteCoordination(const std::string &localNetworkId,
-    const std::string &remoteNetworkId)
+    const std::string &remoteNetworkId, bool checkButtonDown)
 {
     CALL_DEBUG_ENTER;
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
@@ -301,7 +301,7 @@ int32_t CoordinationSoftbusAdapter::StartRemoteCoordination(const std::string &l
     int32_t sessionId = sessionDevMap_[remoteNetworkId];
     auto pointerEvent = COOR_SM->GetLastPointerEvent();
     bool isPointerButtonPressed = false;
-    if (pointerEvent != nullptr) {
+    if (pointerEvent != nullptr && checkButtonDown) {
         for (const auto &item : pointerEvent->GetPressedButtons()) {
             if (item == MMI::PointerEvent::MOUSE_BUTTON_LEFT) {
                 isPointerButtonPressed = true;
@@ -514,7 +514,8 @@ void CoordinationSoftbusAdapter::HandleSessionData(int32_t sessionId, const std:
         FI_HILOGI("Message:%{public}d", dataPacket->messageId);
         if ((dataPacket->messageId == DRAGGING_DATA) ||
             (dataPacket->messageId == STOPDRAG_DATA) ||
-            (dataPacket->messageId == IS_PULL_UP)) {
+            (dataPacket->messageId == IS_PULL_UP) ||
+            (dataPacket->messageId == DRAG_CANCEL)) {
             CHKPV(registerRecvMap_[dataPacket->messageId]);
             registerRecvMap_[dataPacket->messageId](dataPacket->data, dataPacket->dataLen);
         }
@@ -538,7 +539,7 @@ int32_t CoordinationSoftbusAdapter::SendMsg(int32_t sessionId, const std::string
 {
     CALL_DEBUG_ENTER;
     if (message.size() > MSG_MAX_SIZE) {
-        FI_HILOGW("error:message.size() > MSG_MAX_SIZE message size:%{public}zu", message.size());
+        FI_HILOGW("Error:the message size:%{public}zu beyond the maximum limit", message.size());
         return RET_ERR;
     }
     return SendBytes(sessionId, message.c_str(), strlen(message.c_str()));
@@ -615,7 +616,7 @@ void CoordinationSoftbusAdapter::RegisterRecvFunc(MessageId messageId, std::func
 {
     CALL_DEBUG_ENTER;
     if (messageId <= MIN_ID || messageId >= MAX_ID) {
-        FI_HILOGE("Message id is invalid:%{public}d", messageId);
+        FI_HILOGE("Message id is invalid, messageId:%{public}d", messageId);
         return;
     }
     CHKPV(callback);
@@ -733,7 +734,6 @@ void CoordinationSoftbusAdapter::ConfigTcpAlive()
         FI_HILOGE("Setsockopt enable alive falied");
         return;
     }
-
 }
 } // namespace DeviceStatus
 } // namespace Msdp

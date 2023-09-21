@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,9 @@
  * limitations under the License.
  */
 
-//! Fusion drag-IPC binding
+#ifndef REMOVEDRAGLISTENER_FUZZER_H
+#define REMOVEDRAGLISTENER_FUZZER_H
 
-use crate::fusion_data_rust::{ CDragData };
+#define FUZZ_PROJECT_NAME "removedraglistener_fuzzer"
 
-/// type alias OnStartDrag
-pub type OnStartDrag = unsafe extern "C" fn (
-    dragData: *const CDragData
-) -> i32;
-
-/// struct FusionDragOperations
-#[derive(Clone)]
-#[repr(C)]
-pub struct FusionDragOperations {
-    pub on_start_drag: Option<OnStartDrag>,
-}
+#endif // REMOVEDRAGLISTENER_FUZZER_H

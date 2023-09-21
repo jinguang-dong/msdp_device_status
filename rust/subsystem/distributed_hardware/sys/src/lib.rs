@@ -13,23 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef FUSION_IPC_SERVER_H
-#define FUSION_IPC_SERVER_H
-#include <cinttypes>
+//! rust distributed hardware sys.
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+extern crate hilog_rust;
+extern crate fusion_utils_rust;
+extern crate fusion_data_rust;
 
-struct FusionIpcServer;
+mod dm_binding;
+mod interaction;
 
-struct FusionIpcServer* fusion_ipc_server_new();
-
-void fusion_ipc_server_delete(struct FusionIpcServer *service);
-
-int32_t fusion_ipc_server_publish(struct FusionIpcServer *service);
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-#endif // FUSION_IPC_SERVER_H
+pub use dm_binding::{ CDmDeviceInfo, CDmAuthForm };
+pub use interaction::{ dis_handware::DisHandware, dm_device_info::DmDeviceInfo };

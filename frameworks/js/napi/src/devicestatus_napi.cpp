@@ -57,9 +57,9 @@ void DeviceStatusCallback::OnDeviceStatusChanged(const Data& devicestatusData)
         devicestatusData.type, devicestatusData.value);
     data_ = devicestatusData;
     work->data = static_cast<void *>(&data_);
-    int32_t ret = uv_queue_work(loop, work, [] (uv_work_t *work) {}, EmitOnEvent);
+    int32_t ret = uv_queue_work_with_qos(loop, work, [] (uv_work_t *work) {}, EmitOnEvent, uv_qos_default);
     if (ret != 0) {
-        FI_HILOGE("Failed to execute work queue");
+        FI_HILOGE("uv_queue_work_with_qos failed");
     }
 }
 
@@ -348,7 +348,7 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatusCallback(napi_env env, napi_ca
         },
         nullptr, &g_obj->callbackRef_);
     if (!g_obj->On(type, handler, false)) {
-        FI_HILOGE("Type:%{public}d already exists", type);
+        FI_HILOGE("type:%{public}d already exists", type);
         return nullptr;
     }
     auto callbackIter = callbackMap_.find(type);
@@ -452,7 +452,7 @@ napi_value DeviceStatusNapi::GetDeviceStatus(napi_env env, napi_callback_info in
             nullptr, &g_obj->callbackRef_);
     }
     if (!g_obj->On(type, handler, true)) {
-        FI_HILOGE("Type:%{public}d already exists", type);
+        FI_HILOGE("type:%{public}d already exists", type);
         return nullptr;
     }
     Data devicestatusData = StationaryManager::GetInstance()->GetDeviceStatusData(static_cast<Type>(type));
