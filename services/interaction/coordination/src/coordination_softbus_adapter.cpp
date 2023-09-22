@@ -606,7 +606,7 @@ void CoordinationSoftbusAdapter::OnSessionClosed(int32_t sessionId)
         sessionDevs_.erase(networkId);
     }
     if (GetSessionSide(sessionId) != 0) {
-        channelStatusMap_.erase(networkId);
+        channelStatuss_.erase(networkId);
     }
     COOR_SM->OnSoftbusSessionClosed(networkId);
     sessionId_ = -1;
