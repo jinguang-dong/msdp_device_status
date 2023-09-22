@@ -26,7 +26,7 @@
 #include "fi_log.h"
 #include "stationary_callback.h"
 #include "stationary_data.h"
-#include "util.h"
+#include "include/util.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -37,7 +37,7 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceS
 
 DeviceStatusSrvStub::DeviceStatusSrvStub()
 {
-    mapConnFunc_ = {
+    ConnFuncs_ = {
         {static_cast<uint32_t>(DeviceInterfaceCode::DEVICESTATUS_SUBSCRIBE),
             &DeviceStatusSrvStub::SubscribeStub},
         {static_cast<uint32_t>(DeviceInterfaceCode::DEVICESTATUS_UNSUBSCRIBE),
@@ -93,8 +93,8 @@ int32_t DeviceStatusSrvStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
         FI_HILOGE("DeviceStatusSrvStub::OnRemoteRequest failed, descriptor is not matched");
         return E_DEVICESTATUS_GET_SERVICE_FAILED;
     }
-    auto it = mapConnFunc_.find(code);
-    if (it != mapConnFunc_.end()) {
+    auto it = ConnFuncs_.find(code);
+    if (it != ConnFuncs_.end()) {
         return (this->*it->second)(data, reply);
     }
     FI_HILOGE("Unknown code:%{public}u", code);
