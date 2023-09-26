@@ -82,7 +82,7 @@ std::shared_ptr<Media::PixelMap> InteractionDragDrawingTest::CreatePixelMap(int3
 {
     CALL_DEBUG_ENTER;
     if (width <= 0 || width > MAX_PIXEL_MAP_WIDTH || height <= 0 || height > MAX_PIXEL_MAP_HEIGHT) {
-        GTEST_LOG_(ERROR) << "Invalid size, width:" << width ", height:" << height;
+        GTEST_LOG_(ERROR) << "Invalid size, width:" << width << ", height:" << height;
         return nullptr;
     }
     Media::InitializationOptions opts;
@@ -152,7 +152,7 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Mouse_DragNum_On
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
         GTEST_LOG_(INFO) << "displayX:" << notifyMessage.displayX << ", displayY:" <<
-        notifyMessage.displayY << ", result:" << notifyMessage.result <<", target:" <<
+        notifyMessage.displayY << ", result:" << static_cast<int32_t>(notifyMessage.result) <<", target:" <<
         notifyMessage.targetPid;
         promiseFlag.set_value(true);
     };
@@ -193,7 +193,7 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Mouse_DragNum_Mu
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
         GTEST_LOG_(INFO) << "displayX:" << notifyMessage.displayX << ", displayY:" <<
-        notifyMessage.displayY << ", result:" << notifyMessage.result <<", target:" <<
+        notifyMessage.displayY << ", result:" << static_cast<int32_t>(notifyMessage.result) <<", target:" <<
         notifyMessage.targetPid;
         promiseFlag.set_value(true);
     };
@@ -234,7 +234,7 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Touchscreen_Drag
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
         GTEST_LOG_(INFO) << "displayX:" << notifyMessage.displayX << ", displayY:" <<
-        notifyMessage.displayY << ", result:" << notifyMessage.result <<", target:" <<
+        notifyMessage.displayY << ", result:" << static_cast<int32_t>(notifyMessage.result) <<", target:" <<
         notifyMessage.targetPid;
         promiseFlag.set_value(true);
     };
@@ -275,7 +275,7 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Touchscreen_Drag
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
         GTEST_LOG_(INFO) << "displayX:" << notifyMessage.displayX << ", displayY:" <<
-        notifyMessage.displayY << ", result:" << notifyMessage.result <<", target:" <<
+        notifyMessage.displayY << ", result:" << static_cast<int32_t>(notifyMessage.result) <<", target:" <<
         notifyMessage.targetPid;
         promiseFlag.set_value(true);
     };
@@ -316,7 +316,7 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_UpdateShadowPic,
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
         GTEST_LOG_(INFO) << "displayX:" << notifyMessage.displayX << ", displayY:" <<
-        notifyMessage.displayY << ", result:" << notifyMessage.result <<", target:" <<
+        notifyMessage.displayY << ", result:" << static_cast<int32_t>(notifyMessage.result) <<", target:" <<
         notifyMessage.targetPid;
         promiseFlag.set_value(true);
     };
@@ -353,7 +353,7 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Mouse_Animation,
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
         GTEST_LOG_(INFO) << "displayX:" << notifyMessage.displayX << ", displayY:" <<
-        notifyMessage.displayY << ", result:" << notifyMessage.result <<", target:" <<
+        notifyMessage.displayY << ", result:" << static_cast<int32_t>(notifyMessage.result) <<", target:" <<
         notifyMessage.targetPid;
         promiseFlag.set_value(true);
     };
@@ -385,7 +385,7 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Touchscreen_Anim
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
         GTEST_LOG_(INFO) << "displayX:" << notifyMessage.displayX << ", displayY:" <<
-        notifyMessage.displayY << ", result:" << notifyMessage.result <<", target:" <<
+        notifyMessage.displayY << ", result:" << static_cast<int32_t>(notifyMessage.result) <<", target:" <<
         notifyMessage.targetPid;
         promiseFlag.set_value(true);
     };
