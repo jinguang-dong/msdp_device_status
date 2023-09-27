@@ -60,7 +60,7 @@ std::shared_ptr<Media::PixelMap> DragDataManagerTest::CreatePixelMap(int32_t wid
 {
     CALL_DEBUG_ENTER;
     if (width <= 0 || width > MAX_PIXEL_MAP_WIDTH || height <= 0 || height > MAX_PIXEL_MAP_HEIGHT) {
-        FI_HILOGE("Invalid size, width:%{public}d, height:%{public}d", width, height);
+        GTEST_LOG_(ERROR) << "Invalid size, width:" << width << ", height:" << height;
         return nullptr;
     }
     Media::InitializationOptions opts;
@@ -73,19 +73,19 @@ std::shared_ptr<Media::PixelMap> DragDataManagerTest::CreatePixelMap(int32_t wid
     int32_t colorLen = width * height;
     uint32_t *colorPixels = new (std::nothrow) uint32_t[colorLen];
     if (colorPixels == nullptr) {
-        FI_HILOGE("ColorPixels is nullptr");
+        GTEST_LOG_(ERROR) << "ColorPixels is nullptr";
         return nullptr;
     }
     int32_t colorByteCount = colorLen * INT32_BYTE;
     auto ret = memset_s(colorPixels, colorByteCount, DEFAULT_ICON_COLOR, colorByteCount);
     if (ret != EOK) {
-        FI_HILOGE("Memset_s failed");
+        GTEST_LOG_(ERROR) << "Memset_s failed";
         delete[] colorPixels;
         return nullptr;
     }
     std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(colorPixels, colorLen, opts);
     if (pixelMap == nullptr) {
-        FI_HILOGE("Create pixelMap failed");
+        GTEST_LOG_(ERROR) << "Create pixelMap failed";
         delete[] colorPixels;
         return nullptr;
     }
@@ -99,7 +99,7 @@ std::optional<DragData> DragDataManagerTest::CreateDragData(int32_t sourceType,
     CALL_DEBUG_ENTER;
     std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
     if (pixelMap == nullptr) {
-        FI_HILOGE("Create pixelmap failed");
+        GTEST_LOG_(ERROR) << "Create pixelmap failed";
         return std::nullopt;
     }
     DragData dragData;
@@ -350,12 +350,14 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest011, TestSize.Level0)
     EXPECT_FALSE(pointerEvent == nullptr);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
-    FI_HILOGD("SourceType:%{public}d, pointerId:%{public}d, displayX:%{public}d, displayY:%{public}d",
-        pointerEvent->GetSourceType(), pointerEvent->GetPointerId(),
-        pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
-    ASSERT_LT(pointerEvent->GetTargetDisplayId(), 0);
+    GTEST_LOG_(INFO) << "SourceType:" << pointerEvent->GetSourceType() << ", pointerId:" <<
+        pointerEvent->GetPointerId() << ", displayX:" << pointerItem.GetDisplayX() <<", displayY:" <<
+        pointerItem.GetDisplayY();
+    EXPECT_LT(pointerEvent->GetTargetDisplayId(), 0);
     DragDrawing dragDrawing;
     dragDrawing.Draw(pointerEvent->GetTargetDisplayId(), pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+    dragDrawing.DestroyDragWindow();
+    EXPECT_EQ(dragDrawing.startNum_, START_TIME);
 }
 } // namespace
 } // namespace DeviceStatus
