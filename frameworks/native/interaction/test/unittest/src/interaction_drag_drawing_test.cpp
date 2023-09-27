@@ -82,7 +82,7 @@ std::shared_ptr<Media::PixelMap> InteractionDragDrawingTest::CreatePixelMap(int3
 {
     CALL_DEBUG_ENTER;
     if (width <= 0 || width > MAX_PIXEL_MAP_WIDTH || height <= 0 || height > MAX_PIXEL_MAP_HEIGHT) {
-        FI_HILOGE("Invalid size, width:%{public}d, height:%{public}d", width, height);
+        GTEST_LOG_(ERROR) << "Invalid size, width:" << width << ", height:" << height;
         return nullptr;
     }
     Media::InitializationOptions opts;
@@ -98,13 +98,13 @@ std::shared_ptr<Media::PixelMap> InteractionDragDrawingTest::CreatePixelMap(int3
     int32_t colorByteCount = colorLen * INT32_BYTE;
     errno_t ret = memset_s(colorPixels, colorByteCount, DEFAULT_ICON_COLOR, colorByteCount);
     if (ret != EOK) {
-        FI_HILOGE("memset_s failed");
+        GTEST_LOG_(ERROR) << "memset_s failed";
         delete[] colorPixels;
         return nullptr;
     }
     std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(colorPixels, colorLen, opts);
     if (pixelMap == nullptr) {
-        FI_HILOGE("Create pixelMap failed");
+        GTEST_LOG_(ERROR) << "Create pixelMap failed";
         delete[] colorPixels;
         return nullptr;
     }
@@ -118,7 +118,7 @@ std::optional<DragData> InteractionDragDrawingTest::CreateDragData(int32_t sourc
     CALL_DEBUG_ENTER;
     std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
     if (pixelMap == nullptr) {
-        FI_HILOGE("Create pixelmap failed");
+        GTEST_LOG_(ERROR) << "Create pixelMap failed";
         return std::nullopt;
     }
     DragData dragData;
@@ -151,8 +151,9 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Mouse_DragNum_On
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        GTEST_LOG_(INFO) << "displayX:" << notifyMessage.displayX << ", displayY:" <<
+        notifyMessage.displayY << ", result:" << static_cast<int32_t>(notifyMessage.result) <<", target:" <<
+        notifyMessage.targetPid;
         promiseFlag.set_value(true);
     };
     std::optional<DragData> dragData = CreateDragData(
@@ -191,8 +192,9 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Mouse_DragNum_Mu
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        GTEST_LOG_(INFO) << "displayX:" << notifyMessage.displayX << ", displayY:" <<
+        notifyMessage.displayY << ", result:" << static_cast<int32_t>(notifyMessage.result) <<", target:" <<
+        notifyMessage.targetPid;
         promiseFlag.set_value(true);
     };
     std::optional<DragData> dragData = CreateDragData(
@@ -231,8 +233,9 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Touchscreen_Drag
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        GTEST_LOG_(INFO) << "displayX:" << notifyMessage.displayX << ", displayY:" <<
+        notifyMessage.displayY << ", result:" << static_cast<int32_t>(notifyMessage.result) <<", target:" <<
+        notifyMessage.targetPid;
         promiseFlag.set_value(true);
     };
     std::optional<DragData> dragData = CreateDragData(
@@ -271,8 +274,9 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Touchscreen_Drag
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        GTEST_LOG_(INFO) << "displayX:" << notifyMessage.displayX << ", displayY:" <<
+        notifyMessage.displayY << ", result:" << static_cast<int32_t>(notifyMessage.result) <<", target:" <<
+        notifyMessage.targetPid;
         promiseFlag.set_value(true);
     };
     std::optional<DragData> dragData = CreateDragData(
@@ -311,8 +315,9 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_UpdateShadowPic,
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        GTEST_LOG_(INFO) << "displayX:" << notifyMessage.displayX << ", displayY:" <<
+        notifyMessage.displayY << ", result:" << static_cast<int32_t>(notifyMessage.result) <<", target:" <<
+        notifyMessage.targetPid;
         promiseFlag.set_value(true);
     };
     std::optional<DragData> dragData = CreateDragData(
@@ -347,8 +352,9 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Mouse_Animation,
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        GTEST_LOG_(INFO) << "displayX:" << notifyMessage.displayX << ", displayY:" <<
+        notifyMessage.displayY << ", result:" << static_cast<int32_t>(notifyMessage.result) <<", target:" <<
+        notifyMessage.targetPid;
         promiseFlag.set_value(true);
     };
     std::optional<DragData> dragData = CreateDragData(
@@ -378,8 +384,9 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Touchscreen_Anim
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        GTEST_LOG_(INFO) << "displayX:" << notifyMessage.displayX << ", displayY:" <<
+        notifyMessage.displayY << ", result:" << static_cast<int32_t>(notifyMessage.result) <<", target:" <<
+        notifyMessage.targetPid;
         promiseFlag.set_value(true);
     };
     std::optional<DragData> dragData = CreateDragData(
