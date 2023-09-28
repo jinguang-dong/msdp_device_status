@@ -54,8 +54,8 @@ const struct Range KEY_BLOCKS[] {
 };
 } // namespace
 
-Device::Device(int32_t deviceId)
-    : deviceId_(deviceId)
+Device::Device(int32_t networkId)
+    : deviceId_(networkId)
 {}
 
 Device::~Device()

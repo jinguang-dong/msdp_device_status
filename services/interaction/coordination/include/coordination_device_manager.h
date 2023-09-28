@@ -71,11 +71,11 @@ public:
     void Init();
     std::shared_ptr<CoordinationDeviceManager::Device> GetDevice(int32_t id) const;
     bool IsRemote(int32_t id);
-    std::vector<std::string> GetCoordinationDhids(int32_t deviceId) const;
+    std::vector<std::string> GetCoordinationDhids(int32_t networkId) const;
     std::vector<std::string> GetCoordinationDhids(const std::string &dhid, bool isRemote) const;
     std::string GetOriginNetworkId(int32_t id) const;
     std::string GetOriginNetworkId(const std::string &dhid) const;
-    std::string GetDhid(int32_t deviceId) const;
+    std::string GetDhid(int32_t networkId) const;
     bool HasLocalPointerDevice() const;
 
 private:

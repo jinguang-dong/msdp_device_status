@@ -115,7 +115,7 @@ public:
     void UnprepareCoordination();
     int32_t ActivateCoordination(const std::string &remoteNetworkId, int32_t startDeviceId);
     int32_t DeactivateCoordination(bool isUnchained);
-    int32_t GetCoordinationState(const std::string &deviceId);
+    int32_t GetCoordinationState(const std::string &networkId);
     void StartRemoteCoordination(const std::string &remoteNetworkId, bool buttonIsPressed);
     void StartPointerEventFilter();
     void StartRemoteCoordinationResult(bool isSuccess,
@@ -145,7 +145,7 @@ public:
     std::shared_ptr<MMI::PointerEvent> GetLastPointerEvent() const;
     void RemoveMonitor();
     void RemoveInterceptor();
-    bool IsNeedFilterOut(const std::string &deviceId, const std::shared_ptr<MMI::KeyEvent> keyEvent);
+    bool IsNeedFilterOut(const std::string &networkId, const std::shared_ptr<MMI::KeyEvent> keyEvent);
     void RegisterStateChange(CooStateChangeType type,
         std::function<void(CoordinationState, CoordinationState)> callback);
     bool UnchainCoordination(const std::string &localNetworkId, const std::string &remoteNetworkId);

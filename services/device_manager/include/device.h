@@ -67,7 +67,7 @@ public:
         DEVICE_CAP_MAX
     };
 
-    explicit Device(int32_t deviceId);
+    explicit Device(int32_t networkId);
     DISALLOW_COPY_AND_MOVE(Device);
     ~Device();
 

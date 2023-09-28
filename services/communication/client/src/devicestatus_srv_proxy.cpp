@@ -323,7 +323,7 @@ int32_t DeviceStatusSrvProxy::GetUdKey(std::string &udKey)
     return RET_OK;
 }
 
-int32_t DeviceStatusSrvProxy::GetCoordinationState(int32_t userData, const std::string &deviceId)
+int32_t DeviceStatusSrvProxy::GetCoordinationState(int32_t userData, const std::string &networkId)
 {
     CALL_DEBUG_ENTER;
     MessageParcel data;
@@ -332,7 +332,7 @@ int32_t DeviceStatusSrvProxy::GetCoordinationState(int32_t userData, const std::
         return ERR_INVALID_VALUE;
     }
     WRITEINT32(data, userData, ERR_INVALID_VALUE);
-    WRITESTRING(data, deviceId, ERR_INVALID_VALUE);
+    WRITESTRING(data, networkId, ERR_INVALID_VALUE);
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> remote = Remote();

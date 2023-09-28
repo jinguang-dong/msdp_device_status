@@ -21,7 +21,7 @@
 #include "dm_binding.h"
 
 struct CDmDeviceInfo {
-    char* deviceId;
+    char* networkId;
     char* deviceName;
     uint16_t deviceTypeId;
     char* networkId;
