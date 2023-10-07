@@ -18,8 +18,6 @@
 
 #include <memory>
 
-#include <nlohmann/json.hpp>
-
 #include "virtual_device_builder.h"
 
 namespace OHOS {
@@ -46,17 +44,18 @@ private:
     static void ReadMoveToAction(int32_t argc, char *argv[]);
     static void ReadDragToAction(int32_t argc, char *argv[]);
     static void ReadActions(const char *path);
-    static void ReadModel(const nlohmann::json &model, int32_t level);
-    static void ReadAction(const nlohmann::json &model);
-    static void HandleDown(const nlohmann::json &model);
-    static void HandleMove(const nlohmann::json &model);
-    static void HandleUp(const nlohmann::json &model);
-    static void HandleMoveTo(const nlohmann::json &model);
-    static void HandleWait(const nlohmann::json &model);
+    static void ReadModel(const std::shared_ptr<Json> &model, int32_t level);
+    static void ReadAction(const std::shared_ptr<Json> &model);
+    static void HandleDown(const std::shared_ptr<Json> &model);
+    static void HandleMove(const std::shared_ptr<Json> &model);
+    static void HandleUp(const std::shared_ptr<Json> &model);
+    static void HandleMoveTo(const std::shared_ptr<Json> &model);
+    static void HandleWait(const std::shared_ptr<Json> &model);
     static void ReadRawInput(const char *path);
-    static void ReadRawModel(const nlohmann::json &model, int32_t level);
-    static void ReadRawData(const nlohmann::json &model);
-    static int32_t GetModelValue(const nlohmann::json &model, const std::string &targetName, int32_t defaultValue);
+    static void ReadRawModel(const std::shared_ptr<Json> &model, int32_t level);
+    static void ReadRawData(const std::shared_ptr<Json> &model);
+    static int32_t GetModelValue(const std::shared_ptr<Json> &model, const std::string &targetName,
+        int32_t defaultValue);
     using InterfaceParameterLess = void(*)();
     using InterfaceParameterOne = void(*)(const char*);
     using InterfaceParameterTwo = void(*)(int32_t, char**);

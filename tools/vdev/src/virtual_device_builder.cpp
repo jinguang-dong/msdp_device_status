@@ -382,7 +382,7 @@ void VirtualDeviceBuilder::WaitFor(const char *name, int32_t timeout)
     std::this_thread::sleep_for(std::chrono::milliseconds(timeout));
 }
 
-int32_t VirtualDeviceBuilder::ReadFile(const char *path, json &model)
+int32_t VirtualDeviceBuilder::ReadFile(const char *path, std::string &buff)
 {
     CALL_DEBUG_ENTER;
     CHKPR(path, RET_ERR);
@@ -402,7 +402,12 @@ int32_t VirtualDeviceBuilder::ReadFile(const char *path, json &model)
         FI_HILOGE("Could not open the file");
         return RET_ERR;
     }
-    model = nlohmann::json::parse(stream, nullptr, false);
+
+    std::string line;
+    while (stream >> line) {
+        buff += line;
+    }
+    stream.close();
     return RET_OK;
 }
 

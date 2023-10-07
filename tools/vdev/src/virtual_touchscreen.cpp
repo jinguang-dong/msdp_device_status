@@ -129,7 +129,7 @@ int32_t VirtualTouchScreen::UpButton(int32_t slot)
         return RET_ERR;
     }
     slots_[slot].active = false;
-    FI_HILOGD("Release [%{public}d]", slot);
+    FI_HILOGD("Up [%{public}d]", slot);
     SendTouchEvent();
     SendEvent(EV_SYN, SYN_MT_REPORT, SYNC_VALUE);
     FI_HILOGD("Send sync event");
