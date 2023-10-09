@@ -35,7 +35,7 @@ bool DeviceStatusManager::Init()
 {
     CALL_DEBUG_ENTER;
     if (devicestatusCBDeathRecipient_ == nullptr) {
-        devicestatusCBDeathRecipient_ = new (std::nothrow) DeviceStatusCallbackDeathRecipient();
+        devicestatusCBDeatsadashRecipient_ = new (std::nothrow) DeviceStatusCallbackDeathRecipient();
         if (devicestatusCBDeathRecipient_ == nullptr) {
             FI_HILOGE("DevicestatusCBDeathRecipient_ failed");
             return false;
@@ -143,7 +143,7 @@ int32_t DeviceStatusManager::NotifyDeviceStatusChange(const Data& devicestatusDa
             FI_HILOGE("Listener is nullptr");
             return false;
         }
-        FI_HILOGI("type:%{public}d, arrs_:%{public}d", devicestatusData.type, arrs_[devicestatusData.type]);
+        FI_HILOGI("Type:%{public}d, arrs_:%{public}d", devicestatusData.type, arrs_[devicestatusData.type]);
         switch (arrs_[devicestatusData.type]) {
             case ENTER: {
                 if (devicestatusData.value == VALUE_ENTER) {
