@@ -150,7 +150,7 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Mouse_DragNum_On
     CALL_TEST_DEBUG;
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
-    auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
         FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
@@ -190,7 +190,7 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Mouse_DragNum_Mu
     CALL_TEST_DEBUG;
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
-    auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
         FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
@@ -230,7 +230,7 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Touchscreen_Drag
     CALL_TEST_DEBUG;
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
-    auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
         FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
@@ -270,7 +270,7 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Touchscreen_Drag
     CALL_TEST_DEBUG;
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
-    auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
         FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
@@ -310,7 +310,7 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_UpdateShadowPic,
     CALL_TEST_DEBUG;
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
-    auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
         FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
@@ -346,7 +346,7 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Mouse_Animation,
     CALL_TEST_DEBUG;
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
-    auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
         FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
@@ -377,7 +377,7 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Touchscreen_Anim
     CALL_TEST_DEBUG;
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
-    auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
         FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);

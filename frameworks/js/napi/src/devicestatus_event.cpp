@@ -104,7 +104,7 @@ bool DeviceStatusEvent::IsNoExistCallback(std::list<std::shared_ptr<DeviceStatus
     CALL_DEBUG_ENTER;
     napi_value result = nullptr;
     bool equal = false;
-    for (const auto& item : events_[eventType]) {
+    for (const auto &item : events_[eventType]) {
         napi_status status = napi_get_reference_value(env_, item->onHandlerRef, &result);
         if (status != napi_ok) {
             FI_HILOGE("Failed to napi_get_reference_value");

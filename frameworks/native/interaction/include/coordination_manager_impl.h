@@ -55,9 +55,9 @@ public:
     void OnCoordinationMessageEvent(int32_t userData, const std::string deviceId, CoordinationMessage msg);
     void OnCoordinationStateEvent(int32_t userData, bool state);
     int32_t GetUserData() const;
-    int32_t OnCoordinationListener(const StreamClient& client, NetPacket& pkt);
-    int32_t OnCoordinationMessage(const StreamClient& client, NetPacket& pkt);
-    int32_t OnCoordinationState(const StreamClient& client, NetPacket& pkt);
+    int32_t OnCoordinationListener(const StreamClient &client, NetPacket &pkt);
+    int32_t OnCoordinationMessage(const StreamClient& client, NetPacket &pkt);
+    int32_t OnCoordinationState(const StreamClient& client, NetPacket &pkt);
 
 private:
     const CoordinationMsg *GetCoordinationMessageEvent(int32_t userData) const;

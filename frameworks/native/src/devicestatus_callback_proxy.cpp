@@ -31,7 +31,7 @@ namespace {
 constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceStatusCallbackProxy" };
 } // namespace
 
-void DeviceStatusCallbackProxy::OnDeviceStatusChanged(const Data& devicestatusData)
+void DeviceStatusCallbackProxy::OnDeviceStatusChanged(const Data &devicestatusData)
 {
     sptr<IRemoteObject> remote = Remote();
     CHKPV(remote);
