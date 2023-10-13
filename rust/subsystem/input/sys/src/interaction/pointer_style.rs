@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
-use crate::{
-    input_binding, input_binding::{ CPointerStyle, CPointerStyleColor }
-};
-use crate::fusion_utils_rust::{ FusionResult, FusionErrorCode };
 use std::ffi::{ c_char, CString };
-use hilog_rust::{debug, error, hilog, HiLogLabel, LogType};
+
+use hilog_rust::{ debug, error, hilog, HiLogLabel, LogType };
+
+use fusion_utils_rust::{ FusionResult, FusionErrorCode };
+
+use crate::input_binding;
+use crate::input_binding::CPointerStyle;
+
 const LOG_LABEL: HiLogLabel = HiLogLabel {
     log_type: LogType::LogCore,
     domain: 0xD002220,
@@ -37,11 +40,7 @@ impl CPointerStyle {
     pub fn new() -> Self {
         Self {
             size: -1, 
-            color: { CPointerStyleColor {
-                r: 0,
-                g: 0,
-                b: 0,
-            } },
+            color: 0,
             id: 0,
         }
     }
@@ -71,10 +70,10 @@ impl PointerStyle {
         // SAFETY:  no `None` here, cause `CPointerStyle` is valid.
         unsafe {
             if input_binding::CGetPointerStyle(&mut self.inner) != INPUT_BINDING_OK {
-                error!(LOG_LABEL, "get pointer style failed");
+                error!(LOG_LABEL, "Get pointer style failed");
                 return Err(FusionErrorCode::Fail);
             }
-            debug!(LOG_LABEL, "get pointer style success");
+            debug!(LOG_LABEL, "Get pointer style success");
             Ok(())
         }
     }

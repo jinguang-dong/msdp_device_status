@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef DEVICESTATUSSTUB_FUZZER_H
-#define DEVICESTATUSSTUB_FUZZER_H
+#ifndef GETDRAGDATA_FUZZER_H
+#define GETDRAGDATA_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "devicestatusstub_fuzzer"
+#define FUZZ_PROJECT_NAME "getdragdata_fuzzer"
 
-#endif // DEVICESTATUSSTUB_FUZZER_H
+#endif // GETDRAGDATA_FUZZER_H

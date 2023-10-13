@@ -17,9 +17,7 @@
 
 #include "extra_data.h"
 #include "hitrace_meter.h"
-#include "input_manager.h"
 #include "pixel_map.h"
-#include "pointer_style.h"
 #include "udmf_client.h"
 #include "unified_types.h"
 
@@ -182,6 +180,17 @@ int32_t DragManager::UpdateShadowPic(const ShadowInfo &shadowInfo)
     }
     DRAG_DATA_MGR.SetShadowInfo(shadowInfo);
     return dragDrawing_.UpdateShadowPic(shadowInfo);
+}
+
+int32_t DragManager::GetDragData(DragData &dragData)
+{
+    CALL_DEBUG_ENTER;
+    if (dragState_ != DragState::START) {
+        FI_HILOGE("No drag instance running, can not get dragData");
+        return RET_ERR;
+    }
+    dragData = DRAG_DATA_MGR.GetDragData();
+    return RET_OK;
 }
 
 int32_t DragManager::NotifyDragResult(DragResult result)
@@ -524,7 +533,6 @@ int32_t DragManager::AddDragEventHandler(int32_t sourceType)
 int32_t DragManager::OnStartDrag()
 {
     auto extraData = CreateExtraData(true);
-    MMI::InputManager::GetInstance()->AppendExtraData(extraData);
     DragData dragData = DRAG_DATA_MGR.GetDragData();
     int32_t ret = dragDrawing_.Init(dragData);
     if (ret == INIT_FAIL) {
@@ -536,6 +544,8 @@ int32_t DragManager::OnStartDrag()
         FI_HILOGE("Init drag drawing cancel, drag animation is running");
         return RET_ERR;
     }
+    dragDrawing_.Draw(dragData.displayId, dragData.displayX, dragData.displayY);
+    MMI::InputManager::GetInstance()->AppendExtraData(extraData);
     ret = AddDragEventHandler(dragData.sourceType);
     if (ret != RET_OK) {
 #ifdef OHOS_DRAG_ENABLE_MONITOR
@@ -546,8 +556,7 @@ int32_t DragManager::OnStartDrag()
         dragDrawing_.DestroyDragWindow();
         return RET_ERR;
     }
-    if ((dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ||
-        (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) {
+    if (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         MMI::InputManager::GetInstance()->SetPointerVisible(false);
     }
     return RET_OK;
@@ -576,9 +585,7 @@ int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation)
         dragDrawing_.EraseMouseIcon();
         MMI::InputManager::GetInstance()->SetPointerVisible(true);
     }
-    if (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
-        MMI::InputManager::GetInstance()->SetPointerVisible(true);
-    }
+    MMI::InputManager::GetInstance()->AppendExtraData(DragManager::CreateExtraData(false));
     return HandleDragResult(result, hasCustomAnimation);
 }
 

@@ -15,10 +15,14 @@
 
 #![allow(dead_code)]
 
-use crate::{ input_binding, input_binding::OnPointerEventCallback };
-use crate::fusion_utils_rust::{ FusionResult, FusionErrorCode };
 use std::ffi::{ c_char, CString };
-use hilog_rust::{ error, hilog, HiLogLabel, LogType };
+
+use hilog_rust::{error, hilog, HiLogLabel, LogType};
+
+use fusion_utils_rust::{ FusionResult, FusionErrorCode };
+
+use crate::{ input_binding, input_binding::OnPointerEventCallback };
+
 const LOG_LABEL: HiLogLabel = HiLogLabel {
     log_type: LogType::LogCore,
     domain: 0xD002220,
@@ -35,7 +39,7 @@ impl InputManager {
         // SAFETY: No `None` here, cause `callback` is valid.
         unsafe {
             if input_binding::CAddMonitor(callback) != INPUT_BINDING_OK {
-                error!(LOG_LABEL, "failed to add monitor");
+                error!(LOG_LABEL, "Failed to add monitor");
                 return Err(FusionErrorCode::Fail);
             }
             Ok(())
@@ -47,7 +51,7 @@ impl InputManager {
         // SAFETY: Set pointer event visible.
         unsafe {
             if input_binding::CSetPointerVisible(visible) != INPUT_BINDING_OK {
-                error!(LOG_LABEL, "failed to set pointer visible");
+                error!(LOG_LABEL, "Failed to set pointer visible");
                 return Err(FusionErrorCode::Fail);
             }
             Ok(())
@@ -59,7 +63,7 @@ impl InputManager {
         // SAFETY: Enable input device.
         unsafe {
             if input_binding::CEnableInputDevice(enable) != INPUT_BINDING_OK {
-                error!(LOG_LABEL, "failed to enable input device");
+                error!(LOG_LABEL, "Failed to enable input device");
                 return Err(FusionErrorCode::Fail);
             }
             Ok(())
@@ -71,7 +75,7 @@ impl InputManager {
         // SAFETY: Remove input event filter.
         unsafe {
             if input_binding::CRemoveInputEventFilter(filter_id) != INPUT_BINDING_OK {
-                error!(LOG_LABEL, "failed to remove input event filter");
+                error!(LOG_LABEL, "Failed to remove input event filter");
                 return Err(FusionErrorCode::Fail);
             }
             Ok(())

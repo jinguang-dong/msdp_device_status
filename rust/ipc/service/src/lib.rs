@@ -17,21 +17,19 @@
 
 #![allow(unused_variables)]
 
-extern crate hilog_rust;
-extern crate ipc_rust;
-extern crate fusion_data_rust;
-extern crate fusion_utils_rust;
-
 mod identity;
 
 use std::ffi::{ c_char, CString };
+
 use hilog_rust::{ info, error, hilog, HiLogLabel, LogType };
-use crate::ipc_rust::{
+use ipc_rust::{
     BorrowedMsgParcel, IRemoteBroker, IRemoteObj, MsgParcel, IMsgParcel,
     RemoteObj, RemoteStub, define_remote_object
 };
-use crate::fusion_data_rust::Intention;
-use crate::fusion_utils_rust::{ call_debug_enter, FusionResult, FusionErrorCode };
+
+use fusion_data_rust::Intention;
+use fusion_utils_rust::{ call_debug_enter, FusionResult, FusionErrorCode };
+
 use crate::identity::{ CommonAction, compose_param_id, split_action, split_intention, split_param };
 
 const LOG_LABEL: HiLogLabel = HiLogLabel {
@@ -82,27 +80,27 @@ fn on_remote_request(stub: &dyn IDeviceStatus, code: u32, data: &BorrowedMsgParc
 
     match split_action(code)? {
         CommonAction::Enable => {
-            info!(LOG_LABEL, "call stub.enable()");
+            info!(LOG_LABEL, "Call stub.enable()");
             stub.enable(intention, data, reply)
         }
         CommonAction::Disable => {
-            info!(LOG_LABEL, "call stub.disable()");
+            info!(LOG_LABEL, "Call stub.disable()");
             stub.disable(intention, data, reply)
         }
         CommonAction::Start => {
-            info!(LOG_LABEL, "call stub.start()");
+            info!(LOG_LABEL, "Call stub.start()");
             stub.start(intention, data, reply)
         }
         CommonAction::Stop => {
-            info!(LOG_LABEL, "call stub.stop()");
+            info!(LOG_LABEL, "Call stub.stop()");
             stub.stop(intention, data, reply)
         }
         CommonAction::AddWatch => {
-            info!(LOG_LABEL, "call stub.add_watch()");
+            info!(LOG_LABEL, "Call stub.add_watch()");
             stub.add_watch(intention, id, data, reply)
         }
         CommonAction::RemoveWatch => {
-            info!(LOG_LABEL, "call stub.remove_watch()");
+            info!(LOG_LABEL, "Call stub.remove_watch()");
             stub.remove_watch(intention, id, data, reply)
         }
         CommonAction::SetParam => {
@@ -110,11 +108,11 @@ fn on_remote_request(stub: &dyn IDeviceStatus, code: u32, data: &BorrowedMsgParc
             stub.set_param(intention, id, data, reply)
         }
         CommonAction::GetParam => {
-            info!(LOG_LABEL, "call stub.get_param()");
+            info!(LOG_LABEL, "Call stub.get_param()");
             stub.get_param(intention, id, data, reply)
         }
         CommonAction::Control => {
-            info!(LOG_LABEL, "call stub.control()");
+            info!(LOG_LABEL, "Call stub.control()");
             stub.control(intention, id, data, reply)
         }
     }

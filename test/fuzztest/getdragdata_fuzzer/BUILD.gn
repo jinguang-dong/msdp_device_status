@@ -10,10 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import("//base/msdp/device_status/device_status.gni")
-if (fusion_interaction_coordination) {
-  import("//base/msdp/motion/motion.gni")
-}
+import("../../../device_status.gni")
 
 ###############################hydra_fuzz#################################
 import("//build/config/features.gni")
@@ -35,30 +32,26 @@ deps_ex = [
 ]
 
 ###############################fuzztest#################################
-ohos_fuzztest("DevicestatusstubFuzzTest") {
+ohos_fuzztest("GetDragDataFuzzTest") {
   module_out_path = module_output_path
+
   fuzz_config_file =
-      "${device_status_root_path}/test/fuzztest/devicestatusstub_fuzzer"
+      "${device_status_root_path}/test/fuzztest/getdragdata_fuzzer"
   include_dirs = [
     "${device_status_root_path}/libs/interface",
     "${device_status_service_path}/interaction/drag/include",
     "${device_status_service_path}/interaction/coordination/include",
     "${device_status_service_path}/communication/service/include",
     "${device_status_utils_path}/include",
-    "//third_party/cJSON",
   ]
 
-  if (defined(fusion_interaction_motion_drag) &&
-      fusion_interaction_motion_drag) {
-    include_dirs += [ "${motion_service_path}/native/include" ]
-  }
-
   cflags = [
+    "-Dprivate=public",
     "-g",
     "-O0",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "devicestatusstub_fuzzer.cpp" ]
+  sources = [ "getdragdata_fuzzer.cpp" ]
 
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
@@ -68,15 +61,10 @@ ohos_fuzztest("DevicestatusstubFuzzTest") {
   ]
 
   external_deps = deps_ex
-
-  if (defined(fusion_interaction_motion_drag) &&
-      fusion_interaction_motion_drag) {
-    external_deps += [ "motion:motion_drag" ]
-  }
 }
 
 group("fuzztest") {
   testonly = true
   deps = []
-  deps += [ ":DevicestatusstubFuzzTest" ]
+  deps += [ ":GetDragDataFuzzTest" ]
 }
