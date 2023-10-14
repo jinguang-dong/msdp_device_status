@@ -54,11 +54,11 @@ Data DeviceStatusManager::GetLatestDeviceStatusData(Type type)
     CALL_DEBUG_ENTER;
     Data data = {type, OnChangedValue::VALUE_EXIT};
     if ((type <= TYPE_INVALID) || (type >= TYPE_MAX)) {
-        FI_HILOGE(":GetLatestDeviceStatusData type_:%{public}d is error", type);
+        FI_HILOGE("GetLatestDeviceStatusData type_:%{public}d is error", type);
         return data;
     }
     if (msdpImpl_ == nullptr) {
-        FI_HILOGE("GetObserverData func is nullptr, return default");
+        FI_HILOGE("msdpImpl_ is nullptr");
         data.value = OnChangedValue::VALUE_INVALID;
         return data;
     }
@@ -163,7 +163,7 @@ int32_t DeviceStatusManager::NotifyDeviceStatusChange(const Data& devicestatusDa
                 break;
             }
             default: {
-                FI_HILOGE("Exit");
+                FI_HILOGE("OnChangedValue is error");
                 break;
             }
         }
@@ -201,7 +201,7 @@ void DeviceStatusManager::Subscribe(Type type, ActivityEvent event, ReportLatenc
         }
         auto [_, ret] = listeners_.insert(std::make_pair(type, listeners));
         if (!ret) {
-            FI_HILOGW("type is duplicated");
+            FI_HILOGW("Type is duplicated");
         }
     } else {
         FI_HILOGI("callbacklist.size:%{public}zu", listeners_[dtTypeIter->first].size());
@@ -302,7 +302,7 @@ int32_t DeviceStatusManager::GetPackageName(AccessTokenID tokenId, std::string &
             break;
         }
         default: {
-            FI_HILOGE("token type not match");
+            FI_HILOGE("Token type not match");
             break;
         }
     }
