@@ -348,7 +348,7 @@ void CoordinationSM::StartRemoteCoordinationResult(bool isSuccess, const std::st
         return;
     }
     startDeviceDhid_ = startDeviceDhid;
-    CoordinationMessage msg = isSuccess ? CoordinationMessage::ACTIVATE_SUCCESS : CoordinationMessage::ACTIVATE_FAIL;
+    CoordinationMessage msg = isSuccess ? CoordinationMessage::ACTIVATE_SUCCESS : CoordinationMessage::ACTIVATE_FAILURE;
     auto *context = COOR_EVENT_MGR->GetIContext();
     CHKPV(context);
     int32_t ret = context->GetDelegateTasks().PostAsyncTask(
@@ -523,7 +523,7 @@ void CoordinationSM::NotifyRemoteStartFail(const std::string &remoteNetworkId)
 {
     CALL_DEBUG_ENTER;
     COOR_SOFTBUS_ADAPTER->StartRemoteCoordinationResult(remoteNetworkId, false, "", 0, 0);
-    COOR_EVENT_MGR->OnStart(CoordinationMessage::ACTIVATE_FAIL);
+    COOR_EVENT_MGR->OnStart(CoordinationMessage::ACTIVATE_FAILURE);
 }
 
 void CoordinationSM::NotifyRemoteStartSuccess(const std::string &remoteNetworkId, const std::string &startDeviceDhid)
