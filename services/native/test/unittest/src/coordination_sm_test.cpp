@@ -98,7 +98,8 @@ public:
     void SetAceessTokenPermission(const std::string &processName, const char** perms, size_t permCount);
 };
 
-void CoordinationSMTest::SetUp() {
+void CoordinationSMTest::SetUp()
+{
     AddPermission();
 }
 
@@ -141,7 +142,7 @@ Device::Device(int32_t deviceId) {}
 
 Device::~Device() {}
 
-int32_t Device::Open() 
+int32_t Device::Open()
 {
     return 0;
 }
@@ -151,7 +152,7 @@ void Device::Close() {}
 void Device::Dispatch(const struct epoll_event &ev) {}
 
 /**
- * @tc.name: CoordinationSMTest
+ * @tc.name: CoordinationSMTest001
  * @tc.desc: test IsNeedFilterOut state == CoordinationState::STATE_OUT
  * @tc.type: FUNC
  */
@@ -176,7 +177,7 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest001, TestSize.Level0)
 }
 
 /**
- * @tc.name: CoordinationSMTest
+ * @tc.name: CoordinationSMTest002
  * @tc.desc: test abnormal GetCoordinationState when local NetworkId is empty
  * @tc.type: FUNC
  */
@@ -190,7 +191,7 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest002, TestSize.Level0)
 }
 
 /**
- * @tc.name: CoordinationSMTest
+ * @tc.name: CoordinationSMTest003
  * @tc.desc: test normal GetCoordinationState when local NetworkId is correct
  * @tc.type: FUNC
  */
@@ -220,6 +221,8 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest004, TestSize.Level0)
     EXPECT_TRUE(state == "out");
     state = COOR_SM->GetDeviceCoordinationState(static_cast<CoordinationState>(UNKNOWN_STATE));
     EXPECT_TRUE(state == "unknown");
+    ClearCoordiantionSM();
+    ClearCoordinationSoftbusAdapter();
 }
 
 /**
@@ -235,6 +238,8 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest005, TestSize.Level0)
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
     COOR_SM->UpdateLastPointerEventCallback(pointerEvent);
     EXPECT_TRUE(COOR_SM->lastPointerEvent_ == pointerEvent);
+    ClearCoordiantionSM();
+    ClearCoordinationSoftbusAdapter();
 }
 
 /**
@@ -252,6 +257,8 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest006, TestSize.Level0)
     auto lastPointerEvent = COOR_SM->GetLastPointerEvent();
     ASSERT_TRUE(lastPointerEvent != nullptr);
     EXPECT_TRUE(lastPointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_CANCEL);
+    ClearCoordiantionSM();
+    ClearCoordinationSoftbusAdapter();
 }
 
 /**
@@ -265,7 +272,8 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest007, TestSize.Level0)
     std::string remoteNetworkId("cde2b5b4453a5b3ec566f836ffa7a4aab52c4b9c8a0b34f3d6aaca4566db24f0");
     COOR_SM->SetSinkNetworkId(remoteNetworkId);
     EXPECT_TRUE(COOR_SM->sinkNetworkId_ == remoteNetworkId);
-    COOR_SM->sinkNetworkId_.clear();
+    ClearCoordiantionSM();
+    ClearCoordinationSoftbusAdapter();
 }
 
 /**
@@ -280,12 +288,12 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest008, TestSize.Level0)
     std::string networkId("cde2b5b4453a5b3ec566f836ffa7a4aab52c4b9c8a0b34f3d6aaca4566db24f0");
     COOR_SM->Reset(networkId);
     EXPECT_TRUE(COOR_SM->isStarting_ == false);
-    COOR_SM->remoteNetworkId_.clear();
-    COOR_SM->sinkNetworkId_.clear();
+    ClearCoordiantionSM();
+    ClearCoordinationSoftbusAdapter();
 }
 
 /**
- * @tc.name: CoordinationSMTest
+ * @tc.name: CoordinationSMTest009
  * @tc.desc: test normal ActivateCoordination return the correct value
  * @tc.type: FUNC
  */
@@ -306,7 +314,7 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest009, TestSize.Level0)
 }
 
 /**
- * @tc.name: CoordinationSMTest
+ * @tc.name: CoordinationSMTest010
  * @tc.desc: test normal DeactivateCoordination return the correct value
  * @tc.type: FUNC
  */
@@ -318,7 +326,7 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest010, TestSize.Level0)
     COOR_SM->startDeviceDhid_ = "teststartDeviceDhid";
     std::shared_ptr<Device> curdevice= std::make_shared<Device>(DEVICE_ID);
     curdevice->name_ = "DistributedInput ";
-    std::shared_ptr<CoordinationDeviceManager::Device> dev = std::make_shared<CoordinationDeviceManager::Device>(curdevice);
+    auto dev = std::make_shared<CoordinationDeviceManager::Device>(curdevice);
     dev->dhid_ = COOR_SM->startDeviceDhid_;
     dev->networkId_ = "testNetworkId";
     std::function<void(void)> mycallback = [&](void) {
@@ -337,7 +345,7 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest010, TestSize.Level0)
 }
 
 /**
- * @tc.name: CoordinationSMTest
+ * @tc.name: CoordinationSMTest011
  * @tc.desc: test normal UpdateState
  * @tc.type: FUNC
  */
@@ -354,7 +362,7 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest011, TestSize.Level0)
 }
 
 /**
- * @tc.name: CoordinationSMTest
+ * @tc.name: CoordinationSMTest012
  * @tc.desc: test normal UpdatePreparedDevices and obtain correct value
  * @tc.type: FUNC
  */
@@ -364,6 +372,52 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest012, TestSize.Level0)
     COOR_SM->UpdatePreparedDevices(REMOTE_NETWORKID, ORIGIN_NETWORKID);
     std::pair<std::string, std::string> devicelist = COOR_SM->GetPreparedDevices();
     EXPECT_TRUE((devicelist.first == REMOTE_NETWORKID) && (devicelist.second == ORIGIN_NETWORKID));
+    ClearCoordiantionSM();
+    ClearCoordinationSoftbusAdapter();
+}
+
+/**
+ * @tc.name: CoordinationSMTest013
+ * @tc.desc: test normal IsStarting and obtain correct value
+ * @tc.type: FUNC
+ */
+HWTEST_F(CoordinationSMTest, CoordinationSMTest013, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    COOR_SM->isStarting_ = true;
+    bool isStarting = COOR_SM->IsStarting();
+    EXPECT_TRUE(isStarting == true);
+    ClearCoordiantionSM();
+    ClearCoordinationSoftbusAdapter();
+}
+
+/**
+ * @tc.name: CoordinationSMTest014
+ * @tc.desc: test normal IsStopping and obtain correct value
+ * @tc.type: FUNC
+ */
+HWTEST_F(CoordinationSMTest, CoordinationSMTest014, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    COOR_SM->isStopping_ = true;
+    bool isStopping = COOR_SM->IsStopping();
+    EXPECT_TRUE(isStopping == true);
+    ClearCoordiantionSM();
+    ClearCoordinationSoftbusAdapter();
+}
+
+/**
+ * @tc.name: CoordinationSMTest015
+ * @tc.desc: test normal SetUnchainStatus and obtain correct value
+ * @tc.type: FUNC
+ */
+HWTEST_F(CoordinationSMTest, CoordinationSMTest015, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    COOR_SM->isStopping_ = true;
+    COOR_SM->SetUnchainStatus(true);
+    EXPECT_TRUE(COOR_SM->isUnchained_ == true);
+    EXPECT_TRUE(COOR_SM->isStopping_ == false);
     ClearCoordiantionSM();
     ClearCoordinationSoftbusAdapter();
 }
