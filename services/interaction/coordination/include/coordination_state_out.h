@@ -24,6 +24,7 @@ namespace DeviceStatus {
 class CoordinationStateOut final : public ICoordinationState {
 public:
     CoordinationStateOut() = default;
+    explicit CoordinationStateOut(const std::shared_ptr<CoordinationEventHandler>& eventHandler);
     explicit CoordinationStateOut(const std::string &startDeviceDhid);
     int32_t DeactivateCoordination(const std::string &remoteNetworkId, bool isUnchained,
         const std::pair<std::string, std::string> &preparedNetworkId) override;
@@ -34,6 +35,7 @@ private:
     void OnStopRemoteInput(bool isSuccess, const std::string &remoteNetworkId);
     void ProcessStop(const std::string &remoteNetworkId);
     std::string startDeviceDhid_;
+    std::shared_ptr<CoordinationEventHandler> eventHandler_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp

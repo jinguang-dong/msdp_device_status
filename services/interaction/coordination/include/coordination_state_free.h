@@ -24,6 +24,7 @@ namespace DeviceStatus {
 class CoordinationStateFree final : public ICoordinationState {
 public:
     CoordinationStateFree() = default;
+    explicit CoordinationStateFree(const std::shared_ptr<CoordinationEventHandler>& eventHandler);
     int32_t ActivateCoordination(const std::string &remoteNetworkId, int32_t startDeviceId) override;
     int32_t DeactivateCoordination(const std::string &networkId, bool isUnchained,
         const std::pair<std::string, std::string> &preparedNetworkId) override;
@@ -31,6 +32,7 @@ public:
 
 private:
     int32_t ProcessStart(const std::string &remoteNetworkId, int32_t startDeviceId);
+    std::shared_ptr<CoordinationEventHandler> eventHandler_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp
