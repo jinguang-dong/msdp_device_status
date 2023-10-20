@@ -77,7 +77,7 @@ ErrCode DeviceStatusMsdpClientImpl::MockHandle(Type type)
     if (iter == mockCallCounts_.end()) {
         auto ret = mockCallCounts_.emplace(type, 0);
         if (!ret.second) {
-            FI_HILOGW("type is duplicated");
+            FI_HILOGW("Type is duplicated");
             return RET_ERR;
         }
     } else {
@@ -153,7 +153,7 @@ ErrCode DeviceStatusMsdpClientImpl::GetAlgoAbility(Type type)
 {
     if ((type == Type::TYPE_ABSOLUTE_STILL) || (type == Type::TYPE_HORIZONTAL_POSITION) ||
         (type == Type::TYPE_VERTICAL_POSITION)) {
-        FI_HILOGI("support ability type:%{public}d", type);
+        FI_HILOGI("Support ability type:%{public}d", type);
         return RET_OK;
     }
     FI_HILOGI("Not support ability");
@@ -310,7 +310,7 @@ Data DeviceStatusMsdpClientImpl::SaveObserverData(const Data& data)
     }
     auto ret = deviceStatusDatas_.insert(std::make_pair(data.type, data.value));
     if (!ret.second) {
-        FI_HILOGW("type is duplicated");
+        FI_HILOGW("Type is duplicated");
         return data;
     }
     notifyManagerFlag_ = true;
@@ -396,7 +396,7 @@ ErrCode DeviceStatusMsdpClientImpl::LoadAlgoLibrary()
 {
     CALL_DEBUG_ENTER;
     if (algo_.handle != nullptr) {
-        FI_HILOGE("algo handle has exists");
+        FI_HILOGE("Algo handle has exists");
         return RET_OK;
     }
     std::string dlName = DEVICESTATUS_ALGO_LIB_PATH;
