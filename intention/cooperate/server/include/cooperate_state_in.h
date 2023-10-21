@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef COORPERATE_STATE_IN_H
-#define COORPERATE_STATE_IN_H
+#ifndef COOPERATE_STATE_IN_H
+#define COOPERATE_STATE_IN_H
 
 #include "i_cooperate_state.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class CoorperateStateIn final : public ICoorperateState {
+class CooperateStateIn final : public ICooperateState {
 public:
-    CoorperateStateIn() = default;
-    explicit CoorperateStateIn(const std::string &startDeviceDhid);
-    int32_t ActivateCoorperate(const std::string &remoteNetworkId, int32_t startDeviceId) override;
-    int32_t DeactivateCoorperate(const std::string &remoteNetworkId, bool isUnchained,
+    CooperateStateIn() = default;
+    explicit CooperateStateIn(const std::string &startDeviceDhid);
+    int32_t ActivateCooperate(const std::string &remoteNetworkId, int32_t startDeviceId) override;
+    int32_t DeactivateCooperate(const std::string &remoteNetworkId, bool isUnchained,
         const std::pair<std::string, std::string> &preparedNetworkId) override;
     void SetStartDeviceDhid(const std::string &startDeviceDhid) override;
 
@@ -44,4 +44,4 @@ private:
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // COORPERATE_STATE_IN_H
+#endif // COOPERATE_STATE_IN_H

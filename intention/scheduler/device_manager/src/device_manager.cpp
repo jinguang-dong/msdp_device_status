@@ -23,9 +23,9 @@
 #include <sys/epoll.h>
 #include <sys/stat.h>
 
-#ifdef OHOS_BUILD_ENABLE_COORPERATE
+#ifdef OHOS_BUILD_ENABLE_COOPERATE
 #include "cooperate_util.h"
-#endif // OHOS_BUILD_ENABLE_COORPERATE
+#endif // OHOS_BUILD_ENABLE_COOPERATE
 #include "device.h"
 #include "devicestatus_define.h"
 #include "fi_log.h"

@@ -25,17 +25,17 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "ICoorperateState" };
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "ICooperateState" };
 } // namespace
 
-ICoorperateState::ICoorperateState()
+ICooperateState::ICooperateState()
 {
     runner_ = AppExecFwk::EventRunner::Create(true);
     CHKPL(runner_);
-    eventHandler_ = std::make_shared<CoorperateEventHandler>(runner_);
+    eventHandler_ = std::make_shared<CooperateEventHandler>(runner_);
 }
 
-int32_t ICoorperateState::PrepareAndStart(const std::string &remoteNetworkId, int32_t startDeviceId)
+int32_t ICooperateState::PrepareAndStart(const std::string &remoteNetworkId, int32_t startDeviceId)
 {
     CALL_INFO_TRACE;
     std::string originNetworkId = COOR_DEV_MGR->GetOriginNetworkId(startDeviceId);
@@ -61,7 +61,7 @@ int32_t ICoorperateState::PrepareAndStart(const std::string &remoteNetworkId, in
     return ret;
 }
 
-void ICoorperateState::OnPrepareDistributedInput(bool isSuccess, const std::string &remoteNetworkId,
+void ICooperateState::OnPrepareDistributedInput(bool isSuccess, const std::string &remoteNetworkId,
     int32_t startDeviceId)
 {
     FI_HILOGI("isSuccess:%{public}s", isSuccess ? "true" : "false");
@@ -72,12 +72,12 @@ void ICoorperateState::OnPrepareDistributedInput(bool isSuccess, const std::stri
     }
     std::string taskName = "start_dinput_task";
     std::function<void()> handleStartDinputFunc =
-        std::bind(&ICoorperateState::StartRemoteInput, this, startDeviceId);
+        std::bind(&ICooperateState::StartRemoteInput, this, startDeviceId);
     CHKPV(eventHandler_);
     eventHandler_->ProxyPostTask(handleStartDinputFunc, taskName, 0);
 }
 
-int32_t ICoorperateState::StartRemoteInput(int32_t startDeviceId)
+int32_t ICooperateState::StartRemoteInput(int32_t startDeviceId)
 {
     CALL_DEBUG_ENTER;
     std::pair<std::string, std::string> networkIds = COOR_SM->GetPreparedDevices();
@@ -97,17 +97,17 @@ int32_t ICoorperateState::StartRemoteInput(int32_t startDeviceId)
     return RET_OK;
 }
 
-void ICoorperateState::OnStartRemoteInput(bool isSuccess, const std::string &remoteNetworkId, int32_t startDeviceId)
+void ICooperateState::OnStartRemoteInput(bool isSuccess, const std::string &remoteNetworkId, int32_t startDeviceId)
 {
     CALL_DEBUG_ENTER;
     std::string taskName = "start_finish_task";
     std::function<void()> handleStartFinishFunc =
-        std::bind(&CoorperateSM::OnStartFinish, COOR_SM, isSuccess, remoteNetworkId, startDeviceId);
+        std::bind(&CooperateSM::OnStartFinish, COOR_SM, isSuccess, remoteNetworkId, startDeviceId);
     CHKPV(eventHandler_);
     eventHandler_->ProxyPostTask(handleStartFinishFunc, taskName, 0);
 }
 
-bool ICoorperateState::NeedPrepare(const std::string &remoteNetworkId, const std::string &originNetworkId)
+bool ICooperateState::NeedPrepare(const std::string &remoteNetworkId, const std::string &originNetworkId)
 {
     CALL_DEBUG_ENTER;
     std::pair<std::string, std::string> prepared = COOR_SM->GetPreparedDevices();

@@ -34,8 +34,8 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CoorperateSoftbusAdapter" };
-std::shared_ptr<CoorperateSoftbusAdapter> g_instance = nullptr;
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CooperateSoftbusAdapter" };
+std::shared_ptr<CooperateSoftbusAdapter> g_instance = nullptr;
 constexpr int32_t DINPUT_LINK_TYPE_MAX { 4 };
 const SessionAttribute g_sessionAttr = {
     .dataType = SessionType::TYPE_BYTES,
@@ -47,7 +47,7 @@ const SessionAttribute g_sessionAttr = {
     }
 };
 
-void ResponseStartRemoteCoorperate(int32_t sessionId, const JsonParser &parser)
+void ResponseStartRemoteCooperate(int32_t sessionId, const JsonParser &parser)
 {
     CALL_DEBUG_ENTER;
     cJSON* deviceId = cJSON_GetObjectItemCaseSensitive(parser.json, FI_SOFTBUS_KEY_LOCAL_DEVICE_ID);
@@ -56,10 +56,10 @@ void ResponseStartRemoteCoorperate(int32_t sessionId, const JsonParser &parser)
         FI_HILOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE, data type is error");
         return;
     }
-    COOR_SM->StartRemoteCoorperate(deviceId->valuestring, cJSON_IsTrue(buttonIsPressed));
+    COOR_SM->StartRemoteCooperate(deviceId->valuestring, cJSON_IsTrue(buttonIsPressed));
 }
 
-void ResponseStartRemoteCoorperateResult(int32_t sessionId, const JsonParser &parser)
+void ResponseStartRemoteCooperateResult(int32_t sessionId, const JsonParser &parser)
 {
     CALL_DEBUG_ENTER;
     cJSON* result = cJSON_GetObjectItemCaseSensitive(parser.json, FI_SOFTBUS_KEY_RESULT);
@@ -70,10 +70,10 @@ void ResponseStartRemoteCoorperateResult(int32_t sessionId, const JsonParser &pa
         FI_HILOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE, data type is error");
         return;
     }
-    COOR_SM->StartRemoteCoorperateResult(cJSON_IsTrue(result), dhid->valuestring, x->valueint, y->valueint);
+    COOR_SM->StartRemoteCooperateResult(cJSON_IsTrue(result), dhid->valuestring, x->valueint, y->valueint);
 }
 
-void ResponseStopRemoteCoorperate(int32_t sessionId, const JsonParser &parser)
+void ResponseStopRemoteCooperate(int32_t sessionId, const JsonParser &parser)
 {
     CALL_DEBUG_ENTER;
     cJSON* result = cJSON_GetObjectItemCaseSensitive(parser.json, FI_SOFTBUS_KEY_RESULT);
@@ -82,10 +82,10 @@ void ResponseStopRemoteCoorperate(int32_t sessionId, const JsonParser &parser)
         FI_HILOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE, data type is error");
         return;
     }
-    COOR_SM->StopRemoteCoorperate(cJSON_IsTrue(result));
+    COOR_SM->StopRemoteCooperate(cJSON_IsTrue(result));
 }
 
-void ResponseStopRemoteCoorperateResult(int32_t sessionId, const JsonParser &parser)
+void ResponseStopRemoteCooperateResult(int32_t sessionId, const JsonParser &parser)
 {
     CALL_DEBUG_ENTER;
     cJSON* result = cJSON_GetObjectItemCaseSensitive(parser.json, FI_SOFTBUS_KEY_RESULT);
@@ -94,7 +94,7 @@ void ResponseStopRemoteCoorperateResult(int32_t sessionId, const JsonParser &par
         FI_HILOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE, data type is error");
         return;
     }
-    COOR_SM->StopRemoteCoorperateResult(cJSON_IsTrue(result));
+    COOR_SM->StopRemoteCooperateResult(cJSON_IsTrue(result));
 }
 
 void ResponseNotifyUnchainedResult(int32_t sessionId, const JsonParser &parser)
@@ -109,7 +109,7 @@ void ResponseNotifyUnchainedResult(int32_t sessionId, const JsonParser &parser)
     COOR_SM->NotifyUnchainedResult(deviceId->valuestring, cJSON_IsTrue(result));
 }
 
-void ResponseStartCoorperateOtherResult(int32_t sessionId, const JsonParser &parser)
+void ResponseStartCooperateOtherResult(int32_t sessionId, const JsonParser &parser)
 {
     CALL_DEBUG_ENTER;
     cJSON* deviceId = cJSON_GetObjectItemCaseSensitive(parser.json, FI_SOFTBUS_KEY_OTHER_DEVICE_ID);
@@ -118,7 +118,7 @@ void ResponseStartCoorperateOtherResult(int32_t sessionId, const JsonParser &par
         FI_HILOGE("OnBytesReceived cmdType is TRANS_SINK_MSG_ONPREPARE, data type is error");
         return;
     }
-    COOR_SM->StartCoorperateOtherResult(deviceId->valuestring);
+    COOR_SM->StartCooperateOtherResult(deviceId->valuestring);
 }
 } // namespace
 
@@ -153,7 +153,7 @@ static void StreamReceived(int32_t sessionId, const StreamData *data, const Stre
     (void)param;
 }
 
-int32_t CoorperateSoftbusAdapter::Init()
+int32_t CooperateSoftbusAdapter::Init()
 {
     CALL_INFO_TRACE;
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
@@ -165,7 +165,7 @@ int32_t CoorperateSoftbusAdapter::Init()
         .OnMessageReceived = MessageReceived,
         .OnStreamReceived = StreamReceived
     };
-    std::string localNetworkId = COORPERATE::GetLocalNetworkId();
+    std::string localNetworkId = COOPERATE::GetLocalNetworkId();
     if (localNetworkId.empty()) {
         FI_HILOGE("Local networkid is empty");
         return RET_ERR;
@@ -193,12 +193,12 @@ int32_t CoorperateSoftbusAdapter::Init()
     return RET_OK;
 }
 
-CoorperateSoftbusAdapter::~CoorperateSoftbusAdapter()
+CooperateSoftbusAdapter::~CooperateSoftbusAdapter()
 {
     Release();
 }
 
-void CoorperateSoftbusAdapter::Release()
+void CooperateSoftbusAdapter::Release()
 {
     CALL_INFO_TRACE;
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
@@ -212,7 +212,7 @@ void CoorperateSoftbusAdapter::Release()
     channelStatuss_.clear();
 }
 
-bool CoorperateSoftbusAdapter::CheckDeviceSessionState(const std::string &remoteNetworkId)
+bool CooperateSoftbusAdapter::CheckDeviceSessionState(const std::string &remoteNetworkId)
 {
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
     if (sessionDevs_.find(remoteNetworkId) == sessionDevs_.end()) {
@@ -222,7 +222,7 @@ bool CoorperateSoftbusAdapter::CheckDeviceSessionState(const std::string &remote
     return true;
 }
 
-int32_t CoorperateSoftbusAdapter::OpenInputSoftbus(const std::string &remoteNetworkId)
+int32_t CooperateSoftbusAdapter::OpenInputSoftbus(const std::string &remoteNetworkId)
 {
     CALL_INFO_TRACE;
     const std::string SESSION_NAME = "ohos.msdp.device_status.";
@@ -249,7 +249,7 @@ int32_t CoorperateSoftbusAdapter::OpenInputSoftbus(const std::string &remoteNetw
     return WaitSessionOpend(remoteNetworkId, sessionId);
 }
 
-int32_t CoorperateSoftbusAdapter::WaitSessionOpend(const std::string &remoteNetworkId, int32_t sessionId)
+int32_t CooperateSoftbusAdapter::WaitSessionOpend(const std::string &remoteNetworkId, int32_t sessionId)
 {
     CALL_INFO_TRACE;
     std::unique_lock<std::mutex> waitLock(operationMutex_);
@@ -264,7 +264,7 @@ int32_t CoorperateSoftbusAdapter::WaitSessionOpend(const std::string &remoteNetw
     return RET_OK;
 }
 
-void CoorperateSoftbusAdapter::CloseInputSoftbus(const std::string &remoteNetworkId)
+void CooperateSoftbusAdapter::CloseInputSoftbus(const std::string &remoteNetworkId)
 {
     CALL_INFO_TRACE;
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
@@ -280,16 +280,16 @@ void CoorperateSoftbusAdapter::CloseInputSoftbus(const std::string &remoteNetwor
     sessionId_ = -1;
 }
 
-std::shared_ptr<CoorperateSoftbusAdapter> CoorperateSoftbusAdapter::GetInstance()
+std::shared_ptr<CooperateSoftbusAdapter> CooperateSoftbusAdapter::GetInstance()
 {
     static std::once_flag flag;
     std::call_once(flag, [&]() {
-        g_instance.reset(new (std::nothrow) CoorperateSoftbusAdapter());
+        g_instance.reset(new (std::nothrow) CooperateSoftbusAdapter());
     });
     return g_instance;
 }
 
-int32_t CoorperateSoftbusAdapter::StartRemoteCoorperate(const std::string &localNetworkId,
+int32_t CooperateSoftbusAdapter::StartRemoteCooperate(const std::string &localNetworkId,
     const std::string &remoteNetworkId, bool checkButtonDown)
 {
     CALL_DEBUG_ENTER;
@@ -311,7 +311,7 @@ int32_t CoorperateSoftbusAdapter::StartRemoteCoorperate(const std::string &local
     }
     FI_HILOGD("isPointerButtonPressed:%{public}d", isPointerButtonPressed);
     cJSON *jsonStr = cJSON_CreateObject();
-    cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_CMD_TYPE, cJSON_CreateNumber(REMOTE_COORPERATE_START));
+    cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_CMD_TYPE, cJSON_CreateNumber(REMOTE_COOPERATE_START));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_LOCAL_DEVICE_ID, cJSON_CreateString(localNetworkId.c_str()));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_SESSION_ID, cJSON_CreateNumber(sessionId));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_POINTER_BUTTON_IS_PRESS, cJSON_CreateBool(isPointerButtonPressed));
@@ -334,7 +334,7 @@ int32_t CoorperateSoftbusAdapter::StartRemoteCoorperate(const std::string &local
     return RET_OK;
 }
 
-int32_t CoorperateSoftbusAdapter::StartRemoteCoorperateResult(const std::string &remoteNetworkId,
+int32_t CooperateSoftbusAdapter::StartRemoteCooperateResult(const std::string &remoteNetworkId,
     bool isSuccess, const std::string &startDeviceDhid, int32_t xPercent, int32_t yPercent)
 {
     CALL_DEBUG_ENTER;
@@ -345,7 +345,7 @@ int32_t CoorperateSoftbusAdapter::StartRemoteCoorperateResult(const std::string 
     }
     int32_t sessionId = sessionDevs_[remoteNetworkId];
     cJSON *jsonStr = cJSON_CreateObject();
-    cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_CMD_TYPE, cJSON_CreateNumber(REMOTE_COORPERATE_START_RES));
+    cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_CMD_TYPE, cJSON_CreateNumber(REMOTE_COOPERATE_START_RES));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_RESULT, cJSON_CreateBool(isSuccess));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_START_DHID, cJSON_CreateString(startDeviceDhid.c_str()));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_POINTER_X, cJSON_CreateNumber(xPercent));
@@ -362,7 +362,7 @@ int32_t CoorperateSoftbusAdapter::StartRemoteCoorperateResult(const std::string 
     return RET_OK;
 }
 
-int32_t CoorperateSoftbusAdapter::StopRemoteCoorperate(const std::string &remoteNetworkId, bool isUnchained)
+int32_t CooperateSoftbusAdapter::StopRemoteCooperate(const std::string &remoteNetworkId, bool isUnchained)
 {
     CALL_DEBUG_ENTER;
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
@@ -372,7 +372,7 @@ int32_t CoorperateSoftbusAdapter::StopRemoteCoorperate(const std::string &remote
     }
     int32_t sessionId = sessionDevs_[remoteNetworkId];
     cJSON *jsonStr = cJSON_CreateObject();
-    cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_CMD_TYPE, cJSON_CreateNumber(REMOTE_COORPERATE_STOP));
+    cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_CMD_TYPE, cJSON_CreateNumber(REMOTE_COOPERATE_STOP));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_RESULT, cJSON_CreateBool(isUnchained));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_SESSION_ID, cJSON_CreateNumber(sessionId));
     char *smsg = cJSON_Print(jsonStr);
@@ -386,7 +386,7 @@ int32_t CoorperateSoftbusAdapter::StopRemoteCoorperate(const std::string &remote
     return RET_OK;
 }
 
-int32_t CoorperateSoftbusAdapter::StopRemoteCoorperateResult(const std::string &remoteNetworkId,
+int32_t CooperateSoftbusAdapter::StopRemoteCooperateResult(const std::string &remoteNetworkId,
     bool isSuccess)
 {
     CALL_DEBUG_ENTER;
@@ -397,7 +397,7 @@ int32_t CoorperateSoftbusAdapter::StopRemoteCoorperateResult(const std::string &
     }
     int32_t sessionId = sessionDevs_[remoteNetworkId];
     cJSON *jsonStr = cJSON_CreateObject();
-    cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_CMD_TYPE, cJSON_CreateNumber(REMOTE_COORPERATE_STOP_RES));
+    cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_CMD_TYPE, cJSON_CreateNumber(REMOTE_COOPERATE_STOP_RES));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_RESULT, cJSON_CreateBool(isSuccess));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_SESSION_ID, cJSON_CreateNumber(sessionId));
     char *smsg = cJSON_Print(jsonStr);
@@ -411,7 +411,7 @@ int32_t CoorperateSoftbusAdapter::StopRemoteCoorperateResult(const std::string &
     return RET_OK;
 }
 
-int32_t CoorperateSoftbusAdapter::NotifyUnchainedResult(const std::string &localNetworkId,
+int32_t CooperateSoftbusAdapter::NotifyUnchainedResult(const std::string &localNetworkId,
     const std::string &remoteNetworkId, bool result)
 {
     CALL_DEBUG_ENTER;
@@ -439,7 +439,7 @@ int32_t CoorperateSoftbusAdapter::NotifyUnchainedResult(const std::string &local
     return RET_OK;
 }
 
-int32_t CoorperateSoftbusAdapter::NotifyFilterAdded(const std::string &remoteNetworkId)
+int32_t CooperateSoftbusAdapter::NotifyFilterAdded(const std::string &remoteNetworkId)
 {
     CALL_DEBUG_ENTER;
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
@@ -463,7 +463,7 @@ int32_t CoorperateSoftbusAdapter::NotifyFilterAdded(const std::string &remoteNet
     return RET_OK;
 }
 
-int32_t CoorperateSoftbusAdapter::StartCoorperateOtherResult(const std::string &originNetworkId,
+int32_t CooperateSoftbusAdapter::StartCooperateOtherResult(const std::string &originNetworkId,
     const std::string &remoteNetworkId)
 {
     CALL_DEBUG_ENTER;
@@ -474,7 +474,7 @@ int32_t CoorperateSoftbusAdapter::StartCoorperateOtherResult(const std::string &
     }
     int32_t sessionId = sessionDevs_[originNetworkId];
     cJSON *jsonStr = cJSON_CreateObject();
-    cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_CMD_TYPE, cJSON_CreateNumber(REMOTE_COORPERATE_STOP_OTHER_RES));
+    cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_CMD_TYPE, cJSON_CreateNumber(REMOTE_COOPERATE_STOP_OTHER_RES));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_OTHER_DEVICE_ID, cJSON_CreateString(remoteNetworkId.c_str()));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_SESSION_ID, cJSON_CreateNumber(sessionId));
     char *smsg = cJSON_Print(jsonStr);
@@ -488,7 +488,7 @@ int32_t CoorperateSoftbusAdapter::StartCoorperateOtherResult(const std::string &
     return RET_OK;
 }
 
-void CoorperateSoftbusAdapter::HandleSessionData(int32_t sessionId, const std::string &message)
+void CooperateSoftbusAdapter::HandleSessionData(int32_t sessionId, const std::string &message)
 {
     if (message.empty()) {
         FI_HILOGE("Message is empty");
@@ -521,10 +521,10 @@ void CoorperateSoftbusAdapter::HandleSessionData(int32_t sessionId, const std::s
         }
         return;
     }
-    HandleCoorperateSessionData(sessionId, parser);
+    HandleCooperateSessionData(sessionId, parser);
 }
 
-void CoorperateSoftbusAdapter::OnBytesReceived(int32_t sessionId, const void *data, uint32_t dataLen)
+void CooperateSoftbusAdapter::OnBytesReceived(int32_t sessionId, const void *data, uint32_t dataLen)
 {
     FI_HILOGD("dataLen:%{public}d", dataLen);
     if ((sessionId < 0) || (data == nullptr) || (dataLen <= 0)) {
@@ -535,7 +535,7 @@ void CoorperateSoftbusAdapter::OnBytesReceived(int32_t sessionId, const void *da
     HandleSessionData(sessionId, message);
 }
 
-int32_t CoorperateSoftbusAdapter::SendMsg(int32_t sessionId, const std::string &message)
+int32_t CooperateSoftbusAdapter::SendMsg(int32_t sessionId, const std::string &message)
 {
     CALL_DEBUG_ENTER;
     if (message.size() > MSG_MAX_SIZE) {
@@ -545,7 +545,7 @@ int32_t CoorperateSoftbusAdapter::SendMsg(int32_t sessionId, const std::string &
     return SendBytes(sessionId, message.c_str(), strlen(message.c_str()));
 }
 
-std::string CoorperateSoftbusAdapter::FindDevice(int32_t sessionId)
+std::string CooperateSoftbusAdapter::FindDevice(int32_t sessionId)
 {
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
     auto find_item = std::find_if(sessionDevs_.begin(), sessionDevs_.end(),
@@ -559,7 +559,7 @@ std::string CoorperateSoftbusAdapter::FindDevice(int32_t sessionId)
     return find_item->first;
 }
 
-int32_t CoorperateSoftbusAdapter::OnSessionOpened(int32_t sessionId, int32_t result)
+int32_t CooperateSoftbusAdapter::OnSessionOpened(int32_t sessionId, int32_t result)
 {
     CALL_INFO_TRACE;
     char peerDevId[DEVICE_ID_SIZE_MAX] = {};
@@ -597,7 +597,7 @@ int32_t CoorperateSoftbusAdapter::OnSessionOpened(int32_t sessionId, int32_t res
     return RET_OK;
 }
 
-void CoorperateSoftbusAdapter::OnSessionClosed(int32_t sessionId)
+void CooperateSoftbusAdapter::OnSessionClosed(int32_t sessionId)
 {
     CALL_DEBUG_ENTER;
     std::string deviceId = FindDevice(sessionId);
@@ -612,7 +612,7 @@ void CoorperateSoftbusAdapter::OnSessionClosed(int32_t sessionId)
     sessionId_ = -1;
 }
 
-void CoorperateSoftbusAdapter::RegisterRecvFunc(MessageId messageId, std::function<void(void*, uint32_t)> callback)
+void CooperateSoftbusAdapter::RegisterRecvFunc(MessageId messageId, std::function<void(void*, uint32_t)> callback)
 {
     CALL_DEBUG_ENTER;
     if (messageId <= MIN_ID || messageId >= MAX_ID) {
@@ -623,7 +623,7 @@ void CoorperateSoftbusAdapter::RegisterRecvFunc(MessageId messageId, std::functi
     registerRecvs_[messageId] = callback;
 }
 
-int32_t CoorperateSoftbusAdapter::SendData(const std::string &deviceId, MessageId messageId,
+int32_t CooperateSoftbusAdapter::SendData(const std::string &deviceId, MessageId messageId,
     void* data, uint32_t dataLen)
 {
     CALL_DEBUG_ENTER;
@@ -646,14 +646,14 @@ int32_t CoorperateSoftbusAdapter::SendData(const std::string &deviceId, MessageI
     return RET_OK;
 }
 
-void CoorperateSoftbusAdapter::ResponseNotifyFilterAdded()
+void CooperateSoftbusAdapter::ResponseNotifyFilterAdded()
 {
     CALL_DEBUG_ENTER;
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
     openSessionWaitCond_.notify_all();
 }
 
-void CoorperateSoftbusAdapter::HandleCoorperateSessionData(int32_t sessionId, const JsonParser &parser)
+void CooperateSoftbusAdapter::HandleCooperateSessionData(int32_t sessionId, const JsonParser &parser)
 {
     cJSON* comType = cJSON_GetObjectItemCaseSensitive(parser.json, FI_SOFTBUS_KEY_CMD_TYPE);
     if (!cJSON_IsNumber(comType)) {
@@ -662,24 +662,24 @@ void CoorperateSoftbusAdapter::HandleCoorperateSessionData(int32_t sessionId, co
     }
     FI_HILOGD("valueint:%{public}d", comType->valueint);
     switch (comType->valueint) {
-        case REMOTE_COORPERATE_START: {
-            ResponseStartRemoteCoorperate(sessionId, parser);
+        case REMOTE_COOPERATE_START: {
+            ResponseStartRemoteCooperate(sessionId, parser);
             break;
         }
-        case REMOTE_COORPERATE_START_RES: {
-            ResponseStartRemoteCoorperateResult(sessionId, parser);
+        case REMOTE_COOPERATE_START_RES: {
+            ResponseStartRemoteCooperateResult(sessionId, parser);
             break;
         }
-        case REMOTE_COORPERATE_STOP: {
-            ResponseStopRemoteCoorperate(sessionId, parser);
+        case REMOTE_COOPERATE_STOP: {
+            ResponseStopRemoteCooperate(sessionId, parser);
             break;
         }
-        case REMOTE_COORPERATE_STOP_RES: {
-            ResponseStopRemoteCoorperateResult(sessionId, parser);
+        case REMOTE_COOPERATE_STOP_RES: {
+            ResponseStopRemoteCooperateResult(sessionId, parser);
             break;
         }
-        case REMOTE_COORPERATE_STOP_OTHER_RES: {
-            ResponseStartCoorperateOtherResult(sessionId, parser);
+        case REMOTE_COOPERATE_STOP_OTHER_RES: {
+            ResponseStartCooperateOtherResult(sessionId, parser);
             break;
         }
         case NOTIFY_UNCHAINED_RES: {
@@ -697,7 +697,7 @@ void CoorperateSoftbusAdapter::HandleCoorperateSessionData(int32_t sessionId, co
     }
 }
 
-void CoorperateSoftbusAdapter::ConfigTcpAlive()
+void CooperateSoftbusAdapter::ConfigTcpAlive()
 {
     CALL_DEBUG_ENTER;
     if (sessionId_ < 0) {

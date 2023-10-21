@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COORPERATE_EVENT_MANAGER_H
-#define COORPERATE_EVENT_MANAGER_H
+#ifndef COOPERATE_EVENT_MANAGER_H
+#define COOPERATE_EVENT_MANAGER_H
 
 #include <list>
 #include <mutex>
@@ -32,8 +32,8 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class CoorperateEventManager final {
-    DECLARE_DELAYED_SINGLETON(CoorperateEventManager);
+class CooperateEventManager final {
+    DECLARE_DELAYED_SINGLETON(CooperateEventManager);
 public:
     enum EventType { LISTENER, ENABLE, START, STOP, STATE };
     struct EventInfo : public RefBase {
@@ -46,11 +46,11 @@ public:
         bool state { false };
     };
 
-    DISALLOW_COPY_AND_MOVE(CoorperateEventManager);
+    DISALLOW_COPY_AND_MOVE(CooperateEventManager);
 
-    void AddCoorperateEvent(sptr<EventInfo> event);
+    void AddCooperateEvent(sptr<EventInfo> event);
     void RemoveCooperateEvent(sptr<EventInfo> event);
-    int32_t OnCoorperateMessage(CooperateMessage msg, const std::string &deviceId = "");
+    int32_t OnCooperateMessage(CooperateMessage msg, const std::string &deviceId = "");
     void OnEnable(CooperateMessage msg, const std::string &deviceId = "");
     void OnStart(CooperateMessage msg, const std::string &deviceId = "");
     void OnStop(CooperateMessage msg, const std::string &deviceId = "");
@@ -60,13 +60,13 @@ public:
     IContext* GetIContext() const;
 
 private:
-    void NotifyCoorperateMessage(SessionPtr sess, MessageId msgId, int32_t userData,
+    void NotifyCooperateMessage(SessionPtr sess, MessageId msgId, int32_t userData,
         const std::string &deviceId, CooperateMessage msg);
-    void NotifyCoorperateState(SessionPtr sess, MessageId msgId, int32_t userData, bool state);
+    void NotifyCooperateState(SessionPtr sess, MessageId msgId, int32_t userData, bool state);
 
 private:
     std::mutex lock_;
-    std::list<sptr<EventInfo>> remoteCoorperateCallbacks_;
+    std::list<sptr<EventInfo>> remoteCooperateCallbacks_;
     std::map<EventType, sptr<EventInfo>> cooperateCallbacks_{
         {EventType::ENABLE, nullptr},
         {EventType::START, nullptr},
@@ -76,8 +76,8 @@ private:
     IContext *context_ { nullptr };
 };
 
-#define COOR_EVENT_MGR OHOS::DelayedSingleton<CoorperateEventManager>::GetInstance()
+#define COOR_EVENT_MGR OHOS::DelayedSingleton<CooperateEventManager>::GetInstance()
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // COORPERATE_EVENT_MANAGER_H
+#endif // COOPERATE_EVENT_MANAGER_H

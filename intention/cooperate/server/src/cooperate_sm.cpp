@@ -38,31 +38,31 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CoorperateSM" };
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CooperateSM" };
 constexpr int32_t INTERVAL_MS { 2000 };
 constexpr double PERCENT_CONST { 100.0 };
 constexpr float MOUSE_ABS_LOCATION { 100 };
 constexpr int32_t MOUSE_ABS_LOCATION_X { 50 };
 constexpr int32_t MOUSE_ABS_LOCATION_Y { 50 };
-constexpr int32_t COORPERATE_PRIORITY { 499 };
+constexpr int32_t COOPERATE_PRIORITY { 499 };
 constexpr int32_t MIN_HANDLER_ID { 1 };
 constexpr uint32_t P2P_SESSION_CLOSED { 1 };
 } // namespace
 
-CoorperateSM::CoorperateSM() {}
-CoorperateSM::~CoorperateSM()
+CooperateSM::CooperateSM() {}
+CooperateSM::~CooperateSM()
 {
     RemoveMonitor();
     RemoveInterceptor();
 }
 
-void CoorperateSM::Init()
+void CooperateSM::Init()
 {
     CALL_INFO_TRACE;
     preparedNetworkId_ = std::make_pair("", "");
-    cooperateStates_.emplace(CoorperateState::STATE_FREE, std::make_shared<CoorperateStateFree>());
-    cooperateStates_.emplace(CoorperateState::STATE_IN, std::make_shared<CoorperateStateIn>());
-    cooperateStates_.emplace(CoorperateState::STATE_OUT, std::make_shared<CoorperateStateOut>());
+    cooperateStates_.emplace(CooperateState::STATE_FREE, std::make_shared<CooperateStateFree>());
+    cooperateStates_.emplace(CooperateState::STATE_IN, std::make_shared<CooperateStateIn>());
+    cooperateStates_.emplace(CooperateState::STATE_OUT, std::make_shared<CooperateStateOut>());
     auto *context = COOR_EVENT_MGR->GetIContext();
     CHKPV(context);
     context->GetTimerManager().AddTimer(INTERVAL_MS, 1, [this]() {
@@ -72,53 +72,53 @@ void CoorperateSM::Init()
     COOR_DEV_MGR->Init();
     runner_ = AppExecFwk::EventRunner::Create(true);
     CHKPL(runner_);
-    eventHandler_ = std::make_shared<CoorperateEventHandler>(runner_);
+    eventHandler_ = std::make_shared<CooperateEventHandler>(runner_);
 }
 
-void CoorperateSM::OnSoftbusSessionClosed(const std::string &NetworkId)
+void CooperateSM::OnSoftbusSessionClosed(const std::string &NetworkId)
 {
     CALL_INFO_TRACE;
     CHKPV(eventHandler_);
     std::string taskName = "process_coordinition_reset";
     std::function<void()> handleFunc =
-        std::bind(&CoorperateSM::OnReset, this, NetworkId);
+        std::bind(&CooperateSM::OnReset, this, NetworkId);
     eventHandler_->ProxyPostTask(handleFunc, taskName, 0);
 }
 
-void CoorperateSM::OnReset(const std::string &NetworkId)
+void CooperateSM::OnReset(const std::string &NetworkId)
 {
     CALL_INFO_TRACE;
     Reset(NetworkId);
 }
 
-void CoorperateSM::OnSessionLost(SessionPtr session)
+void CooperateSM::OnSessionLost(SessionPtr session)
 {
     CALL_DEBUG_ENTER;
     CHKPV(session);
-    sptr<CoorperateEventManager::EventInfo> event = new (std::nothrow) CoorperateEventManager::EventInfo();
+    sptr<CooperateEventManager::EventInfo> event = new (std::nothrow) CooperateEventManager::EventInfo();
     CHKPV(event);
-    event->type = CoorperateEventManager::EventType::LISTENER;
+    event->type = CooperateEventManager::EventType::LISTENER;
     event->sess = session;
     COOR_EVENT_MGR->RemoveCooperateEvent(event);
     RemoveMonitor();
     RemoveInterceptor();
-    if (currentState_ != CoorperateState::STATE_FREE) {
-        DeactivateCoorperate(COOR_SM->isUnchained_);
+    if (currentState_ != CooperateState::STATE_FREE) {
+        DeactivateCooperate(COOR_SM->isUnchained_);
     }
     D_INPUT_ADAPTER->UnregisterSessionStateCb();
 }
 
-void CoorperateSM::Reset(const std::string &networkId)
+void CooperateSM::Reset(const std::string &networkId)
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
     bool needReset = true;
-    if (currentState_ == CoorperateState::STATE_OUT) {
+    if (currentState_ == CooperateState::STATE_OUT) {
         if (networkId != remoteNetworkId_) {
             needReset = false;
         }
     }
-    if (currentState_ == CoorperateState::STATE_IN) {
+    if (currentState_ == CooperateState::STATE_IN) {
         std::string originNetworkId = COOR_DEV_MGR->GetOriginNetworkId(startDeviceDhid_);
         if (networkId != originNetworkId) {
             needReset = false;
@@ -130,43 +130,43 @@ void CoorperateSM::Reset(const std::string &networkId)
     }
 }
 
-void CoorperateSM::Reset(bool adjustAbsolutionLocation)
+void CooperateSM::Reset(bool adjustAbsolutionLocation)
 {
     CALL_INFO_TRACE;
     startDeviceDhid_ = "";
     remoteNetworkId_ = "";
-    if (adjustAbsolutionLocation && currentState_ != CoorperateState::STATE_FREE) {
+    if (adjustAbsolutionLocation && currentState_ != CooperateState::STATE_FREE) {
         SetAbsolutionLocation(MOUSE_ABS_LOCATION_X, MOUSE_ABS_LOCATION_Y);
     }
-    currentState_ = CoorperateState::STATE_FREE;
+    currentState_ = CooperateState::STATE_FREE;
     isStarting_ = false;
     isStopping_ = false;
     RemoveInterceptor();
 }
 
-void CoorperateSM::OnCoorperateChanged(const std::string &networkId, bool isOpen)
+void CooperateSM::OnCooperateChanged(const std::string &networkId, bool isOpen)
 {
     CALL_DEBUG_ENTER;
     CooperateMessage msg = isOpen ? CooperateMessage::PREPARE : CooperateMessage::UNPREPARE;
     auto *context = COOR_EVENT_MGR->GetIContext();
     CHKPV(context);
     int32_t ret = context->GetTaskScheduler().PostAsyncTask(
-        std::bind(&CoorperateEventManager::OnCoorperateMessage, COOR_EVENT_MGR, msg, networkId));
+        std::bind(&CooperateEventManager::OnCooperateMessage, COOR_EVENT_MGR, msg, networkId));
     if (ret != RET_OK) {
         FI_HILOGE("Posting async task failed");
     }
     if (!isOpen) {
-        OnCloseCoorperate(networkId, false);
+        OnCloseCooperate(networkId, false);
     }
 }
 
-void CoorperateSM::OnCloseCoorperate(const std::string &networkId, bool isLocal)
+void CooperateSM::OnCloseCooperate(const std::string &networkId, bool isLocal)
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
     if (!preparedNetworkId_.first.empty() && !preparedNetworkId_.second.empty()) {
         if ((networkId == preparedNetworkId_.first) || (networkId == preparedNetworkId_.second)) {
-            if (currentState_ != CoorperateState::STATE_FREE) {
+            if (currentState_ != CooperateState::STATE_FREE) {
                 D_INPUT_ADAPTER->StopRemoteInput(preparedNetworkId_.first, preparedNetworkId_.second,
                     COOR_DEV_MGR->GetCooperateDhids(startDeviceDhid_, false), [](bool isSuccess) {
                     FI_HILOGI("Failed to stop remote");
@@ -177,7 +177,7 @@ void CoorperateSM::OnCloseCoorperate(const std::string &networkId, bool isLocal)
         }
     }
     preparedNetworkId_ = std::make_pair("", "");
-    if (currentState_ == CoorperateState::STATE_FREE) {
+    if (currentState_ == CooperateState::STATE_FREE) {
         return;
     }
     if (isLocal || (networkId == remoteNetworkId_)) {
@@ -191,7 +191,7 @@ void CoorperateSM::OnCloseCoorperate(const std::string &networkId, bool isLocal)
     }
 }
 
-int32_t CoorperateSM::GetCoorperateState(const std::string &deviceId)
+int32_t CooperateSM::GetCooperateState(const std::string &deviceId)
 {
     CALL_INFO_TRACE;
     if (deviceId.empty()) {
@@ -203,12 +203,12 @@ int32_t CoorperateSM::GetCoorperateState(const std::string &deviceId)
     return RET_OK;
 }
 
-void CoorperateSM::PrepareCoorperate()
+void CooperateSM::PrepareCooperate()
 {
     CALL_INFO_TRACE;
     if (monitorId_ <= 0) {
         auto monitor = std::make_shared<MonitorConsumer>(
-            std::bind(&CoorperateSM::UpdateLastPointerEventCallback, this, std::placeholders::_1));
+            std::bind(&CooperateSM::UpdateLastPointerEventCallback, this, std::placeholders::_1));
         monitorId_ = MMI::InputManager::GetInstance()->AddMonitor(monitor);
         if (monitorId_ <= 0) {
             FI_HILOGE("Failed to add monitor, error code:%{public}d", monitorId_);
@@ -219,17 +219,17 @@ void CoorperateSM::PrepareCoorperate()
     DP_ADAPTER->UpdateCrossingSwitchState(true, onlineDevice_);
 }
 
-void CoorperateSM::UnprepareCoorperate()
+void CooperateSM::UnprepareCooperate()
 {
     CALL_INFO_TRACE;
     DP_ADAPTER->UpdateCrossingSwitchState(false, onlineDevice_);
-    std::string localNetworkId = COORPERATE::GetLocalNetworkId();
-    OnCloseCoorperate(localNetworkId, true);
+    std::string localNetworkId = COOPERATE::GetLocalNetworkId();
+    OnCloseCooperate(localNetworkId, true);
     RemoveMonitor();
     D_INPUT_ADAPTER->UnregisterSessionStateCb();
 }
 
-int32_t CoorperateSM::ActivateCoorperate(const std::string &remoteNetworkId, int32_t startDeviceId)
+int32_t CooperateSM::ActivateCooperate(const std::string &remoteNetworkId, int32_t startDeviceId)
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
@@ -246,19 +246,19 @@ int32_t CoorperateSM::ActivateCoorperate(const std::string &remoteNetworkId, int
     SetSinkNetworkId(remoteNetworkId);
     auto state = GetCurrentState();
     CHKPR(state, ERROR_NULL_POINTER);
-    int32_t ret = state->ActivateCoorperate(remoteNetworkId, startDeviceId);
+    int32_t ret = state->ActivateCooperate(remoteNetworkId, startDeviceId);
     if (ret != RET_OK) {
         FI_HILOGE("Start remote input failed");
         isStarting_ = false;
         return ret;
     }
-    if (currentState_ == CoorperateState::STATE_FREE) {
+    if (currentState_ == CooperateState::STATE_FREE) {
         remoteNetworkId_ = remoteNetworkId;
     }
     return ret;
 }
 
-int32_t CoorperateSM::DeactivateCoorperate(bool isUnchained)
+int32_t CooperateSM::DeactivateCooperate(bool isUnchained)
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
@@ -269,9 +269,9 @@ int32_t CoorperateSM::DeactivateCoorperate(bool isUnchained)
 
     isStopping_ = true;
     std::string stopNetworkId;
-    if (currentState_ == CoorperateState::STATE_IN) {
+    if (currentState_ == CooperateState::STATE_IN) {
         stopNetworkId = COOR_DEV_MGR->GetOriginNetworkId(startDeviceDhid_);
-    } else if (currentState_ == CoorperateState::STATE_OUT) {
+    } else if (currentState_ == CooperateState::STATE_OUT) {
         stopNetworkId = remoteNetworkId_;
     } else {
         stopNetworkId = sinkNetworkId_;
@@ -281,7 +281,7 @@ int32_t CoorperateSM::DeactivateCoorperate(bool isUnchained)
         isUnchained_, stopNetworkId.substr(0, SUBSTR_NETWORKID_LEN).c_str());
     auto state = GetCurrentState();
     CHKPR(state, ERROR_NULL_POINTER);
-    int32_t ret = state->DeactivateCoorperate(stopNetworkId, isUnchained, preparedNetworkId_);
+    int32_t ret = state->DeactivateCooperate(stopNetworkId, isUnchained, preparedNetworkId_);
     if (ret != RET_OK) {
         FI_HILOGE("Stop input device cooperate failed");
         isStopping_ = false;
@@ -291,14 +291,14 @@ int32_t CoorperateSM::DeactivateCoorperate(bool isUnchained)
     return ret;
 }
 
-void CoorperateSM::RegisterNotifyDragCancel(std::function<void(void)> callback)
+void CooperateSM::RegisterNotifyDragCancel(std::function<void(void)> callback)
 {
     CALL_DEBUG_ENTER;
     CHKPV(callback);
     notifyDragCancelCallback_ = callback;
 }
 
-void CoorperateSM::StartRemoteCoorperate(const std::string &remoteNetworkId, bool buttonIsPressed)
+void CooperateSM::StartRemoteCooperate(const std::string &remoteNetworkId, bool buttonIsPressed)
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
@@ -306,7 +306,7 @@ void CoorperateSM::StartRemoteCoorperate(const std::string &remoteNetworkId, boo
     CHKPV(context);
     COOR_SM->SetSinkNetworkId(remoteNetworkId);
     FI_HILOGD("The remoteNetworkId:%{public}s", remoteNetworkId.substr(0, SUBSTR_NETWORKID_LEN).c_str());
-    int32_t ret = context->GetTaskScheduler().PostAsyncTask(std::bind(&CoorperateEventManager::OnCoorperateMessage,
+    int32_t ret = context->GetTaskScheduler().PostAsyncTask(std::bind(&CooperateEventManager::OnCooperateMessage,
         COOR_EVENT_MGR, CooperateMessage::ACTIVATE, remoteNetworkId));
     if (ret != RET_OK) {
         FI_HILOGE("Posting async task failed");
@@ -320,7 +320,7 @@ void CoorperateSM::StartRemoteCoorperate(const std::string &remoteNetworkId, boo
     NotifyRemoteNetworkId(remoteNetworkId);
 }
 
-void CoorperateSM::StartPointerEventFilter()
+void CooperateSM::StartPointerEventFilter()
 {
     CALL_INFO_TRACE;
     int32_t POINTER_DEFAULT_PRIORITY = 220;
@@ -338,7 +338,7 @@ void CoorperateSM::StartPointerEventFilter()
     filter->UpdateCurrentFilterId(filterId_);
 }
 
-void CoorperateSM::StartRemoteCoorperateResult(bool isSuccess, const std::string &startDeviceDhid, int32_t xPercent,
+void CooperateSM::StartRemoteCooperateResult(bool isSuccess, const std::string &startDeviceDhid, int32_t xPercent,
     int32_t yPercent)
 {
     CALL_INFO_TRACE;
@@ -352,41 +352,41 @@ void CoorperateSM::StartRemoteCoorperateResult(bool isSuccess, const std::string
     auto *context = COOR_EVENT_MGR->GetIContext();
     CHKPV(context);
     int32_t ret = context->GetTaskScheduler().PostAsyncTask(
-        std::bind(&CoorperateEventManager::OnCoorperateMessage, COOR_EVENT_MGR, msg, ""));
+        std::bind(&CooperateEventManager::OnCooperateMessage, COOR_EVENT_MGR, msg, ""));
     if (ret != RET_OK) {
         FI_HILOGE("Posting async task failed");
     }
 
-    if (!isSuccess || (currentState_ == CoorperateState::STATE_IN)) {
+    if (!isSuccess || (currentState_ == CooperateState::STATE_IN)) {
         isStarting_ = false;
         return;
     }
-    if (currentState_ == CoorperateState::STATE_FREE) {
+    if (currentState_ == CooperateState::STATE_FREE) {
         NotifyMouseLocation(xPercent, yPercent);
-        UpdateState(CoorperateState::STATE_IN);
+        UpdateState(CooperateState::STATE_IN);
 #ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
         NotifyRemoteNetworkId(COOR_DEV_MGR->GetOriginNetworkId(startDeviceDhid_));
-        StateChangedNotify(CoorperateState::STATE_FREE, CoorperateState::STATE_IN);
+        StateChangedNotify(CooperateState::STATE_FREE, CooperateState::STATE_IN);
 #else
         SetAbsolutionLocation(MOUSE_ABS_LOCATION - xPercent, yPercent);
         MMI::InputManager::GetInstance()->SetPointerVisible(true);
 #endif // OHOS_BUILD_ENABLE_MOTION_DRAG
     }
-    if (currentState_ == CoorperateState::STATE_OUT) {
+    if (currentState_ == CooperateState::STATE_OUT) {
         NotifyMouseLocation(xPercent, yPercent);
 #ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
         NotifyRemoteNetworkId(remoteNetworkId_);
-        StateChangedNotify(CoorperateState::STATE_OUT, CoorperateState::STATE_FREE);
+        StateChangedNotify(CooperateState::STATE_OUT, CooperateState::STATE_FREE);
 #else
         SetAbsolutionLocation(MOUSE_ABS_LOCATION - xPercent, yPercent);
         MMI::InputManager::GetInstance()->SetPointerVisible(true);
 #endif // OHOS_BUILD_ENABLE_MOTION_DRAG
-        UpdateState(CoorperateState::STATE_FREE);
+        UpdateState(CooperateState::STATE_FREE);
     }
     isStarting_ = false;
 }
 
-void CoorperateSM::StopRemoteCoorperate(bool isUnchained)
+void CooperateSM::StopRemoteCooperate(bool isUnchained)
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
@@ -394,7 +394,7 @@ void CoorperateSM::StopRemoteCoorperate(bool isUnchained)
     isUnchained_ = isUnchained;
 }
 
-void CoorperateSM::StopRemoteCoorperateResult(bool isSuccess)
+void CooperateSM::StopRemoteCooperateResult(bool isSuccess)
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
@@ -409,10 +409,10 @@ void CoorperateSM::StopRemoteCoorperateResult(bool isSuccess)
     if (!preparedNetworkId_.first.empty() && !preparedNetworkId_.second.empty() && isUnchained_) {
         FI_HILOGI("The sink preparedNetworkId isn't empty, first:%{public}s, second:%{public}s",
             preparedNetworkId_.first.c_str(), preparedNetworkId_.second.c_str());
-        bool ret = UnchainCoorperate(preparedNetworkId_.first, preparedNetworkId_.second);
+        bool ret = UnchainCooperate(preparedNetworkId_.first, preparedNetworkId_.second);
         if (ret) {
             COOR_SM->NotifyChainRemoved();
-            std::string localNetworkId = COORPERATE::GetLocalNetworkId();
+            std::string localNetworkId = COOPERATE::GetLocalNetworkId();
             FI_HILOGD("localNetworkId:%{public}s", localNetworkId.substr(0, SUBSTR_NETWORKID_LEN).c_str());
             COOR_SOFTBUS_ADAPTER->NotifyUnchainedResult(localNetworkId, sinkNetworkId_, ret);
         } else {
@@ -423,14 +423,14 @@ void CoorperateSM::StopRemoteCoorperateResult(bool isSuccess)
     isStopping_ = false;
 }
 
-void CoorperateSM::StartCoorperateOtherResult(const std::string &remoteNetworkId)
+void CooperateSM::StartCooperateOtherResult(const std::string &remoteNetworkId)
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
     remoteNetworkId_ = remoteNetworkId;
 }
 
-void CoorperateSM::OnStartFinish(bool isSuccess, const std::string &remoteNetworkId, int32_t startDeviceId)
+void CooperateSM::OnStartFinish(bool isSuccess, const std::string &remoteNetworkId, int32_t startDeviceId)
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
@@ -444,29 +444,29 @@ void CoorperateSM::OnStartFinish(bool isSuccess, const std::string &remoteNetwor
         NotifyRemoteStartFail(remoteNetworkId);
     } else {
         startDeviceDhid_ = COOR_DEV_MGR->GetDhid(startDeviceId);
-        if (currentState_ == CoorperateState::STATE_FREE) {
+        if (currentState_ == CooperateState::STATE_FREE) {
 #ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
             NotifyRemoteNetworkId(remoteNetworkId);
             NotifyMouseLocation(mouseLocation_.first, mouseLocation_.second);
-            StateChangedNotify(CoorperateState::STATE_FREE, CoorperateState::STATE_OUT);
+            StateChangedNotify(CooperateState::STATE_FREE, CooperateState::STATE_OUT);
 #endif // OHOS_BUILD_ENABLE_MOTION_DRAG
-        } else if (currentState_ == CoorperateState::STATE_IN) {
+        } else if (currentState_ == CooperateState::STATE_IN) {
             std::string originNetworkId = COOR_DEV_MGR->GetOriginNetworkId(startDeviceId);
             if (!originNetworkId.empty() && (remoteNetworkId != originNetworkId)) {
-                COOR_SOFTBUS_ADAPTER->StartCoorperateOtherResult(originNetworkId, remoteNetworkId);
+                COOR_SOFTBUS_ADAPTER->StartCooperateOtherResult(originNetworkId, remoteNetworkId);
             }
 #ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
             NotifyRemoteNetworkId(originNetworkId);
             NotifyMouseLocation(mouseLocation_.first, mouseLocation_.second);
-            StateChangedNotify(CoorperateState::STATE_IN, CoorperateState::STATE_FREE);
+            StateChangedNotify(CooperateState::STATE_IN, CooperateState::STATE_FREE);
 #endif // OHOS_BUILD_ENABLE_MOTION_DRAG
             SetPointerVisible();
         }
         NotifyRemoteStartSuccess(remoteNetworkId, startDeviceDhid_);
-        if (currentState_ == CoorperateState::STATE_FREE) {
-            UpdateState(CoorperateState::STATE_OUT);
-        } else if (currentState_ == CoorperateState::STATE_IN) {
-            UpdateState(CoorperateState::STATE_FREE);
+        if (currentState_ == CooperateState::STATE_FREE) {
+            UpdateState(CooperateState::STATE_OUT);
+        } else if (currentState_ == CooperateState::STATE_IN) {
+            UpdateState(CooperateState::STATE_FREE);
         } else {
             FI_HILOGI("Current state is out");
         }
@@ -474,7 +474,7 @@ void CoorperateSM::OnStartFinish(bool isSuccess, const std::string &remoteNetwor
     isStarting_ = false;
 }
 
-void CoorperateSM::OnStopFinish(bool isSuccess, const std::string &remoteNetworkId)
+void CooperateSM::OnStopFinish(bool isSuccess, const std::string &remoteNetworkId)
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
@@ -488,11 +488,11 @@ void CoorperateSM::OnStopFinish(bool isSuccess, const std::string &remoteNetwork
             MMI::InputManager::GetInstance()->SetPointerVisible(true);
             SetAbsolutionLocation(MOUSE_ABS_LOCATION_X, MOUSE_ABS_LOCATION_Y);
         }
-        if ((currentState_ == CoorperateState::STATE_IN) || (currentState_ == CoorperateState::STATE_OUT)) {
-            UpdateState(CoorperateState::STATE_FREE);
+        if ((currentState_ == CooperateState::STATE_IN) || (currentState_ == CooperateState::STATE_OUT)) {
+            UpdateState(CooperateState::STATE_FREE);
 #ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
             NotifyRemoteNetworkId(remoteNetworkId);
-            StateChangedNotify(currentState_, CoorperateState::STATE_FREE);
+            StateChangedNotify(currentState_, CooperateState::STATE_FREE);
 #endif // OHOS_BUILD_ENABLE_MOTION_DRAG
         } else {
             FI_HILOGI("Current state is free");
@@ -501,10 +501,10 @@ void CoorperateSM::OnStopFinish(bool isSuccess, const std::string &remoteNetwork
     if (!preparedNetworkId_.first.empty() && !preparedNetworkId_.second.empty() && isUnchained_) {
         FI_HILOGI("The local preparedNetworkId isn't empty, first:%{public}s, second:%{public}s",
             preparedNetworkId_.first.c_str(), preparedNetworkId_.second.c_str());
-        bool ret = UnchainCoorperate(preparedNetworkId_.first, preparedNetworkId_.second);
+        bool ret = UnchainCooperate(preparedNetworkId_.first, preparedNetworkId_.second);
         if (ret) {
             COOR_SM->NotifyChainRemoved();
-            std::string localNetworkId = COORPERATE::GetLocalNetworkId();
+            std::string localNetworkId = COOPERATE::GetLocalNetworkId();
             FI_HILOGD("localNetworkId:%{public}s", localNetworkId.substr(0, SUBSTR_NETWORKID_LEN).c_str());
             COOR_SOFTBUS_ADAPTER->NotifyUnchainedResult(localNetworkId, remoteNetworkId, ret);
         } else {
@@ -519,25 +519,25 @@ void CoorperateSM::OnStopFinish(bool isSuccess, const std::string &remoteNetwork
     isStopping_ = false;
 }
 
-void CoorperateSM::NotifyRemoteStartFail(const std::string &remoteNetworkId)
+void CooperateSM::NotifyRemoteStartFail(const std::string &remoteNetworkId)
 {
     CALL_DEBUG_ENTER;
-    COOR_SOFTBUS_ADAPTER->StartRemoteCoorperateResult(remoteNetworkId, false, "", 0, 0);
+    COOR_SOFTBUS_ADAPTER->StartRemoteCooperateResult(remoteNetworkId, false, "", 0, 0);
     COOR_EVENT_MGR->OnStart(CooperateMessage::ACTIVATE_FAIL);
 }
 
-void CoorperateSM::NotifyRemoteStartSuccess(const std::string &remoteNetworkId, const std::string &startDeviceDhid)
+void CooperateSM::NotifyRemoteStartSuccess(const std::string &remoteNetworkId, const std::string &startDeviceDhid)
 {
     CALL_DEBUG_ENTER;
-    COOR_SOFTBUS_ADAPTER->StartRemoteCoorperateResult(remoteNetworkId, true, startDeviceDhid, mouseLocation_.first,
+    COOR_SOFTBUS_ADAPTER->StartRemoteCooperateResult(remoteNetworkId, true, startDeviceDhid, mouseLocation_.first,
         mouseLocation_.second);
     COOR_EVENT_MGR->OnStart(CooperateMessage::ACTIVATE_SUCCESS);
 }
 
-void CoorperateSM::NotifyRemoteStopFinish(bool isSuccess, const std::string &remoteNetworkId)
+void CooperateSM::NotifyRemoteStopFinish(bool isSuccess, const std::string &remoteNetworkId)
 {
     CALL_DEBUG_ENTER;
-    COOR_SOFTBUS_ADAPTER->StopRemoteCoorperateResult(remoteNetworkId, isSuccess);
+    COOR_SOFTBUS_ADAPTER->StopRemoteCooperateResult(remoteNetworkId, isSuccess);
     if (!isSuccess) {
         COOR_EVENT_MGR->OnStop(CooperateMessage::COOPERATE_FAIL);
     } else {
@@ -545,7 +545,7 @@ void CoorperateSM::NotifyRemoteStopFinish(bool isSuccess, const std::string &rem
     }
 }
 
-bool CoorperateSM::UpdateMouseLocation()
+bool CooperateSM::UpdateMouseLocation()
 {
     CALL_DEBUG_ENTER;
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
@@ -565,7 +565,7 @@ bool CoorperateSM::UpdateMouseLocation()
     return true;
 }
 
-bool CoorperateSM::UnchainCoorperate(const std::string &localNetworkId, const std::string &remoteNetworkId)
+bool CooperateSM::UnchainCooperate(const std::string &localNetworkId, const std::string &remoteNetworkId)
 {
     CALL_DEBUG_ENTER;
     int32_t ret = D_INPUT_ADAPTER->UnPrepareRemoteInput(localNetworkId, remoteNetworkId, [](bool isSuccess) {});
@@ -577,28 +577,28 @@ bool CoorperateSM::UnchainCoorperate(const std::string &localNetworkId, const st
     return true;
 }
 
-void CoorperateSM::UpdateState(CoorperateState state)
+void CooperateSM::UpdateState(CooperateState state)
 {
     FI_HILOGI("state:%{public}d", state);
     currentState_ = state;
     switch (state) {
-        case CoorperateState::STATE_FREE: {
+        case CooperateState::STATE_FREE: {
             Reset();
             MMI::InputManager::GetInstance()->EnableInputDevice(false);
             break;
         }
-        case CoorperateState::STATE_IN: {
+        case CooperateState::STATE_IN: {
             MMI::InputManager::GetInstance()->SetPointerVisible(false);
             auto interceptor = std::make_shared<InterceptorConsumer>();
             MMI::InputManager::GetInstance()->EnableInputDevice(true);
             auto state = GetCurrentState();
             CHKPV(state);
             state->SetStartDeviceDhid(startDeviceDhid_);
-            interceptorId_ = MMI::InputManager::GetInstance()->AddInterceptor(interceptor, COORPERATE_PRIORITY,
+            interceptorId_ = MMI::InputManager::GetInstance()->AddInterceptor(interceptor, COOPERATE_PRIORITY,
                 CapabilityToTags(MMI::INPUT_DEV_CAP_KEYBOARD));
             if (interceptorId_ <= 0) {
                 FI_HILOGE("Failed to add interceptor, error code:%{public}d", interceptorId_);
-                DeactivateCoorperate(isUnchained_);
+                DeactivateCooperate(isUnchained_);
                 return;
             }
             COOR_SOFTBUS_ADAPTER->ConfigTcpAlive();
@@ -606,17 +606,17 @@ void CoorperateSM::UpdateState(CoorperateState state)
             RegisterSessionCallback();
             break;
         }
-        case CoorperateState::STATE_OUT: {
+        case CooperateState::STATE_OUT: {
             MMI::InputManager::GetInstance()->SetPointerVisible(false);
             auto interceptor = std::make_shared<InterceptorConsumer>();
-            interceptorId_ = MMI::InputManager::GetInstance()->AddInterceptor(interceptor, COORPERATE_PRIORITY,
+            interceptorId_ = MMI::InputManager::GetInstance()->AddInterceptor(interceptor, COOPERATE_PRIORITY,
                 CapabilityToTags(MMI::INPUT_DEV_CAP_KEYBOARD) | CapabilityToTags(MMI::INPUT_DEV_CAP_POINTER));
             auto state = GetCurrentState();
             CHKPV(state);
             state->SetStartDeviceDhid(startDeviceDhid_);
             if (interceptorId_ <= 0) {
                 FI_HILOGE("Failed to add interceptor, error code:%{public}d", interceptorId_);
-                DeactivateCoorperate(isUnchained_);
+                DeactivateCooperate(isUnchained_);
                 return;
             }
             COOR_SOFTBUS_ADAPTER->ConfigTcpAlive();
@@ -628,40 +628,40 @@ void CoorperateSM::UpdateState(CoorperateState state)
     }
 }
 
-CoorperateState CoorperateSM::GetCurrentCoorperateState() const
+CooperateState CooperateSM::GetCurrentCooperateState() const
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mutex_);
     return currentState_;
 }
 
-void CoorperateSM::UpdatePreparedDevices(const std::string &remoteNetworkId, const std::string &originNetworkId)
+void CooperateSM::UpdatePreparedDevices(const std::string &remoteNetworkId, const std::string &originNetworkId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mutex_);
     preparedNetworkId_ = std::make_pair(remoteNetworkId, originNetworkId);
 }
 
-std::pair<std::string, std::string> CoorperateSM::GetPreparedDevices() const
+std::pair<std::string, std::string> CooperateSM::GetPreparedDevices() const
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mutex_);
     return preparedNetworkId_;
 }
 
-bool CoorperateSM::IsStarting() const
+bool CooperateSM::IsStarting() const
 {
     std::lock_guard<std::mutex> guard(mutex_);
     return isStarting_;
 }
 
-bool CoorperateSM::IsStopping() const
+bool CooperateSM::IsStopping() const
 {
     std::lock_guard<std::mutex> guard(mutex_);
     return isStopping_;
 }
 
-void CoorperateSM::OnKeyboardOnline(const std::string &dhid)
+void CooperateSM::OnKeyboardOnline(const std::string &dhid)
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
@@ -670,25 +670,25 @@ void CoorperateSM::OnKeyboardOnline(const std::string &dhid)
     state->OnKeyboardOnline(dhid, preparedNetworkId_);
 }
 
-void CoorperateSM::OnPointerOffline(const std::string &dhid, const std::vector<std::string> &keyboards)
+void CooperateSM::OnPointerOffline(const std::string &dhid, const std::vector<std::string> &keyboards)
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
-    if (currentState_ == CoorperateState::STATE_FREE) {
+    if (currentState_ == CooperateState::STATE_FREE) {
         FI_HILOGI("Current state:free");
         return;
     }
-    if ((currentState_ == CoorperateState::STATE_IN) && (startDeviceDhid_ == dhid)) {
+    if ((currentState_ == CooperateState::STATE_IN) && (startDeviceDhid_ == dhid)) {
         Reset(true);
         SetPointerVisible();
         return;
     }
-    if ((currentState_ == CoorperateState::STATE_OUT) && (startDeviceDhid_ == dhid)) {
+    if ((currentState_ == CooperateState::STATE_OUT) && (startDeviceDhid_ == dhid)) {
         std::string remoteNetworkId = remoteNetworkId_;
         if (remoteNetworkId.empty()) {
             remoteNetworkId = preparedNetworkId_.first;
         }
-        std::string localNetworkId = COORPERATE::GetLocalNetworkId();
+        std::string localNetworkId = COOPERATE::GetLocalNetworkId();
         D_INPUT_ADAPTER->StopRemoteInput(remoteNetworkId, localNetworkId, keyboards,
             [this, remoteNetworkId](bool isSuccess) {});
         Reset(true);
@@ -696,15 +696,15 @@ void CoorperateSM::OnPointerOffline(const std::string &dhid, const std::vector<s
     }
 }
 
-void CoorperateSM::OnKeyboardOffline(const std::string &dhid)
+void CooperateSM::OnKeyboardOffline(const std::string &dhid)
 {
     CALL_INFO_TRACE;
-    if (currentState_ == CoorperateState::STATE_OUT) {
+    if (currentState_ == CooperateState::STATE_OUT) {
         std::string remoteNetworkId = remoteNetworkId_;
         if (remoteNetworkId.empty()) {
             remoteNetworkId = preparedNetworkId_.first;
         }
-        std::string localNetworkId = COORPERATE::GetLocalNetworkId();
+        std::string localNetworkId = COOPERATE::GetLocalNetworkId();
         std::vector<std::string> inputDeviceDhids;
         inputDeviceDhids.push_back(dhid);
         D_INPUT_ADAPTER->StopRemoteInput(remoteNetworkId, localNetworkId, inputDeviceDhids,
@@ -712,7 +712,7 @@ void CoorperateSM::OnKeyboardOffline(const std::string &dhid)
     }
 }
 
-bool CoorperateSM::InitDeviceManager()
+bool CooperateSM::InitDeviceManager()
 {
     CALL_DEBUG_ENTER;
     initCallback_ = std::make_shared<DeviceInitCallBack>();
@@ -730,17 +730,17 @@ bool CoorperateSM::InitDeviceManager()
     return true;
 }
 
-void CoorperateSM::OnDeviceOnline(const std::string &networkId)
+void CooperateSM::OnDeviceOnline(const std::string &networkId)
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
     onlineDevice_.push_back(networkId);
     DP_ADAPTER->RegisterCrossingStateListener(networkId,
-        std::bind(&CoorperateSM::OnCoorperateChanged, COOR_SM, std::placeholders::_1, std::placeholders::_2));
+        std::bind(&CooperateSM::OnCooperateChanged, COOR_SM, std::placeholders::_1, std::placeholders::_2));
     COOR_SOFTBUS_ADAPTER->Init();
 }
 
-void CoorperateSM::OnDeviceOffline(const std::string &networkId)
+void CooperateSM::OnDeviceOffline(const std::string &networkId)
 {
     CALL_INFO_TRACE;
     DP_ADAPTER->UnregisterCrossingStateListener(networkId);
@@ -753,48 +753,48 @@ void CoorperateSM::OnDeviceOffline(const std::string &networkId)
             onlineDevice_.erase(it);
         }
     }
-    if ((currentState_ == CoorperateState::STATE_IN) && (sinkNetworkId_ == networkId)) {
-        COOR_EVENT_MGR->OnCoorperateMessage(CooperateMessage::SESSION_CLOSED);
+    if ((currentState_ == CooperateState::STATE_IN) && (sinkNetworkId_ == networkId)) {
+        COOR_EVENT_MGR->OnCooperateMessage(CooperateMessage::SESSION_CLOSED);
     }
-    if ((currentState_ == CoorperateState::STATE_OUT) && (remoteNetworkId_ == networkId)) {
-        COOR_EVENT_MGR->OnCoorperateMessage(CooperateMessage::SESSION_CLOSED);
+    if ((currentState_ == CooperateState::STATE_OUT) && (remoteNetworkId_ == networkId)) {
+        COOR_EVENT_MGR->OnCooperateMessage(CooperateMessage::SESSION_CLOSED);
     }
 }
 
-std::string CoorperateSM::GetDeviceCoorperateState(CoorperateState value) const
+std::string CooperateSM::GetDeviceCooperateState(CooperateState value) const
 {
     std::string state;
     switch (value) {
-        case CoorperateState::STATE_FREE: {
+        case CooperateState::STATE_FREE: {
             state = "free";
             break;
         }
-        case CoorperateState::STATE_IN: {
+        case CooperateState::STATE_IN: {
             state = "in";
             break;
         }
-        case CoorperateState::STATE_OUT: {
+        case CooperateState::STATE_OUT: {
             state = "out";
             break;
         }
         default: {
             state = "unknown";
-            FI_HILOGW("Coorperate status unknown");
+            FI_HILOGW("Cooperate status unknown");
             break;
         }
     }
     return state;
 }
 
-void CoorperateSM::Dump(int32_t fd)
+void CooperateSM::Dump(int32_t fd)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mutex_);
-    dprintf(fd, "Coorperate information:\n");
+    dprintf(fd, "Cooperate information:\n");
     dprintf(fd,
         "cooperateState:%s | startDeviceDhid:%s | remoteNetworkId:%s | isStarting:%s | isStopping:%s\n"
         "physicalX:%d | physicalY:%d | displayX:%d | displayY:%d | interceptorId:%d | monitorId:%d | filterId:%d\n",
-        GetDeviceCoorperateState(currentState_).c_str(), startDeviceDhid_.c_str(),
+        GetDeviceCooperateState(currentState_).c_str(), startDeviceDhid_.c_str(),
         remoteNetworkId_.substr(0, SUBSTR_NETWORKID_LEN).c_str(), isStarting_ ? "true" : "false",
         isStopping_ ? "true" : "false", mouseLocation_.first, mouseLocation_.second, displayX_,
         displayY_, interceptorId_, monitorId_, filterId_);
@@ -807,17 +807,17 @@ void CoorperateSM::Dump(int32_t fd)
     }
 }
 
-void CoorperateSM::UpdateLastPointerEventCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+void CooperateSM::UpdateLastPointerEventCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     lastPointerEvent_ = pointerEvent;
 }
 
-std::shared_ptr<MMI::PointerEvent> CoorperateSM::GetLastPointerEvent() const
+std::shared_ptr<MMI::PointerEvent> CooperateSM::GetLastPointerEvent() const
 {
     return lastPointerEvent_;
 }
 
-void CoorperateSM::RemoveMonitor()
+void CooperateSM::RemoveMonitor()
 {
     if ((monitorId_ >= MIN_HANDLER_ID) && (monitorId_ < std::numeric_limits<int32_t>::max())) {
         MMI::InputManager::GetInstance()->RemoveMonitor(monitorId_);
@@ -825,7 +825,7 @@ void CoorperateSM::RemoveMonitor()
     }
 }
 
-void CoorperateSM::RemoveInterceptor()
+void CooperateSM::RemoveInterceptor()
 {
     if ((interceptorId_ >= MIN_HANDLER_ID) && (interceptorId_ < std::numeric_limits<int32_t>::max())) {
         MMI::InputManager::GetInstance()->RemoveInterceptor(interceptorId_);
@@ -833,7 +833,7 @@ void CoorperateSM::RemoveInterceptor()
     }
 }
 
-bool CoorperateSM::IsNeedFilterOut(const std::string &deviceId, const std::shared_ptr<MMI::KeyEvent> keyEvent)
+bool CooperateSM::IsNeedFilterOut(const std::string &deviceId, const std::shared_ptr<MMI::KeyEvent> keyEvent)
 {
     CALL_DEBUG_ENTER;
     std::vector<OHOS::MMI::KeyEvent::KeyItem> KeyItems = keyEvent->GetKeyItems();
@@ -854,34 +854,34 @@ bool CoorperateSM::IsNeedFilterOut(const std::string &deviceId, const std::share
     return D_INPUT_ADAPTER->IsNeedFilterOut(deviceId, businessEvent);
 }
 
-void CoorperateSM::DeviceInitCallBack::OnRemoteDied()
+void CooperateSM::DeviceInitCallBack::OnRemoteDied()
 {
     CALL_INFO_TRACE;
 }
 
-void CoorperateSM::DmDeviceStateCallback::OnDeviceOnline(const DistributedHardware::DmDeviceInfo &deviceInfo)
+void CooperateSM::DmDeviceStateCallback::OnDeviceOnline(const DistributedHardware::DmDeviceInfo &deviceInfo)
 {
     CALL_DEBUG_ENTER;
     COOR_SM->OnDeviceOnline(deviceInfo.networkId);
 }
 
-void CoorperateSM::DmDeviceStateCallback::OnDeviceOffline(const DistributedHardware::DmDeviceInfo &deviceInfo)
+void CooperateSM::DmDeviceStateCallback::OnDeviceOffline(const DistributedHardware::DmDeviceInfo &deviceInfo)
 {
     CALL_INFO_TRACE;
     COOR_SM->OnDeviceOffline(deviceInfo.networkId);
 }
 
-void CoorperateSM::DmDeviceStateCallback::OnDeviceChanged(const DistributedHardware::DmDeviceInfo &deviceInfo)
+void CooperateSM::DmDeviceStateCallback::OnDeviceChanged(const DistributedHardware::DmDeviceInfo &deviceInfo)
 {
     CALL_INFO_TRACE;
 }
 
-void CoorperateSM::DmDeviceStateCallback::OnDeviceReady(const DistributedHardware::DmDeviceInfo &deviceInfo)
+void CooperateSM::DmDeviceStateCallback::OnDeviceReady(const DistributedHardware::DmDeviceInfo &deviceInfo)
 {
     CALL_INFO_TRACE;
 }
 
-void CoorperateSM::SetAbsolutionLocation(double xPercent, double yPercent)
+void CooperateSM::SetAbsolutionLocation(double xPercent, double yPercent)
 {
     CALL_INFO_TRACE;
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
@@ -895,52 +895,52 @@ void CoorperateSM::SetAbsolutionLocation(double xPercent, double yPercent)
     MMI::InputManager::GetInstance()->SetPointerLocation(physicalX, physicalY);
 }
 
-void CoorperateSM::OnInterceptorInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent)
+void CooperateSM::OnInterceptorInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent)
 {
     CHKPV(eventHandler_);
     CHKPV(keyEvent);
     std::string taskName = "process_interceptor_keyevent";
     std::function<void()> handleFunc =
-        std::bind(&CoorperateSM::OnPostInterceptorKeyEvent, this, keyEvent);
+        std::bind(&CooperateSM::OnPostInterceptorKeyEvent, this, keyEvent);
     eventHandler_->ProxyPostTask(handleFunc, taskName, 0);
 }
 
-void CoorperateSM::OnInterceptorInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+void CooperateSM::OnInterceptorInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(eventHandler_);
     CHKPV(pointerEvent);
     std::string taskName = "process_interceptor_pointerevent";
     std::function<void()> handleFunc =
-        std::bind(&CoorperateSM::OnPostInterceptorPointerEvent, this, pointerEvent);
+        std::bind(&CooperateSM::OnPostInterceptorPointerEvent, this, pointerEvent);
     eventHandler_->ProxyPostTask(handleFunc, taskName, 0);
 }
 
-void CoorperateSM::OnMonitorInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+void CooperateSM::OnMonitorInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(eventHandler_);
     CHKPV(pointerEvent);
     std::string taskName = "process_monitor_pointerevent";
     std::function<void()> handleFunc =
-        std::bind(&CoorperateSM::OnPostMonitorInputEvent, this, pointerEvent);
+        std::bind(&CooperateSM::OnPostMonitorInputEvent, this, pointerEvent);
     eventHandler_->ProxyPostTask(handleFunc, taskName, 0);
 }
 
-void CoorperateSM::OnPostInterceptorKeyEvent(std::shared_ptr<MMI::KeyEvent> keyEvent)
+void CooperateSM::OnPostInterceptorKeyEvent(std::shared_ptr<MMI::KeyEvent> keyEvent)
 {
     CALL_DEBUG_ENTER;
     CHKPV(keyEvent);
     int32_t keyCode = keyEvent->GetKeyCode();
-    CoorperateState state = GetCurrentCoorperateState();
+    CooperateState state = GetCurrentCooperateState();
     int32_t deviceId = keyEvent->GetDeviceId();
     if ((keyCode == MMI::KeyEvent::KEYCODE_BACK) || (keyCode == MMI::KeyEvent::KEYCODE_VOLUME_UP) ||
         (keyCode == MMI::KeyEvent::KEYCODE_VOLUME_DOWN) || (keyCode == MMI::KeyEvent::KEYCODE_POWER)) {
-        if ((state == CoorperateState::STATE_OUT) || (!COOR_DEV_MGR->IsRemote(deviceId))) {
+        if ((state == CooperateState::STATE_OUT) || (!COOR_DEV_MGR->IsRemote(deviceId))) {
             keyEvent->AddFlag(MMI::AxisEvent::EVENT_FLAG_NO_INTERCEPT);
             MMI::InputManager::GetInstance()->SimulateInputEvent(keyEvent);
         }
         return;
     }
-    if (state == CoorperateState::STATE_IN) {
+    if (state == CooperateState::STATE_IN) {
         if (COOR_DEV_MGR->IsRemote(deviceId)) {
             auto networkId = COOR_DEV_MGR->GetOriginNetworkId(deviceId);
             if (!IsNeedFilterOut(networkId, keyEvent)) {
@@ -951,8 +951,8 @@ void CoorperateSM::OnPostInterceptorKeyEvent(std::shared_ptr<MMI::KeyEvent> keyE
             keyEvent->AddFlag(MMI::AxisEvent::EVENT_FLAG_NO_INTERCEPT);
             MMI::InputManager::GetInstance()->SimulateInputEvent(keyEvent);
         }
-    } else if (state == CoorperateState::STATE_OUT) {
-        std::string networkId = COORPERATE::GetLocalNetworkId();
+    } else if (state == CooperateState::STATE_OUT) {
+        std::string networkId = COOPERATE::GetLocalNetworkId();
         if (IsNeedFilterOut(networkId, keyEvent)) {
             keyEvent->AddFlag(MMI::AxisEvent::EVENT_FLAG_NO_INTERCEPT);
             MMI::InputManager::GetInstance()->SimulateInputEvent(keyEvent);
@@ -960,7 +960,7 @@ void CoorperateSM::OnPostInterceptorKeyEvent(std::shared_ptr<MMI::KeyEvent> keyE
     }
 }
 
-void CoorperateSM::OnPostInterceptorPointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+void CooperateSM::OnPostInterceptorPointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CALL_DEBUG_ENTER;
     CHKPV(pointerEvent);
@@ -968,18 +968,18 @@ void CoorperateSM::OnPostInterceptorPointerEvent(std::shared_ptr<MMI::PointerEve
         FI_HILOGD("Not mouse event, skip");
         return;
     }
-    CoorperateState state = GetCurrentCoorperateState();
-    if (state == CoorperateState::STATE_OUT) {
+    CooperateState state = GetCurrentCooperateState();
+    if (state == CooperateState::STATE_OUT) {
         int32_t deviceId = pointerEvent->GetDeviceId();
         std::string dhid = COOR_DEV_MGR->GetDhid(deviceId);
         if (startDeviceDhid_ != dhid) {
             FI_HILOGI("Move other mouse, stop input device cooperate");
-            DeactivateCoorperate(isUnchained_);
+            DeactivateCooperate(isUnchained_);
         }
     }
 }
 
-void CoorperateSM::OnPostMonitorInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+void CooperateSM::OnPostMonitorInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CALL_DEBUG_ENTER;
     CHKPV(pointerEvent);
@@ -987,30 +987,30 @@ void CoorperateSM::OnPostMonitorInputEvent(std::shared_ptr<MMI::PointerEvent> po
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     displayX_ = pointerItem.GetDisplayX();
     displayY_ = pointerItem.GetDisplayY();
-    CoorperateState state = GetCurrentCoorperateState();
-    if (state == CoorperateState::STATE_IN) {
+    CooperateState state = GetCurrentCooperateState();
+    if (state == CooperateState::STATE_IN) {
         int32_t deviceId = pointerEvent->GetDeviceId();
         if (!COOR_DEV_MGR->IsRemote(deviceId)) {
-            DeactivateCoorperate(isUnchained_);
+            DeactivateCooperate(isUnchained_);
         }
     }
 }
 
-void CoorperateSM::InterceptorConsumer::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
+void CooperateSM::InterceptorConsumer::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
     COOR_SM->OnInterceptorInputEvent(keyEvent);
 }
 
-void CoorperateSM::InterceptorConsumer::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
+void CooperateSM::InterceptorConsumer::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     COOR_SM->OnInterceptorInputEvent(pointerEvent);
 }
 
-void CoorperateSM::InterceptorConsumer::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const {}
+void CooperateSM::InterceptorConsumer::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const {}
 
-void CoorperateSM::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const {}
+void CooperateSM::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const {}
 
-void CoorperateSM::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
+void CooperateSM::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     CHKPV(pointerEvent);
     if (pointerEvent->GetSourceType() != MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
@@ -1023,51 +1023,51 @@ void CoorperateSM::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::PointerEve
     COOR_SM->OnMonitorInputEvent(pointerEvent);
 }
 
-void CoorperateSM::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const {}
+void CooperateSM::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const {}
 
-void CoorperateSM::RegisterStateChange(CooStateChangeType type,
-    std::function<void(CoorperateState, CoorperateState)> callback)
+void CooperateSM::RegisterStateChange(CooStateChangeType type,
+    std::function<void(CooperateState, CooperateState)> callback)
 {
     CALL_DEBUG_ENTER;
     CHKPV(callback);
     stateChangedCallbacks_[type] = callback;
 }
 
-void CoorperateSM::RegisterRemoteNetworkId(std::function<void(std::string)> callback)
+void CooperateSM::RegisterRemoteNetworkId(std::function<void(std::string)> callback)
 {
     CALL_DEBUG_ENTER;
     CHKPV(callback);
     remoteNetworkIdCallback_ = callback;
 }
 
-void CoorperateSM::RegisterMouseLocation(std::function<void(int32_t, int32_t)> callback)
+void CooperateSM::RegisterMouseLocation(std::function<void(int32_t, int32_t)> callback)
 {
     CALL_DEBUG_ENTER;
     CHKPV(callback);
     mouseLocationCallback_ = callback;
 }
 
-void CoorperateSM::StateChangedNotify(CoorperateState oldState, CoorperateState newState)
+void CooperateSM::StateChangedNotify(CooperateState oldState, CooperateState newState)
 {
     CALL_DEBUG_ENTER;
-    if ((oldState == CoorperateState::STATE_FREE) && (newState == CoorperateState::STATE_IN)) {
+    if ((oldState == CooperateState::STATE_FREE) && (newState == CooperateState::STATE_IN)) {
         ChangeNotify(CooStateChangeType::STATE_FREE_TO_IN, oldState, newState);
         return;
     }
-    if ((oldState == CoorperateState::STATE_FREE) && (newState == CoorperateState::STATE_OUT)) {
+    if ((oldState == CooperateState::STATE_FREE) && (newState == CooperateState::STATE_OUT)) {
         ChangeNotify(CooStateChangeType::STATE_FREE_TO_OUT, oldState, newState);
         return;
     }
-    if ((oldState == CoorperateState::STATE_IN) && (newState == CoorperateState::STATE_FREE)) {
+    if ((oldState == CooperateState::STATE_IN) && (newState == CooperateState::STATE_FREE)) {
         ChangeNotify(CooStateChangeType::STATE_IN_TO_FREE, oldState, newState);
         return;
     }
-    if ((oldState == CoorperateState::STATE_OUT) && (newState == CoorperateState::STATE_FREE)) {
+    if ((oldState == CooperateState::STATE_OUT) && (newState == CooperateState::STATE_FREE)) {
         ChangeNotify(CooStateChangeType::STATE_OUT_TO_FREE, oldState, newState);
     }
 }
 
-void CoorperateSM::ChangeNotify(CooStateChangeType type, CoorperateState oldState, CoorperateState newState)
+void CooperateSM::ChangeNotify(CooStateChangeType type, CooperateState oldState, CooperateState newState)
 {
     auto item = stateChangedCallbacks_[type];
     if (item != nullptr) {
@@ -1075,41 +1075,41 @@ void CoorperateSM::ChangeNotify(CooStateChangeType type, CoorperateState oldStat
     }
 }
 
-void CoorperateSM::NotifyRemoteNetworkId(const std::string &remoteNetworkId)
+void CooperateSM::NotifyRemoteNetworkId(const std::string &remoteNetworkId)
 {
     if (remoteNetworkIdCallback_ != nullptr) {
         remoteNetworkIdCallback_(remoteNetworkId);
     }
 }
 
-void CoorperateSM::NotifyMouseLocation(int32_t x, int32_t y)
+void CooperateSM::NotifyMouseLocation(int32_t x, int32_t y)
 {
     if (mouseLocationCallback_ != nullptr) {
         mouseLocationCallback_(x, y);
     }
 }
 
-void CoorperateSM::SetUnchainStatus(bool isUnchained)
+void CooperateSM::SetUnchainStatus(bool isUnchained)
 {
     CALL_DEBUG_ENTER;
     isUnchained_ = isUnchained;
     isStopping_ = false;
 }
 
-void CoorperateSM::NotifyChainRemoved()
+void CooperateSM::NotifyChainRemoved()
 {
     CALL_DEBUG_ENTER;
     CooperateMessage msg = CooperateMessage::SESSION_CLOSED;
     auto *context = COOR_EVENT_MGR->GetIContext();
     CHKPV(context);
     int32_t ret = context->GetTaskScheduler().PostAsyncTask(
-        std::bind(&CoorperateEventManager::OnCoorperateMessage, COOR_EVENT_MGR, msg, ""));
+        std::bind(&CooperateEventManager::OnCooperateMessage, COOR_EVENT_MGR, msg, ""));
     if (ret != RET_OK) {
         FI_HILOGE("Posting async task failed");
     }
 }
 
-void CoorperateSM::NotifyUnchainedResult(const std::string &remoteNetworkId, bool isSuccess)
+void CooperateSM::NotifyUnchainedResult(const std::string &remoteNetworkId, bool isSuccess)
 {
     CALL_DEBUG_ENTER;
     FI_HILOGD("Notify unchained result, isSuccess:%{public}d", isSuccess);
@@ -1122,20 +1122,20 @@ void CoorperateSM::NotifyUnchainedResult(const std::string &remoteNetworkId, boo
     COOR_SOFTBUS_ADAPTER->CloseInputSoftbus(remoteNetworkId);
 }
 
-void CoorperateSM::SetSinkNetworkId(const std::string &sinkNetworkId)
+void CooperateSM::SetSinkNetworkId(const std::string &sinkNetworkId)
 {
     CALL_DEBUG_ENTER;
     sinkNetworkId_ = sinkNetworkId;
 }
 
-void CoorperateSM::SetPointerVisible()
+void CooperateSM::SetPointerVisible()
 {
     bool hasPointer = COOR_DEV_MGR->HasLocalPointerDevice();
     FI_HILOGD("hasPointer:%{public}s", hasPointer ? "true" : "false");
     MMI::InputManager::GetInstance()->SetPointerVisible(hasPointer);
 }
 
-std::shared_ptr<ICoorperateState> CoorperateSM::GetCurrentState()
+std::shared_ptr<ICooperateState> CooperateSM::GetCurrentState()
 {
     auto it = cooperateStates_.find(currentState_);
     if (it == cooperateStates_.end()) {
@@ -1145,14 +1145,14 @@ std::shared_ptr<ICoorperateState> CoorperateSM::GetCurrentState()
     return it->second;
 }
 
-void CoorperateSM::RegisterSessionCallback()
+void CooperateSM::RegisterSessionCallback()
 {
     CALL_DEBUG_ENTER;
     D_INPUT_ADAPTER->RegisterSessionStateCb([this](uint32_t status) {
         FI_HILOGI("Recv session callback status:%{public}u", status);
         if (status == P2P_SESSION_CLOSED) {
             preparedNetworkId_ = std::pair("", "");
-            COOR_EVENT_MGR->OnCoorperateMessage(CooperateMessage::SESSION_CLOSED);
+            COOR_EVENT_MGR->OnCooperateMessage(CooperateMessage::SESSION_CLOSED);
             Reset();
         }
     });

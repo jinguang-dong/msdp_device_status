@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COORPERATE_SOFTBUS_ADAPTER_H
-#define COORPERATE_SOFTBUS_ADAPTER_H
+#ifndef COOPERATE_SOFTBUS_ADAPTER_H
+#define COOPERATE_SOFTBUS_ADAPTER_H
 
 #include <condition_variable>
 #include <map>
@@ -30,9 +30,9 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class CoorperateSoftbusAdapter {
+class CooperateSoftbusAdapter {
 public:
-    virtual ~CoorperateSoftbusAdapter();
+    virtual ~CooperateSoftbusAdapter();
 
     enum MessageId {
         MIN_ID = 0,
@@ -48,13 +48,13 @@ public:
         uint8_t data[0];
     };
 
-    int32_t StartRemoteCoorperate(const std::string &localNetworkId,
+    int32_t StartRemoteCooperate(const std::string &localNetworkId,
         const std::string &remoteNetworkId, bool checkButtonDown);
-    int32_t StartRemoteCoorperateResult(const std::string &remoteNetworkId, bool isSuccess,
+    int32_t StartRemoteCooperateResult(const std::string &remoteNetworkId, bool isSuccess,
         const std::string &startDeviceDhid, int32_t xPercent, int32_t yPercent);
-    int32_t StopRemoteCoorperate(const std::string &remoteNetworkId, bool isUnchained);
-    int32_t StopRemoteCoorperateResult(const std::string &remoteNetworkId, bool isSuccess);
-    int32_t StartCoorperateOtherResult(const std::string &originNetworkId, const std::string &remoteNetworkId);
+    int32_t StopRemoteCooperate(const std::string &remoteNetworkId, bool isUnchained);
+    int32_t StopRemoteCooperateResult(const std::string &remoteNetworkId, bool isSuccess);
+    int32_t StartCooperateOtherResult(const std::string &originNetworkId, const std::string &remoteNetworkId);
     int32_t Init();
     void Release();
     int32_t OpenInputSoftbus(const std::string &remoteNetworkId);
@@ -64,20 +64,20 @@ public:
     void OnBytesReceived(int32_t sessionId, const void* data, uint32_t dataLen);
     void RegisterRecvFunc(MessageId messageId, std::function<void(void*, uint32_t)> callback);
     int32_t SendData(const std::string &deviceId, MessageId messageId, void* data, uint32_t dataLen);
-    static std::shared_ptr<CoorperateSoftbusAdapter> GetInstance();
+    static std::shared_ptr<CooperateSoftbusAdapter> GetInstance();
     int32_t NotifyUnchainedResult(const std::string &localNetworkId,
         const std::string &remoteNetworkId, bool isSuccess);
     int32_t NotifyFilterAdded(const std::string &remoteNetworkId);
     void ConfigTcpAlive();
 
 private:
-    CoorperateSoftbusAdapter() = default;
-    DISALLOW_COPY_AND_MOVE(CoorperateSoftbusAdapter);
+    CooperateSoftbusAdapter() = default;
+    DISALLOW_COPY_AND_MOVE(CooperateSoftbusAdapter);
     std::string FindDevice(int32_t sessionId);
     int32_t SendMsg(int32_t sessionId, const std::string &message);
     bool CheckDeviceSessionState(const std::string &remoteNetworkId);
     void HandleSessionData(int32_t sessionId, const std::string &messageData);
-    void HandleCoorperateSessionData(int32_t sessionId, const JsonParser &parser);
+    void HandleCooperateSessionData(int32_t sessionId, const JsonParser &parser);
     int32_t WaitSessionOpend(const std::string &remoteNetworkId, int32_t sessionId);
     void ResponseNotifyFilterAdded();
 
@@ -93,5 +93,5 @@ private:
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#define COOR_SOFTBUS_ADAPTER CoorperateSoftbusAdapter::GetInstance()
-#endif // COORPERATE_SOFTBUS_ADAPTER_H
+#define COOR_SOFTBUS_ADAPTER CooperateSoftbusAdapter::GetInstance()
+#endif // COOPERATE_SOFTBUS_ADAPTER_H

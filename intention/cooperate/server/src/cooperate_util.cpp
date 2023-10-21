@@ -23,9 +23,9 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-namespace COORPERATE {
+namespace COOPERATE {
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CoorperateUtil" };
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CooperateUtil" };
 } // namespace
 std::string GetLocalNetworkId()
 {
@@ -40,7 +40,7 @@ std::string GetLocalNetworkId()
     FI_HILOGD("GetLocalNodeDeviceInfo networkId:%{public}s", networkId.substr(0, SUBSTR_NETWORKID_LEN).c_str());
     return localNode->networkId;
 }
-} // namespace COORPERATE
+} // namespace COOPERATE
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

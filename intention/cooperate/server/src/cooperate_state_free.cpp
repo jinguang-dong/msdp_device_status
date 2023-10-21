@@ -23,10 +23,10 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CoorperateStateFree" };
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CooperateStateFree" };
 } // namespace
 
-int32_t CoorperateStateFree::ActivateCoorperate(
+int32_t CooperateStateFree::ActivateCooperate(
     const std::string &remoteNetworkId, int32_t startDeviceId)
 {
     CALL_INFO_TRACE;
@@ -34,31 +34,31 @@ int32_t CoorperateStateFree::ActivateCoorperate(
         FI_HILOGE("RemoteNetworkId is empty");
         return static_cast<int32_t>(CooperateMessage::PARAMETER_ERROR);
     }
-    std::string localNetworkId = COORPERATE::GetLocalNetworkId();
+    std::string localNetworkId = COOPERATE::GetLocalNetworkId();
     if (localNetworkId.empty() || remoteNetworkId == localNetworkId) {
         FI_HILOGE("Input Parameters error");
         return static_cast<int32_t>(CooperateMessage::PARAMETER_ERROR);
     }
-    int32_t ret = COOR_SOFTBUS_ADAPTER->StartRemoteCoorperate(localNetworkId, remoteNetworkId, true);
+    int32_t ret = COOR_SOFTBUS_ADAPTER->StartRemoteCooperate(localNetworkId, remoteNetworkId, true);
     if (ret != RET_OK) {
         FI_HILOGE("Start input device cooperate failed");
         return static_cast<int32_t>(CooperateMessage::COOPERATE_FAIL);
     }
     std::string taskName = "process_start_task";
     std::function<void()> handleProcessStartFunc =
-        std::bind(&CoorperateStateFree::ProcessStart, this, remoteNetworkId, startDeviceId);
+        std::bind(&CooperateStateFree::ProcessStart, this, remoteNetworkId, startDeviceId);
     CHKPR(eventHandler_, RET_ERR);
     eventHandler_->ProxyPostTask(handleProcessStartFunc, taskName, 0);
     return RET_OK;
 }
 
-int32_t CoorperateStateFree::ProcessStart(const std::string &remoteNetworkId, int32_t startDeviceId)
+int32_t CooperateStateFree::ProcessStart(const std::string &remoteNetworkId, int32_t startDeviceId)
 {
     CALL_DEBUG_ENTER;
     return PrepareAndStart(remoteNetworkId, startDeviceId);
 }
 
-int32_t CoorperateStateFree::DeactivateCoorperate(const std::string &networkId, bool isUnchained,
+int32_t CooperateStateFree::DeactivateCooperate(const std::string &networkId, bool isUnchained,
     const std::pair<std::string, std::string> &preparedNetworkId)
 {
     CALL_INFO_TRACE;
@@ -71,7 +71,7 @@ int32_t CoorperateStateFree::DeactivateCoorperate(const std::string &networkId, 
         FI_HILOGE("Failed to open softbus");
         return ret;
     }
-    ret = COOR_SOFTBUS_ADAPTER->StopRemoteCoorperate(networkId, isUnchained);
+    ret = COOR_SOFTBUS_ADAPTER->StopRemoteCooperate(networkId, isUnchained);
     if (ret != RET_OK) {
         FI_HILOGE("Stop cooperate failed");
         return ret;
@@ -82,10 +82,10 @@ int32_t CoorperateStateFree::DeactivateCoorperate(const std::string &networkId, 
             preparedNetworkId.first.c_str(), preparedNetworkId.second.c_str());
         if (networkId == preparedNetworkId.first || networkId == preparedNetworkId.second) {
             FI_HILOGD("networkId:%{public}s", networkId.substr(0, SUBSTR_NETWORKID_LEN).c_str());
-            bool ret = COOR_SM->UnchainCoorperate(preparedNetworkId.first, preparedNetworkId.second);
+            bool ret = COOR_SM->UnchainCooperate(preparedNetworkId.first, preparedNetworkId.second);
             if (ret) {
                 COOR_SM->NotifyChainRemoved();
-                std::string localNetworkId = COORPERATE::GetLocalNetworkId();
+                std::string localNetworkId = COOPERATE::GetLocalNetworkId();
                 FI_HILOGD("localNetworkId:%{public}s", localNetworkId.substr(0, SUBSTR_NETWORKID_LEN).c_str());
                 COOR_SOFTBUS_ADAPTER->NotifyUnchainedResult(localNetworkId, networkId, ret);
             } else {
@@ -94,7 +94,7 @@ int32_t CoorperateStateFree::DeactivateCoorperate(const std::string &networkId, 
             COOR_SM->SetUnchainStatus(false);
         }
     }
-    ret = COOR_SOFTBUS_ADAPTER->StopRemoteCoorperateResult(networkId, false);
+    ret = COOR_SOFTBUS_ADAPTER->StopRemoteCooperateResult(networkId, false);
     if (ret != RET_OK) {
         FI_HILOGE("Failed to stop the process");
         return ret;

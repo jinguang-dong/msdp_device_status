@@ -31,13 +31,13 @@ Cooperate::Cooperate(IContext *context)
 
 int32_t Cooperate::Enable(CallingContext &context, Parcel &data, Parcel &reply)
 {
-    cooperateMgr_.PrepareCoorperate();
+    cooperateMgr_.PrepareCooperate();
     return RET_OK;
 }
 
 int32_t Cooperate::Disable(CallingContext &context, Parcel &data, Parcel &reply)
 {
-    cooperateMgr_.UnprepareCoorperate();
+    cooperateMgr_.UnprepareCooperate();
     return RET_OK;
 }
 
@@ -50,7 +50,7 @@ int32_t Cooperate::Start(CallingContext &context, Parcel &data, Parcel &reply)
         return RET_ERR;
     }
 
-    int32_t ret = cooperateMgr_.ActivateCoorperate(context.session, param.userData, param.remoteNetworkId, param.startDeviceId);
+    int32_t ret = cooperateMgr_.ActivateCooperate(context.session, param.userData, param.remoteNetworkId, param.startDeviceId);
     if (ret != RET_OK) {
         FI_HILOGE("Activate cooperate failed, ret:%{public}d", ret);
     }
@@ -65,7 +65,7 @@ int32_t Cooperate::Stop(CallingContext &context, Parcel &data, Parcel &reply)
         return RET_ERR;
     }
 
-    int32_t ret = cooperateMgr_.DeactivateCoorperate(context.session, param.userData, param.isUnchained);
+    int32_t ret = cooperateMgr_.DeactivateCooperate(context.session, param.userData, param.isUnchained);
     if (ret != RET_OK) {
         FI_HILOGE("Deactivate cooperate failed, ret:%{public}d", ret);
     }
@@ -74,7 +74,7 @@ int32_t Cooperate::Stop(CallingContext &context, Parcel &data, Parcel &reply)
 
 int32_t Cooperate::AddWatch(CallingContext &context, uint32_t id, Parcel &data, Parcel &reply)
 {
-    int32_t ret = cooperateMgr_.RegisterCoorperateListener(context.session);
+    int32_t ret = cooperateMgr_.RegisterCooperateListener(context.session);
     if (ret != RET_OK) {
         FI_HILOGE("Register cooperate listener failed, ret:%{public}d", ret);
     }
@@ -83,7 +83,7 @@ int32_t Cooperate::AddWatch(CallingContext &context, uint32_t id, Parcel &data, 
 
 int32_t Cooperate::RemoveWatch(CallingContext &context, uint32_t id, Parcel &data, Parcel &reply)
 {
-    int32_t ret = cooperateMgr_.UnregisterCoorperateListener(context.session);
+    int32_t ret = cooperateMgr_.UnregisterCooperateListener(context.session);
     if (ret != RET_OK) {
         FI_HILOGE("Unregister cooperate listener failed, ret:%{public}d", ret);
     }

@@ -13,26 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef COORPERATE_STATE_FREE_H
-#define COORPERATE_STATE_FREE_H
+#ifndef COOPERATE_STATE_OUT_H
+#define COOPERATE_STATE_OUT_H
 
 #include "i_cooperate_state.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class CoorperateStateFree final : public ICoorperateState {
+class CooperateStateOut final : public ICooperateState {
 public:
-    CoorperateStateFree() = default;
-    int32_t ActivateCoorperate(const std::string &remoteNetworkId, int32_t startDeviceId) override;
-    int32_t DeactivateCoorperate(const std::string &networkId, bool isUnchained,
+    CooperateStateOut() = default;
+    explicit CooperateStateOut(const std::string &startDeviceDhid);
+    int32_t DeactivateCooperate(const std::string &remoteNetworkId, bool isUnchained,
         const std::pair<std::string, std::string> &preparedNetworkId) override;
-    void SetStartDeviceDhid(const std::string &startDeviceDhid) override {}
+    void OnKeyboardOnline(const std::string &dhid, const std::pair<std::string, std::string> &networkIds) override;
+    void SetStartDeviceDhid(const std::string &startDeviceDhid) override;
 
 private:
-    int32_t ProcessStart(const std::string &remoteNetworkId, int32_t startDeviceId);
+    void OnStopRemoteInput(bool isSuccess, const std::string &remoteNetworkId);
+    void ProcessStop(const std::string &remoteNetworkId);
+    std::string startDeviceDhid_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // COORPERATE_STATE_FREE_H
+#endif // COOPERATE_STATE_OUT_H

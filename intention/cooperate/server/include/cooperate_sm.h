@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COORPERATE_SM_H
-#define COORPERATE_SM_H
+#ifndef COOPERATE_SM_H
+#define COOPERATE_SM_H
 
 #include <functional>
 
@@ -33,24 +33,24 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 static constexpr int32_t SUBSTR_NETWORKID_LEN = 6;
-enum class CoorperateState {
+enum class CooperateState {
     STATE_FREE = 0,
     STATE_IN = 1,
     STATE_OUT = 2
 };
 
-enum class CoorperateMsg {
-    COORPERATE_ON_SUCCESS = 0,
-    COORPERATE_ON_FAIL = 1,
-    COORPERATE_OFF_SUCCESS = 2,
-    COORPERATE_OFF_FAIL = 3,
-    COORPERATE_START = 4,
-    COORPERATE_START_SUCCESS = 5,
-    COORPERATE_START_FAIL = 6,
-    COORPERATE_STOP = 7,
-    COORPERATE_STOP_SUCCESS = 8,
-    COORPERATE_STOP_FAIL = 9,
-    COORPERATE_NULL = 10
+enum class CooperateMsg {
+    COOPERATE_ON_SUCCESS = 0,
+    COOPERATE_ON_FAIL = 1,
+    COOPERATE_OFF_SUCCESS = 2,
+    COOPERATE_OFF_FAIL = 3,
+    COOPERATE_START = 4,
+    COOPERATE_START_SUCCESS = 5,
+    COOPERATE_START_FAIL = 6,
+    COOPERATE_STOP = 7,
+    COOPERATE_STOP_SUCCESS = 8,
+    COOPERATE_STOP_FAIL = 9,
+    COOPERATE_NULL = 10
 };
 
 enum class CooStateChangeType {
@@ -75,8 +75,8 @@ private:
     mutable int32_t filterId_ { -1 };
 };
 
-class CoorperateSM final {
-    DECLARE_DELAYED_SINGLETON(CoorperateSM);
+class CooperateSM final {
+    DECLARE_DELAYED_SINGLETON(CooperateSM);
 
     class DeviceInitCallBack : public DistributedHardware::DmInitCallback {
         void OnRemoteDied() override;
@@ -108,26 +108,26 @@ class CoorperateSM final {
 
 public:
     void SetAbsolutionLocation(double xPercent, double yPercent);
-    DISALLOW_COPY_AND_MOVE(CoorperateSM);
+    DISALLOW_COPY_AND_MOVE(CooperateSM);
     void Init();
     void OnSessionLost(SessionPtr session);
-    void PrepareCoorperate();
-    void UnprepareCoorperate();
-    int32_t ActivateCoorperate(const std::string &remoteNetworkId, int32_t startDeviceId);
-    int32_t DeactivateCoorperate(bool isUnchained);
-    int32_t GetCoorperateState(const std::string &deviceId);
-    void StartRemoteCoorperate(const std::string &remoteNetworkId, bool buttonIsPressed);
+    void PrepareCooperate();
+    void UnprepareCooperate();
+    int32_t ActivateCooperate(const std::string &remoteNetworkId, int32_t startDeviceId);
+    int32_t DeactivateCooperate(bool isUnchained);
+    int32_t GetCooperateState(const std::string &deviceId);
+    void StartRemoteCooperate(const std::string &remoteNetworkId, bool buttonIsPressed);
     void StartPointerEventFilter();
-    void StartRemoteCoorperateResult(bool isSuccess,
+    void StartRemoteCooperateResult(bool isSuccess,
         const std::string &startDeviceDhid, int32_t xPercent, int32_t yPercent);
-    void StopRemoteCoorperate(bool isUnchained);
-    void StopRemoteCoorperateResult(bool isSuccess);
-    void StartCoorperateOtherResult(const std::string &remoteNetworkId);
-    void UpdateState(CoorperateState state);
+    void StopRemoteCooperate(bool isUnchained);
+    void StopRemoteCooperateResult(bool isSuccess);
+    void StartCooperateOtherResult(const std::string &remoteNetworkId);
+    void UpdateState(CooperateState state);
     void UpdatePreparedDevices(const std::string &remoteNetworkId, const std::string &originNetworkId);
     std::pair<std::string, std::string> GetPreparedDevices() const;
-    CoorperateState GetCurrentCoorperateState() const;
-    void OnCoorperateChanged(const std::string &networkId, bool isOpen);
+    CooperateState GetCurrentCooperateState() const;
+    void OnCooperateChanged(const std::string &networkId, bool isOpen);
     void OnKeyboardOnline(const std::string &dhid);
     void OnPointerOffline(const std::string &dhid, const std::vector<std::string> &keyboards);
     void OnKeyboardOffline(const std::string &dhid);
@@ -140,15 +140,15 @@ public:
     bool IsStopping() const;
     void Reset(const std::string &networkId);
     void Dump(int32_t fd);
-    std::string GetDeviceCoorperateState(CoorperateState value) const;
+    std::string GetDeviceCooperateState(CooperateState value) const;
     void UpdateLastPointerEventCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     std::shared_ptr<MMI::PointerEvent> GetLastPointerEvent() const;
     void RemoveMonitor();
     void RemoveInterceptor();
     bool IsNeedFilterOut(const std::string &deviceId, const std::shared_ptr<MMI::KeyEvent> keyEvent);
     void RegisterStateChange(CooStateChangeType type,
-        std::function<void(CoorperateState, CoorperateState)> callback);
-    bool UnchainCoorperate(const std::string &localNetworkId, const std::string &remoteNetworkId);
+        std::function<void(CooperateState, CooperateState)> callback);
+    bool UnchainCooperate(const std::string &localNetworkId, const std::string &remoteNetworkId);
     void SetUnchainStatus(bool isUnchained);
     void NotifyChainRemoved();
     void NotifyUnchainedResult(const std::string &remoteNetworkId, bool isSuccess);
@@ -163,13 +163,13 @@ public:
 
 private:
     void Reset(bool adjustAbsolutionLocation = false);
-    void OnCloseCoorperate(const std::string &networkId, bool isLocal);
+    void OnCloseCooperate(const std::string &networkId, bool isLocal);
     void NotifyRemoteStartFail(const std::string &remoteNetworkId);
     void NotifyRemoteStartSuccess(const std::string &remoteNetworkId, const std::string &startDeviceDhid);
     void NotifyRemoteStopFinish(bool isSuccess, const std::string &remoteNetworkId);
     bool UpdateMouseLocation();
-    void StateChangedNotify(CoorperateState oldState, CoorperateState newState);
-    void ChangeNotify(CooStateChangeType type, CoorperateState oldState, CoorperateState newState);
+    void StateChangedNotify(CooperateState oldState, CooperateState newState);
+    void ChangeNotify(CooStateChangeType type, CooperateState oldState, CooperateState newState);
     void NotifyRemoteNetworkId(const std::string &remoteNetworkId);
     void NotifyMouseLocation(int32_t x, int32_t y);
     void SetPointerVisible();
@@ -177,7 +177,7 @@ private:
     void OnPostInterceptorPointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void OnPostMonitorInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void OnReset(const std::string &NetworkId);
-    std::shared_ptr<ICoorperateState> GetCurrentState();
+    std::shared_ptr<ICooperateState> GetCurrentState();
     void RegisterSessionCallback();
 
 private:
@@ -186,7 +186,7 @@ private:
     std::string remoteNetworkId_;
     std::string sinkNetworkId_;
     bool isUnchained_ { false };
-    CoorperateState currentState_ { CoorperateState::STATE_FREE };
+    CooperateState currentState_ { CooperateState::STATE_FREE };
     std::shared_ptr<DistributedHardware::DmInitCallback> initCallback_ { nullptr };
     std::shared_ptr<DistributedHardware::DeviceStateCallback> stateCallback_ { nullptr };
     std::vector<std::string> onlineDevice_;
@@ -200,18 +200,18 @@ private:
     int32_t interceptorId_ { -1 };
     int32_t monitorId_ { -1 };
     int32_t filterId_ { -1 };
-    std::map<CooStateChangeType, std::function<void(CoorperateState, CoorperateState)>> stateChangedCallbacks_;
+    std::map<CooStateChangeType, std::function<void(CooperateState, CooperateState)>> stateChangedCallbacks_;
     std::function<void(std::string)> remoteNetworkIdCallback_;
     std::function<void(int32_t, int32_t)> mouseLocationCallback_;
     std::function<void(void)> notifyDragCancelCallback_;
-    std::map<CoorperateState, std::shared_ptr<ICoorperateState>> cooperateStates_;
+    std::map<CooperateState, std::shared_ptr<ICooperateState>> cooperateStates_;
     std::shared_ptr<AppExecFwk::EventRunner> runner_ { nullptr };
-    std::shared_ptr<CoorperateEventHandler> eventHandler_ { nullptr };
+    std::shared_ptr<CooperateEventHandler> eventHandler_ { nullptr };
 };
 
 #define DIS_HARDWARE DistributedHardware::DeviceManager::GetInstance()
-#define COOR_SM OHOS::DelayedSingleton<CoorperateSM>::GetInstance()
+#define COOR_SM OHOS::DelayedSingleton<CooperateSM>::GetInstance()
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // COORPERATE_SM_H
+#endif // COOPERATE_SM_H

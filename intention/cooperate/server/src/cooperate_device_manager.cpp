@@ -227,7 +227,7 @@ std::vector<std::string> CooperateDeviceManager::GetCooperateDhids(int32_t devic
     inputDeviceDhids.push_back(dev->GetDhid());
     FI_HILOGD("unq:%{public}s, type:%{public}s", inputDeviceDhids.back().c_str(), "pointer");
 
-    const std::string localNetworkId { COORPERATE::GetLocalNetworkId() };
+    const std::string localNetworkId { COOPERATE::GetLocalNetworkId() };
     const std::string pointerNetworkId { dev->IsRemote() ? dev->GetNetworkId() : localNetworkId };
 
     for (const auto &[id, dev] : devices_) {
@@ -268,7 +268,7 @@ std::string CooperateDeviceManager::GetOriginNetworkId(int32_t id) const
     CHKPS(devIter->second);
     auto OriginNetworkId = devIter->second->GetNetworkId();
     if (OriginNetworkId.empty()) {
-        OriginNetworkId = COORPERATE::GetLocalNetworkId();
+        OriginNetworkId = COOPERATE::GetLocalNetworkId();
     }
     return OriginNetworkId;
 }

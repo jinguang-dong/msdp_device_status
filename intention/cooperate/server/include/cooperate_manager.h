@@ -13,35 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef COORPERATE_UTIL_H
-#define COORPERATE_UTIL_H
+#ifndef COOPERATE_MANAGER_H
+#define COOPERATE_MANAGER_H
 
-#include <string>
-
-#include "cJSON.h"
+#include "stream_session.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-struct JsonParser {
-    JsonParser() = default;
-    ~JsonParser()
-    {
-        if (json != nullptr) {
-            cJSON_Delete(json);
-            json = nullptr;
-        }
-    }
-    operator cJSON *()
-    {
-        return json;
-    }
-    cJSON *json { nullptr };
+class CooperateManager {
+public:
+    CooperateManager() = default;
+    ~CooperateManager() = default;
+
+    void PrepareCooperate();
+    void UnprepareCooperate();
+    int32_t ActivateCooperate(SessionPtr sess, int32_t userData, const std::string &remoteNetworkId, int32_t startDeviceId);
+    int32_t DeactivateCooperate(SessionPtr sess, int32_t userData, bool isUnchained);
+    int32_t GetCooperateState(SessionPtr sess, int32_t userData, const std::string &deviceId);
+    int32_t RegisterCooperateListener(SessionPtr sess);
+    int32_t UnregisterCooperateListener(SessionPtr sess);
+    void Dump(int32_t fd);
 };
-namespace COORPERATE {
-std::string GetLocalNetworkId();
-} // namespace COORPERATE
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // COORPERATE_UTIL_H
+#endif // COOPERATE_MANAGER_H

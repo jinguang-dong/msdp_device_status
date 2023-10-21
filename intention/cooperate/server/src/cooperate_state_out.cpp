@@ -27,14 +27,14 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CoorperateStateOut" };
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CooperateStateOut" };
 } // namespace
 
-CoorperateStateOut::CoorperateStateOut(const std::string& startDeviceDhid)
+CooperateStateOut::CooperateStateOut(const std::string& startDeviceDhid)
     : startDeviceDhid_(startDeviceDhid)
 {}
 
-int32_t CoorperateStateOut::DeactivateCoorperate(const std::string &remoteNetworkId, bool isUnchained,
+int32_t CooperateStateOut::DeactivateCooperate(const std::string &remoteNetworkId, bool isUnchained,
     const std::pair<std::string, std::string> &preparedNetworkId)
 {
     CALL_DEBUG_ENTER;
@@ -42,23 +42,23 @@ int32_t CoorperateStateOut::DeactivateCoorperate(const std::string &remoteNetwor
     if (tempRemoteNetworkId.empty()) {
         tempRemoteNetworkId = preparedNetworkId.first;
     }
-    int32_t ret = COOR_SOFTBUS_ADAPTER->StopRemoteCoorperate(tempRemoteNetworkId, isUnchained);
+    int32_t ret = COOR_SOFTBUS_ADAPTER->StopRemoteCooperate(tempRemoteNetworkId, isUnchained);
     if (ret != RET_OK) {
         FI_HILOGE("Stop cooperate failed");
         return RET_ERR;
     }
     std::string taskName = "process_stop_task";
     std::function<void()> handleProcessStopFunc =
-        std::bind(&CoorperateStateOut::ProcessStop, this, tempRemoteNetworkId);
+        std::bind(&CooperateStateOut::ProcessStop, this, tempRemoteNetworkId);
     CHKPR(eventHandler_, RET_ERR);
     eventHandler_->ProxyPostTask(handleProcessStopFunc, taskName, 0);
     return RET_OK;
 }
 
-void CoorperateStateOut::ProcessStop(const std::string& remoteNetworkId)
+void CooperateStateOut::ProcessStop(const std::string& remoteNetworkId)
 {
     CALL_DEBUG_ENTER;
-    std::string localNetworkId = COORPERATE::GetLocalNetworkId();
+    std::string localNetworkId = COOPERATE::GetLocalNetworkId();
     std::vector<std::string> inputDeviceDhids = COOR_DEV_MGR->GetCooperateDhids(startDeviceDhid_, false);
     if (inputDeviceDhids.empty()) {
         COOR_SM->OnStopFinish(false, remoteNetworkId);
@@ -72,17 +72,17 @@ void CoorperateStateOut::ProcessStop(const std::string& remoteNetworkId)
     }
 }
 
-void CoorperateStateOut::OnStopRemoteInput(bool isSuccess, const std::string &remoteNetworkId)
+void CooperateStateOut::OnStopRemoteInput(bool isSuccess, const std::string &remoteNetworkId)
 {
     CALL_DEBUG_ENTER;
     std::string taskName = "stop_finish_task";
     std::function<void()> handleStopFinishFunc =
-        std::bind(&CoorperateSM::OnStopFinish, COOR_SM, isSuccess, remoteNetworkId);
+        std::bind(&CooperateSM::OnStopFinish, COOR_SM, isSuccess, remoteNetworkId);
     CHKPV(eventHandler_);
     eventHandler_->ProxyPostTask(handleStopFinishFunc, taskName, 0);
 }
 
-void CoorperateStateOut::OnKeyboardOnline(const std::string &dhid,
+void CooperateStateOut::OnKeyboardOnline(const std::string &dhid,
     const std::pair<std::string, std::string> &networkIds)
 {
     std::vector<std::string> inputDeviceDhids;
@@ -90,7 +90,7 @@ void CoorperateStateOut::OnKeyboardOnline(const std::string &dhid,
     D_INPUT_ADAPTER->StartRemoteInput(networkIds.first, networkIds.second, inputDeviceDhids, [](bool isSuccess) {});
 }
 
-void CoorperateStateOut::SetStartDeviceDhid(const std::string &startDeviceDhid)
+void CooperateStateOut::SetStartDeviceDhid(const std::string &startDeviceDhid)
 {
     startDeviceDhid_ = startDeviceDhid;
 }

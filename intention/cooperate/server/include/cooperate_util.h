@@ -13,26 +13,35 @@
  * limitations under the License.
  */
 
-#ifndef COORPERATE_EVENT_HANDLER_H
-#define COORPERATE_EVENT_HANDLER_H
+#ifndef COOPERATE_UTIL_H
+#define COOPERATE_UTIL_H
 
-#include <memory>
+#include <string>
 
-#include "event_handler.h"
-#include "event_runner.h"
+#include "cJSON.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class CoorperateEventHandler final : public AppExecFwk::EventHandler {
-public:
-    explicit CoorperateEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
-    ~CoorperateEventHandler() override = default;
-    bool ProxyPostTask(const Callback &callback, int64_t delayTime);
-    bool ProxyPostTask(const Callback &callback, const std::string &name = std::string(), int64_t delayTime = 0);
-    void ProxyRemoveTask(const std::string &name);
+struct JsonParser {
+    JsonParser() = default;
+    ~JsonParser()
+    {
+        if (json != nullptr) {
+            cJSON_Delete(json);
+            json = nullptr;
+        }
+    }
+    operator cJSON *()
+    {
+        return json;
+    }
+    cJSON *json { nullptr };
 };
+namespace COOPERATE {
+std::string GetLocalNetworkId();
+} // namespace COOPERATE
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // COORPERATE_EVENT_HANDLER_H
+#endif // COOPERATE_UTIL_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef I_COORPERATE_STATE_H
-#define I_COORPERATE_STATE_H
+#ifndef I_COOPERATE_STATE_H
+#define I_COOPERATE_STATE_H
 
 #include <atomic>
 #include <map>
@@ -29,15 +29,15 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class ICoorperateState {
+class ICooperateState {
 public:
-    ICoorperateState();
-    virtual ~ICoorperateState() = default;
-    virtual int32_t ActivateCoorperate(const std::string &remoteNetworkId, int32_t startDeviceId)
+    ICooperateState();
+    virtual ~ICooperateState() = default;
+    virtual int32_t ActivateCooperate(const std::string &remoteNetworkId, int32_t startDeviceId)
     {
         return static_cast<int32_t>(CooperateMessage::COOPERATE_FAIL);
     }
-    virtual int32_t DeactivateCoorperate(const std::string &networkId, bool isUnchained,
+    virtual int32_t DeactivateCooperate(const std::string &networkId, bool isUnchained,
         const std::pair<std::string, std::string> &preparedNetworkId)
     {
         return static_cast<int32_t>(CooperateMessage::COOPERATE_FAIL);
@@ -54,9 +54,9 @@ protected:
 
 protected:
     std::shared_ptr<AppExecFwk::EventRunner> runner_ { nullptr };
-    std::shared_ptr<CoorperateEventHandler> eventHandler_ { nullptr };
+    std::shared_ptr<CooperateEventHandler> eventHandler_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // I_COORPERATE_STATE_H
+#endif // I_COOPERATE_STATE_H

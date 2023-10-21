@@ -13,29 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef COORPERATE_H
-#define COORPERATE_H
+#ifndef COOPERATE_EVENT_HANDLER_H
+#define COOPERATE_EVENT_HANDLER_H
 
-#include "stream_session.h"
+#include <memory>
+
+#include "event_handler.h"
+#include "event_runner.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class CooperateManager {
+class CooperateEventHandler final : public AppExecFwk::EventHandler {
 public:
-    CooperateManager() = default;
-    ~CooperateManager() = default;
-
-    void PrepareCoorperate();
-    void UnprepareCoorperate();
-    int32_t ActivateCoorperate(SessionPtr sess, int32_t userData, const std::string &remoteNetworkId, int32_t startDeviceId);
-    int32_t DeactivateCoorperate(SessionPtr sess, int32_t userData, bool isUnchained);
-    int32_t GetCooperateState(SessionPtr sess, int32_t userData, const std::string &deviceId);
-    int32_t RegisterCoorperateListener(SessionPtr sess);
-    int32_t UnregisterCoorperateListener(SessionPtr sess);
-    void Dump(int32_t fd);
+    explicit CooperateEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
+    ~CooperateEventHandler() override = default;
+    bool ProxyPostTask(const Callback &callback, int64_t delayTime);
+    bool ProxyPostTask(const Callback &callback, const std::string &name = std::string(), int64_t delayTime = 0);
+    void ProxyRemoveTask(const std::string &name);
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // COORPERATE_H
+#endif // COOPERATE_EVENT_HANDLER_H
