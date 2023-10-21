@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,35 @@
  * limitations under the License.
  */
 
-#ifndef I_CONTEXT_H
-#define I_CONTEXT_H
+#ifndef ENUMERATOR_H
+#define ENUMERATOR_H
 
-#include "i_plugin_manager.h"
-#include "i_task_scheduler.h"
-#include "i_timer_manager.h"
-#include "i_device_manager.h"
+#include <set>
+
+#include "nocopyable.h"
+
+#include "i_device_mgr.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class IContext {
+class Enumerator {
 public:
-    IContext() = default;
-    virtual ~IContext() = default;
+    Enumerator() = default;
+    ~Enumerator() = default;
+    DISALLOW_COPY_AND_MOVE(Enumerator);
 
-    virtual ITaskScheduler& GetTaskScheduler() = 0;
-    virtual ITimerManager& GetTimerManager() = 0;
-    virtual IPluginManager& GetPluginManager() = 0;
-    virtual IDeviceManager& GetDeviceManager() = 0;
+    void SetDeviceMgr(IDeviceMgr *devMgr);
+    void ScanDevices();
+
+private:
+    void ScanAndAddDevices();
+    void AddDevice(const std::string &devNode) const;
+
+private:
+    IDeviceMgr *devMgr_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // I_CONTEXT_H
+#endif // ENUMERATOR_H

@@ -21,13 +21,27 @@ ohos_shared_library("intention_cooperate") {
   include_dirs = [
     "include",
     "${intention_root_path}/data/cooperate/include",
+    "${intention_root_path}/data/include",
+    "${intention_root_path}/interfaces/include",
     "${device_status_root_path}/utils/ipc/include",
     "${intention_root_path}/data/include",
   ]
 
   sources = [
     "src/cooperate.cpp",
-    "src/state_machine.cpp",
+    "src/cooperate_manager.cpp",
+    "src/cooperate_device_manager.cpp",
+    "src/cooperate_event_handler.cpp",
+    "src/cooperate_event_manager.cpp",
+    "src/cooperate_sm.cpp",
+    "src/cooperate_softbus_adapter.cpp",
+    "src/cooperate_state_free.cpp",
+    "src/cooperate_state_in.cpp",
+    "src/cooperate_state_out.cpp",
+    "src/cooperate_util.cpp",
+    "src/device_profile_adapter.cpp",
+    "src/distributed_input_adapter.cpp",
+    "src/i_cooperate_state.cpp",
   ]
 
   public_configs = [ ":cooperate_public_config" ]
@@ -37,6 +51,8 @@ ohos_shared_library("intention_cooperate") {
   deps = [
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
     "${device_status_utils_path}:devicestatus_util",
+    "//third_party/cJSON:cjson",
+    "//third_party/openssl:libcrypto_shared",
     "${intention_root_path}/data:cooperate_params",
   ]
 
@@ -45,6 +61,14 @@ ohos_shared_library("intention_cooperate") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "input:libmmi-client",
+    "device_info_manager:distributed_device_profile_client",
+    "device_manager:devicemanagersdk",
+    "distributed_input:libdinput_sdk",
+    "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
+    "image_framework:image_native",
+    "ipc:ipc_single",
+    "window_manager:libdm",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

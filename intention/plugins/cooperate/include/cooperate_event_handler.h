@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef I_CONTEXT_H
-#define I_CONTEXT_H
+#ifndef COORPERATE_EVENT_HANDLER_H
+#define COORPERATE_EVENT_HANDLER_H
 
-#include "i_plugin_manager.h"
-#include "i_task_scheduler.h"
-#include "i_timer_manager.h"
-#include "i_device_manager.h"
+#include <memory>
+
+#include "event_handler.h"
+#include "event_runner.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class IContext {
+class CoorperateEventHandler final : public AppExecFwk::EventHandler {
 public:
-    IContext() = default;
-    virtual ~IContext() = default;
-
-    virtual ITaskScheduler& GetTaskScheduler() = 0;
-    virtual ITimerManager& GetTimerManager() = 0;
-    virtual IPluginManager& GetPluginManager() = 0;
-    virtual IDeviceManager& GetDeviceManager() = 0;
+    explicit CoorperateEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
+    ~CoorperateEventHandler() override = default;
+    bool ProxyPostTask(const Callback &callback, int64_t delayTime);
+    bool ProxyPostTask(const Callback &callback, const std::string &name = std::string(), int64_t delayTime = 0);
+    void ProxyRemoveTask(const std::string &name);
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // I_CONTEXT_H
+#endif // COORPERATE_EVENT_HANDLER_H

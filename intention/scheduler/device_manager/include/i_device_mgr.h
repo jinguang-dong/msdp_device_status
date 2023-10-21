@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef STATE_MACHINE_H
-#define STATE_MACHINE_H
+#ifndef I_DEVICE_MGR_H
+#define I_DEVICE_MGR_H
 
-#include <string>
-
-namespace OHOS {
-namespace Msdp {
-namespace DeviceStatus {
-class StateMachine final {
+class IDeviceMgr {
 public:
-    void EnableCooperate();
-    void DisableCooperate();
-    int32_t StartCooperate(const std::string &remoteNetworkId, int32_t startDeviceId);
-    int32_t StopCooperate(bool isUnchained);
-    int32_t GetCooperateState(const std::string &deviceId);
+    IDeviceMgr() = default;
+    virtual ~IDeviceMgr() = default;
+
+    virtual void AddDevice(const std::string &devNode) = 0;
+    virtual void RemoveDevice(const std::string &devNode) = 0;
 };
-} // namespace DeviceStatus
-} // namespace Msdp
-} // namespace OHOS
-#endif // STATE_MACHINE_H
+
+#endif // I_DEVICE_MGR_H

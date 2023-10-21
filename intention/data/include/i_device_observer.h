@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,44 +13,35 @@
  * limitations under the License.
  */
 
-#include "state_machine.h"
+#ifndef I_DEVICE_OBSERVER_H
+#define I_DEVICE_OBSERVER_H
 
-#include "devicestatus_define.h"
+#include <memory>
+
+#include "i_device.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "StateMachine" };
-} // namespace
+class IDeviceObserver {
+public:
+    IDeviceObserver() = default;
+    virtual ~IDeviceObserver() = default;
 
-void StateMachine::EnableCooperate()
+    virtual void OnDeviceAdded(std::shared_ptr<IDevice>) = 0;
+    virtual void OnDeviceRemoved(std::shared_ptr<IDevice>) = 0;
+};
+
+inline bool operator<(std::weak_ptr<IDeviceObserver> ptr1, std::weak_ptr<IDeviceObserver> ptr2)
 {
-    CALL_INFO_TRACE;
+    return (ptr1.lock() < ptr2.lock());
 }
 
-void StateMachine::DisableCooperate()
+inline bool operator==(const std::weak_ptr<IDeviceObserver> ptr1, std::nullptr_t) noexcept
 {
-    CALL_INFO_TRACE;
-}
-
-int32_t StateMachine::StartCooperate(const std::string &remoteNetworkId, int32_t startDeviceId)
-{
-    CALL_INFO_TRACE;
-    return RET_ERR;
-}
-
-int32_t StateMachine::StopCooperate(bool isUnchained)
-{
-    CALL_INFO_TRACE;
-    return RET_ERR;
-}
-
-int32_t StateMachine::GetCooperateState(const std::string &deviceId)
-{
-    CALL_INFO_TRACE;
-    return RET_ERR;
+    return (ptr1.lock() == nullptr);
 }
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
+#endif // I_DEVICE_OBSERVER_H
