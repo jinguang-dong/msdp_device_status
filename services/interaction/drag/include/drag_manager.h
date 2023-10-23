@@ -63,6 +63,7 @@ public:
     void SetPointerEventFilterTime(int64_t filterTime) override;
     void MoveTo(int32_t x, int32_t y) override;
     DragResult GetDragResult() const override;
+    int32_t GetCurrentDragState(DragState &dragState) const override;
     DragState GetDragState() const override;
     void SetDragState(DragState state) override;
 #ifdef OHOS_DRAG_ENABLE_INTERCEPTOR

@@ -323,6 +323,29 @@ int32_t DeviceStatusSrvProxy::GetUdKey(std::string &udKey)
     return RET_OK;
 }
 
+int32_t DeviceStatusSrvProxy::GetDragState(DragState &dragState)
+{
+    CALL_DEBUG_ENTER;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(DeviceStatusSrvProxy::GetDescriptor())) {
+        FI_HILOGE("Failed to write descriptor");
+        return ERR_INVALID_VALUE;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    CHKPR(remote, RET_ERR);
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(DeviceInterfaceCode::GET_DRAG_STATE), data, reply, option);
+    if (ret != RET_OK) {
+        FI_HILOGE("Send request failed, ret:%{public}d", ret);
+        return ret;
+    }
+    uint32_t state { 0 };
+    READUINT32(reply, state, IPC_PROXY_DEAD_OBJECT_ERR);
+    dragState = static_cast<DragState>(state);
+    return RET_OK;
+}
+
 int32_t DeviceStatusSrvProxy::GetDragData(DragData &dragData)
 {
     CALL_DEBUG_ENTER;

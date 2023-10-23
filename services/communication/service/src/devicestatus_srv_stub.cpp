@@ -26,9 +26,10 @@
 #include "devicestatus_service.h"
 #include "devicestatus_srv_proxy.h"
 #include "fi_log.h"
+#include "include/util.h"
+#include "permission_util.h"
 #include "stationary_callback.h"
 #include "stationary_data.h"
-#include "include/util.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -87,7 +88,9 @@ DeviceStatusSrvStub::DeviceStatusSrvStub()
         {static_cast<uint32_t>(DeviceInterfaceCode::ADD_HOT_AREA_MONITOR),
             &DeviceStatusSrvStub::AddHotAreaListenerStub},
         {static_cast<uint32_t>(DeviceInterfaceCode::REMOVE_HOT_AREA_MONITOR),
-            &DeviceStatusSrvStub::RemoveHotAreaListenerStub}
+            &DeviceStatusSrvStub::RemoveHotAreaListenerStub},
+        {static_cast<uint32_t>(DeviceInterfaceCode::GET_DRAG_STATE),
+            &DeviceStatusSrvStub::GetDragStateStub}
     };
 }
 
@@ -531,6 +534,25 @@ int32_t DeviceStatusSrvStub::RemoveHotAreaListenerStub(MessageParcel& data, Mess
     if (ret != RET_OK) {
         FI_HILOGE("Call remove hot area listener failed, ret:%{public}d", ret);
     }
+    return ret;
+}
+
+int32_t DeviceStatusSrvStub::GetDragStateStub(MessageParcel& data, MessageParcel& reply)
+{
+    CALL_DEBUG_ENTER;
+    PermissionUtil &permissionUtil = PermissionUtil::GetInstance();
+    Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
+    if (!permissionUtil.IsNativeToken(callerToken)) {
+        FI_HILOGE("TokenType is not TOKEN_NATIVE");
+        return RET_ERR;
+    }
+    DragState dragState;
+    int32_t ret = GetDragState(dragState);
+    if (ret != RET_OK) {
+        FI_HILOGE("GetDragState failed, ret:%{public}d", ret);
+        return RET_ERR;
+    }
+    WRITEUINT32(reply, static_cast<uint32_t>(dragState), IPC_STUB_WRITE_PARCEL_ERR);
     return ret;
 }
 } // namespace DeviceStatus

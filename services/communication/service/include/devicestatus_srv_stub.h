@@ -21,7 +21,9 @@
 #include <iremote_stub.h>
 #include <nocopyable.h>
 
+#include "accesstoken_kit.h"
 #include "i_devicestatus.h"
+#include "ipc_skeleton.h"
 #include "message_option.h"
 #include "message_parcel.h"
 
@@ -64,6 +66,7 @@ private:
     int32_t AddHotAreaListenerStub(MessageParcel& data, MessageParcel& reply);
     int32_t RemoveHotAreaListenerStub(MessageParcel& data, MessageParcel& reply);
     bool CheckCooperatePermission();
+    int32_t GetDragStateStub(MessageParcel& data, MessageParcel& reply);
 
 private:
     std::map<uint32_t, ConnFunc> connFuncs_;
