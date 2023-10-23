@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef STATE_MACHINE_H
-#define STATE_MACHINE_H
+#ifndef COOPERATE_EVENT_HANDLER_H
+#define COOPERATE_EVENT_HANDLER_H
 
-#include <string>
+#include <memory>
+
+#include "event_handler.h"
+#include "event_runner.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class StateMachine final {
+class CooperateEventHandler final : public AppExecFwk::EventHandler {
 public:
-    void EnableCooperate();
-    void DisableCooperate();
-    int32_t StartCooperate(const std::string &remoteNetworkId, int32_t startDeviceId);
-    int32_t StopCooperate(bool isUnchained);
-    int32_t GetCooperateState(const std::string &deviceId);
+    explicit CooperateEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
+    ~CooperateEventHandler() override = default;
+    bool ProxyPostTask(const Callback &callback, int64_t delayTime);
+    bool ProxyPostTask(const Callback &callback, const std::string &name = std::string(), int64_t delayTime = 0);
+    void ProxyRemoveTask(const std::string &name);
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // STATE_MACHINE_H
+#endif // COOPERATE_EVENT_HANDLER_H

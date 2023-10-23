@@ -18,7 +18,7 @@
 
 #include "i_context.h"
 #include "i_plugin.h"
-#include "state_machine.h"
+#include "cooperate_manager.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -40,7 +40,7 @@ public:
 
 private:
     IContext *context_ { nullptr };
-    StateMachine sm_;
+    CooperateManager cooperateMgr_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

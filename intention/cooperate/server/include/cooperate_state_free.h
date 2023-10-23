@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef I_CONTEXT_H
-#define I_CONTEXT_H
+#ifndef COOPERATE_STATE_FREE_H
+#define COOPERATE_STATE_FREE_H
 
-#include "i_plugin_manager.h"
-#include "i_task_scheduler.h"
-#include "i_timer_manager.h"
-#include "i_device_manager.h"
+#include "i_cooperate_state.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class IContext {
+class CooperateStateFree final : public ICooperateState {
 public:
-    IContext() = default;
-    virtual ~IContext() = default;
+    CooperateStateFree() = default;
+    int32_t ActivateCooperate(const std::string &remoteNetworkId, int32_t startDeviceId) override;
+    int32_t DeactivateCooperate(const std::string &networkId, bool isUnchained,
+        const std::pair<std::string, std::string> &preparedNetworkId) override;
+    void SetStartDeviceDhid(const std::string &startDeviceDhid) override {}
 
-    virtual ITaskScheduler& GetTaskScheduler() = 0;
-    virtual ITimerManager& GetTimerManager() = 0;
-    virtual IPluginManager& GetPluginManager() = 0;
-    virtual IDeviceManager& GetDeviceManager() = 0;
+private:
+    int32_t ProcessStart(const std::string &remoteNetworkId, int32_t startDeviceId);
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // I_CONTEXT_H
+#endif // COOPERATE_STATE_FREE_H

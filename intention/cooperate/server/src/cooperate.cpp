@@ -31,13 +31,13 @@ Cooperate::Cooperate(IContext *context)
 
 int32_t Cooperate::Enable(CallingContext &context, Parcel &data, Parcel &reply)
 {
-    sm_.EnableCooperate();
+    cooperateMgr_.PrepareCooperate();
     return RET_OK;
 }
 
 int32_t Cooperate::Disable(CallingContext &context, Parcel &data, Parcel &reply)
 {
-    sm_.DisableCooperate();
+    cooperateMgr_.UnprepareCooperate();
     return RET_OK;
 }
 
@@ -50,9 +50,9 @@ int32_t Cooperate::Start(CallingContext &context, Parcel &data, Parcel &reply)
         return RET_ERR;
     }
 
-    int32_t ret = sm_.StartCooperate(param.remoteNetworkId, param.startDeviceId);
+    int32_t ret = cooperateMgr_.ActivateCooperate(context.session, param.userData, param.remoteNetworkId, param.startDeviceId);
     if (ret != RET_OK) {
-        FI_HILOGE("StartCooperate failed, ret:%{public}d", ret);
+        FI_HILOGE("Activate cooperate failed, ret:%{public}d", ret);
     }
     return ret;
 }
@@ -65,21 +65,29 @@ int32_t Cooperate::Stop(CallingContext &context, Parcel &data, Parcel &reply)
         return RET_ERR;
     }
 
-    int32_t ret = sm_.StopCooperate(param.isUnchained);
+    int32_t ret = cooperateMgr_.DeactivateCooperate(context.session, param.userData, param.isUnchained);
     if (ret != RET_OK) {
-        FI_HILOGE("Deactivate coordination failed, ret:%{public}d", ret);
+        FI_HILOGE("Deactivate cooperate failed, ret:%{public}d", ret);
     }
     return ret;
 }
 
 int32_t Cooperate::AddWatch(CallingContext &context, uint32_t id, Parcel &data, Parcel &reply)
 {
-    return RET_OK;
+    int32_t ret = cooperateMgr_.RegisterCooperateListener(context.session);
+    if (ret != RET_OK) {
+        FI_HILOGE("Register cooperate listener failed, ret:%{public}d", ret);
+    }
+    return ret;
 }
 
 int32_t Cooperate::RemoveWatch(CallingContext &context, uint32_t id, Parcel &data, Parcel &reply)
 {
-    return RET_OK;
+    int32_t ret = cooperateMgr_.UnregisterCooperateListener(context.session);
+    if (ret != RET_OK) {
+        FI_HILOGE("Unregister cooperate listener failed, ret:%{public}d", ret);
+    }
+    return ret;
 }
 
 int32_t Cooperate::SetParam(CallingContext &context, uint32_t id, Parcel &data, Parcel &reply)
@@ -95,9 +103,9 @@ int32_t Cooperate::GetParam(CallingContext &context, uint32_t id, Parcel &data, 
         return RET_ERR;
     }
 
-    int32_t ret = sm_.GetCooperateState(param.deviceId);
+    int32_t ret = cooperateMgr_.GetCooperateState(context.session, param.userData, param.deviceId);
     if (ret != RET_OK) {
-        FI_HILOGE("Get coordination state failed");
+        FI_HILOGE("Get cooperate state failed");
     }
     return ret;
 }
