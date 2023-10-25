@@ -25,6 +25,7 @@
 #include "drag_data.h"
 #include "i_coordination_listener.h"
 #include "i_drag_listener.h"
+#include "i_hotarea_listener.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -91,12 +92,12 @@ public:
 
     /**
      * @brief Obtains the screen hopping status of a mouse pointer.
-     * @param deviceId Indicates the descriptor of the input device.
+     * @param networkId Indicates the descriptor of the input device.
      * @param callback Indicates the callback used to receive the screen hopping status.
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 9
      */
-    int32_t GetCoordinationState(const std::string &deviceId, std::function<void(bool)> callback);
+    int32_t GetCoordinationState(const std::string &networkId, std::function<void(bool)> callback);
 
     /**
      * @brief Starts dragging.
@@ -195,6 +196,22 @@ public:
      * @since 10
      */
     int32_t GetDragData(DragData &dragData);
+
+    /**
+     * @brief Registers a listener for screen hot area of the mouse pointer.
+     * @param listener Indicates the listener for screen hot area of the mouse pointer.
+     * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
+     * @since 11
+     */
+    int32_t AddHotAreaListener(std::shared_ptr<IHotAreaListener> listener);
+
+    /**
+     * @brief Unregisters a listener for screen hot area of the mouse pointer.
+     * @param listener Indicates the listener for screen hot area of the mouse pointer.
+     * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
+     * @since 9
+     */
+    int32_t RemoveHotAreaListener(std::shared_ptr<IHotAreaListener> listener = nullptr);
 
 private:
     InteractionManager() = default;

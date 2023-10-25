@@ -156,7 +156,7 @@ int32_t CoordinationManagerImpl::DeactivateCoordination(bool isUnchained, FuncCo
 }
 
 int32_t CoordinationManagerImpl::GetCoordinationState(
-    const std::string &deviceId, FuncCoordinationState callback)
+    const std::string &networkId, FuncCoordinationState callback)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
@@ -166,7 +166,7 @@ int32_t CoordinationManagerImpl::GetCoordinationState(
         FI_HILOGE("userData exceeds the maximum");
         return RET_ERR;
     }
-    int32_t ret = DeviceStatusClient::GetInstance().GetCoordinationState(userData_, deviceId);
+    int32_t ret = DeviceStatusClient::GetInstance().GetCoordinationState(userData_, networkId);
     if (ret != RET_OK) {
         FI_HILOGE("Get coordination state failed");
         return ret;
@@ -176,17 +176,17 @@ int32_t CoordinationManagerImpl::GetCoordinationState(
     return RET_OK;
 }
 
-void CoordinationManagerImpl::OnDevCoordinationListener(const std::string deviceId, CoordinationMessage msg)
+void CoordinationManagerImpl::OnDevCoordinationListener(const std::string networkId, CoordinationMessage msg)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
     for (const auto &item : devCoordinationListener_) {
-        item->OnCoordinationMessage(deviceId, msg);
+        item->OnCoordinationMessage(networkId, msg);
     }
 }
 
 void CoordinationManagerImpl::OnCoordinationMessageEvent(int32_t userData,
-    const std::string deviceId, CoordinationMessage msg)
+    const std::string networkId, CoordinationMessage msg)
 {
     CALL_DEBUG_ENTER;
     CHK_PID_AND_TID();
@@ -197,7 +197,7 @@ void CoordinationManagerImpl::OnCoordinationMessageEvent(int32_t userData,
     }
     CoordinationMsg event = iter->second.msg;
     CHKPV(event);
-    event(deviceId, msg);
+    event(networkId, msg);
     devCoordinationEvent_.erase(iter);
 }
 
@@ -241,14 +241,14 @@ int32_t CoordinationManagerImpl::OnCoordinationListener(const StreamClient &clie
 {
     CALL_DEBUG_ENTER;
     int32_t userData = 0;
-    std::string deviceId;
+    std::string networkId;
     int32_t nType = 0;
-    pkt >> userData >> deviceId >> nType;
+    pkt >> userData >> networkId >> nType;
     if (pkt.ChkRWError()) {
         FI_HILOGE("Packet read type failed");
         return RET_ERR;
     }
-    OnDevCoordinationListener(deviceId, CoordinationMessage(nType));
+    OnDevCoordinationListener(networkId, CoordinationMessage(nType));
     return RET_OK;
 }
 
@@ -256,14 +256,14 @@ int32_t CoordinationManagerImpl::OnCoordinationMessage(const StreamClient &clien
 {
     CALL_DEBUG_ENTER;
     int32_t userData = 0;
-    std::string deviceId;
+    std::string networkId;
     int32_t nType = 0;
-    pkt >> userData >> deviceId >> nType;
+    pkt >> userData >> networkId >> nType;
     if (pkt.ChkRWError()) {
         FI_HILOGE("Packet read coordination msg failed");
         return RET_ERR;
     }
-    OnCoordinationMessageEvent(userData, deviceId, CoordinationMessage(nType));
+    OnCoordinationMessageEvent(userData, networkId, CoordinationMessage(nType));
     return RET_OK;
 }
 
@@ -279,6 +279,83 @@ int32_t CoordinationManagerImpl::OnCoordinationState(const StreamClient &client,
         return RET_ERR;
     }
     OnCoordinationStateEvent(userData, state);
+    return RET_OK;
+}
+
+int32_t CoordinationManagerImpl::AddHotAreaListener(HotAreaListenerPtr listener)
+{
+    CALL_DEBUG_ENTER;
+    CHKPR(listener, RET_ERR);
+    std::lock_guard<std::mutex> guard(mtx_);
+    for (const auto &item : devHotAreaListener_) {
+        if (item == listener) {
+            FI_HILOGW("The listener already exists");
+            return RET_ERR;
+        }
+    }
+    if (!isHotAreaListener_) {
+        FI_HILOGI("Start monitoring");
+        int32_t ret = DeviceStatusClient::GetInstance().AddHotAreaListener();
+        if (ret != RET_OK) {
+            FI_HILOGE("Failed to add hot area listener, ret:%{public}d", ret);
+            return ret;
+        }
+        isHotAreaListener_ = true;
+    }
+    devHotAreaListener_.push_back(listener);
+    return RET_OK;
+}
+
+void CoordinationManagerImpl::OnDevHotAreaListener(int32_t displayX,
+    int32_t displayY, HotAreaType type, bool isEdge)
+{
+    CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
+    for (const auto &item : devHotAreaListener_) {
+        item->OnHotAreaMessage(displayX, displayY, type, isEdge);
+    }
+}
+
+int32_t CoordinationManagerImpl::OnHotAreaListener(const StreamClient& client, NetPacket& pkt)
+{
+    CALL_DEBUG_ENTER;
+    int32_t positionX = 0;
+    int32_t positionY = 0;
+    int32_t type = 0;
+    bool isEdge = false;
+    pkt >> positionX >> positionY >> type >> isEdge;
+    if (pkt.ChkRWError()) {
+        FI_HILOGE("Packet read type failed");
+        return RET_ERR;
+    }
+    OnDevHotAreaListener(positionX, positionY, HotAreaType(type), isEdge);
+    return RET_OK;
+}
+
+int32_t CoordinationManagerImpl::ResetListener()
+{
+    CALL_DEBUG_ENTER;
+    if (isHotAreaListener_ && devHotAreaListener_.empty()) {
+        isHotAreaListener_ = false;
+        return DeviceStatusClient::GetInstance().RemoveHotAreaListener();
+    }
+    return RET_OK;
+}
+
+int32_t CoordinationManagerImpl::RemoveHotAreaListener(HotAreaListenerPtr listener)
+{
+    CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
+    if (listener == nullptr) {
+        devHotAreaListener_.clear();
+        return ResetListener();
+    }
+    for (auto it = devHotAreaListener_.begin(); it != devHotAreaListener_.end(); ++it) {
+        if (*it == listener) {
+            devHotAreaListener_.erase(it);
+            return ResetListener();
+        }
+    }
     return RET_OK;
 }
 } // namespace DeviceStatus

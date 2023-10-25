@@ -22,7 +22,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 enum CooperateParam : uint32_t {
-    PREPARE
+    PREPARE,
     STATE,
     REGISTER
 };
@@ -42,6 +42,7 @@ struct DefaultCooperateReply final : public ParamBase {
 };
 
 struct StartCooperateParam final : public ParamBase {
+    StartCooperateParam() = default;
     StartCooperateParam(int32_t userData, const std::string &remoteNetworkId, int32_t startDeviceId);
     bool Marshalling(Parcel &data) const override;
     bool Unmarshalling(Parcel &data) override;
@@ -52,6 +53,7 @@ struct StartCooperateParam final : public ParamBase {
 };
 
 struct StopCooperateParam final : public ParamBase {
+    StopCooperateParam() = default;
     StopCooperateParam(int32_t userData, bool isUnchained);
     bool Marshalling(Parcel &data) const override;
     bool Unmarshalling(Parcel &data) override;
@@ -61,11 +63,12 @@ struct StopCooperateParam final : public ParamBase {
 };
 
 struct GetCooperateStateParam final : public ParamBase {
-    GetCooperateStateParam(std::string deviceId, int32_t userData);
+    GetCooperateStateParam() = default;
+    GetCooperateStateParam(std::string networkId, int32_t userData);
     bool Marshalling(Parcel &data) const override;
     bool Unmarshalling(Parcel &data) override;
 
-    std::string deviceId;
+    std::string networkId;
     int32_t userData { -1 };
 };
 } // namespace DeviceStatus

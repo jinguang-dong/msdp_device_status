@@ -26,6 +26,7 @@
 
 #include "coordination_device_manager.h"
 #include "coordination_event_manager.h"
+#include "coordination_hotarea.h"
 #include "coordination_message.h"
 #include "coordination_softbus_adapter.h"
 #include "coordination_state_free.h"
@@ -75,20 +76,20 @@ void CoordinationSM::Init()
     eventHandler_ = std::make_shared<CoordinationEventHandler>(runner_);
 }
 
-void CoordinationSM::OnSoftbusSessionClosed(const std::string &NetworkId)
+void CoordinationSM::OnSoftbusSessionClosed(const std::string &networkId)
 {
     CALL_INFO_TRACE;
     CHKPV(eventHandler_);
     std::string taskName = "process_coordinition_reset";
     std::function<void()> handleFunc =
-        std::bind(&CoordinationSM::OnReset, this, NetworkId);
+        std::bind(&CoordinationSM::OnReset, this, networkId);
     eventHandler_->ProxyPostTask(handleFunc, taskName, 0);
 }
 
-void CoordinationSM::OnReset(const std::string &NetworkId)
+void CoordinationSM::OnReset(const std::string &networkId)
 {
     CALL_INFO_TRACE;
-    Reset(NetworkId);
+    Reset(networkId);
 }
 
 void CoordinationSM::OnSessionLost(SessionPtr session)
@@ -191,14 +192,14 @@ void CoordinationSM::OnCloseCoordination(const std::string &networkId, bool isLo
     }
 }
 
-int32_t CoordinationSM::GetCoordinationState(const std::string &deviceId)
+int32_t CoordinationSM::GetCoordinationState(const std::string &networkId)
 {
     CALL_INFO_TRACE;
-    if (deviceId.empty()) {
-        FI_HILOGE("DeviceId is empty");
+    if (networkId.empty()) {
+        FI_HILOGE("Transfer network id is empty");
         return static_cast<int32_t>(CoordinationMessage::PARAMETER_ERROR);
     }
-    bool state = DP_ADAPTER->GetCrossingSwitchState(deviceId);
+    bool state = DP_ADAPTER->GetCrossingSwitchState(networkId);
     COOR_EVENT_MGR->OnGetCrossingSwitchState(state);
     return RET_OK;
 }
@@ -206,6 +207,10 @@ int32_t CoordinationSM::GetCoordinationState(const std::string &deviceId)
 void CoordinationSM::PrepareCoordination()
 {
     CALL_INFO_TRACE;
+    auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    CHKPV(display);
+    HOT_AREA->SetWidth(display->GetWidth());
+    HOT_AREA->SetHeight(display->GetHeight());
     if (monitorId_ <= 0) {
         auto monitor = std::make_shared<MonitorConsumer>(
             std::bind(&CoordinationSM::UpdateLastPointerEventCallback, this, std::placeholders::_1));
@@ -810,6 +815,14 @@ void CoordinationSM::Dump(int32_t fd)
 void CoordinationSM::UpdateLastPointerEventCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     lastPointerEvent_ = pointerEvent;
+    CHKPV(pointerEvent);
+    auto *context = COOR_EVENT_MGR->GetIContext();
+    CHKPV(context);
+    int32_t ret = context->GetDelegateTasks().PostAsyncTask(
+        std::bind(&CoordinationHotArea::ProcessData, HOT_AREA, pointerEvent));
+    if (ret != RET_OK) {
+        FI_HILOGE("Posting async task failed");
+    }
 }
 
 std::shared_ptr<MMI::PointerEvent> CoordinationSM::GetLastPointerEvent() const
@@ -833,7 +846,7 @@ void CoordinationSM::RemoveInterceptor()
     }
 }
 
-bool CoordinationSM::IsNeedFilterOut(const std::string &deviceId, const std::shared_ptr<MMI::KeyEvent> keyEvent)
+bool CoordinationSM::IsNeedFilterOut(const std::string &networkId, const std::shared_ptr<MMI::KeyEvent> keyEvent)
 {
     CALL_DEBUG_ENTER;
     std::vector<OHOS::MMI::KeyEvent::KeyItem> KeyItems = keyEvent->GetKeyItems();
@@ -851,7 +864,7 @@ bool CoordinationSM::IsNeedFilterOut(const std::string &deviceId, const std::sha
     for (const auto &item : businessEvent.pressedKeys) {
         FI_HILOGI("pressedKeys:%{public}d", item);
     }
-    return D_INPUT_ADAPTER->IsNeedFilterOut(deviceId, businessEvent);
+    return D_INPUT_ADAPTER->IsNeedFilterOut(networkId, businessEvent);
 }
 
 void CoordinationSM::DeviceInitCallBack::OnRemoteDied()

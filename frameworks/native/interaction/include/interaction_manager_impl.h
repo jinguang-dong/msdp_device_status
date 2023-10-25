@@ -40,7 +40,7 @@ public:
     int32_t ActivateCoordination(const std::string &remoteNetworkId, int32_t startDeviceId,
         std::function<void(std::string, CoordinationMessage)> callback);
     int32_t DeactivateCoordination(bool isUnchained, std::function<void(std::string, CoordinationMessage)> callback);
-    int32_t GetCoordinationState(const std::string &deviceId, std::function<void(bool)> callback);
+    int32_t GetCoordinationState(const std::string &networkId, std::function<void(bool)> callback);
     int32_t UpdateDragStyle(DragCursorStyle style);
     int32_t StartDrag(const DragData &dragData, std::function<void(const DragNotifyMsg&)> callback);
     int32_t StopDrag(const DragDropResult &dropResult);
@@ -52,6 +52,8 @@ public:
     int32_t GetShadowOffset(int32_t &offsetX, int32_t &offsetY, int32_t &width, int32_t &height);
     int32_t UpdateShadowPic(const ShadowInfo &shadowInfo);
     int32_t GetDragData(DragData &dragData);
+    int32_t AddHotAreaListener(std::shared_ptr<IHotAreaListener> listener);
+    int32_t RemoveHotAreaListener(std::shared_ptr<IHotAreaListener> listener = nullptr);
 
 private:
     void InitMsgHandler();

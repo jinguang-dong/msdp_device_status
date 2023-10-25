@@ -15,7 +15,7 @@
 
 #include "state_machine.h"
 
-#include "intention_define.h"
+#include "devicestatus_define.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -27,16 +27,14 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "StateMa
 void StateMachine::EnableCooperate()
 {
     CALL_INFO_TRACE;
-    return RET_ERR;
 }
 
 void StateMachine::DisableCooperate()
 {
     CALL_INFO_TRACE;
-    return RET_ERR;
 }
 
-int32_t StartCooperate(const std::string &remoteNetworkId, int32_t startDeviceId)
+int32_t StateMachine::StartCooperate(const std::string &remoteNetworkId, int32_t startDeviceId)
 {
     CALL_INFO_TRACE;
     return RET_ERR;
@@ -48,7 +46,7 @@ int32_t StateMachine::StopCooperate(bool isUnchained)
     return RET_ERR;
 }
 
-int32_t StateMachine::GetCooperateState(const std::string &deviceId)
+int32_t StateMachine::GetCooperateState(const std::string &networkId)
 {
     CALL_INFO_TRACE;
     return RET_ERR;
