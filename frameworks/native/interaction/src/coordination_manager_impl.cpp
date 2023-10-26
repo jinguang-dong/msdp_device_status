@@ -237,7 +237,7 @@ const CoordinationManagerImpl::CoordinationState *CoordinationManagerImpl::GetCo
     return iter == devCoordinationEvent_.end() ? nullptr : &iter->second.state;
 }
 
-int32_t CoordinationManagerImpl::OnCoordinationListener(const StreamClient& client, NetPacket& pkt)
+int32_t CoordinationManagerImpl::OnCoordinationListener(const StreamClient &client, NetPacket &pkt)
 {
     CALL_DEBUG_ENTER;
     int32_t userData = 0;
@@ -252,7 +252,7 @@ int32_t CoordinationManagerImpl::OnCoordinationListener(const StreamClient& clie
     return RET_OK;
 }
 
-int32_t CoordinationManagerImpl::OnCoordinationMessage(const StreamClient& client, NetPacket& pkt)
+int32_t CoordinationManagerImpl::OnCoordinationMessage(const StreamClient &client, NetPacket &pkt)
 {
     CALL_DEBUG_ENTER;
     int32_t userData = 0;
@@ -267,7 +267,7 @@ int32_t CoordinationManagerImpl::OnCoordinationMessage(const StreamClient& clien
     return RET_OK;
 }
 
-int32_t CoordinationManagerImpl::OnCoordinationState(const StreamClient& client, NetPacket& pkt)
+int32_t CoordinationManagerImpl::OnCoordinationState(const StreamClient &client, NetPacket &pkt)
 {
     CALL_DEBUG_ENTER;
     int32_t userData = 0;

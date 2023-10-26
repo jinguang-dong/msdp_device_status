@@ -96,7 +96,7 @@ void JsEventTarget::EmitJsActivate(sptr<JsUtil::CallbackInfo> cb, const std::str
     }
 }
 
-void JsEventTarget::EmitJsDeactivate(sptr<JsUtil::CallbackInfo> cb, const std::string& networkId,
+void JsEventTarget::EmitJsDeactivate(sptr<JsUtil::CallbackInfo> cb, const std::string &networkId,
     CoordinationMessage msg)
 {
     CALL_INFO_TRACE;

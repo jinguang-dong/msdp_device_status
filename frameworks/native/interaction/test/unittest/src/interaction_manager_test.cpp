@@ -139,7 +139,7 @@ private:
 std::vector<int32_t> InteractionManagerTest::GetInputDeviceIds()
 {
     std::vector<int32_t> realDeviceIds;
-    auto callback = [&realDeviceIds](std::vector<int32_t>& deviceIds) {
+    auto callback = [&realDeviceIds](std::vector<int32_t> &deviceIds) {
         realDeviceIds = deviceIds;
     };
     int32_t ret = MMI::InputManager::GetInstance()->GetDeviceIds(callback);
@@ -168,7 +168,7 @@ std::pair<int32_t, int32_t> InteractionManagerTest::GetMouseAndTouch()
 {
     std::vector<int32_t> deviceIds = GetInputDeviceIds();
     std::pair<int32_t, int32_t> mouseAndTouch { -1, -1 };
-    for (const auto& id : deviceIds) {
+    for (const auto &id : deviceIds) {
         std::shared_ptr<MMI::InputDevice> device = GetDevice(id);
         CHKPC(device);
         if (device->HasCapability(MMI::InputDeviceCapability::INPUT_DEV_CAP_POINTER)) {
@@ -367,7 +367,7 @@ void InteractionManagerTest::SimulateMoveEvent(const std::pair<int32_t, int32_t>
         }
         coordinates.push_back({dstX, dstY});
     }
-    for (const auto& pointer : coordinates) {
+    for (const auto &pointer : coordinates) {
         std::shared_ptr<MMI::PointerEvent> pointerEvent =
             SetupPointerEvent(pointer, MMI::PointerEvent::POINTER_ACTION_MOVE, sourceType, pointerId, isPressed);
         CHKPC(pointerEvent);
@@ -658,7 +658,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_Draglistener_Mouse, Test
         ASSERT_EQ(ret, RET_OK);
         std::promise<bool> promiseFlag;
         std::future<bool> futureFlag = promiseFlag.get_future();
-        auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+        auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
             FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
                 notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
             promiseFlag.set_value(true);
@@ -699,7 +699,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_Draglistener_Touch, Test
         ASSERT_EQ(ret, RET_OK);
         std::promise<bool> promiseFlag;
         std::future<bool> futureFlag = promiseFlag.get_future();
-        auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+        auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
             FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
                 notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
             promiseFlag.set_value(true);
@@ -746,7 +746,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_Draglistener, TestSize.L
         }
         std::promise<bool> promiseFlag;
         std::future<bool> futureFlag = promiseFlag.get_future();
-        auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+        auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
             FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
                 notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
             promiseFlag.set_value(true);
@@ -784,7 +784,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_Mouse, TestSiz
     } else {
         std::promise<bool> promiseFlag;
         std::future<bool> futureFlag = promiseFlag.get_future();
-        auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+        auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
             FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
                 notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
             promiseFlag.set_value(true);
@@ -821,7 +821,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_Failed_Mouse, 
         std::promise<bool> promiseFlag;
         std::future<bool> futureFlag = promiseFlag.get_future();
         SimulateDownEvent({ DRAG_SRC_X, DRAG_SRC_Y }, MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID);
-        auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+        auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
             FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
                 notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
             promiseFlag.set_value(true);
@@ -853,7 +853,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StopDrag_Mouse, TestSize
     } else {
         std::promise<bool> promiseFlag;
         std::future<bool> futureFlag = promiseFlag.get_future();
-        auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+        auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
             FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
                 notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
             promiseFlag.set_value(true);
@@ -909,7 +909,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_Touch, TestSiz
     } else {
         std::promise<bool> promiseFlag;
         std::future<bool> futureFlag = promiseFlag.get_future();
-        auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+        auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
             FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
                 notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
             promiseFlag.set_value(true);
@@ -946,7 +946,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StopDrag_Touch, TestSize
     } else {
         std::promise<bool> promiseFlag;
         std::future<bool> futureFlag = promiseFlag.get_future();
-        auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+        auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
             FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
                 notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
             promiseFlag.set_value(true);
@@ -979,7 +979,7 @@ HWTEST_F(InteractionManagerTest, GetDragTargetPid_Mouse, TestSize.Level1)
     } else {
         std::promise<bool> promiseStopFlag;
         std::future<bool> futureStopFlag = promiseStopFlag.get_future();
-        auto callback = [&promiseStopFlag](const DragNotifyMsg& notifyMessage) {
+        auto callback = [&promiseStopFlag](const DragNotifyMsg &notifyMessage) {
             FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
                 notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
             promiseStopFlag.set_value(true);
@@ -1018,7 +1018,7 @@ HWTEST_F(InteractionManagerTest, GetDragTargetPid_Touch, TestSize.Level1)
     } else {
         std::promise<bool> promiseStopFlag;
         std::future<bool> futureStopFlag = promiseStopFlag.get_future();
-        auto callback = [&promiseStopFlag](const DragNotifyMsg& notifyMessage) {
+        auto callback = [&promiseStopFlag](const DragNotifyMsg &notifyMessage) {
             FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
                 notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
             promiseStopFlag.set_value(true);
@@ -1056,7 +1056,7 @@ HWTEST_F(InteractionManagerTest, TouchEventDispatch, TestSize.Level1)
     if (g_deviceTouchId < 0) {
         ASSERT_TRUE(g_deviceTouchId < 0);
     } else {
-        auto callback = [](const DragNotifyMsg& notifyMessage) {
+        auto callback = [](const DragNotifyMsg &notifyMessage) {
             FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
                 notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         };
@@ -1095,7 +1095,7 @@ HWTEST_F(InteractionManagerTest, MouseEventDispatch, TestSize.Level1)
     if (g_deviceMouseId < 0) {
         ASSERT_TRUE(g_deviceMouseId < 0);
     } else {
-        auto callback = [](const DragNotifyMsg& notifyMessage) {
+        auto callback = [](const DragNotifyMsg &notifyMessage) {
             FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
                 notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         };
@@ -1153,7 +1153,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetShadowOffset, TestSiz
     int32_t height = 0;
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
-    auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
         FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
@@ -1189,7 +1189,7 @@ HWTEST_F(InteractionManagerTest, GetUdKey_Mouse, TestSize.Level1)
     } else {
         std::promise<bool> promiseFlag;
         std::future<bool> futureFlag = promiseFlag.get_future();
-        auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+        auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
             FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
                 notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
             promiseFlag.set_value(true);
@@ -1226,7 +1226,7 @@ HWTEST_F(InteractionManagerTest, GetUdKey_Touch, TestSize.Level1)
     } else {
         std::promise<bool> promiseFlag;
         std::future<bool> futureFlag = promiseFlag.get_future();
-        auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+        auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
             FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
                 notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
             promiseFlag.set_value(true);
@@ -1264,7 +1264,7 @@ HWTEST_F(InteractionManagerTest, GetDragData_Success, TestSize.Level1)
     } else {
         std::promise<bool> promiseFlag;
         std::future<bool> futureFlag = promiseFlag.get_future();
-        auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+        auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
             FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
                 notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
             promiseFlag.set_value(true);
