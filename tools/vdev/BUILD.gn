@@ -16,7 +16,7 @@ import("../../device_status.gni")
 config("devicestatus_vdev_config") {
   include_dirs = [
     "include",
-    "//third_party/json/include",
+    "//third_party/cJSON",
   ]
 }
 
@@ -53,7 +53,7 @@ ohos_source_set("devicestatus_vdev") {
 config("devicestatus_vdev_builders_config") {
   include_dirs = [
     "include",
-    "//third_party/json/include",
+    "//third_party/cJSON",
   ]
 }
 
@@ -63,6 +63,7 @@ config("devicestatus_vdev_builders_public_config") {
 
 ohos_source_set("devicestatus_vdev_builders") {
   sources = [
+    "src/json.cpp",
     "src/virtual_device_builder.cpp",
     "src/virtual_keyboard_builder.cpp",
     "src/virtual_mouse_builder.cpp",
@@ -73,7 +74,10 @@ ohos_source_set("devicestatus_vdev_builders") {
 
   public_configs = [ ":devicestatus_vdev_builders_public_config" ]
 
-  deps = [ "${device_status_utils_path}:devicestatus_util" ]
+  deps = [
+    "${device_status_utils_path}:devicestatus_util",
+    "//third_party/cJSON:cjson",
+  ]
 
   public_deps = [ ":devicestatus_vdev" ]
 
@@ -92,7 +96,7 @@ ohos_source_set("devicestatus_vdev_builders") {
 ohos_executable("vdevadm") {
   include_dirs = [
     "include",
-    "//third_party/json/include",
+    "//third_party/cJSON",
   ]
 
   sources = [ "src/vdevadm.cpp" ]
@@ -100,6 +104,7 @@ ohos_executable("vdevadm") {
   deps = [
     ":devicestatus_vdev_builders",
     "${device_status_utils_path}:devicestatus_util",
+    "//third_party/cJSON:cjson",
   ]
 
   external_deps = [

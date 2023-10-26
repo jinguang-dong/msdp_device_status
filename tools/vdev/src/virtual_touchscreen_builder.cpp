@@ -27,6 +27,7 @@
 #include "devicestatus_define.h"
 #include "display_manager.h"
 #include "fi_log.h"
+#include "json.h"
 #include "utility.h"
 #include "virtual_touchscreen.h"
 
@@ -325,7 +326,7 @@ void VirtualTouchScreenBuilder::ReadUpAction()
         return;
     }
     int32_t slot = std::atoi(optarg);
-    std::cout << "[touchscreen] release: [" << slot << "]" << std::endl;
+    std::cout << "[touchscreen] up: [" << slot << "]" << std::endl;
     VirtualTouchScreen::GetDevice()->UpButton(slot);
 }
 
@@ -382,113 +383,122 @@ void VirtualTouchScreenBuilder::ReadDragToAction(int32_t argc, char *argv[])
 void VirtualTouchScreenBuilder::ReadActions(const char *path)
 {
     CALL_DEBUG_ENTER;
-    json model;
-    int32_t ret = VirtualDeviceBuilder::ReadFile(path, model);
-    if (ret == RET_ERR) {
-        FI_HILOGE("Failed to read the file");
+    std::shared_ptr<Json> model = Json::Load(path);
+    CHKPV(model);
+    if (!model->IsObject()) {
+        FI_HILOGE("Failed to load the file");
         return;
     }
     ReadModel(model, MAXIMUM_LEVEL_ALLOWED);
 }
 
-void VirtualTouchScreenBuilder::ReadModel(const nlohmann::json &model, int32_t level)
+void VirtualTouchScreenBuilder::ReadModel(const std::shared_ptr<Json> &model, int32_t level)
 {
     CALL_DEBUG_ENTER;
-    if (model.is_object()) {
-        auto it = model.find("actions");
-        if (it != model.cend() && it->is_array()) {
-            std::for_each(it->cbegin(), it->cend(), [](const auto &item) { ReadAction(item); });
+    if (model->IsObject() && model->HasItem("actions")) {
+        std::vector<std::shared_ptr<Json>> actions = model->GetArrayItems("actions");
+        for (const auto &action : actions) {
+            ReadAction(action);
         }
-    } else if (model.is_array() && level > 0) {
-        for (const auto &m : model) {
+    } else if (model->IsArray() && (level > 0)) {
+        for (const auto &m : model->GetArrayItems()) {
             ReadModel(m, level - 1);
         }
     }
 }
 
-void VirtualTouchScreenBuilder::ReadAction(const nlohmann::json &model)
+void VirtualTouchScreenBuilder::ReadAction(const std::shared_ptr<Json> &model)
 {
     CALL_DEBUG_ENTER;
-    if (!model.is_object()) {
-        FI_HILOGD("Not an object");
+    if (!model->IsObject() || !model->HasItem("action")) {
         return;
     }
-    auto it = model.find("action");
-    if (it != model.cend()) {
-        static const std::unordered_map<std::string, std::function<void(const nlohmann::json &model)>> actions {
+    std::shared_ptr<Json> action = model->GetItem("action");
+    CHKPV(action);
+    if (!action->IsNull() && action->IsString()) {
+        static const std::unordered_map<std::string, std::function<void (const std::shared_ptr<Json> &model)>> actions {
             { "down", &HandleDown },
             { "move", &HandleMove },
             { "up", &HandleUp },
             { "move-to", &HandleMoveTo },
             { "wait", &HandleWait }
         };
-        auto actionItr = actions.find(it.value());
+        auto actionItr = actions.find(action->StringValue());
         if (actionItr != actions.cend()) {
             actionItr->second(model);
         }
     }
 }
 
-int32_t VirtualTouchScreenBuilder::GetModelValue(const nlohmann::json &model, const std::string &targetName,
+int32_t VirtualTouchScreenBuilder::GetModelValue(const std::shared_ptr<Json> &model, const std::string &targetName,
     int32_t defaultValue)
 {
-    auto it = model.find(targetName);
-    if (it != model.cend() && it->is_number_integer()) {
-        return it.value();
+    auto it = model->GetItem(targetName);
+    if (!it->IsNull() && it->IsNumber()) {
+        return it->IntValue();
     }
     return defaultValue;
 }
 
-void VirtualTouchScreenBuilder::HandleDown(const nlohmann::json &model)
+void VirtualTouchScreenBuilder::HandleDown(const std::shared_ptr<Json> &model)
 {
+    if (!model->HasItem("slot") || !model->HasItem("x") || !model->HasItem("y")) {
+        return;
+    }
     int32_t slot = VirtualTouchScreenBuilder::GetModelValue(model, "slot", DEFAULT_VALUE_MINUS_ONE);
-
     int32_t x = VirtualTouchScreenBuilder::GetModelValue(model, "x", DEFAULT_VALUE_MINUS_ONE);
-
     int32_t y = VirtualTouchScreenBuilder::GetModelValue(model, "y", DEFAULT_VALUE_MINUS_ONE);
 
     std::cout << "[touchscreen] down: [" << slot << ", (" << x << "," << y << ")]" << std::endl;
     VirtualTouchScreen::GetDevice()->DownButton(slot, x, y);
 }
 
-void VirtualTouchScreenBuilder::HandleMove(const nlohmann::json &model)
+void VirtualTouchScreenBuilder::HandleMove(const std::shared_ptr<Json> &model)
 {
+    if (!model->HasItem("slot") || !model->HasItem("dx") || !model->HasItem("dy")) {
+        return;
+    }
     int32_t slot = VirtualTouchScreenBuilder::GetModelValue(model, "slot", DEFAULT_VALUE_MINUS_ONE);
-
     int32_t dx = VirtualTouchScreenBuilder::GetModelValue(model, "dx", DEFAULT_VALUE_ZERO);
-
     int32_t dy = VirtualTouchScreenBuilder::GetModelValue(model, "dy", DEFAULT_VALUE_ZERO);
 
     std::cout << "[touchscreen] move: [" << slot << ", (" << dx << "," << dy << ")]" << std::endl;
     VirtualTouchScreen::GetDevice()->Move(slot, dx, dy);
 }
 
-void VirtualTouchScreenBuilder::HandleUp(const nlohmann::json &model)
+void VirtualTouchScreenBuilder::HandleUp(const std::shared_ptr<Json> &model)
 {
+    if (!model->HasItem("slot")) {
+        return;
+    }
     int32_t slot = VirtualTouchScreenBuilder::GetModelValue(model, "slot", DEFAULT_VALUE_MINUS_ONE);
+    std::cout << "[touchscreen] up: [" << slot << "]" << std::endl;
 
-    std::cout << "[touchscreen] release: [" << slot << "]" << std::endl;
     VirtualTouchScreen::GetDevice()->UpButton(slot);
 }
 
-void VirtualTouchScreenBuilder::HandleMoveTo(const nlohmann::json &model)
+void VirtualTouchScreenBuilder::HandleMoveTo(const std::shared_ptr<Json> &model)
 {
+    if (!model->HasItem("slot") || !model->HasItem("x") || !model->HasItem("y")) {
+        return;
+    }
     int32_t slot = VirtualTouchScreenBuilder::GetModelValue(model, "slot", DEFAULT_VALUE_MINUS_ONE);
-
     int32_t x = VirtualTouchScreenBuilder::GetModelValue(model, "x", DEFAULT_VALUE_MINUS_ONE);
-
     int32_t y = VirtualTouchScreenBuilder::GetModelValue(model, "y", DEFAULT_VALUE_MINUS_ONE);
 
     std::cout << "[touchscreen] move-to: [" << slot << ", (" << x << "," << y << ")]" << std::endl;
     VirtualTouchScreen::GetDevice()->MoveTo(slot, x, y);
 }
 
-void VirtualTouchScreenBuilder::HandleWait(const nlohmann::json &model)
+void VirtualTouchScreenBuilder::HandleWait(const std::shared_ptr<Json> &model)
 {
-    CALL_DEBUG_ENTER;
-    auto it = model.find("duration");
-    if (it != model.cend() && it->is_number_integer()) {
-        int32_t waitTime = it.value();
+    if (!model->HasItem("duration")) {
+        return;
+    }
+    auto it = model->GetItem("duration");
+    if (!it->IsNull() && it->IsNumber()) {
+        int32_t waitTime = it->IntValue();
+        std::cout << "[touchstreen] wait for " << waitTime << " milliseconds" << std::endl;
         VirtualDeviceBuilder::WaitFor("touchscreen", waitTime);
     }
 }
@@ -496,57 +506,67 @@ void VirtualTouchScreenBuilder::HandleWait(const nlohmann::json &model)
 void VirtualTouchScreenBuilder::ReadRawInput(const char *path)
 {
     CALL_DEBUG_ENTER;
-    json model;
-    int32_t ret = VirtualDeviceBuilder::ReadFile(path, model);
-    if (ret == RET_ERR) {
-        FI_HILOGE("Failed to read raw input data");
+    std::shared_ptr<Json> model = Json::Load(path);
+    CHKPV(model);
+    if (!model->IsObject()) {
+        FI_HILOGE("Failed to load the file");
         return;
     }
     ReadRawModel(model, MAXIMUM_LEVEL_ALLOWED);
 }
 
-void VirtualTouchScreenBuilder::ReadRawModel(const nlohmann::json &model, int32_t level)
+void VirtualTouchScreenBuilder::ReadRawModel(const std::shared_ptr<Json> &model, int32_t level)
 {
     CALL_DEBUG_ENTER;
-    if (model.is_object()) {
-        auto it = model.find("type");
-        if (it == model.cend() || !it->is_string() || (std::string(it.value()).compare("raw") != 0)) {
-            std::cout << "Expect raw input data." << std::endl;
+    if (!model->IsObject() && !model->IsArray()) {
+        FI_HILOGE("model is not an array or object");
+        return;
+    }
+    if (model->IsObject()) {
+        auto it = model->GetItem("type");
+        if (it->IsNull() || !it->IsString() || (it->StringValue().compare("raw") != 0)) {
+            std::cout << "Expect raw input data" << std::endl;
             return;
         }
-        it = model.find("actions");
-        if (it != model.cend() && it->is_array()) {
-            std::for_each(it->cbegin(), it->cend(), [](const auto &item) { ReadRawData(item); });
+        it = model->GetItem("actions");
+        if (!it->IsNull() && it->IsArray()) {
+            for (const auto &item : it->GetArrayItems()) {
+                ReadRawData(item);
+            }
         }
-    } else if (model.is_array() && level > 0) {
-        for (const auto &m : model) {
+    }
+    if (model->IsArray() && (level > 0)) {
+        for (const auto &m : model->GetArrayItems()) {
             ReadRawModel(m, level - 1);
         }
     }
 }
 
-void VirtualTouchScreenBuilder::ReadRawData(const nlohmann::json &model)
+void VirtualTouchScreenBuilder::ReadRawData(const std::shared_ptr<Json> &model)
 {
     CALL_DEBUG_ENTER;
-    if (!model.is_object()) {
-        FI_HILOGD("Not an object");
+    if (!model->IsObject()) {
+        FI_HILOGE("model is not an object");
         return;
     }
-    auto typeIter = model.find("type");
-    if (typeIter == model.cend() || !typeIter->is_number_integer()) {
+
+    auto typeIter = model->GetItem("type");
+    if (typeIter->IsNull() || !typeIter->IsNumber()) {
         return;
     }
-    auto codeIter = model.find("code");
-    if (codeIter == model.cend() || !codeIter->is_number_integer()) {
+
+    auto codeIter = model->GetItem("code");
+    if (codeIter->IsNull() || !codeIter->IsNumber()) {
         return;
     }
-    auto valueIter = model.find("value");
-    if (valueIter == model.cend() || !valueIter->is_number_integer()) {
+
+    auto valueIter = model->GetItem("value");
+    if (valueIter->IsNull() || !valueIter->IsNumber()) {
         return;
     }
-    std::cout << "[touchscreen] raw input: [" << typeIter.value() << ", " << codeIter.value() << ", " <<
-        valueIter.value() << "]" << std::endl;
-    VirtualTouchScreen::GetDevice()->SendEvent(typeIter.value(), codeIter.value(), valueIter.value());
+    std::cout << "[touchscreen] raw input: [" << typeIter->IntValue() << ", " << codeIter->IntValue() << ", " <<
+        valueIter->IntValue() << "]" << std::endl;
+    VirtualTouchScreen::GetDevice()->SendEvent(typeIter->IntValue(), codeIter->IntValue(), valueIter->IntValue());
 }
 } // namespace DeviceStatus
 } // namespace Msdp

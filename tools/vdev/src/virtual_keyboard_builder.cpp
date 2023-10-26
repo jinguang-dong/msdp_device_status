@@ -21,6 +21,7 @@
 
 #include "devicestatus_define.h"
 #include "fi_log.h"
+#include "json.h"
 #include "utility.h"
 #include "virtual_keyboard.h"
 
@@ -30,7 +31,6 @@ namespace DeviceStatus {
 namespace {
 constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "VirtualKeyboardBuilder" };
 constexpr int32_t MAXIMUM_LEVEL_ALLOWED { 3 };
-constexpr ssize_t MAXIMUM_FILESIZE_ALLOWED { 0x100000 };
 } // namespace
 
 VirtualKeyboardBuilder::VirtualKeyboardBuilder() : VirtualDeviceBuilder(GetDeviceName(), BUS_USB, 0x24ae, 0x4035)
@@ -61,7 +61,7 @@ void VirtualKeyboardBuilder::ShowUsage()
 {
     std::cout << "Usage: vdevadm act -t K [-d <key>] [-u <key>] [-w <ms>] [-f <FILE>] [-r <FILE>]" << std::endl;
     std::cout << "      -d <key>    Down <key>" << std::endl;
-    std::cout << "      -u <key>    Release <key>" << std::endl;
+    std::cout << "      -u <key>    Up <key>" << std::endl;
     std::cout << "      -w <ms>     Wait for <ms> milliseconds." << std::endl;
     std::cout << "      -f <FILE>   Read actions from <FILE>" << std::endl;
     std::cout << "      -r <FILE>   Read raw input data from <FILE>." << std::endl;
@@ -215,7 +215,7 @@ void VirtualKeyboardBuilder::ReadUpAction()
     }
 
     int32_t key = std::atoi(optarg);
-    std::cout << "[keyboard] release key: [" << key << "]" << std::endl;
+    std::cout << "[keyboard] up key: [" << key << "]" << std::endl;
     VirtualKeyboard::GetDevice()->Up(key);
 }
 
@@ -223,94 +223,88 @@ void VirtualKeyboardBuilder::ReadActions(const char *path)
 {
     CALL_DEBUG_ENTER;
     CHKPV(path);
-    char realPath[PATH_MAX] {};
-
-    if (realpath(path, realPath) == nullptr) {
-        std::cout << "[keyboard] invalid path: " << path << std::endl;
-        return;
-    }
-    if (Utility::GetFileSize(realPath) > MAXIMUM_FILESIZE_ALLOWED) {
-        std::cout << "[keyboard] file is too large" << std::endl;
-        return;
-    }
-    json model;
-
-    int32_t ret = VirtualDeviceBuilder::ReadFile(realPath, model);
-    if (ret == RET_ERR) {
-        FI_HILOGE("Failed to read the file");
+    std::shared_ptr<Json> model = Json::Load(path);
+    CHKPV(model);
+    if (!model->IsObject()) {
+        FI_HILOGE("Failed to load the file");
         return;
     }
     ReadModel(model, MAXIMUM_LEVEL_ALLOWED);
 }
 
-void VirtualKeyboardBuilder::ReadModel(const nlohmann::json &model, int32_t level)
+void VirtualKeyboardBuilder::ReadModel(const std::shared_ptr<Json> &model, int32_t level)
 {
     CALL_DEBUG_ENTER;
-    if (!model.is_object() && !model.is_array()) {
+    if (!model->IsObject() && !model->IsArray()) {
         FI_HILOGE("model is not an array or object");
         return;
     }
-    if (model.is_object()) {
-        auto tIter = model.find("actions");
-        if (tIter != model.cend() && tIter->is_array()) {
-            std::for_each(tIter->cbegin(), tIter->cend(), [](const auto &item) { ReadAction(item); });
+    if (model->IsObject() && model->HasItem("actions")) {
+        std::vector<std::shared_ptr<Json>> actions = model->GetArrayItems("actions");
+        for (const auto &action : actions) {
+            ReadAction(action);
         }
     }
-    if (model.is_array() && level > 0) {
-        for (const auto &m : model) {
+    if (model->IsArray() && (level > 0)) {
+        for (const auto &m : model->GetArrayItems()) {
             ReadModel(m, level - 1);
         }
     }
 }
 
-void VirtualKeyboardBuilder::ReadAction(const nlohmann::json &model)
+void VirtualKeyboardBuilder::ReadAction(const std::shared_ptr<Json> &model)
 {
     CALL_DEBUG_ENTER;
-    if (!model.is_object()) {
-        FI_HILOGD("Not an object");
+    if (!model->IsObject()) {
         return;
     }
-    auto it = model.find("action");
-    if (it != model.cend() && it->is_string()) {
-        static const std::unordered_map<std::string, std::function<void(const nlohmann::json &model)>> actions {
+    auto it = model->GetItem("action");
+    if (!it->IsNull() && it->IsString()) {
+        static const std::unordered_map<std::string, std::function<void(const std::shared_ptr<Json> &model)>> actions {
             { "down", &VirtualKeyboardBuilder::HandleDown },
             { "up", &VirtualKeyboardBuilder::HandleUp },
             { "wait", &VirtualKeyboardBuilder::HandleWait }
         };
-        auto actionItr = actions.find(it.value());
+        auto actionItr = actions.find(it->StringValue());
         if (actionItr != actions.cend()) {
             actionItr->second(model);
         }
     }
 }
 
-void VirtualKeyboardBuilder::HandleDown(const nlohmann::json &model)
+void VirtualKeyboardBuilder::HandleDown(const std::shared_ptr<Json> &model)
 {
-    CALL_DEBUG_ENTER;
-    auto it = model.find("key");
-    if (it != model.cend() && it->is_number_integer()) {
-        std::cout << "[virtual keyboard] down key: " << it.value() << std::endl;
-        VirtualKeyboard::GetDevice()->Down(it.value());
+    if (!model->HasItem("key")) {
+        return;
+    }
+    auto it = model->GetItem("key");
+    if (!it->IsNull() && it->IsNumber()) {
+        std::cout << "[keyboard] down key: " << it->IntValue() << std::endl;
+        VirtualKeyboard::GetDevice()->Down(it->IntValue());
     }
 }
 
-void VirtualKeyboardBuilder::HandleUp(const nlohmann::json &model)
+void VirtualKeyboardBuilder::HandleUp(const std::shared_ptr<Json> &model)
 {
-    CALL_DEBUG_ENTER;
-    auto it = model.find("key");
-    if (it != model.cend() && it->is_number_integer()) {
-        std::cout << "[virtual keyboard] release key: " << it.value() << std::endl;
-        VirtualKeyboard::GetDevice()->Up(it.value());
+    if (!model->HasItem("key")) {
+        return;
+    }
+    auto it = model->GetItem("key");
+    if (!it->IsNull() && it->IsNumber()) {
+        std::cout << "[keyboard] up key: " << it->IntValue() << std::endl;
+        VirtualKeyboard::GetDevice()->Up(it->IntValue());
     }
 }
 
-void VirtualKeyboardBuilder::HandleWait(const nlohmann::json &model)
+void VirtualKeyboardBuilder::HandleWait(const std::shared_ptr<Json> &model)
 {
-    CALL_DEBUG_ENTER;
-    auto it = model.find("duration");
-    if (it != model.cend() && it->is_number_integer()) {
-        int32_t waitTime = it.value();
-        std::cout << "[virtual keyboard] wait for " << waitTime << " milliseconds" << std::endl;
+    if (!model->HasItem("duration")) {
+        return;
+    }
+    auto it = model->GetItem("duration");
+    if (!it->IsNull() && it->IsNumber()) {
+        int32_t waitTime = it->IntValue();
+        std::cout << "[keyboard] wait for " << waitTime << " milliseconds" << std::endl;
         VirtualDeviceBuilder::WaitFor("virtual keyboard", waitTime);
     }
 }
@@ -319,73 +313,66 @@ void VirtualKeyboardBuilder::ReadRawInput(const char *path)
 {
     CALL_DEBUG_ENTER;
     CHKPV(path);
-    char realPath[PATH_MAX] {};
-
-    if (realpath(path, realPath) == nullptr) {
-        std::cout << "[keyboard] invalid path: " << path << std::endl;
-        return;
-    }
-    if (Utility::GetFileSize(realPath) > MAXIMUM_FILESIZE_ALLOWED) {
-        std::cout << "[keyboard] file is too large" << std::endl;
-        return;
-    }
-    json model;
-
-    int32_t ret = VirtualDeviceBuilder::ReadFile(realPath, model);
-    if (ret == RET_ERR) {
-        FI_HILOGE("Failed to read raw input data");
-        return;
+    std::shared_ptr<Json> model = Json::Load(path);
+    CHKPV(model);
+    if (!model->IsObject()) {
+        FI_HILOGE("Failed to load the file");
     }
     ReadRawModel(model, MAXIMUM_LEVEL_ALLOWED);
 }
 
-void VirtualKeyboardBuilder::ReadRawModel(const nlohmann::json &model, int32_t level)
+void VirtualKeyboardBuilder::ReadRawModel(const std::shared_ptr<Json> &model, int32_t level)
 {
     CALL_DEBUG_ENTER;
-    if (!model.is_object() && !model.is_array()) {
+    if (!model->IsObject() && !model->IsArray()) {
         FI_HILOGE("model is not an array or object");
         return;
     }
-    if (model.is_object()) {
-        auto typeIter = model.find("type");
-        if (typeIter == model.cend() || !typeIter->is_string() || (std::string(typeIter.value()).compare("raw") != 0)) {
+    if (model->IsObject()) {
+        auto it = model->GetItem("type");
+        if (it->IsNull() || !it->IsString() || (it->StringValue().compare("raw") != 0)) {
             std::cout << "Expect raw input data." << std::endl;
             return;
         }
-        auto actionIter = model.find("actions");
-        if (actionIter != model.cend() && actionIter->is_array()) {
-            std::for_each(actionIter->cbegin(), actionIter->cend(), [](const auto &item) { ReadRawData(item); });
+        it = model->GetItem("actions");
+        if (!it->IsNull() && it->IsArray()) {
+            for (const auto &item : it->GetArrayItems()) {
+                ReadRawData(item);
+            }
         }
     }
-    if (model.is_array() && level > 0) {
-        for (const auto &m : model) {
+    if (model->IsArray() && (level > 0)) {
+        for (const auto &m : model->GetArrayItems()) {
             ReadRawModel(m, level - 1);
         }
     }
 }
 
-void VirtualKeyboardBuilder::ReadRawData(const nlohmann::json &model)
+void VirtualKeyboardBuilder::ReadRawData(const std::shared_ptr<Json> &model)
 {
     CALL_DEBUG_ENTER;
-    if (!model.is_object()) {
-        FI_HILOGE("model is not an object");
+    if (!model->IsObject()) {
         return;
     }
-    auto typeIter = model.find("type");
-    if (typeIter == model.cend() || !typeIter->is_number_integer()) {
+
+    auto typeIter = model->GetItem("type");
+    if (typeIter->IsNull() || !typeIter->IsNumber()) {
         return;
     }
-    auto codeIter = model.find("code");
-    if (codeIter == model.cend() || !codeIter->is_number_integer()) {
+
+    auto codeIter = model->GetItem("code");
+    if (codeIter->IsNull() || !codeIter->IsNumber()) {
         return;
     }
-    auto valueIter = model.find("value");
-    if (valueIter == model.cend() || !valueIter->is_number_integer()) {
+
+    auto valueIter = model->GetItem("value");
+    if (valueIter->IsNull() || !valueIter->IsNumber()) {
         return;
     }
-    std::cout << "[virtual keyboard] raw input: [" << typeIter.value() << ", " << codeIter.value() << ", " <<
-        valueIter.value() << "]" << std::endl;
-    VirtualKeyboard::GetDevice()->SendEvent(typeIter.value(), codeIter.value(), valueIter.value());
+
+    std::cout << "[keyboard] raw input: [" << typeIter->IntValue() << ", " << codeIter->IntValue() << ", " <<
+        valueIter->IntValue() << "]" << std::endl;
+    VirtualKeyboard::GetDevice()->SendEvent(typeIter->IntValue(), codeIter->IntValue(), valueIter->IntValue());
 }
 } // namespace DeviceStatus
 } // namespace Msdp

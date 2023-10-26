@@ -17,20 +17,21 @@
 #define VIRTUAL_DEVICE_BUILDER_H
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <linux/uinput.h>
 
-#include <nlohmann/json.hpp>
 #include "nocopyable.h"
 
+#include "json.h"
 #include "virtual_device.h"
 #include "virtual_device_defines.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-using json = nlohmann::json;
+
 class VirtualDeviceBuilder {
 public:
     VirtualDeviceBuilder(const std::string &name, uint16_t bustype, uint16_t vendor, uint16_t product);
@@ -39,13 +40,13 @@ public:
     DISALLOW_COPY_AND_MOVE(VirtualDeviceBuilder);
     bool SetUp();
     void Close();
+    static int32_t ReadFile(const char *path, std::string &buff);
 
 protected:
     static void Daemonize();
     static void Unmount(const char *name, const char *id);
     static void WaitFor(const char *path, const char *name);
     static void WaitFor(const char *name, int32_t timeout);
-    static int32_t ReadFile(const char *path, json &model);
     static int32_t ScanFor(std::function<bool(std::shared_ptr<VirtualDevice>)> pred,
         std::vector<std::shared_ptr<VirtualDevice>> &vDevs);
     static std::shared_ptr<VirtualDevice> Select(std::vector<std::shared_ptr<VirtualDevice>> &vDevs, const char *name);

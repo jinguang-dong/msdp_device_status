@@ -26,6 +26,7 @@
 
 #include "devicestatus_define.h"
 #include "fi_log.h"
+#include "json.h"
 #include "utility.h"
 #include "virtual_mouse.h"
 
@@ -88,7 +89,7 @@ void VirtualMouseBuilder::ShowUsage()
     std::cout << "      -d <mouse-button>" << std::endl;
     std::cout << "                  Down the <mouse-button>" << std::endl;
     std::cout << "      -u <mouse-button>" << std::endl;
-    std::cout << "                  Release the <mouse-button>" << std::endl;
+    std::cout << "                  Up the <mouse-button>" << std::endl;
     std::cout << "      -s <dy>     Scroll the mouse wheel" << std::endl;
     std::cout << "      -m <dx> [<dy>]" << std::endl;
     std::cout << "                  Move the mouse along <dx, dy>; if <dy> is missing, then set dy=dx" << std::endl;
@@ -327,13 +328,13 @@ void VirtualMouseBuilder::ReadUpAction()
     CHKPV(optarg);
 
     if (strcmp(optarg, "L") == 0) {
-        std::cout << "[mouse] release button: BTN_LEFT" << std::endl;
+        std::cout << "[mouse] up button: BTN_LEFT" << std::endl;
         VirtualMouse::GetDevice()->UpButton(BTN_LEFT);
     } else if (strcmp(optarg, "M") == 0) {
-        std::cout << "[mouse] release button: BTN_MIDDLE" << std::endl;
+        std::cout << "[mouse] up button: BTN_MIDDLE" << std::endl;
         VirtualMouse::GetDevice()->UpButton(BTN_MIDDLE);
     } else if (strcmp(optarg, "R") == 0) {
-        std::cout << "[mouse] release button: BTN_RIGHT" << std::endl;
+        std::cout << "[mouse] up button: BTN_RIGHT" << std::endl;
         VirtualMouse::GetDevice()->UpButton(BTN_RIGHT);
     } else {
         std::cout << "Invalid argument for option \'-u\'." << std::endl;
@@ -358,59 +359,61 @@ void VirtualMouseBuilder::ReadScrollAction()
 void VirtualMouseBuilder::ReadActions(const char *path)
 {
     CALL_DEBUG_ENTER;
-    json model;
-    int32_t ret = VirtualDeviceBuilder::ReadFile(path, model);
-    if (ret == RET_ERR) {
-        FI_HILOGE("Failed to read the file");
+    CHKPV(path);
+    std::shared_ptr<Json> model = Json::Load(path);
+    CHKPV(model);
+    if (!model->IsObject()) {
+        FI_HILOGE("Failed to load the file");
         return;
     }
     ReadModel(model, MAXIMUM_LEVEL_ALLOWED);
 }
 
-void VirtualMouseBuilder::ReadModel(const nlohmann::json &model, int32_t level)
+void VirtualMouseBuilder::ReadModel(const std::shared_ptr<Json> &model, int32_t level)
 {
     CALL_DEBUG_ENTER;
-    if (model.is_object()) {
-        auto tIter = model.find("actions");
-        if (tIter != model.cend() && tIter->is_array()) {
-            std::for_each(tIter->cbegin(), tIter->cend(), [](const auto &item) { ReadAction(item); });
+    if (model->IsObject() && model->HasItem("actions")) {
+        std::vector<std::shared_ptr<Json>> actions = model->GetArrayItems("actions");
+        for (const auto &action : actions) {
+            ReadAction(action);
         }
-    } else if (model.is_array() && level > 0) {
-        for (const auto &m : model) {
+    } else if (model->IsArray() && (level > 0)) {
+        for (auto m : model->GetArrayItems()) {
             ReadModel(m, level - 1);
         }
     }
 }
 
-void VirtualMouseBuilder::ReadAction(const nlohmann::json &model)
+void VirtualMouseBuilder::ReadAction(const std::shared_ptr<Json> &model)
 {
     CALL_DEBUG_ENTER;
-    if (!model.is_object()) {
-        FI_HILOGD("Not an object");
+    if (!model->IsObject()) {
         return;
     }
-    auto it = model.find("action");
-    if (it != model.cend() && it->is_string()) {
-        static const std::unordered_map<std::string, std::function<void(const nlohmann::json &model)>> actions {
+    auto it = model->GetItem("action");
+    if (!it->IsNull() && it->IsString()) {
+        static const std::unordered_map<std::string, std::function<void (const std::shared_ptr<Json> &model)>> actions {
             { "down", &HandleDown },
             { "move", &HandleMove },
             { "up", &HandleUp },
             { "scroll", &HandleScroll },
             { "wait", &HandleWait }
         };
-        auto actionItr = actions.find(it.value());
+        auto actionItr = actions.find(it->StringValue());
         if (actionItr != actions.cend()) {
             actionItr->second(model);
         }
     }
 }
 
-void VirtualMouseBuilder::HandleDown(const nlohmann::json &model)
+void VirtualMouseBuilder::HandleDown(const std::shared_ptr<Json> &model)
 {
-    CALL_DEBUG_ENTER;
-    auto it = model.find("button");
-    if (it != model.cend() && it->is_string()) {
-        auto tIter = mouseBtns.find(it.value());
+    if (!model->HasItem("button")) {
+        return;
+    }
+    auto it = model->GetItem("button");
+    if (!it->IsNull() && it->IsString()) {
+        auto tIter = mouseBtns.find(it->StringValue());
         if (tIter != mouseBtns.cend()) {
             std::cout << "[mouse] down button: " << tIter->first << std::endl;
             VirtualMouse::GetDevice()->DownButton(tIter->second);
@@ -418,113 +421,133 @@ void VirtualMouseBuilder::HandleDown(const nlohmann::json &model)
     }
 }
 
-void VirtualMouseBuilder::HandleMove(const nlohmann::json &model)
+void VirtualMouseBuilder::HandleMove(const std::shared_ptr<Json> &model)
 {
-    CALL_DEBUG_ENTER;
     int32_t dx = 0;
     int32_t dy = 0;
+    if (!model->HasItem("dx") || !model->HasItem("dy")) {
+        return;
+    }
+    auto it = model->GetItem("dx");
+    if (!it->IsNull() && it->IsNumber()) {
+        dx = it->IntValue();
+    }
 
-    auto it = model.find("dx");
-    if (it != model.cend() && it->is_number_integer()) {
-        dx = it.value();
+    it = model->GetItem("dy");
+    if (!it->IsNull() && it->IsNumber()) {
+        dy = it->IntValue();
     }
-    it = model.find("dy");
-    if (it != model.cend() && it->is_number_integer()) {
-        dy = it.value();
-    }
+
     std::cout << "[mouse] move: (" << dx << "," << dy << ")" << std::endl;
     VirtualMouse::GetDevice()->Move(dx, dy);
 }
 
-void VirtualMouseBuilder::HandleUp(const nlohmann::json &model)
+void VirtualMouseBuilder::HandleUp(const std::shared_ptr<Json> &model)
 {
-    CALL_DEBUG_ENTER;
-    auto it = model.find("button");
-    if (it != model.cend() && it->is_string()) {
-        auto tIter = mouseBtns.find(it.value());
+    if (!model->HasItem("button")) {
+        return;
+    }
+    auto it = model->GetItem("button");
+    if (!it->IsNull() && it->IsString()) {
+        auto tIter = mouseBtns.find(it->StringValue());
         if (tIter != mouseBtns.cend()) {
-            std::cout << "[mouse] release button: " << tIter->first << std::endl;
+            std::cout << "[mouse] up button: " << tIter->first << std::endl;
             VirtualMouse::GetDevice()->UpButton(tIter->second);
         }
     }
 }
 
-void VirtualMouseBuilder::HandleScroll(const nlohmann::json &model)
+void VirtualMouseBuilder::HandleScroll(const std::shared_ptr<Json> &model)
 {
     CALL_DEBUG_ENTER;
-    auto it = model.find("dy");
-    if (it != model.cend() && it->is_number_integer()) {
-        int32_t dy = it.value();
-        std::cout << "[mouse] scroll: " << dy << std::endl;
-        VirtualMouse::GetDevice()->Scroll(dy);
+    if (!model->HasItem("dy")) {
+        return;
+    }
+    auto it = model->GetItem("dy");
+    if (!it->IsNull() && it->IsNumber()) {
+        std::cout << "[mouse] scroll: " << it->IntValue() << std::endl;
+        VirtualMouse::GetDevice()->Scroll(it->IntValue());
     }
 }
 
-void VirtualMouseBuilder::HandleWait(const nlohmann::json &model)
+void VirtualMouseBuilder::HandleWait(const std::shared_ptr<Json> &model)
 {
-    CALL_DEBUG_ENTER;
-    auto it = model.find("duration");
-    if (it != model.cend() && it->is_number_integer()) {
-        int32_t waitTime = it.value();
+    if (!model->HasItem("duration")) {
+        return;
+    }
+    auto it = model->GetItem("duration");
+    if (!it->IsNull() && it->IsNumber()) {
+        int32_t waitTime = it->IntValue();
         std::cout << "[mouse] wait for " << waitTime << " milliseconds" << std::endl;
-        VirtualDeviceBuilder::WaitFor("mouse", waitTime);
+        VirtualDeviceBuilder::WaitFor("virtual mouse", waitTime);
     }
 }
 
 void VirtualMouseBuilder::ReadRawInput(const char *path)
 {
     CALL_DEBUG_ENTER;
-    json model;
-    int32_t ret = VirtualDeviceBuilder::ReadFile(path, model);
-    if (ret == RET_ERR) {
-        FI_HILOGE("Failed to read raw input data");
+    CHKPV(path);
+    std::shared_ptr<Json> model = Json::Load(path);
+    CHKPV(model);
+    if (!model->IsObject()) {
+        FI_HILOGE("Failed to load the file");
         return;
     }
     ReadRawModel(model, MAXIMUM_LEVEL_ALLOWED);
 }
 
-void VirtualMouseBuilder::ReadRawModel(const nlohmann::json &model, int32_t level)
+void VirtualMouseBuilder::ReadRawModel(const std::shared_ptr<Json> &model, int32_t level)
 {
     CALL_DEBUG_ENTER;
-    if (model.is_object()) {
-        auto typeIter = model.find("type");
-        if (typeIter == model.cend() || !typeIter->is_string() || (std::string(typeIter.value()).compare("raw") != 0)) {
+    if (!model->IsObject() && !model->IsArray()) {
+        FI_HILOGE("model is not an array or object");
+        return;
+    }
+    if (model->IsObject()) {
+        auto it = model->GetItem("type");
+        if (it->IsNull() || !it->IsString() || (it->StringValue().compare("raw") != 0)) {
             std::cout << "Expect raw input data." << std::endl;
             return;
         }
-        auto actionIter = model.find("actions");
-        if (actionIter != model.cend() && actionIter->is_array()) {
-            std::for_each(actionIter->cbegin(), actionIter->cend(), [](const auto &item) { ReadRawData(item); });
+        it = model->GetItem("actions");
+        if (!it->IsNull() && it->IsArray()) {
+            for (const auto& item : it->GetArrayItems()) {
+                ReadRawData(item);
+            }
         }
-    } else if (model.is_array() && level > 0) {
-        for (const auto &m : model) {
+    }
+    if (model->IsArray() && (level > 0)) {
+        for (const auto &m : model->GetArrayItems()) {
             ReadRawModel(m, level - 1);
         }
     }
 }
 
-void VirtualMouseBuilder::ReadRawData(const nlohmann::json &model)
+void VirtualMouseBuilder::ReadRawData(const std::shared_ptr<Json> &model)
 {
     CALL_DEBUG_ENTER;
-    if (!model.is_object()) {
-        FI_HILOGD("Not an object");
+    if (!model->IsObject()) {
+        FI_HILOGE("model is not an object");
         return;
     }
-    auto typeIter = model.find("type");
-    if (typeIter == model.cend() || !typeIter->is_number_integer()) {
+
+    auto typeIter = model->GetItem("type");
+    if (typeIter->IsNull() || !typeIter->IsNumber()) {
         return;
     }
-    auto codeIter = model.find("code");
-    if (codeIter == model.cend() || !codeIter->is_number_integer()) {
+
+    auto codeIter = model->GetItem("code");
+    if (codeIter->IsNull() || !codeIter->IsNumber()) {
         return;
     }
-    auto valueIter = model.find("value");
-    if (valueIter == model.cend() || !valueIter->is_number_integer()) {
+
+    auto valueIter = model->GetItem("value");
+    if (valueIter->IsNull() || !valueIter->IsNumber()) {
         return;
     }
-    std::cout << "[virtual mouse] raw input: [" << typeIter.value() << ", " << codeIter.value() << ", " <<
-        valueIter.value() << "]" << std::endl;
-    VirtualMouse::GetDevice()->SendEvent(typeIter.value(), codeIter.value(), valueIter.value());
+    std::cout << "[mouse] raw input: [" << typeIter->IntValue() << ", " << codeIter->IntValue() << ", " <<
+        valueIter->IntValue() << "]" << std::endl;
+    VirtualMouse::GetDevice()->SendEvent(typeIter->IntValue(), codeIter->IntValue(), valueIter->IntValue());
 }
 } // namespace DeviceStatus
 } // namespace Msdp
