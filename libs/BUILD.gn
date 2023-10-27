@@ -14,7 +14,10 @@
 import("../device_status.gni")
 
 config("devicestatus_private_config") {
-  include_dirs = [ "${device_status_interfaces_path}/innerkits/include" ]
+  include_dirs = [
+    "${device_status_interfaces_path}/innerkits/include",
+    "${device_status_utils_path}/include"
+  ]
 }
 
 config("devicestatus_srv_public_config") {
@@ -41,7 +44,6 @@ ohos_shared_library("devicestatus_mock") {
 
   deps = [
     "${device_status_utils_path}:devicestatus_util",
-    "//third_party/cJSON:cjson_static",
   ]
 
   external_deps = [
@@ -78,7 +80,6 @@ ohos_shared_library("devicestatus_algo") {
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_utils_path}:devicestatus_util",
-    "//third_party/cJSON:cjson_static",
     "//third_party/jsoncpp",
   ]
 

@@ -18,7 +18,6 @@
 
 #include <functional>
 
-#include "cJSON.h"
 #include "sensor_agent.h"
 
 #include "stationary_data.h"
@@ -41,22 +40,6 @@ constexpr double ANGLE_VER_FLIPPED_THRHD { 5.0 };
 constexpr int32_t VALID_TIME_THRESHOLD { 500 };
 constexpr int32_t ACC_SAMPLE_PERIOD { 100 };
 constexpr int32_t COUNTER_THRESHOLD = VALID_TIME_THRESHOLD / ACC_SAMPLE_PERIOD;
-
-struct JsonParser {
-    JsonParser() = default;
-    ~JsonParser()
-    {
-        if (json != nullptr) {
-            cJSON_Delete(json);
-            json = nullptr;
-        }
-    }
-    operator cJSON *()
-    {
-        return json;
-    }
-    cJSON *json = nullptr;
-};
 using SensorCallback = std::function<void(int32_t, AccelData*)>;
 } // namespace DeviceStatus
 } // namespace Msdp

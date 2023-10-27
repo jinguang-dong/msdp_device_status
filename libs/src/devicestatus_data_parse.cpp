@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 
 #include "devicestatus_data_define.h"
+#include "util.h"
 #include "devicestatus_errors.h"
 #include "fi_log.h"
 #include "utility.h"
