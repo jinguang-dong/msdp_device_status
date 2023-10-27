@@ -593,6 +593,12 @@ void DragManager::StateChangedNotify(DragState state)
     }
 }
 
+int32_t DragManager::GetCurrentDragState(DragState &dragState) const
+{
+    dragState = dragState_;
+    return RET_OK;
+}
+
 MMI::ExtraData DragManager::GetExtraData(bool appended) const
 {
     return CreateExtraData(appended);

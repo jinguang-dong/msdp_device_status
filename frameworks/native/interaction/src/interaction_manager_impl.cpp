@@ -303,6 +303,12 @@ int32_t InteractionManagerImpl::RemoveHotAreaListener(std::shared_ptr<IHotAreaLi
     return ERROR_UNSUPPORT;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
+
+int32_t InteractionManagerImpl::GetDragState(DragState &dragState)
+{
+    CALL_DEBUG_ENTER;
+    return dragManagerImpl_.GetDragState(dragState);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

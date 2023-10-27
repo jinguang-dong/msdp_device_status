@@ -752,6 +752,17 @@ int32_t DeviceStatusService::GetDragData(DragData &dragData)
     return ret;
 }
 
+int32_t DeviceStatusService::GetDragState(DragState &dragState)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = delegateTasks_.PostSyncTask(
+        std::bind(&DragManager::GetCurrentDragState, &dragMgr_, std::ref(dragState)));
+    if (ret != RET_OK) {
+        FI_HILOGE("Get drag state failed, ret:%{public}d", ret);
+    }
+    return ret;
+}
+
 int32_t DeviceStatusService::UpdateDragStyle(DragCursorStyle style)
 {
     CALL_DEBUG_ENTER;

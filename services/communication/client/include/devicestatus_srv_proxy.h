@@ -60,6 +60,7 @@ public:
     virtual int32_t GetShadowOffset(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height) override;
     virtual int32_t AddHotAreaListener() override;
     virtual int32_t RemoveHotAreaListener() override;
+    virtual int32_t GetDragState(DragState &dragState) override;
 
 private:
     static inline BrokerDelegator<DeviceStatusSrvProxy> delegator_;
