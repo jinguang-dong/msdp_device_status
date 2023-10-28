@@ -33,7 +33,7 @@ public:
     StreamBuffer() = default;
     DISALLOW_MOVE(StreamBuffer);
     explicit StreamBuffer(const StreamBuffer &buf);
-    virtual StreamBuffer &operator=(const StreamBuffer &other);
+    virtual StreamBuffer &operator=(const StreamBuffer &buffer);
     virtual ~StreamBuffer() = default;
 
     void Reset();
@@ -45,9 +45,9 @@ public:
     bool Write(const StreamBuffer &buf);
     bool Read(char *buf, size_t size);
     virtual bool Write(const char *buf, size_t size);
-    bool IsEmpty() const;
+    bool empty() const;
     size_t Size() const;
-    int32_t UnreadSize() const;
+    int32_t ResidualSize() const;
     int32_t GetAvailableBufSize() const;
     bool ChkRWError() const;
     const std::string &GetErrorStatusRemark() const;

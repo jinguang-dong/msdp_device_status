@@ -34,7 +34,7 @@ StreamClient::~StreamClient()
     CALL_DEBUG_ENTER;
 }
 
-int32_t StreamClient::ConnectTo()
+int32_t StreamClient::StartConnect()
 {
     CALL_DEBUG_ENTER;
     if (Socket() < 0) {
@@ -100,13 +100,13 @@ bool StreamClient::SendMsg(const NetPacket &pkt) const
 bool StreamClient::StartClient(MsgClientFunCallback fun)
 {
     CALL_DEBUG_ENTER;
-    if (isRunning_ || isConnected_) {
+    if (isRunning_ || hasConnected_) {
         FI_HILOGE("Client is connected or started");
         return false;
     }
     hasClient_ = true;
     recvFun_ = fun;
-    if (ConnectTo() < 0) {
+    if (StartConnect() < 0) {
         FI_HILOGW("Client connection failed, Try again later");
     }
     return true;
