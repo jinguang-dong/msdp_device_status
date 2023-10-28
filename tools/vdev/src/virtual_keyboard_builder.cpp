@@ -368,21 +368,21 @@ void VirtualKeyboardBuilder::ReadRawData(const nlohmann::json &model)
         FI_HILOGE("model is not an object");
         return;
     }
-    auto typeItem = model.find("type");
-    if (typeItem == model.cend() || !typeItem->is_number_integer()) {
+    auto valueIter = model.find("value");
+    if (valueIter == model.cend() || !valueIter->is_number_integer()) {
         return;
     }
-    auto codeItem = model.find("code");
-    if (codeItem == model.cend() || !codeItem->is_number_integer()) {
+    auto codeIter = model.find("code");
+    if (codeIter == model.cend() || !codeIter->is_number_integer()) {
         return;
     }
-    auto valueItem = model.find("value");
-    if (valueItem == model.cend() || !valueItem->is_number_integer()) {
+    auto typeIter = model.find("type");
+    if (typeIter == model.cend() || !typeIter->is_number_integer()) {
         return;
     }
-    std::cout << "[virtual keyboard] raw input: [" << typeItem.value() << ", " << codeItem.value() << ", " <<
-        valueItem.value() << "]" << std::endl;
-    VirtualKeyboard::GetDevice()->SendEvent(typeItem.value(), codeItem.value(), valueItem.value());
+    std::cout << "[virtual keyboard] raw input: [" << typeIter.value() << ", " << codeIter.value() << ", " <<
+        valueIter.value() << "]" << std::endl;
+    VirtualKeyboard::GetDevice()->SendEvent(typeIter.value(), codeIter.value(), valueIter.value());
 }
 } // namespace DeviceStatus
 } // namespace Msdp

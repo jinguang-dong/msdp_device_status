@@ -509,12 +509,12 @@ void VirtualMouseBuilder::ReadRawData(const nlohmann::json &model)
         FI_HILOGD("Not an object");
         return;
     }
-    auto typeIter = model.find("type");
-    if (typeIter == model.cend() || !typeIter->is_number_integer()) {
-        return;
-    }
     auto codeIter = model.find("code");
     if (codeIter == model.cend() || !codeIter->is_number_integer()) {
+        return;
+    }
+    auto typeIter = model.find("type");
+    if (typeIter == model.cend() || !typeIter->is_number_integer()) {
         return;
     }
     auto valueIter = model.find("value");

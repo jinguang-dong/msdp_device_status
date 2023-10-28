@@ -56,13 +56,13 @@ std::shared_ptr<Media::PixelMap> CreatePixelMap(int32_t width, int32_t height)
     int32_t colorByteCount = colorLen * INT32_BYTE;
     auto ret = memset_s(colorPixels, colorByteCount, DEFAULT_ICON_COLOR, colorByteCount);
     if (ret != EOK) {
-        FI_HILOGE("Memset_s failed");
+        FI_HILOGE("Failed to call Memset_s");
         delete[] colorPixels;
         return nullptr;
     }
     std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(colorPixels, colorLen, opts);
     if (pixelMap == nullptr) {
-        FI_HILOGE("Create pixelMap failed");
+        FI_HILOGE("Create pixelMap was a failure");
         delete[] colorPixels;
         return nullptr;
     }
