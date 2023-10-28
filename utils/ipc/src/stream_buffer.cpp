@@ -115,6 +115,7 @@ bool StreamBuffer::Read(char *buf, size_t size)
         rwErrorStatus_ = ErrorStatus::ERROR_STATUS_READ;
         return false;
     }
+
     rPos_ += static_cast<int32_t>(size);
     rCount_ += 1;
     return true;

@@ -165,7 +165,6 @@ void VirtualMouseBuilder::Clone()
         std::cout << "Failed to clone \' " << vDev->GetName() << " \'." << std::endl;
         return;
     }
-
     int32_t nTries = 3;
     do {
         std::this_thread::sleep_for(std::chrono::seconds(1));
