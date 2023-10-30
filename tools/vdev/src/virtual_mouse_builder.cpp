@@ -372,10 +372,10 @@ void VirtualMouseBuilder::ReadModel(const nlohmann::json &model, int32_t level)
     CALL_DEBUG_ENTER;
     if (model.is_object()) {
         auto tIter = model.find("actions");
-        if (tIter != model.cend() && tIter->is_array()) {
+        if ((tIter != model.cend()) && (tIter->is_array())) {
             std::for_each(tIter->cbegin(), tIter->cend(), [](const auto &item) { ReadAction(item); });
         }
-    } else if (model.is_array() && level > 0) {
+    } else if (model.is_array() && (level > 0)) {
         for (const auto &m : model) {
             ReadModel(m, level - 1);
         }
@@ -390,7 +390,7 @@ void VirtualMouseBuilder::ReadAction(const nlohmann::json &model)
         return;
     }
     auto it = model.find("action");
-    if (it != model.cend() && it->is_string()) {
+    if ((it != model.cend()) && (it->is_string())) {
         static const std::unordered_map<std::string, std::function<void(const nlohmann::json &model)>> actions {
             { "down", &HandleDown },
             { "move", &HandleMove },
@@ -409,7 +409,7 @@ void VirtualMouseBuilder::HandleDown(const nlohmann::json &model)
 {
     CALL_DEBUG_ENTER;
     auto it = model.find("button");
-    if (it != model.cend() && it->is_string()) {
+    if ((it != model.cend()) && it->is_string()) {
         auto tIter = mouseBtns.find(it.value());
         if (tIter != mouseBtns.cend()) {
             std::cout << "[mouse] down button: " << tIter->first << std::endl;
@@ -425,11 +425,11 @@ void VirtualMouseBuilder::HandleMove(const nlohmann::json &model)
     int32_t dy = 0;
 
     auto it = model.find("dx");
-    if (it != model.cend() && it->is_number_integer()) {
+    if ((it != model.cend()) && it->is_number_integer()) {
         dx = it.value();
     }
     it = model.find("dy");
-    if (it != model.cend() && it->is_number_integer()) {
+    if ((it != model.cend()) && it->is_number_integer()) {
         dy = it.value();
     }
     std::cout << "[mouse] move: (" << dx << "," << dy << ")" << std::endl;
@@ -440,7 +440,7 @@ void VirtualMouseBuilder::HandleUp(const nlohmann::json &model)
 {
     CALL_DEBUG_ENTER;
     auto it = model.find("button");
-    if (it != model.cend() && it->is_string()) {
+    if ((it != model.cend()) && it->is_string()) {
         auto tIter = mouseBtns.find(it.value());
         if (tIter != mouseBtns.cend()) {
             std::cout << "[mouse] release button: " << tIter->first << std::endl;
@@ -453,7 +453,7 @@ void VirtualMouseBuilder::HandleScroll(const nlohmann::json &model)
 {
     CALL_DEBUG_ENTER;
     auto it = model.find("dy");
-    if (it != model.cend() && it->is_number_integer()) {
+    if ((it != model.cend()) && it->is_number_integer()) {
         int32_t dy = it.value();
         std::cout << "[mouse] scroll: " << dy << std::endl;
         VirtualMouse::GetDevice()->Scroll(dy);
@@ -464,7 +464,7 @@ void VirtualMouseBuilder::HandleWait(const nlohmann::json &model)
 {
     CALL_DEBUG_ENTER;
     auto it = model.find("duration");
-    if (it != model.cend() && it->is_number_integer()) {
+    if ((it != model.cend()) && it->is_number_integer()) {
         int32_t waitTime = it.value();
         std::cout << "[mouse] wait for " << waitTime << " milliseconds" << std::endl;
         VirtualDeviceBuilder::WaitFor("mouse", waitTime);
@@ -488,12 +488,13 @@ void VirtualMouseBuilder::ReadRawModel(const nlohmann::json &model, int32_t leve
     CALL_DEBUG_ENTER;
     if (model.is_object()) {
         auto typeIter = model.find("type");
-        if (typeIter == model.cend() || !typeIter->is_string() || (std::string(typeIter.value()).compare("raw") != 0)) {
+        if ((typeIter == model.cend()) || !typeIter->is_string() ||
+        (std::string(typeIter.value()).compare("raw") != 0)) {
             std::cout << "Expect raw input data." << std::endl;
             return;
         }
         auto actionIter = model.find("actions");
-        if (actionIter != model.cend() && actionIter->is_array()) {
+        if ((actionIter != model.cend()) && actionIter->is_array()) {
             std::for_each(actionIter->cbegin(), actionIter->cend(), [](const auto &item) { ReadRawData(item); });
         }
     } else if (model.is_array() && level > 0) {
@@ -511,15 +512,15 @@ void VirtualMouseBuilder::ReadRawData(const nlohmann::json &model)
         return;
     }
     auto typeIter = model.find("type");
-    if (typeIter == model.cend() || !typeIter->is_number_integer()) {
+    if ((typeIter == model.cend()) || !typeIter->is_number_integer()) {
         return;
     }
     auto codeIter = model.find("code");
-    if (codeIter == model.cend() || !codeIter->is_number_integer()) {
+    if ((codeIter == model.cend()) || !codeIter->is_number_integer()) {
         return;
     }
     auto valueIter = model.find("value");
-    if (valueIter == model.cend() || !valueIter->is_number_integer()) {
+    if ((valueIter == model.cend()) || !valueIter->is_number_integer()) {
         return;
     }
     std::cout << "[virtual mouse] raw input: [" << typeIter.value() << ", " << codeIter.value() << ", " <<

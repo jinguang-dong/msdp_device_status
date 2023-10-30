@@ -252,11 +252,11 @@ void VirtualKeyboardBuilder::ReadModel(const nlohmann::json &model, int32_t leve
     }
     if (model.is_object()) {
         auto tIter = model.find("actions");
-        if (tIter != model.cend() && tIter->is_array()) {
+        if ((tIter != model.cend()) && tIter->is_array()) {
             std::for_each(tIter->cbegin(), tIter->cend(), [](const auto &item) { ReadAction(item); });
         }
     }
-    if (model.is_array() && level > 0) {
+    if (model.is_array() && (level > 0)) {
         for (const auto &m : model) {
             ReadModel(m, level - 1);
         }
@@ -271,7 +271,7 @@ void VirtualKeyboardBuilder::ReadAction(const nlohmann::json &model)
         return;
     }
     auto it = model.find("action");
-    if (it != model.cend() && it->is_string()) {
+    if ((it != model.cend()) && it->is_string()) {
         static const std::unordered_map<std::string, std::function<void(const nlohmann::json &model)>> actions {
             { "down", &VirtualKeyboardBuilder::HandleDown },
             { "up", &VirtualKeyboardBuilder::HandleUp },
@@ -288,7 +288,7 @@ void VirtualKeyboardBuilder::HandleDown(const nlohmann::json &model)
 {
     CALL_DEBUG_ENTER;
     auto it = model.find("key");
-    if (it != model.cend() && it->is_number_integer()) {
+    if ((it != model.cend()) && it->is_number_integer()) {
         std::cout << "[virtual keyboard] down key: " << it.value() << std::endl;
         VirtualKeyboard::GetDevice()->Down(it.value());
     }
@@ -298,7 +298,7 @@ void VirtualKeyboardBuilder::HandleUp(const nlohmann::json &model)
 {
     CALL_DEBUG_ENTER;
     auto it = model.find("key");
-    if (it != model.cend() && it->is_number_integer()) {
+    if ((it != model.cend()) && it->is_number_integer()) {
         std::cout << "[virtual keyboard] release key: " << it.value() << std::endl;
         VirtualKeyboard::GetDevice()->Up(it.value());
     }
@@ -308,7 +308,7 @@ void VirtualKeyboardBuilder::HandleWait(const nlohmann::json &model)
 {
     CALL_DEBUG_ENTER;
     auto it = model.find("duration");
-    if (it != model.cend() && it->is_number_integer()) {
+    if ((it != model.cend()) && it->is_number_integer()) {
         int32_t waitTime = it.value();
         std::cout << "[virtual keyboard] wait for " << waitTime << " milliseconds" << std::endl;
         VirtualDeviceBuilder::WaitFor("virtual keyboard", waitTime);
@@ -348,16 +348,17 @@ void VirtualKeyboardBuilder::ReadRawModel(const nlohmann::json &model, int32_t l
     }
     if (model.is_object()) {
         auto typeIter = model.find("type");
-        if (typeIter == model.cend() || !typeIter->is_string() || (std::string(typeIter.value()).compare("raw") != 0)) {
+        if ((typeIter == model.cend()) || !typeIter->is_string() ||
+        (std::string(typeIter.value()).compare("raw") != 0)) {
             std::cout << "Expect raw input data." << std::endl;
             return;
         }
         auto actionIter = model.find("actions");
-        if (actionIter != model.cend() && actionIter->is_array()) {
+        if ((actionIter != model.cend()) && actionIter->is_array()) {
             std::for_each(actionIter->cbegin(), actionIter->cend(), [](const auto &item) { ReadRawData(item); });
         }
     }
-    if (model.is_array() && level > 0) {
+    if (model.is_array() && (level > 0)) {
         for (const auto &m : model) {
             ReadRawModel(m, level - 1);
         }
@@ -372,15 +373,15 @@ void VirtualKeyboardBuilder::ReadRawData(const nlohmann::json &model)
         return;
     }
     auto typeIter = model.find("type");
-    if (typeIter == model.cend() || !typeIter->is_number_integer()) {
+    if ((typeIter == model.cend()) || !typeIter->is_number_integer()) {
         return;
     }
     auto codeIter = model.find("code");
-    if (codeIter == model.cend() || !codeIter->is_number_integer()) {
+    if ((codeIter == model.cend()) || !codeIter->is_number_integer()) {
         return;
     }
     auto valueIter = model.find("value");
-    if (valueIter == model.cend() || !valueIter->is_number_integer()) {
+    if ((valueIter == model.cend()) || !valueIter->is_number_integer()) {
         return;
     }
     std::cout << "[virtual keyboard] raw input: [" << typeIter.value() << ", " << codeIter.value() << ", " <<

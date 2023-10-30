@@ -624,7 +624,7 @@ void JsEventCooperateTarget::EmitCoordinationMessageEvent(uv_work_t *work, int32
 
 void JsEventCooperateTarget::HandleExecuteResult(napi_env env, int32_t errCode)
 {
-    if (errCode != OTHER_ERROR && errCode != RET_OK) {
+    if ((errCode != OTHER_ERROR) && (errCode != RET_OK)) {
         NapiError napiError;
         if (!UtilNapiError::GetApiError(errCode, napiError)) {
             FI_HILOGE("This error code could not be found");

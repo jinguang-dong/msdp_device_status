@@ -396,10 +396,10 @@ void VirtualTouchScreenBuilder::ReadModel(const nlohmann::json &model, int32_t l
     CALL_DEBUG_ENTER;
     if (model.is_object()) {
         auto it = model.find("actions");
-        if (it != model.cend() && it->is_array()) {
+        if ((it != model.cend()) && it->is_array()) {
             std::for_each(it->cbegin(), it->cend(), [](const auto &item) { ReadAction(item); });
         }
-    } else if (model.is_array() && level > 0) {
+    } else if (model.is_array() && (level > 0)) {
         for (const auto &m : model) {
             ReadModel(m, level - 1);
         }
@@ -487,7 +487,7 @@ void VirtualTouchScreenBuilder::HandleWait(const nlohmann::json &model)
 {
     CALL_DEBUG_ENTER;
     auto it = model.find("duration");
-    if (it != model.cend() && it->is_number_integer()) {
+    if ((it != model.cend()) && it->is_number_integer()) {
         int32_t waitTime = it.value();
         VirtualDeviceBuilder::WaitFor("touchscreen", waitTime);
     }
@@ -510,15 +510,15 @@ void VirtualTouchScreenBuilder::ReadRawModel(const nlohmann::json &model, int32_
     CALL_DEBUG_ENTER;
     if (model.is_object()) {
         auto it = model.find("type");
-        if (it == model.cend() || !it->is_string() || (std::string(it.value()).compare("raw") != 0)) {
+        if ((it == model.cend()) || !it->is_string() || (std::string(it.value()).compare("raw") != 0)) {
             std::cout << "Expect raw input data." << std::endl;
             return;
         }
         it = model.find("actions");
-        if (it != model.cend() && it->is_array()) {
+        if ((it != model.cend()) && it->is_array()) {
             std::for_each(it->cbegin(), it->cend(), [](const auto &item) { ReadRawData(item); });
         }
-    } else if (model.is_array() && level > 0) {
+    } else if (model.is_array() && (level > 0)) {
         for (const auto &m : model) {
             ReadRawModel(m, level - 1);
         }
@@ -533,15 +533,15 @@ void VirtualTouchScreenBuilder::ReadRawData(const nlohmann::json &model)
         return;
     }
     auto typeIter = model.find("type");
-    if (typeIter == model.cend() || !typeIter->is_number_integer()) {
+    if ((typeIter == model.cend()) || !typeIter->is_number_integer()) {
         return;
     }
     auto codeIter = model.find("code");
-    if (codeIter == model.cend() || !codeIter->is_number_integer()) {
+    if ((codeIter == model.cend()) || !codeIter->is_number_integer()) {
         return;
     }
     auto valueIter = model.find("value");
-    if (valueIter == model.cend() || !valueIter->is_number_integer()) {
+    if ((valueIter == model.cend()) || !valueIter->is_number_integer()) {
         return;
     }
     std::cout << "[touchscreen] raw input: [" << typeIter.value() << ", " << codeIter.value() << ", " <<
