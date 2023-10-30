@@ -24,6 +24,7 @@
 
 #include "coordination_util.h"
 #include "devicestatus_define.h"
+#include "util.h"
 
 namespace OHOS {
 namespace Msdp {

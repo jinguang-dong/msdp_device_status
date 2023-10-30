@@ -25,6 +25,7 @@ config("devicestatus_util_public_config") {
   include_dirs = [
     ".",
     "include",
+    "//third_party/cJSON",
   ]
 }
 
@@ -46,6 +47,8 @@ ohos_shared_library("devicestatus_util") {
     "hilog:libhilog",
     "napi:ace_napi",
   ]
+
+  deps = [ "//third_party/cJSON:cjson" ]
 
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "${device_status_subsystem_name}"

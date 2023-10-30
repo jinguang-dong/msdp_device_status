@@ -20,11 +20,29 @@
 #include <string>
 #include <vector>
 
+#include "cJSON.h"
+
 #include <sys/types.h>
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+struct JsonParser {
+    JsonParser() = default;
+    ~JsonParser()
+    {
+        if (json != nullptr) {
+            cJSON_Delete(json);
+            json = nullptr;
+        }
+    }
+    operator cJSON *()
+    {
+        return json;
+    }
+    cJSON *json = nullptr;
+};
+
 int32_t GetPid();
 const char* GetProgramName();
 int64_t GetMillisTime();
