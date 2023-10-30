@@ -57,14 +57,14 @@ bool StreamClient::SendMsg(const char *buf, size_t size) const
         return false;
     }
 
-    int32_t idx = 0;
     int32_t retryCount = 0;
+    int32_t idx = 0;
     const int32_t bufSize = static_cast<int32_t>(size);
     int32_t remSize = bufSize;
     while (remSize > 0 && retryCount < SEND_RETRY_LIMIT) {
         retryCount += 1;
-        ssize_t count = send(fd_, &buf[idx], remSize, MSG_DONTWAIT | MSG_NOSIGNAL);
-        if (count < 0) {
+        ssize_t number = send(fd_, &buf[idx], remSize, MSG_DONTWAIT | MSG_NOSIGNAL);
+        if (number < 0) {
             if (errno == EAGAIN || errno == EINTR || errno == EWOULDBLOCK) {
                 FI_HILOGW("Continue for errno EAGAIN|EINTR|EWOULDBLOCK, errno:%{public}d", errno);
                 continue;
@@ -72,8 +72,8 @@ bool StreamClient::SendMsg(const char *buf, size_t size) const
             FI_HILOGE("Send return failed, error:%{public}d, fd:%{public}d", errno, fd_);
             return false;
         }
-        idx += count;
-        remSize -= count;
+        idx += number;
+        remSize -= number;
         if (remSize > 0) {
             usleep(SEND_RETRY_SLEEP_TIME);
         }
