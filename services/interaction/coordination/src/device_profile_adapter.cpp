@@ -52,10 +52,10 @@ int32_t DeviceProfileAdapter::UpdateCrossingSwitchState(bool state, const std::v
     profile.SetServiceType(SERVICE_TYPE);
     cJSON *data = cJSON_CreateObject();
     cJSON_AddItemToObject(data, characteristicsName_.c_str(), cJSON_CreateNumber(state));
-    char *smsg = cJSON_Print(data);
+    char *csmsg = cJSON_Print(data);
     cJSON_Delete(data);
-    profile.SetCharacteristicProfileJson(smsg);
-    cJSON_free(smsg);
+    profile.SetCharacteristicProfileJson(csmsg);
+    cJSON_free(csmsg);
 
     int32_t ret = DistributedDeviceProfileClient::GetInstance().PutDeviceProfile(profile);
     if (ret != 0) {

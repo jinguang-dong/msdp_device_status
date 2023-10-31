@@ -36,6 +36,7 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceManager" };
+constexpr int32_t MAX_N_EVENTS { 64 };
 constexpr size_t EXPECTED_N_SUBMATCHES { 2 };
 constexpr size_t EXPECTED_SUBMATCH { 1 };
 } // namespace
@@ -95,17 +96,19 @@ int32_t DeviceManager::Enable()
 int32_t DeviceManager::OnEnable()
 {
     CALL_DEBUG_ENTER;
-    epollMgr_ = std::make_shared<EpollManager>();
-    int32_t ret = epollMgr_->Open();
+    int32_t ret = EpollCreate();
     if (ret != RET_OK) {
+        FI_HILOGE("EpollCreate failed");
         return ret;
     }
     ret = monitor_.Enable();
     if (ret != RET_OK) {
+        FI_HILOGE("Failed to enable monitor");
         goto CLOSE_EPOLL;
     }
-    ret = epollMgr_->Add(monitor_);
+    ret = EpollAdd(&monitor_);
     if (ret != RET_OK) {
+        FI_HILOGE("EpollAdd failed");
         goto DISABLE_MONITOR;
     }
     enumerator_.ScanDevices();
@@ -115,7 +118,7 @@ DISABLE_MONITOR:
     monitor_.Disable();
 
 CLOSE_EPOLL:
-    epollMgr_.reset();
+    EpollClose();
     return ret;
 }
 
@@ -133,10 +136,9 @@ int32_t DeviceManager::Disable()
 
 int32_t DeviceManager::OnDisable()
 {
-    CHKPR(epollMgr_, RET_ERR);
-    epollMgr_->Remove(monitor_);
+    EpollDel(&monitor_);
     monitor_.Disable();
-    epollMgr_.reset();
+    EpollClose();
     return RET_OK;
 }
 
@@ -264,25 +266,85 @@ void DeviceManager::OnDeviceRemoved(std::shared_ptr<IDevice> dev)
     }
 }
 
-void DeviceManager::Dispatch(const struct epoll_event &ev)
+int32_t DeviceManager::EpollCreate()
 {
     CALL_DEBUG_ENTER;
-    CHKPV(context_);
-    int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
-        std::bind(&DeviceManager::OnEpollDispatch, this, ev.events));
-    if (ret != RET_OK) {
-        FI_HILOGE("PostAsyncTask failed");
+    epollFd_ = epoll_create1(EPOLL_CLOEXEC);
+    if (epollFd_ < 0) {
+        FI_HILOGE("epoll_create1 failed");
+        return RET_ERR;
+    }
+    return RET_OK;
+}
+
+int32_t DeviceManager::EpollAdd(IEpollEventSource *source)
+{
+    CALL_DEBUG_ENTER;
+    CHKPR(source, RET_ERR);
+    struct epoll_event ev {};
+    ev.events = EPOLLIN | EPOLLHUP | EPOLLERR;
+    ev.data.ptr = source;
+    int32_t ret = epoll_ctl(epollFd_, EPOLL_CTL_ADD, source->GetFd(), &ev);
+    if (ret != 0) {
+        FI_HILOGE("epoll_ctl failed:%{public}s", strerror(errno));
+        return RET_ERR;
+    }
+    return RET_OK;
+}
+
+void DeviceManager::EpollDel(IEpollEventSource *source)
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(source);
+    int32_t ret = epoll_ctl(epollFd_, EPOLL_CTL_DEL, source->GetFd(), nullptr);
+    if (ret != 0) {
+        FI_HILOGE("epoll_ctl failed:%{public}s", strerror(errno));
     }
 }
 
-int32_t DeviceManager::OnEpollDispatch(uint32_t events)
+void DeviceManager::EpollClose()
 {
-    struct epoll_event ev {};
-    ev.events = events;
-    ev.data.ptr = epollMgr_.get();
+    CALL_DEBUG_ENTER;
+    if (epollFd_ >= 0) {
+        if (close(epollFd_) < 0) {
+            FI_HILOGE("Close epoll fd failed, error:%{public}s, epollFd_:%{public}d", strerror(errno), epollFd_);
+        }
+        epollFd_ = -1;
+    }
+}
 
-    CHKPR(epollMgr_, RET_ERR);
-    epollMgr_->Dispatch(ev);
+void DeviceManager::Dispatch(const struct epoll_event &ev)
+{
+    CALL_DEBUG_ENTER;
+    if ((ev.events & EPOLLIN) == EPOLLIN) {
+        CHKPV(context_);
+        int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
+            std::bind(&DeviceManager::OnEpollDispatch, this));
+        if (ret != RET_OK) {
+            FI_HILOGE("PostAsyncTask failed");
+        }
+    } else if ((ev.events & (EPOLLHUP | EPOLLERR)) != 0) {
+        FI_HILOGE("Epoll hangup:%{public}s", strerror(errno));
+    }
+}
+
+int32_t DeviceManager::OnEpollDispatch()
+{
+    struct epoll_event evs[MAX_N_EVENTS];
+    int32_t cnt = epoll_wait(epollFd_, evs, MAX_N_EVENTS, 0);
+    if (cnt < 0) {
+        FI_HILOGE("epoll_wait failed");
+        return RET_ERR;
+    }
+    for (int32_t index = 0; index < cnt; ++index) {
+        IEpollEventSource *source = reinterpret_cast<IEpollEventSource *>(evs[index].data.ptr);
+        CHKPC(source);
+        if ((evs[index].events & EPOLLIN) == EPOLLIN) {
+            source->Dispatch(evs[index]);
+        } else if ((evs[index].events & (EPOLLHUP | EPOLLERR)) != 0) {
+            FI_HILOGE("Epoll hangup:%{public}s", strerror(errno));
+        }
+    }
     return RET_OK;
 }
 

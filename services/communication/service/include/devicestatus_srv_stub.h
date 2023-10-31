@@ -61,7 +61,6 @@ private:
     int32_t GetShadowOffsetStub(MessageParcel& data, MessageParcel& reply);
     int32_t UpdateShadowPicStub(MessageParcel& data, MessageParcel& reply);
     int32_t GetDragDataStub(MessageParcel& data, MessageParcel& reply);
-    int32_t GetDragStateStub(MessageParcel &data, MessageParcel &reply);
     int32_t AddHotAreaListenerStub(MessageParcel& data, MessageParcel& reply);
     int32_t RemoveHotAreaListenerStub(MessageParcel& data, MessageParcel& reply);
     bool CheckCooperatePermission();

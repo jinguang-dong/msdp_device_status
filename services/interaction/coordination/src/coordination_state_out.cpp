@@ -23,6 +23,7 @@
 #include "coordination_util.h"
 #include "distributed_input_adapter.h"
 
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {

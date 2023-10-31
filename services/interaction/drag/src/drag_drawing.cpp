@@ -63,7 +63,6 @@ constexpr int32_t SVG_HEIGHT { 40 };
 constexpr int32_t SIXTEEN { 16 };
 constexpr int32_t SUCCESS_ANIMATION_DURATION { 300 };
 constexpr int32_t VIEW_BOX_POS { 2 };
-constexpr int32_t BACKGROUND_FILTER_INDEX { 0 };
 constexpr int32_t PIXEL_MAP_INDEX { 1 };
 constexpr int32_t DRAG_STYLE_INDEX { 2 };
 constexpr int32_t MOUSE_ICON_INDEX { 3 };
@@ -327,7 +326,6 @@ int32_t DragDrawing::UpdateShadowPic(const ShadowInfo &shadowInfo)
         g_drawingInfo.pixelMapY = shadowInfo.y;
         DrawMouseIcon();
     }
-    ProcessFilter();
     Draw(g_drawingInfo.displayId, g_drawingInfo.displayX + shadowInfo.x - g_drawingInfo.pixelMapX,
         g_drawingInfo.displayY + shadowInfo.y - g_drawingInfo.pixelMapY);
     Rosen::RSTransaction::FlushImplicitTransaction();
@@ -467,6 +465,7 @@ void DragDrawing::OnStartDrag(const DragAnimationData &dragAnimationData,
         return;
     }
     if (handler_ == nullptr) {
+        FI_HILOGE("determined successful");
         auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
         CHKPV(runner);
         handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
@@ -799,11 +798,9 @@ void DragDrawing::InitCanvas(int32_t width, int32_t height)
     g_drawingInfo.rootNode->SetFrame(g_drawingInfo.displayX, g_drawingInfo.displayY - adjustSize, width, height);
     g_drawingInfo.rootNode->SetBackgroundColor(SK_ColorTRANSPARENT);
     std::shared_ptr<Rosen::RSCanvasNode> filterNode = Rosen::RSCanvasNode::Create();
+    ProcessFilter(filterNode);
     CHKPV(filterNode);
     g_drawingInfo.nodes.emplace_back(filterNode);
-    if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
-        ProcessFilter();
-    }
     std::shared_ptr<Rosen::RSCanvasNode> pixelMapNode = Rosen::RSCanvasNode::Create();
     CHKPV(pixelMapNode);
     CHKPV(g_drawingInfo.pixelMap);
@@ -1174,10 +1171,8 @@ bool DragDrawing::ParserFilterInfo(FilterInfo& filterInfo)
     return true;
 }
 
-void DragDrawing::ProcessFilter()
+void DragDrawing::ProcessFilter(std::shared_ptr<Rosen::RSCanvasNode> filterNode)
 {
-    CALL_DEBUG_ENTER;
-    std::shared_ptr<Rosen::RSCanvasNode> filterNode = g_drawingInfo.nodes[BACKGROUND_FILTER_INDEX];
     CHKPV(filterNode);
     CHKPV(g_drawingInfo.pixelMap);
     int32_t adjustSize = TWELVE_SIZE * GetScaling();
@@ -1242,10 +1237,10 @@ void DrawSVGModifier::Draw(Rosen::RSDrawingContext& context) const
     dragStyleNode->SetBgImageHeight(stylePixelMap_->GetHeight());
     dragStyleNode->SetBgImagePositionX(0);
     dragStyleNode->SetBgImagePositionY(0);
-    auto rosenImage = std::make_shared<Rosen::RSImage>();
-    rosenImage->SetPixelMap(stylePixelMap_);
-    rosenImage->SetImageRepeat(0);
-    dragStyleNode->SetBgImage(rosenImage);
+    auto rimagePointer = std::make_shared<Rosen::RSImage>();
+    imagePointer->SetPixelMap(stylePixelMap_);
+    imagePointer->SetImageRepeat(0);
+    dragStyleNode->SetBgImage(imagePointer);
     adjustSize = (SVG_WIDTH + TWELVE_SIZE) * scalingValue;
     g_drawingInfo.rootNodeWidth = g_drawingInfo.pixelMap->GetWidth() + g_drawingInfo.mouseWidth + adjustSize;
     g_drawingInfo.rootNodeHeight = g_drawingInfo.pixelMap->GetHeight() + g_drawingInfo.mouseHeight + adjustSize;
