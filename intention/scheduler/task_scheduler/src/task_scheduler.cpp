@@ -117,7 +117,7 @@ void TaskScheduler::PopPendingTaskList(std::vector<TaskPtr> &tasks)
 {
     static constexpr int32_t onceProcessTaskLimit = 10;
     std::lock_guard<std::mutex> guard(mux_);
-    for (int32_t total = 0; total < onceProcessTaskLimit; total++) {
+    for (int32_t i = 0; i < onceProcessTaskLimit; i++) {
         if (tasks_.empty()) {
             break;
         }
