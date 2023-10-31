@@ -360,7 +360,7 @@ void JsEventCooperateTarget::CallStartPromiseWork(uv_work_t *work, int32_t statu
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(cb->env, &scope);
     if (scope == nullptr) {
-        FI_HILOGE("Start promises,cope is nullptr");
+        FI_HILOGE("Start promises, cope is nullptr");
         RELEASE_CALLBACKINFO(cb->env, cb->ref);
         return;
     }
