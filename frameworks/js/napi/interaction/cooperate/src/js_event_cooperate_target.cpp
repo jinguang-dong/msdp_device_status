@@ -366,7 +366,7 @@ void JsEventCooperateTarget::CallStartPromiseWork(uv_work_t *work, int32_t statu
     }
     napi_value object = JsUtilCooperate::GetStartInfo(cb);
     if (object == nullptr) {
-        FI_HILOGE("Start promises,object is nullptr");
+        FI_HILOGE("Start promises, object is nullptr");
         RELEASE_CALLBACKINFO(cb->env, cb->ref);
         napi_close_handle_scope(cb->env, scope);
         return;
@@ -416,8 +416,8 @@ void JsEventCooperateTarget::CallStartAsyncWork(uv_work_t *work, int32_t status)
     }
     napi_value handler = nullptr;
     CHKRV_SCOPE(cb->env, napi_get_reference_value(cb->env, cb->ref, &handler), GET_REFERENCE_VALUE, scope);
-    napi_value results = nullptr;
-    CHKRV_SCOPE(cb->env, napi_call_function(cb->env, nullptr, handler, 1, &object, &results), CALL_FUNCTION, scope);
+    napi_value ret = nullptr;
+    CHKRV_SCOPE(cb->env, napi_call_function(cb->env, nullptr, handler, 1, &object, &ret), CALL_FUNCTION, scope);
     RELEASE_CALLBACKINFO(cb->env, cb->ref);
     napi_close_handle_scope(cb->env, scope);
 }
