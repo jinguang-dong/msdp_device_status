@@ -60,7 +60,7 @@ std::shared_ptr<Media::PixelMap> DragDataManagerTest::CreatePixelMap(int32_t wid
 {
     CALL_DEBUG_ENTER;
     if (width <= 0 || width > MAX_PIXEL_MAP_WIDTH || height <= 0 || height > MAX_PIXEL_MAP_HEIGHT) {
-        FI_HILOGE("Invalid size, height:%{public}d, width:%{public}d,}d", height, width);
+        FI_HILOGE("Invalid size, height:%{public}d, width:%{public}d}", height, width);
         return nullptr;
     }
     Media::InitializationOptions options;
