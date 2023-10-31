@@ -285,14 +285,14 @@ void JsEventTarget::CallPreparePromiseWork(uv_work_t *work, int32_t status)
     }
     napi_value object = JsUtil::GetPrepareInfo(cb);
     if (object == nullptr) {
-        FI_HILOGE("object is nullptr");
+        FI_HILOGE("object is nullptr1");
         RELEASE_CALLBACKINFO(cb->env, cb->ref);
         napi_close_handle_scope(cb->env, scope);
         return;
     }
     napi_valuetype valueType = napi_undefined;
     if (napi_typeof(cb->env, object, &valueType) != napi_ok) {
-        FI_HILOGE("napi typeof failed");
+        FI_HILOGE("napi typeof failed1");
         RELEASE_CALLBACKINFO(cb->env, cb->ref);
         napi_close_handle_scope(cb->env, scope);
         return;
@@ -363,14 +363,14 @@ void JsEventTarget::CallActivatePromiseWork(uv_work_t *work, int32_t status)
     }
     napi_value object = JsUtil::GetActivateInfo(cb);
     if (object == nullptr) {
-        FI_HILOGE("object is nullptr");
+        FI_HILOGE("object is nullptr2");
         RELEASE_CALLBACKINFO(cb->env, cb->ref);
         napi_close_handle_scope(cb->env, scope);
         return;
     }
     napi_valuetype valueType = napi_undefined;
     if (napi_typeof(cb->env, object, &valueType) != napi_ok) {
-        FI_HILOGE("napi typeof failed");
+        FI_HILOGE("napi typeof failed2");
         RELEASE_CALLBACKINFO(cb->env, cb->ref);
         napi_close_handle_scope(cb->env, scope);
         return;
@@ -441,7 +441,7 @@ void JsEventTarget::CallDeactivatePromiseWork(uv_work_t *work, int32_t status)
     }
     napi_value object = JsUtil::GetDeactivateInfo(cb);
     if (object == nullptr) {
-        FI_HILOGE("object is nullptr");
+        FI_HILOGE("object is nullptr3");
         RELEASE_CALLBACKINFO(cb->env, cb->ref);
         napi_close_handle_scope(cb->env, scope);
         return;
@@ -449,7 +449,7 @@ void JsEventTarget::CallDeactivatePromiseWork(uv_work_t *work, int32_t status)
 
     napi_valuetype valueType = napi_undefined;
     if (napi_typeof(cb->env, object, &valueType) != napi_ok) {
-        FI_HILOGE("napi typeof failed");
+        FI_HILOGE("napi typeof failed3");
         RELEASE_CALLBACKINFO(cb->env, cb->ref);
         napi_close_handle_scope(cb->env, scope);
         return;

@@ -102,19 +102,18 @@ std::optional<DragData> DragDataManagerTest::CreateDragData(int32_t sourceType,
         FI_HILOGE("Create pixelmap failed");
         return std::nullopt;
     }
-    DragData dragData;
-    dragData.shadowInfo.pixelMap = pixelMap;
-    dragData.shadowInfo.x = 0;
-    dragData.shadowInfo.y = 0;
-    dragData.buffer = std::vector<uint8_t>(MAX_BUFFER_SIZE, 0);
-    dragData.udKey = UD_KEY;
-    dragData.sourceType = sourceType;
-    dragData.pointerId = pointerId;
-    dragData.dragNum = dragNum;
-    dragData.displayX = DISPLAY_X;
-    dragData.displayY = DISPLAY_Y;
-    dragData.displayId = DISPLAY_ID;
-    dragData.hasCanceledAnimation = HAS_CANCELED_ANIMATION;
+DragData dragData {
+    .shadowInfo = {pixelMap, 0, 0},
+    .buffer = std::vector<uint8_t>(MAX_BUFFER_SIZE, 0),
+    .udKey = UD_KEY,
+    .sourceType = sourceType,
+    .pointerId = pointerId,
+    .dragNum = dragNum,
+    .displayX = DISPLAY_X,
+    .displayY = DISPLAY_Y,
+    .displayId = DISPLAY_ID,
+    .hasCanceledAnimation = HAS_CANCELED_ANIMATION
+};
     return dragData;
 }
 
