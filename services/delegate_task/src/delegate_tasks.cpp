@@ -117,7 +117,7 @@ void DelegateTasks::PopPendingTaskList(std::vector<TaskPtr> &tasks)
 {
     std::lock_guard<std::mutex> guard(mux_);
     static constexpr int32_t onceProcessTaskLimit = 10;
-    for (int32_t tally = 0; tally < onceProcessTaskLimit; tally++) {
+    for (int32_t i = 0; i < onceProcessTaskLimit; i++) {
         if (tasks_.empty()) {
             break;
         }
