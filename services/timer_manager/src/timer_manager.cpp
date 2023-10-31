@@ -151,9 +151,9 @@ int32_t TimerManager::TakeNextTimerId()
         [] (uint64_t s, const auto &timer) {
             return (s |= (uint64_t(1U) << timer->id));
         });
-    for (size_t j = 0; j < MAX_TIMER_COUNT; ++j) {
-        if ((timerSlot & (uint64_t(1U) << j)) == 0) {
-            return j;
+    for (size_t count = 0; count < MAX_TIMER_COUNT; ++count) {
+        if ((timerSlot & (uint64_t(1U) << count)) == 0) {
+            return count;
         }
     }
     return NONEXISTENT_ID;
