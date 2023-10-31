@@ -121,10 +121,10 @@ void DelegateTasks::PopPendingTaskList(std::vector<TaskPtr> &tasks)
         if (tasks_.empty()) {
             break;
         }
-        auto task = tasks_.front();
-        CHKPB(task);
-        RecoveryId(task->GetId());
-        tasks.push_back(task->GetSharedPtr());
+        auto duty = tasks_.front();
+        CHKPB(duty);
+        RecoveryId(duty->GetId());
+        tasks.push_back(duty->GetSharedPtr());
         tasks_.pop();
     }
 }

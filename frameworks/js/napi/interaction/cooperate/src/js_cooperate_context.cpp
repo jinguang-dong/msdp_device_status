@@ -156,7 +156,7 @@ napi_value JsCooperateContext::GetState(napi_env env, napi_callback_info info)
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
 
     if (argc == ZERO_PARAM) {
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
+        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Incorrect parameter count");
         return nullptr;
     }
     if (!UtilNapi::TypeOf(env, argv[ZERO_PARAM], napi_string)) {
@@ -191,7 +191,7 @@ napi_value JsCooperateContext::On(napi_env env, napi_callback_info info)
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
 
     if (argc == ZERO_PARAM) {
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
+        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Mismatched parameter count");
         return nullptr;
     }
     if (!UtilNapi::TypeOf(env, argv[ZERO_PARAM], napi_string)) {

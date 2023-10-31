@@ -111,7 +111,7 @@ extern "C" IPlugin* CreateInstance(IContext *context)
     return new (std::nothrow) IntentionDrag(context);
 }
 
-extern "C" void DestroyInstance(IPlugin *instance)
+extern "C" void DestroyInstance(IPlugin *instance)  //c name mangling
 {
     if (instance != nullptr) {
         delete instance;

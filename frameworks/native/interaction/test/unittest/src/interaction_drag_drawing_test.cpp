@@ -83,7 +83,7 @@ std::shared_ptr<Media::PixelMap> InteractionDragDrawingTest::CreatePixelMap(int3
 {
     CALL_DEBUG_ENTER;
     if (width <= 0 || width > MAX_PIXEL_MAP_WIDTH || height <= 0 || height > MAX_PIXEL_MAP_HEIGHT) {
-        FI_HILOGE("Invalid size, width:%{public}d, height:%{public}d", width, height);
+        FI_HILOGE("Improper size, width:%{public}d, height:%{public}d", width, height);
         return nullptr;
     }
     Media::InitializationOptions opts;

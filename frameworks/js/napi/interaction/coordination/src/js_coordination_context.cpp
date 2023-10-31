@@ -177,7 +177,7 @@ napi_value JsCoordinationContext::GetCrossingSwitchState(napi_env env, napi_call
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
 
     if (argc == 0) {
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
+        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Incorrect parameter count");
         return nullptr;
     }
     if (!UtilNapi::TypeOf(env, argv[0], napi_string)) {
@@ -212,7 +212,7 @@ napi_value JsCoordinationContext::On(napi_env env, napi_callback_info info)
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
 
     if (argc == 0) {
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
+        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Parameter mismatch error");
         return nullptr;
     }
     if (!UtilNapi::TypeOf(env, argv[0], napi_string)) {
@@ -313,7 +313,7 @@ napi_value JsCoordinationContext::CreateInstance(napi_env env)
     uint32_t refCount = 0;
     status = napi_reference_ref(env, jsContext->contextRef_, &refCount);
     if (status != napi_ok) {
-        FI_HILOGE("ref is nullptr");
+        FI_HILOGE("reference to nullptr");
         napi_delete_reference(env, jsContext->contextRef_);
         return nullptr;
     }
