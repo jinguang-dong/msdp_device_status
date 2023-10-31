@@ -232,14 +232,14 @@ void TimerManager::InsertTimerInternal(std::unique_ptr<TimerItem>& timer)
 
 int64_t TimerManager::CalcNextDelayInternal()
 {
-    int64_t defer = MIN_DELAY;
+    int64_t delayTime = MIN_DELAY;
     if (!timers_.empty()) {
         int64_t nowTime = GetMillisTime();
         const auto& item = *timers_.begin();
         if (nowTime >= item->nextCallTime) {
-            defer = 0;
+            delayTime = 0;
         } else {
-            defer = item->nextCallTime - nowTime;
+            delayTime = item->nextCallTime - nowTime;
         }
     }
     return defer;
