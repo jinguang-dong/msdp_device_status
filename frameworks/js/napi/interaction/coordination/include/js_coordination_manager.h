@@ -38,8 +38,7 @@ public:
     napi_value GetCrossingSwitchState(napi_env env, const std::string &networkId, napi_value handle = nullptr);
     void ResetEnv();
     void RegisterListener(napi_env env, const std::string &type, napi_value handle);
-    void UnregisterListener(napi_env env, const std::string &type, napi_value handle = nullptr);
-    
+    void UnregisterListener(napi_env env, const std::string &type, napi_value handle = nullptr); 
 
 private:
     std::mutex mutex_;
