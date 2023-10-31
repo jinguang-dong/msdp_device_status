@@ -83,8 +83,8 @@ HWTEST_F(DeviceStatusServiceTest, GetDeviceStatusDataTest002, TestSize.Level0)
     CALL_TEST_DEBUG;
     g_type = Type::TYPE_ABSOLUTE_STILL;
     Data data = g_client->GetDeviceStatusData(g_type);
-    GTEST_LOG_(INFO) << "type: " << data.type;
-    GTEST_LOG_(INFO) << "value: " << data.value;
+    GTEST_LOG_(INFO) << "The type: " << data.type;
+    GTEST_LOG_(INFO) << "The value: " << data.value;
     EXPECT_TRUE(data.type == Type::TYPE_ABSOLUTE_STILL &&
         (data.value >= OnChangedValue::VALUE_ENTER && data.value <= OnChangedValue::VALUE_EXIT));
     GTEST_LOG_(INFO) << "GetDeviceStatusData failed";
@@ -129,8 +129,8 @@ HWTEST_F(DeviceStatusServiceTest, GetDeviceStatusDataTest005, TestSize.Level0)
     CALL_TEST_DEBUG;
     g_type = Type::TYPE_CAR_BLUETOOTH;
     Data data = g_client->GetDeviceStatusData(g_type);
-    GTEST_LOG_(INFO) << "type: " << data.type;
-    GTEST_LOG_(INFO) << "value: " << data.value;
+    GTEST_LOG_(INFO) << "The type: " << data.type;
+    GTEST_LOG_(INFO) << "The value: " << data.value;
     EXPECT_TRUE(data.type == Type::TYPE_CAR_BLUETOOTH &&
         (data.value <= OnChangedValue::VALUE_EXIT && data.value >= OnChangedValue::VALUE_INVALID));
     GTEST_LOG_(INFO) << "GetDeviceStatusData failed";
@@ -175,8 +175,8 @@ HWTEST_F(DeviceStatusServiceTest, GetDeviceStatusDataTest008, TestSize.Level0)
     CALL_TEST_DEBUG;
     g_type = Type::TYPE_HORIZONTAL_POSITION;
     Data data = g_client->GetDeviceStatusData(g_type);
-    GTEST_LOG_(INFO) << "type: " << data.type;
-    GTEST_LOG_(INFO) << "value: " << data.value;
+    GTEST_LOG_(INFO) << "The type: " << data.type;
+    GTEST_LOG_(INFO) << "The value: " << data.value;
     EXPECT_TRUE(data.type == Type::TYPE_HORIZONTAL_POSITION &&
         (data.value >= OnChangedValue::VALUE_ENTER && data.value <= OnChangedValue::VALUE_EXIT));
     GTEST_LOG_(INFO) << "GetDeviceStatusData failed";
@@ -221,8 +221,8 @@ HWTEST_F(DeviceStatusServiceTest, GetDeviceStatusDataTest011, TestSize.Level0)
     CALL_TEST_DEBUG;
     g_type = Type::TYPE_RELATIVE_STILL;
     Data data = g_client->GetDeviceStatusData(g_type);
-    GTEST_LOG_(INFO) << "type: " << data.type;
-    GTEST_LOG_(INFO) << "value: " << data.value;
+    GTEST_LOG_(INFO) << "The type: " << data.type;
+    GTEST_LOG_(INFO) << "The value: " << data.value;
     EXPECT_TRUE(data.type == Type::TYPE_RELATIVE_STILL &&
         (data.value <= OnChangedValue::VALUE_EXIT && data.value >= OnChangedValue::VALUE_INVALID));
     GTEST_LOG_(INFO) << "GetDeviceStatusData failed";
@@ -267,8 +267,8 @@ HWTEST_F(DeviceStatusServiceTest, GetDeviceStatusDataTest014, TestSize.Level0)
     CALL_TEST_DEBUG;
     g_type = Type::TYPE_STILL;
     Data data = g_client->GetDeviceStatusData(g_type);
-    GTEST_LOG_(INFO) << "type: " << data.type;
-    GTEST_LOG_(INFO) << "value: " << data.value;
+    GTEST_LOG_(INFO) << "The type: " << data.type;
+    GTEST_LOG_(INFO) << "The value: " << data.value;
     EXPECT_TRUE(data.type == Type::TYPE_STILL &&
         (data.value <= OnChangedValue::VALUE_EXIT && data.value >= OnChangedValue::VALUE_INVALID));
     GTEST_LOG_(INFO) << "GetDeviceStatusData failed";
@@ -313,8 +313,8 @@ HWTEST_F(DeviceStatusServiceTest, GetDeviceStatusDataTest017, TestSize.Level0)
     CALL_TEST_DEBUG;
     g_type = Type::TYPE_VERTICAL_POSITION;
     Data data = g_client->GetDeviceStatusData(g_type);
-    GTEST_LOG_(INFO) << "type: " << data.type;
-    GTEST_LOG_(INFO) << "value: " << data.value;
+    GTEST_LOG_(INFO) << "The type: " << data.type;
+    GTEST_LOG_(INFO) << "The value: " << data.value;
     EXPECT_TRUE(data.type == Type::TYPE_VERTICAL_POSITION &&
         (data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT));
     GTEST_LOG_(INFO) << "GetDeviceStatusData failed";
@@ -344,8 +344,8 @@ HWTEST_F(DeviceStatusServiceTest, GetDeviceStatusDataTest019, TestSize.Level0)
     CALL_TEST_DEBUG;
     g_type = Type::TYPE_VERTICAL_POSITION;
     Data data = g_client->GetDeviceStatusData(g_type);
-    GTEST_LOG_(INFO) << "type: " << data.type;
-    GTEST_LOG_(INFO) << "value: " << data.value;
+    GTEST_LOG_(INFO) << "The type: " << data.type;
+    GTEST_LOG_(INFO) << "The value: " << data.value;
     EXPECT_TRUE(data.type == Type::TYPE_VERTICAL_POSITION &&
         (data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT));
     GTEST_LOG_(INFO) << "GetDeviceStatusData failed";
