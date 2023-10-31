@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,32 @@
  * limitations under the License.
  */
 
-#include "registercoordinationlistener_fuzzer.h"
+#include "removehotarealistener_fuzzer.h"
 
 #include "singleton.h"
 
 #define private public
 #include "devicestatus_service.h"
+#include "fi_log.h"
 #include "message_parcel.h"
 
 using namespace OHOS::Msdp::DeviceStatus;
-namespace OHOS {
-const std::u16string FORMMGR_DEVICE_TOKEN { u"ohos.msdp.Idevicestatus" };
 
-bool RegisterCoordinationListenerFuzzTest(const uint8_t* data, size_t size)
+namespace OHOS {
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, Msdp::MSDP_DOMAIN_ID, "RemoveHotAreaListenerFuzzTest" };
+
+bool RemoveHotAreaListenerFuzzTest(const uint8_t* data, size_t size)
 {
+    const std::u16string FORMMGR_DEVICE_TOKEN { u"ohos.msdp.Idevicestatus" };
     MessageParcel datas;
-    datas.WriteInterfaceToken(FORMMGR_DEVICE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
+    if (!datas.WriteInterfaceToken(FORMMGR_DEVICE_TOKEN) || !datas.WriteBuffer(data, size) || !datas.RewindRead(0)) {
+        FI_HILOGE("Write failure");
+        return false;
+    }
     MessageParcel reply;
     MessageOption option;
     DelayedSingleton<DeviceStatusService>::GetInstance()->OnRemoteRequest(
-        static_cast<uint32_t>(Msdp::DeviceInterfaceCode::REGISTER_COORDINATION_MONITOR), datas, reply, option);
+        static_cast<uint32_t>(Msdp::DeviceInterfaceCode::REMOVE_HOT_AREA_MONITOR), datas, reply, option);
     return true;
 }
 } // namespace OHOS
@@ -45,6 +49,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (data == nullptr) {
         return 0;
     }
-    OHOS::RegisterCoordinationListenerFuzzTest(data, size);
+
+    OHOS::RemoveHotAreaListenerFuzzTest(data, size);
     return 0;
 }
+

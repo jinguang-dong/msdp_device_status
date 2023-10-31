@@ -63,12 +63,12 @@ std::shared_ptr<Media::PixelMap> DragDataManagerTest::CreatePixelMap(int32_t wid
         FI_HILOGE("Invalid size, width:%{public}d, height:%{public}d", width, height);
         return nullptr;
     }
-    Media::InitializationOptions opts;
-    opts.size.width = width;
-    opts.size.height = height;
-    opts.pixelFormat = Media::PixelFormat::BGRA_8888;
-    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
-    opts.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
+    Media::InitializationOptions options;
+    options.size.width = width;
+    options.size.height = height;
+    options.pixelFormat = Media::PixelFormat::BGRA_8888;
+    options.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    options.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
 
     int32_t colorLen = width * height;
     uint32_t *colorPixels = new (std::nothrow) uint32_t[colorLen];
@@ -79,13 +79,13 @@ std::shared_ptr<Media::PixelMap> DragDataManagerTest::CreatePixelMap(int32_t wid
     int32_t colorByteCount = colorLen * INT32_BYTE;
     auto ret = memset_s(colorPixels, colorByteCount, DEFAULT_ICON_COLOR, colorByteCount);
     if (ret != EOK) {
-        FI_HILOGE("Memset_s failed");
+        FI_HILOGE("Call memset_s was a failure");
         delete[] colorPixels;
         return nullptr;
     }
-    std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(colorPixels, colorLen, opts);
+    std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(colorPixels, colorLen, options);
     if (pixelMap == nullptr) {
-        FI_HILOGE("Create pixelMap failed");
+        FI_HILOGE("Failed to create pixelMap");
         delete[] colorPixels;
         return nullptr;
     }
@@ -102,18 +102,19 @@ std::optional<DragData> DragDataManagerTest::CreateDragData(int32_t sourceType,
         FI_HILOGE("Create pixelmap failed");
         return std::nullopt;
     }
-DragData dragData {
-    .shadowInfo = {pixelMap, 0, 0},
-    .buffer = std::vector<uint8_t>(MAX_BUFFER_SIZE, 0),
-    .udKey = UD_KEY,
-    .sourceType = sourceType,
-    .pointerId = pointerId,
-    .dragNum = dragNum,
-    .displayX = DISPLAY_X,
-    .displayY = DISPLAY_Y,
-    .displayId = DISPLAY_ID,
-    .hasCanceledAnimation = HAS_CANCELED_ANIMATION
-};
+    DragData dragData;
+    dragData.shadowInfo.x = 0;
+    dragData.shadowInfo.y = 0;
+    dragData.shadowInfo.pixelMap = pixelMap;
+    dragData.buffer = std::vector<uint8_t>(MAX_BUFFER_SIZE, 0);
+    dragData.udKey = UD_KEY;
+    dragData.sourceType = sourceType;
+    dragData.pointerId = pointerId;
+    dragData.dragNum = dragNum;
+    dragData.displayX = DISPLAY_X;
+    dragData.displayY = DISPLAY_Y;
+    dragData.displayId = DISPLAY_ID;
+    dragData.hasCanceledAnimation = HAS_CANCELED_ANIMATION;
     return dragData;
 }
 

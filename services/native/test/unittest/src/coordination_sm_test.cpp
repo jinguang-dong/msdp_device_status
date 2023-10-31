@@ -67,8 +67,8 @@ void ClearCoordiantionSM()
     COOR_SM->lastPointerEvent_ = nullptr;
     COOR_SM->displayX_ = -1;
     COOR_SM->displayY_ = -1;
-    COOR_SM->interceptorId_ = -1;
     COOR_SM->monitorId_ = -1;
+    COOR_SM->interceptorId_ = -1;
     COOR_SM->filterId_ = -1;
     COOR_SM->remoteNetworkIdCallback_ = nullptr;
     COOR_SM->mouseLocationCallback_ = nullptr;
@@ -112,6 +112,7 @@ void CoordinationSMTest::AddPermission()
 void CoordinationSMTest::SetAceessTokenPermission(const std::string &processName, const char** perms, size_t permCount)
 {
     if (perms == nullptr || permCount == 0) {
+        FI_HILOGE("perms is nullptr or permCount is 0");
         return;
     }
     NativeTokenInfoParams infoInstance = {
@@ -149,7 +150,7 @@ void Device::Close() {}
 void Device::Dispatch(const struct epoll_event &ev) {}
 
 /**
- * @tc.name: CoordinationSMTest
+ * @tc.name: CoordinationSMTest001
  * @tc.desc: test IsNeedFilterOut state == CoordinationState::STATE_OUT
  * @tc.type: FUNC
  */
@@ -174,7 +175,7 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest001, TestSize.Level0)
 }
 
 /**
- * @tc.name: CoordinationSMTest
+ * @tc.name: CoordinationSMTest002
  * @tc.desc: test abnormal GetCoordinationState when local network id is empty
  * @tc.type: FUNC
  */
@@ -188,7 +189,7 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest002, TestSize.Level0)
 }
 
 /**
- * @tc.name: CoordinationSMTest
+ * @tc.name: CoordinationSMTest003
  * @tc.desc: test normal GetCoordinationState when local network id is correct
  * @tc.type: FUNC
  */
@@ -283,7 +284,7 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest008, TestSize.Level0)
 }
 
 /**
- * @tc.name: CoordinationSMTest
+ * @tc.name: CoordinationSMTest009
  * @tc.desc: test normal ActivateCoordination return the correct value
  * @tc.type: FUNC
  */
@@ -304,7 +305,7 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest009, TestSize.Level0)
 }
 
 /**
- * @tc.name: CoordinationSMTest
+ * @tc.name: CoordinationSMTest010
  * @tc.desc: test normal DeactivateCoordination return the correct value
  * @tc.type: FUNC
  */
@@ -335,7 +336,7 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest010, TestSize.Level0)
 }
 
 /**
- * @tc.name: CoordinationSMTest
+ * @tc.name: CoordinationSMTest011
  * @tc.desc: test normal UpdateState
  * @tc.type: FUNC
  */
@@ -352,7 +353,7 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest011, TestSize.Level0)
 }
 
 /**
- * @tc.name: CoordinationSMTest
+ * @tc.name: CoordinationSMTest012
  * @tc.desc: test normal UpdatePreparedDevices and obtain correct value
  * @tc.type: FUNC
  */
