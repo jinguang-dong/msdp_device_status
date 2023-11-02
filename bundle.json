@@ -66,6 +66,8 @@
           "//base/msdp/device_status/libs:devicestatus_algo",
           "//base/msdp/device_status/libs:devicestatus_mock",
           "//base/msdp/device_status/services:devicestatus_service",
+          "//base/msdp/device_status/services/device_manager:msdp_device_manager",
+          "//base/msdp/device_status/services/interaction/coordination:msdp_coordination",
           "//base/msdp/device_status/frameworks/native/src:deviceagent",
           "//base/msdp/device_status/sa_profile:devicestatus_sa_profile",
           "//base/msdp/device_status/tools:devicestatus_tools",
@@ -102,7 +104,7 @@
           }
         },
         {
-          "name": "//base/msdp/device_status/services/interaction/coordination:coordination",
+          "name": "//base/msdp/device_status/services/interaction/coordination:msdp_coordination",
           "header": {
             "header_files": [
               "interaction/coordination/include/coordination_softbus_adapter.h",

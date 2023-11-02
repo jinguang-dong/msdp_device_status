@@ -27,12 +27,7 @@
 #include "string_ex.h"
 #include "system_ability_definition.h"
 
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#include "coordination_device_manager.h"
-#include "coordination_event_manager.h"
-#include "coordination_hotarea.h"
-#include "coordination_sm.h"
-#endif // OHOS_BUILD_ENABLE_COORDINATION
+#include "coordination_message.h"
 #include "devicestatus_common.h"
 #include "devicestatus_hisysevent.h"
 
@@ -114,9 +109,9 @@ IDelegateTasks& DeviceStatusService::GetDelegateTasks()
     return delegateTasks_;
 }
 
-IDeviceManager& DeviceStatusService::GetDeviceManager()
+IPluginManager& DeviceStatusService::GetPluginManager()
 {
-    return devMgr_;
+    return pluginMgr_;
 }
 
 ITimerManager& DeviceStatusService::GetTimerManager()
@@ -183,8 +178,8 @@ bool DeviceStatusService::Init()
         FI_HILOGE("TimerMgr init failed");
         goto INIT_FAIL;
     }
-    if (devMgr_.Init(this) != RET_OK) {
-        FI_HILOGE("DevMgr init failed");
+    if (pluginMgr_.Init(this, this) != RET_OK) {
+        FI_HILOGE("CooPluginManager init failed");
         goto INIT_FAIL;
     }
     if (dragMgr_.Init(this) != RET_OK) {
@@ -202,10 +197,6 @@ bool DeviceStatusService::Init()
         goto INIT_FAIL;
     }
 
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-    COOR_EVENT_MGR->SetIContext(this);
-    COOR_SM->Init();
-#endif // OHOS_BUILD_ENABLE_COORDINATION
     return true;
 
 INIT_FAIL:
@@ -417,8 +408,6 @@ void DeviceStatusService::OnThread()
     uint64_t tid = GetThisThreadId();
     delegateTasks_.SetWorkerThreadId(tid);
     FI_HILOGD("Main worker thread start, tid:%{public}" PRId64 "", tid);
-    EnableDevMgr(MAX_N_RETRIES);
-
     while (state_ == ServiceRunningState::STATE_RUNNING) {
         struct epoll_event ev[MAX_EVENT_SIZE] {};
         int32_t count = EpollWait(MAX_EVENT_SIZE, -1, ev[0]);
@@ -475,18 +464,32 @@ void DeviceStatusService::OnTimeout(const struct epoll_event &ev)
 void DeviceStatusService::OnDeviceMgr(const struct epoll_event &ev)
 {
     CALL_INFO_TRACE;
+    IDeviceManager* deviceManager = pluginMgr_.GetDeviceManager();
+    CHKPV(deviceManager);
     if ((ev.events & EPOLLIN) == EPOLLIN) {
-        devMgr_.Dispatch(ev);
+        deviceManager->Dispatch(ev);
     } else if ((ev.events & (EPOLLHUP | EPOLLERR)) != 0) {
         FI_HILOGE("Epoll hangup:%{public}s", strerror(errno));
     }
+}
+
+void DeviceStatusService::EnableDeviceMananger()
+{
+    EnableDevMgr(MAX_N_RETRIES);
+}
+
+void DeviceStatusService::DisableDeviceManager()
+{
+    DisableDevMgr();
 }
 
 int32_t DeviceStatusService::EnableDevMgr(int32_t nRetries)
 {
     CALL_INFO_TRACE;
     static int32_t timerId { -1 };
-    int32_t ret = devMgr_.Enable();
+    IDeviceManager* deviceManager = pluginMgr_.GetDeviceManager();
+    CHKPR(deviceManager, RET_ERR);
+    int32_t ret = deviceManager->Enable();
     if (ret != RET_OK) {
         FI_HILOGE("Failed to enable device manager");
         if (nRetries > 0) {
@@ -500,7 +503,7 @@ int32_t DeviceStatusService::EnableDevMgr(int32_t nRetries)
         }
         return ret;
     }
-    AddEpoll(EPOLL_EVENT_DEVICE_MGR, devMgr_.GetFd());
+    AddEpoll(EPOLL_EVENT_DEVICE_MGR, deviceManager->GetFd());
     if (timerId >= 0) {
         timerMgr_.RemoveTimer(timerId);
         timerId = -1;
@@ -510,8 +513,11 @@ int32_t DeviceStatusService::EnableDevMgr(int32_t nRetries)
 
 void DeviceStatusService::DisableDevMgr()
 {
-    DelEpoll(EPOLL_EVENT_DEVICE_MGR, devMgr_.GetFd());
-    devMgr_.Disable();
+    CALL_INFO_TRACE;
+    IDeviceManager* deviceManager = pluginMgr_.GetDeviceManager();
+    CHKPV(deviceManager);
+    DelEpoll(EPOLL_EVENT_DEVICE_MGR, deviceManager->GetFd());
+    deviceManager->Disable();
 }
 
 int32_t DeviceStatusService::RegisterCoordinationListener()
@@ -549,7 +555,7 @@ int32_t DeviceStatusService::PrepareCoordination(int32_t userData)
     CALL_DEBUG_ENTER;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     int32_t pid = GetCallingPid();
-    AddSessionDeletedCallback(pid, std::bind(&CoordinationSM::OnSessionLost, COOR_SM, std::placeholders::_1));
+    // AddSessionDeletedCallback(pid, std::bind(&CoordinationSM::OnSessionLost, COOR_SM, std::placeholders::_1));
     int32_t ret = delegateTasks_.PostSyncTask(
         std::bind(&DeviceStatusService::OnPrepareCoordination, this, pid, userData));
     if (ret != RET_OK) {
@@ -779,31 +785,38 @@ int32_t DeviceStatusService::OnRegisterCoordinationListener(int32_t pid)
     CALL_DEBUG_ENTER;
     SessionPtr sess = GetSession(GetClientFd(pid));
     CHKPR(sess, RET_ERR);
-    sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
-    CHKPR(event, RET_ERR);
-    event->type = CoordinationEventManager::EventType::LISTENER;
-    event->sess = sess;
-    event->msgId = MessageId::COORDINATION_ADD_LISTENER;
-    COOR_EVENT_MGR->AddCoordinationEvent(event);
-    return RET_OK;
+    pluginMgr_.SetSessionID(pid);
+    int32_t ret = pluginMgr_.LoadDeviceManager();
+    if (ret != RET_OK) {
+        FI_HILOGE("Load deviceManager plugin failed");
+        return RET_ERR;
+    }
+    ret = pluginMgr_.LoadCoordination();
+    if (ret != RET_OK) {
+        FI_HILOGE("Load coordination plugin failed");
+        return RET_ERR;
+    }
+    ICoordination* coordination = pluginMgr_.GetCoordination();
+    CHKPR(coordination, RET_ERR);
+    return coordination->RegisterCoordinationListener(sess);
 }
 
 int32_t DeviceStatusService::OnUnregisterCoordinationListener(int32_t pid)
 {
     CALL_DEBUG_ENTER;
     SessionPtr sess = GetSession(GetClientFd(pid));
-    sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
-    CHKPR(event, RET_ERR);
-    event->type = CoordinationEventManager::EventType::LISTENER;
-    event->sess = sess;
-    COOR_EVENT_MGR->RemoveCoordinationEvent(event);
-    return RET_OK;
+    CHKPR(sess, RET_ERR);
+    ICoordination* coordination = pluginMgr_.GetCoordination();
+    CHKPR(coordination, RET_ERR);
+    return coordination->UnregisterCoordinationListener(sess);
 }
 
 int32_t DeviceStatusService::OnPrepareCoordination(int32_t pid, int32_t userData)
 {
     CALL_DEBUG_ENTER;
-    COOR_SM->PrepareCoordination();
+    ICoordination* coordination = pluginMgr_.GetCoordination();
+    CHKPR(coordination, RET_ERR);
+    coordination->PrepareCoordination();
     std::string deviceId;
     CoordinationMessage msg = CoordinationMessage::PREPARE;
     NetPacket pkt(MessageId::COORDINATION_MESSAGE);
@@ -827,7 +840,9 @@ int32_t DeviceStatusService::OnPrepareCoordination(int32_t pid, int32_t userData
 int32_t DeviceStatusService::OnUnprepareCoordination(int32_t pid, int32_t userData)
 {
     CALL_DEBUG_ENTER;
-    COOR_SM->UnprepareCoordination();
+    ICoordination* coordination = pluginMgr_.GetCoordination();
+    CHKPR(coordination, RET_ERR);
+    coordination->UnprepareCoordination();
     std::string deviceId;
     CoordinationMessage msg = CoordinationMessage::UNPREPARE;
     NetPacket pkt(MessageId::COORDINATION_MESSAGE);
@@ -851,34 +866,9 @@ int32_t DeviceStatusService::OnActivateCoordination(int32_t pid,
     CALL_DEBUG_ENTER;
     SessionPtr sess = GetSession(GetClientFd(pid));
     CHKPR(sess, RET_ERR);
-    sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
-    CHKPR(event, RET_ERR);
-    event->type = CoordinationEventManager::EventType::START;
-    event->sess = sess;
-    event->msgId = MessageId::COORDINATION_MESSAGE;
-    event->userData = userData;
-    if (COOR_SM->GetCurrentCoordinationState() == CoordinationState::STATE_OUT ||
-        (COOR_SM->GetCurrentCoordinationState() == CoordinationState::STATE_FREE &&
-        COOR_DEV_MGR->IsRemote(startDeviceId))) {
-        FI_HILOGW("It is currently worn out");
-        NetPacket pkt(event->msgId);
-        pkt << userData << "" << static_cast<int32_t>(CoordinationMessage::ACTIVATE_SUCCESS);
-        if (pkt.ChkRWError()) {
-            FI_HILOGE("Packet write data failed");
-            return RET_ERR;
-        }
-        if (!sess->SendMsg(pkt)) {
-            FI_HILOGE("Sending failed");
-            return RET_ERR;
-        }
-        return RET_OK;
-    }
-    COOR_EVENT_MGR->AddCoordinationEvent(event);
-    int32_t ret = COOR_SM->ActivateCoordination(remoteNetworkId, startDeviceId);
-    if (ret != RET_OK) {
-        FI_HILOGE("On activate coordination failed, ret:%{public}d", ret);
-    }
-    return ret;
+    ICoordination* coordination = pluginMgr_.GetCoordination();
+    CHKPR(coordination, RET_ERR);
+    return coordination->ActivateCoordination(sess, userData, remoteNetworkId, startDeviceId);
 }
 
 int32_t DeviceStatusService::OnDeactivateCoordination(int32_t pid, int32_t userData, bool isUnchained)
@@ -886,39 +876,19 @@ int32_t DeviceStatusService::OnDeactivateCoordination(int32_t pid, int32_t userD
     CALL_DEBUG_ENTER;
     SessionPtr sess = GetSession(GetClientFd(pid));
     CHKPR(sess, RET_ERR);
-    sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
-    CHKPR(event, RET_ERR);
-    event->type = CoordinationEventManager::EventType::STOP;
-    event->sess = sess;
-    event->msgId = MessageId::COORDINATION_MESSAGE;
-    event->userData = userData;
-    COOR_EVENT_MGR->AddCoordinationEvent(event);
-    int32_t ret = COOR_SM->DeactivateCoordination(isUnchained);
-    if (ret != RET_OK) {
-        FI_HILOGE("On deactivate coordination failed, ret:%{public}d", ret);
-        COOR_EVENT_MGR->OnErrorMessage(event->type, CoordinationMessage(ret));
-    }
-    return ret;
+    ICoordination* coordination = pluginMgr_.GetCoordination();
+    CHKPR(coordination, RET_ERR);
+    return coordination->DeactivateCoordination(sess, userData, isUnchained);
 }
 
-int32_t DeviceStatusService::OnGetCoordinationState(
-    int32_t pid, int32_t userData, const std::string &deviceId)
+int32_t DeviceStatusService::OnGetCoordinationState(int32_t pid, int32_t userData, const std::string &deviceId)
 {
     CALL_DEBUG_ENTER;
     SessionPtr sess = GetSession(GetClientFd(pid));
     CHKPR(sess, RET_ERR);
-    sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
-    CHKPR(event, RET_ERR);
-    event->type = CoordinationEventManager::EventType::STATE;
-    event->sess = sess;
-    event->msgId = MessageId::COORDINATION_GET_STATE;
-    event->userData = userData;
-    COOR_EVENT_MGR->AddCoordinationEvent(event);
-    int32_t ret = COOR_SM->GetCoordinationState(deviceId);
-    if (ret != RET_OK) {
-        FI_HILOGE("Get coordination state failed");
-    }
-    return ret;
+    ICoordination* coordination = pluginMgr_.GetCoordination();
+    CHKPR(coordination, RET_ERR);
+    return coordination->GetCoordinationState(sess, userData, deviceId);
 }
 
 int32_t DeviceStatusService::OnAddHotAreaListener(int32_t pid)
@@ -926,12 +896,15 @@ int32_t DeviceStatusService::OnAddHotAreaListener(int32_t pid)
     CALL_DEBUG_ENTER;
     auto sess = GetSession(GetClientFd(pid));
     CHKPR(sess, RET_ERR);
-    sptr<CoordinationHotArea::HotAreaInfo> event = new (std::nothrow) CoordinationHotArea::HotAreaInfo();
-    CHKPR(event, RET_ERR);
-    event->sess = sess;
-    event->msgId = MessageId::HOT_AREA_ADD_LISTENER;
-    HOT_AREA->AddHotAreaListener(event);
-    return RET_OK;
+    // sptr<CoordinationHotArea::HotAreaInfo> event = new (std::nothrow) CoordinationHotArea::HotAreaInfo();
+    // CHKPR(event, RET_ERR);
+    // event->sess = sess;
+    // event->msgId = MessageId::HOT_AREA_ADD_LISTENER;
+    // HOT_AREA->AddHotAreaListener(event);
+    // return RET_OK;
+    ICoordination* coordination = pluginMgr_.GetCoordination();
+    CHKPR(coordination, RET_ERR);
+    return coordination->AddHotAreaListener(sess);
 }
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 

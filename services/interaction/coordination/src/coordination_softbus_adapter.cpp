@@ -193,8 +193,14 @@ int32_t CoordinationSoftbusAdapter::Init()
     return RET_OK;
 }
 
+CoordinationSoftbusAdapter::CoordinationSoftbusAdapter()
+{
+    CALL_DEBUG_ENTER;
+}
+
 CoordinationSoftbusAdapter::~CoordinationSoftbusAdapter()
 {
+    CALL_DEBUG_ENTER;
     Release();
 }
 

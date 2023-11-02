@@ -30,9 +30,11 @@
 #include "drag_data.h"
 #include "drag_manager.h"
 #include "i_context.h"
+#include "i_drag_context.h"
 #ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
 #include "motion_drag.h"
 #endif // OHOS_BUILD_ENABLE_MOTION_DRAG
+#include "plugin_manager.h"
 #include "stationary_callback.h"
 #include "stationary_data.h"
 #include "stream_server.h"
@@ -43,6 +45,7 @@ namespace Msdp {
 namespace DeviceStatus {
 enum class ServiceRunningState {STATE_NOT_START, STATE_RUNNING, STATE_EXIT};
 class DeviceStatusService final : public IContext,
+                                  public IDragContext,
                                   public StreamServer,
                                   public SystemAbility,
                                   public DeviceStatusSrvStub {
@@ -54,9 +57,11 @@ public:
     virtual void OnStop() override;
 
     IDelegateTasks& GetDelegateTasks() override;
-    IDeviceManager& GetDeviceManager() override;
+    IPluginManager& GetPluginManager() override;
     ITimerManager& GetTimerManager() override;
     IDragManager& GetDragManager() override;
+    void EnableDeviceMananger() override;
+    void DisableDeviceManager() override;
 
     void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency,
         sptr<IRemoteDevStaCallback> callback) override;
@@ -120,8 +125,8 @@ private:
     std::atomic<ServiceRunningState> state_ { ServiceRunningState::STATE_NOT_START };
     std::thread worker_;
     DelegateTasks delegateTasks_;
-    DeviceManager devMgr_;
     TimerManager timerMgr_;
+    PluginManager pluginMgr_;
     std::atomic<bool> ready_ { false };
     std::shared_ptr<DeviceStatusManager> devicestatusManager_ { nullptr };
     DragManager dragMgr_;

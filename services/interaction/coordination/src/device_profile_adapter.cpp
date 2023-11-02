@@ -34,10 +34,14 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceP
 const std::string SERVICE_ID { "deviceStatus" };
 } // namespace
 
-DeviceProfileAdapter::DeviceProfileAdapter() {}
+DeviceProfileAdapter::DeviceProfileAdapter()
+{
+    CALL_DEBUG_ENTER;
+}
 
 DeviceProfileAdapter::~DeviceProfileAdapter()
 {
+    CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(adapterLock_);
     profileEventCallbacks_.clear();
     callbacks_.clear();

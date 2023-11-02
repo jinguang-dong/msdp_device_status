@@ -19,9 +19,8 @@
 #include <cstdint>
 #include <functional>
 
-#include <input_manager.h>
-
 #include "drag_data.h"
+#include "input_manager.h"
 #include "stream_session.h"
 
 namespace OHOS {

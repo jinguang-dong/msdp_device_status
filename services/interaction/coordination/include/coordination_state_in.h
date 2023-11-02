@@ -25,6 +25,7 @@ class CoordinationStateIn final : public ICoordinationState {
 public:
     CoordinationStateIn() = default;
     explicit CoordinationStateIn(const std::string &startDeviceDhid);
+    ~CoordinationStateIn();
     int32_t ActivateCoordination(const std::string &remoteNetworkId, int32_t startDeviceId) override;
     int32_t DeactivateCoordination(const std::string &remoteNetworkId, bool isUnchained,
         const std::pair<std::string, std::string> &preparedNetworkId) override;

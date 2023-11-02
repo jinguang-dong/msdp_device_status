@@ -20,6 +20,8 @@
 #include <string>
 #include <vector>
 
+#include <sys/epoll.h>
+
 #include "i_device.h"
 #include "i_device_observer.h"
 
@@ -34,6 +36,10 @@ public:
     virtual int32_t AddDeviceObserver(std::weak_ptr<IDeviceObserver> observer) = 0;
     virtual void RemoveDeviceObserver(std::weak_ptr<IDeviceObserver> observer) = 0;
     virtual void RetriggerHotplug(std::weak_ptr<IDeviceObserver> observer) = 0;
+    virtual void Dispatch(const struct epoll_event &ev) = 0;
+    virtual int32_t GetFd() const = 0;
+    virtual int32_t Enable() = 0;
+    virtual int32_t Disable() = 0;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

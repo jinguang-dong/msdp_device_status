@@ -38,9 +38,10 @@ public:
     virtual int32_t RegisterCoordinationListener(SessionPtr sess) = 0;
     virtual int32_t UnregisterCoordinationListener(SessionPtr sess) = 0;
     virtual void Dump(int32_t fd) = 0;
+    virtual void OnSessionLost(SessionPtr session) = 0;
 };
 
-extern "C" ICoordination* CreateICoordination(IContext *context);
+extern "C" ICoordination* CreateCoordination(IContext *context);
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

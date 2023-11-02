@@ -27,7 +27,8 @@
 #include <singleton.h>
 
 #include "accesstoken_kit.h"
-#include "i_context.h"
+#include "i_drag_context.h"
+#include "i_drag_manager.h"
 #include "stationary_callback.h"
 #include "stationary_data.h"
 
@@ -54,7 +55,7 @@ struct DeviceStatusRecord {
 class DeviceStatusDumper final : public RefBase {
     DECLARE_DELAYED_SINGLETON(DeviceStatusDumper);
 public:
-    int32_t Init(IContext *context);
+    int32_t Init(IDragContext *dragContext);
     void ParseCommand(int32_t fd, const std::vector<std::string> &args, const std::vector<Data> &datas);
     void DumpHelpInfo(int32_t fd) const;
     void SaveAppInfo(std::shared_ptr<AppInfo> appInfo);
@@ -79,7 +80,7 @@ private:
     std::map<Type, std::set<std::shared_ptr<AppInfo>>> appInfos_;
     std::queue<std::shared_ptr<DeviceStatusRecord>> deviceStatusQueue_;
     std::mutex mutex_;
-    IContext *context_ { nullptr };
+    IDragContext *dragContext_ { nullptr };
 };
 
 #define DS_DUMPER OHOS::DelayedSingleton<DeviceStatusDumper>::GetInstance()

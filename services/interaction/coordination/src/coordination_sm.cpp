@@ -50,9 +50,14 @@ constexpr int32_t MIN_HANDLER_ID { 1 };
 constexpr uint32_t P2P_SESSION_CLOSED { 1 };
 } // namespace
 
-CoordinationSM::CoordinationSM() {}
+CoordinationSM::CoordinationSM()
+{
+    CALL_DEBUG_ENTER;
+}
+
 CoordinationSM::~CoordinationSM()
 {
+    CALL_DEBUG_ENTER;
     RemoveMonitor();
     RemoveInterceptor();
 }
@@ -107,6 +112,10 @@ void CoordinationSM::OnSessionLost(SessionPtr session)
         DeactivateCoordination(COOR_SM->isUnchained_);
     }
     D_INPUT_ADAPTER->UnregisterSessionStateCb();
+    int32_t ret = DIS_HARDWARE.UnRegisterDevStateCallback(FI_PKG_NAME);
+    if (ret != RET_OK) {
+        FI_HILOGE("Unregister devStateCallback failed, ret:%{public}d", ret);
+    }
 }
 
 void CoordinationSM::Reset(const std::string &networkId)
@@ -832,6 +841,7 @@ std::shared_ptr<MMI::PointerEvent> CoordinationSM::GetLastPointerEvent() const
 
 void CoordinationSM::RemoveMonitor()
 {
+    CALL_DEBUG_ENTER;
     if ((monitorId_ >= MIN_HANDLER_ID) && (monitorId_ < std::numeric_limits<int32_t>::max())) {
         MMI::InputManager::GetInstance()->RemoveMonitor(monitorId_);
         monitorId_ = -1;
@@ -840,6 +850,7 @@ void CoordinationSM::RemoveMonitor()
 
 void CoordinationSM::RemoveInterceptor()
 {
+    CALL_DEBUG_ENTER;
     if ((interceptorId_ >= MIN_HANDLER_ID) && (interceptorId_ < std::numeric_limits<int32_t>::max())) {
         MMI::InputManager::GetInstance()->RemoveInterceptor(interceptorId_);
         interceptorId_ = -1;
@@ -944,6 +955,7 @@ void CoordinationSM::OnPostInterceptorKeyEvent(std::shared_ptr<MMI::KeyEvent> ke
     CHKPV(keyEvent);
     int32_t keyCode = keyEvent->GetKeyCode();
     CoordinationState state = GetCurrentCoordinationState();
+    FI_HILOGD("Current coordination state:%{public}d", state);
     int32_t deviceId = keyEvent->GetDeviceId();
     if ((keyCode == MMI::KeyEvent::KEYCODE_BACK) || (keyCode == MMI::KeyEvent::KEYCODE_VOLUME_UP) ||
         (keyCode == MMI::KeyEvent::KEYCODE_VOLUME_DOWN) || (keyCode == MMI::KeyEvent::KEYCODE_POWER)) {
@@ -982,6 +994,7 @@ void CoordinationSM::OnPostInterceptorPointerEvent(std::shared_ptr<MMI::PointerE
         return;
     }
     CoordinationState state = GetCurrentCoordinationState();
+    FI_HILOGD("Current coordination state:%{public}d", state);
     if (state == CoordinationState::STATE_OUT) {
         int32_t deviceId = pointerEvent->GetDeviceId();
         std::string dhid = COOR_DEV_MGR->GetDhid(deviceId);

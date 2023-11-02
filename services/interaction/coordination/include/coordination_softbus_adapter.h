@@ -71,7 +71,7 @@ public:
     void ConfigTcpAlive();
 
 private:
-    CoordinationSoftbusAdapter() = default;
+    CoordinationSoftbusAdapter();
     DISALLOW_COPY_AND_MOVE(CoordinationSoftbusAdapter);
     std::string FindDevice(int32_t sessionId);
     int32_t SendMsg(int32_t sessionId, const std::string &message);
