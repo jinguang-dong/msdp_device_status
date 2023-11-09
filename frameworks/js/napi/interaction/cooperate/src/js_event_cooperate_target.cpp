@@ -41,7 +41,7 @@ JsEventCooperateTarget::JsEventCooperateTarget()
     auto ret = coordinationListeners_.insert({ COORDINATION,
         std::vector<sptr<JsUtilCooperate::CallbackInfo>>()});
     if (!ret.second) {
-        FI_HILOGW("Failed to insert, errCode:%{public}d", static_cast<int32_t>(DeviceStatus::VAL_NOT_EXP));
+        FI_HILOGW("Js event cooperate target, failed to insert, errCode:%{public}d", static_cast<int32_t>(DeviceStatus::VAL_NOT_EXP));
     }
 }
 
@@ -67,7 +67,7 @@ void JsEventCooperateTarget::EmitJsEnable(sptr<JsUtilCooperate::CallbackInfo> cb
     }
 
     if (result != 0) {
-        FI_HILOGE("uv_queue_work_with_qos failed");
+        FI_HILOGE("Emit js enable, uv_queue_work_with_qos failed");
         JsUtilCooperate::DeletePtr<uv_work_t*>(work);
         cb->DecStrongRef(nullptr);
     }
@@ -95,7 +95,7 @@ void JsEventCooperateTarget::EmitJsStart(sptr<JsUtilCooperate::CallbackInfo> cb,
     }
 
     if (result != 0) {
-        FI_HILOGE("uv_queue_work_with_qos failed");
+        FI_HILOGE("Emit js start, uv_queue_work_with_qos failed");
         JsUtilCooperate::DeletePtr<uv_work_t*>(work);
         cb->DecStrongRef(nullptr);
     }
@@ -123,7 +123,7 @@ void JsEventCooperateTarget::EmitJsStop(sptr<JsUtilCooperate::CallbackInfo> cb,
     }
 
     if (result != 0) {
-        FI_HILOGE("uv_queue_work_with_qos failed");
+        FI_HILOGE("Emit js stop, uv_queue_work_with_qos failed");
         JsUtilCooperate::DeletePtr<uv_work_t*>(work);
         cb->DecStrongRef(nullptr);
     }
@@ -149,7 +149,7 @@ void JsEventCooperateTarget::EmitJsGetState(sptr<JsUtilCooperate::CallbackInfo> 
     }
 
     if (result != 0) {
-        FI_HILOGE("uv_queue_work_with_qos failed");
+        FI_HILOGE("Emit js get state, uv_queue_work_with_qos failed");
         JsUtilCooperate::DeletePtr<uv_work_t*>(work);
         cb->DecStrongRef(nullptr);
     }
@@ -161,14 +161,14 @@ void JsEventCooperateTarget::AddListener(napi_env env, const std::string &type, 
     std::lock_guard<std::mutex> guard(mutex_);
     auto iter = coordinationListeners_.find(type);
     if (iter == coordinationListeners_.end()) {
-        FI_HILOGE("Find %{public}s failed", type.c_str());
+        FI_HILOGE("Add listener, find %{public}s failed", type.c_str());
         return;
     }
 
     for (const auto &item : iter->second) {
         CHKPC(item);
         if (JsUtilCooperate::IsSameHandle(env, handle, item->ref)) {
-            FI_HILOGE("The handle already exists");
+            FI_HILOGE("Add listener, the handle already exists");
             return;
         }
     }
@@ -191,7 +191,7 @@ void JsEventCooperateTarget::RemoveListener(napi_env env, const std::string &typ
     std::lock_guard<std::mutex> guard(mutex_);
     auto iter = coordinationListeners_.find(type);
     if (iter == coordinationListeners_.end()) {
-        FI_HILOGE("Find %{public}s failed", type.c_str());
+        FI_HILOGE("Remove listener, find %{public}s failed", type.c_str());
         return;
     }
     if (handle == nullptr) {
@@ -200,7 +200,7 @@ void JsEventCooperateTarget::RemoveListener(napi_env env, const std::string &typ
     }
     for (auto it = iter->second.begin(); it != iter->second.end(); ++it) {
         if (JsUtilCooperate::IsSameHandle(env, handle, (*it)->ref)) {
-            FI_HILOGE("Success in removing monitor");
+            FI_HILOGE("Remove listener, success in removing monitor");
             iter->second.erase(it);
             goto MONITOR_TAG;
         }
@@ -241,7 +241,7 @@ void JsEventCooperateTarget::OnCoordinationMessage(const std::string &networkId,
     std::lock_guard<std::mutex> guard(mutex_);
     auto changeEvent = coordinationListeners_.find(COORDINATION);
     if (changeEvent == coordinationListeners_.end()) {
-        FI_HILOGE("Find %{public}s failed", std::string(COORDINATION).c_str());
+        FI_HILOGE("On coordination message, find %{public}s failed", std::string(COORDINATION).c_str());
         return;
     }
 
@@ -259,7 +259,7 @@ void JsEventCooperateTarget::OnCoordinationMessage(const std::string &networkId,
         int32_t result = uv_queue_work_with_qos(loop, uvWork, [](uv_work_t *uvWork) {},
             EmitCoordinationMessageEvent, uv_qos_default);
         if (result != 0) {
-            FI_HILOGE("uv_queue_work_with_qos failed");
+            FI_HILOGE("On coordination message, uv_queue_work_with_qos failed");
             item->DecStrongRef(nullptr);
             JsUtilCooperate::DeletePtr<uv_work_t*>(uvWork);
         }
