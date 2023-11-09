@@ -427,7 +427,7 @@ int32_t DeviceStatusService::InitTimerMgr()
 
 void DeviceStatusService::OnThread()
 {
-    SetThreadName(std::string("device_status_service"));
+    SetThreadName(std::string("os_ds_service"));
     uint64_t tid = GetThisThreadId();
     delegateTasks_.SetWorkerThreadId(tid);
     FI_HILOGD("Main worker thread start, tid:%{public}" PRId64 "", tid);
@@ -932,7 +932,7 @@ int32_t DeviceStatusService::OnActivateCoordination(int32_t pid,
     COOR_EVENT_MGR->AddCoordinationEvent(event);
     int32_t ret = COOR_SM->ActivateCoordination(remoteNetworkId, startDeviceId);
     if (ret != RET_OK) {
-        FI_HILOGE("On activate coordination failed, ret:%{public}d", ret);
+        FI_HILOGE("On activate coordination error, ret:%{public}d", ret);
     }
     return ret;
 }

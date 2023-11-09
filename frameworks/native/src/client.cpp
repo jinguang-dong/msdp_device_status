@@ -30,7 +30,7 @@ namespace DeviceStatus {
 using namespace AppExecFwk;
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "Client" };
-const std::string THREAD_NAME { "ClientEventHandler" };
+const std::string THREAD_NAME { "os_ClientEventHandler" };
 } // namespace
 
 Client::~Client()
@@ -205,9 +205,9 @@ void Client::OnDisconnect()
     OnDisconnected();
 }
 
-void Client::RegisterConnectedFunction(ConnectCallback fun)
+void Client::RegisterConnectedFunction(ConnectCallback function)
 {
-    funConnected_ = fun;
+    funConnected_ = function;
 }
 
 void Client::RegisterDisconnectedFunction(ConnectCallback fun)

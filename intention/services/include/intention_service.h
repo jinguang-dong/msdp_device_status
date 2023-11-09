@@ -25,6 +25,7 @@
 #include "plugin_manager.h"
 #include "task_scheduler.h"
 #include "timer_manager.h"
+#include "device_manager.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -43,22 +44,24 @@ public:
     ITaskScheduler& GetTaskScheduler() override;
     ITimerManager& GetTimerManager() override;
     IPluginManager& GetPluginManager() override;
+    IDeviceManager& GetDeviceManager() override;
 
 private:
     int32_t Enable(uint32_t intention, MessageParcel &data, MessageParcel &reply) override;
     int32_t Disable(uint32_t intention, MessageParcel &data, MessageParcel &reply) override;
     int32_t Start(uint32_t intention, MessageParcel &data, MessageParcel &reply) override;
     int32_t Stop(uint32_t intention, MessageParcel &data, MessageParcel &reply) override;
+    int32_t Control(uint32_t intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
     int32_t AddWatch(uint32_t intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
     int32_t RemoveWatch(uint32_t intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
     int32_t SetParam(uint32_t intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
     int32_t GetParam(uint32_t intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Control(uint32_t intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
 
 private:
     TaskScheduler taskScheduler_;
     TimerManager timerMgr_;
     PluginManager pluginMgr_;
+    DeviceManager deviceMgr_;
 };
 
 ITaskScheduler& IntentionService::GetTaskScheduler()
@@ -74,6 +77,11 @@ ITimerManager& IntentionService::GetTimerManager()
 IPluginManager& IntentionService::GetPluginManager()
 {
     return pluginMgr_;
+}
+
+IDeviceManager& IntentionService::GetDeviceManager()
+{
+    return deviceMgr_;
 }
 } // namespace DeviceStatus
 } // namespace Msdp
