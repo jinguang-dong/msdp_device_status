@@ -252,15 +252,15 @@ void DragDrawing::Draw(int32_t displayId, int32_t displayX, int32_t displayY)
     int32_t adjustSize = TWELVE_SIZE * GetScaling();
     int32_t positionX = g_drawingInfo.displayX + g_drawingInfo.pixelMapX;
     int32_t positionY = g_drawingInfo.displayY + g_drawingInfo.pixelMapY - adjustSize;
+    CHKPV(g_drawingInfo.parentNode);
+    CHKPV(g_drawingInfo.pixelMap);
     if ((g_drawingInfo.currentStyle == DragCursorStyle::DEFAULT) ||
         ((g_drawingInfo.currentStyle == DragCursorStyle::MOVE) && (g_drawingInfo.currentDragNum == DRAG_NUM_ONE))) {
-        CHKPV(g_drawingInfo.parentNode);
         g_drawingInfo.parentNode->SetBounds(positionX, positionY, g_drawingInfo.pixelMap->GetWidth(),
             g_drawingInfo.pixelMap->GetHeight());
         g_drawingInfo.parentNode->SetFrame(positionX, positionY, g_drawingInfo.pixelMap->GetWidth(),
             g_drawingInfo.pixelMap->GetHeight());
     } else {
-        CHKPV(g_drawingInfo.parentNode);
         g_drawingInfo.parentNode->SetBounds(positionX, positionY, g_drawingInfo.pixelMap->GetWidth() + adjustSize,
             g_drawingInfo.pixelMap->GetHeight() + adjustSize);
         g_drawingInfo.parentNode->SetFrame(positionX, positionY, g_drawingInfo.pixelMap->GetWidth() + adjustSize,
@@ -274,7 +274,6 @@ void DragDrawing::Draw(int32_t displayId, int32_t displayX, int32_t displayY)
 
 int32_t DragDrawing::UpdateDragStyle(DragCursorStyle style)
 {
-    CALL_DEBUG_ENTER;
     FI_HILOGD("style:%{public}d", style);
     if ((style < DragCursorStyle::DEFAULT) || (style > DragCursorStyle::MOVE)) {
         FI_HILOGE("Invalid style:%{public}d", style);
@@ -290,8 +289,13 @@ int32_t DragDrawing::UpdateDragStyle(DragCursorStyle style)
     }
     g_drawingInfo.currentStyle = style;
     if (g_drawingInfo.isCurrentDefaultStyle) {
+        if (!CheckNodesValid()) {
+            FI_HILOGE("Check nodes valid failed");
+            return RET_ERR;
+        }
         std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
         CHKPR(dragStyleNode, RET_ERR);
+        CHKPR(g_drawingInfo.parentNode, RET_ERR);
         g_drawingInfo.parentNode->AddChild(dragStyleNode);
     }
     std::string filePath;
@@ -1231,6 +1235,7 @@ int32_t DragDrawing::UpdateDefaultDragStyle(DragCursorStyle style)
     if (!g_drawingInfo.isCurrentDefaultStyle) {
         std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
         CHKPR(dragStyleNode, RET_ERR);
+        CHKPR(g_drawingInfo.parentNode, RET_ERR);
         g_drawingInfo.parentNode->RemoveChild(dragStyleNode);
         CHKPR(rsUiDirector_, RET_ERR);
         rsUiDirector_->SendMessages();
