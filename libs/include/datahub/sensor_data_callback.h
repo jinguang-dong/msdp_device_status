@@ -32,9 +32,10 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class SensorDataCallback final {
-    DECLARE_SINGLETON(SensorDataCallback);
+class SensorDataCallback : public Singleton<SensorDataCallback> {
 public:
+    SensorDataCallback() = default;
+    ~SensorDataCallback();
     bool RegisterCallbackSensor(int32_t sensorTypeId);
     bool UnregisterCallbackSensor(int32_t sensorTypeId);
     void Init();

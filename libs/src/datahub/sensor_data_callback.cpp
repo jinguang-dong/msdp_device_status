@@ -30,7 +30,6 @@ constexpr int32_t RATE_MILLISEC { 100100100 };
 std::map<int32_t, SensorCallback> g_algoMap;
 } // namespace
 
-SensorDataCallback::SensorDataCallback() {}
 SensorDataCallback::~SensorDataCallback()
 {
     g_algoMap.clear();
