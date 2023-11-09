@@ -577,7 +577,7 @@ void JsEventCooperateTarget::EmitCoordinationMessageEvent(uv_work_t *work, int32
     CHKPV(work);
     if (work->data == nullptr) {
         JsUtilCooperate::DeletePtr<uv_work_t*>(work);
-        FI_HILOGE("Check data is nullptr");
+        FI_HILOGE("Coordination message, check data is nullptr");
         return;
     }
 
@@ -586,7 +586,7 @@ void JsEventCooperateTarget::EmitCoordinationMessageEvent(uv_work_t *work, int32
     temp->DecStrongRef(nullptr);
     auto messageEvent = coordinationListeners_.find(COORDINATION);
     if (messageEvent == coordinationListeners_.end()) {
-        FI_HILOGE("Find messageEvent failed");
+        FI_HILOGE("Coordination message, find messageEvent failed");
         return;
     }
     for (const auto &item : messageEvent->second) {
@@ -602,7 +602,7 @@ void JsEventCooperateTarget::EmitCoordinationMessageEvent(uv_work_t *work, int32
         napi_value eventMsg = nullptr;
         auto iter = messageTransform.find(item->data.msg);
         if (iter == messageTransform.end()) {
-            FI_HILOGE("Find message code failed");
+            FI_HILOGE("Coordination message, find message code failed");
             CHKRV(napi_close_handle_scope(item->env, scope), CLOSE_SCOPE);
             return;
         }
@@ -627,7 +627,7 @@ void JsEventCooperateTarget::HandleExecuteResult(napi_env env, int32_t errCode)
     if (errCode != OTHER_ERROR && errCode != RET_OK) {
         NapiError napiError;
         if (!UtilNapiError::GetApiError(errCode, napiError)) {
-            FI_HILOGE("This error code could not be found");
+            FI_HILOGE("Handle execute result, this error code could not be found");
             return;
         }
         THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, napiError.msg.c_str());
