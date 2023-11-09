@@ -239,7 +239,7 @@ void DeviceStatusService::Subscribe(Type type, ActivityEvent event, ReportLatenc
     StartTrace(HITRACE_TAG_MSDP, "serviceSubscribeStart");
     devicestatusManager_->Subscribe(type, event, latency, callback);
     FinishTrace(HITRACE_TAG_MSDP);
-    ReportSensorSysEvent(type, true);
+    //ReportSensorSysEvent(type, true);
     WriteSubscribeHiSysEvent(appInfo->uid, appInfo->packageName, type);
 }
 
