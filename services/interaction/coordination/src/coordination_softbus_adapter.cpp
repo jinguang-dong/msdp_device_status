@@ -157,7 +157,7 @@ int32_t CoordinationSoftbusAdapter::Init()
 {
     CALL_INFO_TRACE;
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
-    const std::string SESSION_NAME = "ohos.msdp.device_status.";
+    const std::string SESS_NAME = "ohos.msdp.device_status.";
     sessListener_ = {
         .OnSessionOpened = SessionOpened,
         .OnSessionClosed = SessionClosed,
@@ -170,9 +170,9 @@ int32_t CoordinationSoftbusAdapter::Init()
         FI_HILOGE("Local network id is empty");
         return RET_ERR;
     }
-    std::string sessionName = SESSION_NAME + localNetworkId.substr(0, INTERCEPT_STRING_LENGTH);
+    std::string sessionName = SESS_NAME + localNetworkId.substr(0, INTERCEPT_STRING_LENGTH);
     if (sessionName == localSessionName_) {
-        FI_HILOGI("Session server has already created");
+        FI_HILOGI("Softbus session server has already created");
         return RET_OK;
     }
     int32_t ret = RET_ERR;
@@ -180,14 +180,14 @@ int32_t CoordinationSoftbusAdapter::Init()
         FI_HILOGD("Remove last sesison server, sessionName:%{public}s", localSessionName_.c_str());
         ret = RemoveSessionServer(FI_PKG_NAME, localSessionName_.c_str());
         if (ret != RET_OK) {
-            FI_HILOGE("Remove session server failed, error code:%{public}d", ret);
+            FI_HILOGE("Remove softbus session server failed, error code:%{public}d", ret);
         }
     }
 
     localSessionName_ = sessionName;
     ret = CreateSessionServer(FI_PKG_NAME, localSessionName_.c_str(), &sessListener_);
     if (ret != RET_OK) {
-        FI_HILOGE("Create session server failed, error code:%{public}d", ret);
+        FI_HILOGE("Create softbus session server failed, error code:%{public}d", ret);
         return RET_ERR;
     }
     return RET_OK;
@@ -204,10 +204,10 @@ void CoordinationSoftbusAdapter::Release()
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
     std::for_each(sessionDevs_.begin(), sessionDevs_.end(), [](auto item) {
         CloseSession(item.second);
-        FI_HILOGD("Close session success");
+        FI_HILOGD("Session closed successful");
     });
     int32_t ret = RemoveSessionServer(FI_PKG_NAME, localSessionName_.c_str());
-    FI_HILOGD("RemoveSessionServer ret:%{public}d", ret);
+    FI_HILOGD("Release removeSessionServer ret:%{public}d", ret);
     sessionDevs_.clear();
     channelStatuss_.clear();
 }
@@ -580,11 +580,11 @@ int32_t CoordinationSoftbusAdapter::OnSessionOpened(int32_t sessionId, int32_t r
         return RET_OK;
     }
 
-    int32_t sessionSide = GetSessionSide(sessionId);
-    FI_HILOGI("Session open succeed, sessionId:%{public}d, sessionSide:%{public}d(1 is client side)",
-        sessionId, sessionSide);
+    int32_t sessSide = GetSessionSide(sessionId);
+    FI_HILOGI("SoftbusSession open succeed, sessionId:%{public}d, sessionSide:%{public}d(1 is client side)",
+        sessionId, sessSide);
     std::lock_guard<std::mutex> notifyLock(operationMutex_);
-    if (sessionSide == SESSION_SIDE_SERVER) {
+    if (sessSide == SESSION_SIDE_SERVER) {
         if (getPeerDeviceIdResult == RET_OK) {
             sessionDevs_[peerDevId] = sessionId;
         }
@@ -629,11 +629,11 @@ int32_t CoordinationSoftbusAdapter::SendData(const std::string &networkId, Messa
     CALL_DEBUG_ENTER;
     DataPacket* dataPacket = (DataPacket*)malloc(sizeof(DataPacket) + dataLen);
     CHKPR(dataPacket, RET_ERR);
-    dataPacket->messageId = messageId;
     dataPacket->dataLen = dataLen;
+    dataPacket->messageId = messageId;
     errno_t ret = memcpy_s(dataPacket->data, dataPacket->dataLen, data, dataPacket->dataLen);
     if (ret != EOK) {
-        FI_HILOGE("Memcpy data packet failed");
+        FI_HILOGE("Memory copy data packet failed");
         free(dataPacket);
         return RET_ERR;
     }

@@ -215,7 +215,7 @@ void DeviceProfileAdapter::ProfileEventCallbackImpl::OnProfileChanged(
 void DeviceProfileAdapter::ProfileEventCallbackImpl::OnSyncCompleted(const DeviceProfile::SyncResult &syncResults)
 {
     std::for_each(syncResults.begin(), syncResults.end(), [](const auto &syncResult) {
-        FI_HILOGD("Sync result:%{public}d", syncResult.second);
+        FI_HILOGD("Sync completed result:%{public}d", syncResult.second);
     });
 }
 } // namespace DeviceStatus

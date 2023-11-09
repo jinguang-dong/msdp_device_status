@@ -1496,7 +1496,7 @@ HWTEST_F(InteractionManagerTest, GetDragState, TestSize.Level1)
 
     DragState dragState;
     ret = InteractionManager::GetInstance()->GetDragState(dragState);
-    FI_HILOGD("dragState:%{public}d", dragState);
+    FI_HILOGD("InteractionManager::dragState:%{public}d", dragState);
     EXPECT_EQ(ret, RET_OK);
     EXPECT_EQ(dragState, DragState::START);
 
