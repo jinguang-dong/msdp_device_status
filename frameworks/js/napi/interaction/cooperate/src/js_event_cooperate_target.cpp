@@ -584,12 +584,12 @@ void JsEventCooperateTarget::EmitCoordinationMessageEvent(uv_work_t *work, int32
     sptr<JsUtilCooperate::CallbackInfo> temp(static_cast<JsUtilCooperate::CallbackInfo*>(work->data));
     JsUtilCooperate::DeletePtr<uv_work_t*>(work);
     temp->DecStrongRef(nullptr);
-    auto messageEvent = coordinationListeners_.find(COORDINATION);
-    if (messageEvent == coordinationListeners_.end()) {
+    auto msgEvent = coordinationListeners_.find(COORDINATION);
+    if (msgEvent == coordinationListeners_.end()) {
         FI_HILOGE("Find messageEvent failed");
         return;
     }
-    for (const auto &item : messageEvent->second) {
+    for (const auto &item : msgEvent->second) {
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(item->env, &scope);
         CHKPC(item->env);
