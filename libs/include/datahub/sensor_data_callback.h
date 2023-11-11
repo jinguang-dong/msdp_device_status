@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#ifdef DEVICE_STATUS_SENSOR_ENABLE
 #ifndef SENSOR_DATA_CALLBACK_H
 #define SENSOR_DATA_CALLBACK_H
 
@@ -64,3 +65,4 @@ private:
 } // namespace Msdp
 } // namespace OHOS
 #endif // SENSOR_DATA_CALLBACK_H
+#endif // DEVICE_STATUS_SENSOR_ENABLE

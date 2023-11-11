@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#ifdef DEVICE_STATUS_SENSOR_ENABLE
 #ifndef ALGO_BASE_H
 #define ALGO_BASE_H
 
@@ -76,3 +77,4 @@ protected:
 } // namespace Msdp
 } // namespace OHOS
 #endif // ALGO_BASE_H
+#endif // DEVICE_STATUS_SENSOR_ENABLE
