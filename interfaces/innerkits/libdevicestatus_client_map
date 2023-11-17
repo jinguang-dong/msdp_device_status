@@ -23,6 +23,7 @@
             "OHOS::Msdp::DeviceStatus::StationaryManager::UnsubscribeCallback(OHOS::Msdp::DeviceStatus::Type, OHOS::Msdp::DeviceStatus::ActivityEvent, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteDevStaCallback>)";
             "OHOS::Msdp::DeviceStatus::StationaryManager::GetDeviceStatusData(OHOS::Msdp::DeviceStatus::Type)";
             "VTT for OHOS::Msdp::DeviceStatus::DeviceStatusCallbackStub";
+            "typeinfo for OHOS::Msdp::DeviceStatus::DeviceStatusCallbackStub";
             "OHOS::Msdp::DeviceStatus::DeviceStatusCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetInstance()";
             "OHOS::Msdp::DeviceStatus::InteractionManager::AddDraglistener(std::__h::shared_ptr<OHOS::Msdp::DeviceStatus::IDragListener>)";
