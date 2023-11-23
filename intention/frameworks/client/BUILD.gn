@@ -27,6 +27,7 @@ config("intention_public_config") {
 }
 
 ohos_shared_library("intention_client") {
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true

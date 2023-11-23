@@ -21,6 +21,7 @@ config("task_scheduler_config") {
 }
 
 ohos_source_set("task_scheduler") {
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true

@@ -21,6 +21,7 @@ config("plugin_manager_config") {
 }
 
 ohos_source_set("plugin_manager") {
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true

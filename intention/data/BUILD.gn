@@ -26,6 +26,7 @@ config("cooperate_params_config") {
 }
 
 ohos_source_set("cooperate_params") {
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -62,6 +63,7 @@ config("drag_params_config") {
 }
 
 ohos_source_set("drag_params") {
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true

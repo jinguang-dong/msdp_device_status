@@ -18,6 +18,7 @@ config("intention_epoll_public_config") {
 }
 
 ohos_source_set("intention_epoll") {
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
