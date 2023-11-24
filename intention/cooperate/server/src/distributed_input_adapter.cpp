@@ -187,18 +187,6 @@ void DistributedInputAdapter::ProcessDInputCallback(CallbackType type, int32_t s
     callbacks_.erase(it);
 }
 
-void DistributedInputAdapter::StartDInputCallback::OnResult(const std::string &devId, const uint32_t &inputTypes,
-                                                            const int32_t &status)
-{
-    D_INPUT_ADAPTER->ProcessDInputCallback(CallbackType::StartDInputCallback, status);
-}
-
-void DistributedInputAdapter::StopDInputCallback::OnResult(const std::string &devId, const uint32_t &inputTypes,
-                                                           const int32_t &status)
-{
-    D_INPUT_ADAPTER->ProcessDInputCallback(CallbackType::StopDInputCallback, status);
-}
-
 void DistributedInputAdapter::StartDInputCallbackDHIds::OnResultDhids(const std::string &devId, const int32_t &status)
 {
     D_INPUT_ADAPTER->ProcessDInputCallback(CallbackType::StartDInputCallbackDHIds, status);
