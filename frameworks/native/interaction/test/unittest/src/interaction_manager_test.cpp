@@ -516,6 +516,7 @@ void InteractionManagerTest::SimulateDownKeyEvent(int32_t key)
     SetupKeyEvent(MMI::KeyEvent::KEY_ACTION_DOWN, key, true);
     FI_HILOGD("TEST:keyCode:%{public}d, keyAction: KEY_ACTION_DOWN", key);
     MMI::InputManager::GetInstance()->SimulateInputEvent(g_keyEvent);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_INJECT_MS));
 }
 
 void InteractionManagerTest::SimulateUpKeyEvent(int32_t key)
@@ -524,6 +525,7 @@ void InteractionManagerTest::SimulateUpKeyEvent(int32_t key)
     SetupKeyEvent(MMI::KeyEvent::KEY_ACTION_UP, key, false);
     FI_HILOGD("TEST:keyCode:%{public}d, keyAction: KEY_ACTION_UP", key);
     MMI::InputManager::GetInstance()->SimulateInputEvent(g_keyEvent);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_INJECT_MS));
 }
 
 void InteractionManagerTest::PrintDragAction(DragAction dragAction)
@@ -1945,6 +1947,7 @@ HWTEST_F(InteractionManagerTest, GetDragAction_002, TestSize.Level1)
     };
     SimulateDownPointerEvent(
         { DRAG_SRC_X, DRAG_SRC_Y }, MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_INJECT_MS));
     std::optional<DragData> dragData = CreateDragData({ TEST_PIXEL_MAP_WIDTH, TEST_PIXEL_MAP_HEIGHT },
         MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, DISPLAY_ID, { DRAG_SRC_X, DRAG_SRC_Y });
     ASSERT_TRUE(dragData);
@@ -1975,6 +1978,7 @@ HWTEST_F(InteractionManagerTest, GetDragAction_002, TestSize.Level1)
     ClearUpKeyEvent();
     SimulateUpPointerEvent(
         { DRAG_SRC_X, DRAG_SRC_Y }, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_INJECT_MS));
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
     InteractionManager::GetInstance()->StopDrag(dropResult);
     ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
