@@ -39,6 +39,7 @@ enum class CooperateEventType {
     START_DINPUT_RESULT,
     DINPUT_CLOSED,
     DSOFTBUS_CLOSED,
+    INTERCEPTOR,
 };
 
 struct UpdateStateEvent {
