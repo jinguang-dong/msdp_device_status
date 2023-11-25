@@ -70,6 +70,10 @@ void CooperateIn::StartRemoteInput::OnEvent(Context &context, CooperateEvent &ev
             }
             break;
         }
+        case CooperateEventType::INTERCEPTOR : {
+            AddInterceptor();
+            break;
+        }
         default : {
             break;
         }
