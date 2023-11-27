@@ -15,6 +15,10 @@
 
 #include "state_machine.h"
 
+#include "cooperate_in.h"
+#include "cooperate_out.h"
+#include "cooperate_free.h"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
@@ -43,9 +47,6 @@ void StateMachine::OnEvent(CooperateEvent &event)
     switch (event.type) {
         case CooperateEventType::UPDATE_STATE : {
             UpdateState(std::get<UpdateStateEvent>(event.event));
-            if (std::get<UpdateStateEvent>(event.event).current != COOPERATE_STATE_FREE) {
-                context_.sender.Send(CooperateEventType::INTERCEPTOR);
-            }
             break;
         }
         case CooperateEventType::ENABLE : {

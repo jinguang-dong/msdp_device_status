@@ -18,10 +18,6 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "ICooperateState" };
-const std::string THREAD_NAME { "coordination_state" };
-} // namespace
 
 ICooperateState::ICooperateStep::ICooperateStep(ICooperateState &parent, std::shared_ptr<ICooperateStep> prev)
     : parent_(parent), prev_(prev)
@@ -29,7 +25,7 @@ ICooperateState::ICooperateStep::ICooperateStep(ICooperateState &parent, std::sh
 
 void ICooperateState::Switch(std::shared_ptr<ICooperateStep> step)
 {
-    if (step_ !- nullptr) {
+    if (step != nullptr) {
         current_ = step;
     }
 }

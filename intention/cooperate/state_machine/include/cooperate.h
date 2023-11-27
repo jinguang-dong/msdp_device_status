@@ -21,6 +21,8 @@
 #include <iostream>
 #include <thread>
 
+#include "state_machine.h"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
@@ -29,7 +31,7 @@ public:
     int32_t Init();
     int32_t Enable();
     void Disable();
-    int32_t StartCooperate(int32_t userData, const std::string &remoteNetworkId, int32_t start startDeviceId);
+    int32_t StartCooperate(int32_t userData, const std::string &remoteNetworkId, int32_t startDeviceId);
     int32_t StopCooperate(int32_t userData, bool isUnchained);
 
 private:

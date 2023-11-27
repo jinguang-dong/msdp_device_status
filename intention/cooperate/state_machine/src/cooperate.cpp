@@ -18,6 +18,9 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+namespace {
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "Cooperate" };
+} // namespace
 int32_t Cooperate::Init()
 {
     CALL_DEBUG_ENTER;
@@ -27,7 +30,7 @@ int32_t Cooperate::Init()
     return sm_.Init(sender);
 }
 
-int32_t Enable()
+int32_t Cooperate::Enable()
 {
     running_.store(true);
     worker_ = std::thread(std::bind(&Cooperate::Loop, this));
@@ -36,16 +39,16 @@ int32_t Enable()
     return RET_OK;
 }
 
-int32_t Disable()
+void Cooperate::Disable()
 {
-    sender_.Send(CooperateEvent(CooperateEventType::Disable));
+    sender_.Send(CooperateEvent(CooperateEventType::DISABLE));
     sender_.Send(CooperateEvent(CooperateEventType::QUIT));
     if (worker_.joinable()) {
         worker_.join();
     }
 }
 
-int32_t Cooperate::StartCooperate(int32_t userData, const std::string &remoteNetworkId, int32_t start startDeviceId)
+int32_t Cooperate::StartCooperate(int32_t userData, const std::string &remoteNetworkId, int32_t startDeviceId)
 {
     StartCooperateEvent event {
         .userData = userData,
@@ -71,22 +74,23 @@ int32_t Cooperate::StartCooperate(int32_t userData, const std::string &remoteNet
                 .success = true }));
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         sender_.Send(CooperateEvent(CooperateEventType::POINTER_MOVE,
-            PointerMove {
+            PointerMoveEvent {
                 .deviceId = 13,
-        }));
+            }
+        ));
     }).detach();
     return RET_OK;
 }
 
-int32_t StopCooperate(int32_t userData, bool isUnchained)
+int32_t Cooperate::StopCooperate(int32_t userData, bool isUnchained)
 {
     return RET_ERR;
 }
 
 void Cooperate::Loop()
 {
-    while (wunning_.load()) {
-        CooperateEvent event = receiver_.Receiver();
+    while (running_.load()) {
+        CooperateEvent event = receiver_.Receive();
         switch (event.type) {
             case CooperateEventType::NOOP : {
                 FI_HILOGD("noop");
@@ -108,4 +112,3 @@ void Cooperate::Loop()
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // COOPERATE_OUT_H

@@ -32,6 +32,7 @@ void CooperateIn::Initial::OnProgress(Context &context, CooperateEvent &event)
 
 void CooperateIn::Initial::OnReset(Context &context, CooperateEvent &event)
 {
+    CALL_DEBUG_ENTER;
     switch (event.type) {
         case CooperateEventType::POINTER_MOVE : {
             // 当前设备上连接的鼠标发生移动，重置穿越状态。
@@ -68,10 +69,6 @@ void CooperateIn::StartRemoteInput::OnEvent(Context &context, CooperateEvent &ev
                     prev_->OnReset(context, event);
                 }
             }
-            break;
-        }
-        case CooperateEventType::INTERCEPTOR : {
-            AddInterceptor();
             break;
         }
         default : {

@@ -20,6 +20,8 @@
 #include <variant>
 #include <tuple>
 
+#include "channel.h"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
@@ -40,6 +42,7 @@ enum class CooperateEventType {
     DINPUT_CLOSED,
     DSOFTBUS_CLOSED,
     INTERCEPTOR,
+    SESSION_OPEND,
 };
 
 struct UpdateStateEvent {
@@ -63,6 +66,11 @@ struct PointerMoveEvent {
     int32_t deviceId;
 };
 
+struct SessionOpened {
+    int32_t sessionId;
+    int32_t result;
+};
+
 struct CooperateEvent {
     CooperateEvent() : type(CooperateEventType::QUIT) {}
 
@@ -80,39 +88,49 @@ struct CooperateEvent {
     > event;
 };
 
-std::ostream& operator<<(std::ostream &oss, CooperateEvent &event)
+// std::ostream& operator<<(std::ostream &oss, CooperateEvent &event)
+// {
+//     oss << "CooperateEvent(id:";
+//     switch (event.type) {
+//         case CooperateEventType::POINTER_MOVE : {
+//             PointerMoveEvent e = std::get<PointerMoveEvent>(event.event);
+//             oss << "pointer move, pointer:" << e.deviceId;
+//             break;
+//         }
+//         case CooperateEventType::START: {
+//             StartCooperateEvent e = std::get<StartCooperateEvent>(event.event);
+//             oss << "start cooperate, remote:" << e.remoteNetworkId << ", startDeviceId:" << e.startDeviceId;
+//             break;
+//         }
+//         case CooperateEventType::PREPARE_DINPUT_RESULT : {
+//             StartRemoteInputResult e = std::get<StartRemoteInputResult>(event.event);
+//             oss << "prepare remote input result, source:" << e.source << ", sink:" << e.sink
+//                 << ", startDeviceId:" << e.startDeviceId << ", isSuccess:" << std::boolalpha << e.success;
+//             break;
+//         }
+//         case CooperateEventType::START_DINPUT_RESULT : {
+//             StartRemoteInputResult e = std::get<StartRemoteInputResult>(event.event);
+//             oss << "start remote input result, source:" << e.source << ", sink:" << e.sink
+//                 << ", startDeviceId:" << e.startDeviceId << ", isSuccess:" << std::boolalpha << e.success;
+//             break;
+//         }
+//         default : {
+//             oss << static_cast<int32_t>(event.type);
+//             break;
+//         }
+//     }
+//     oss << ")";
+//     return oss;
+// }
+
+class DeviceManager {
+public:
+    std::string GetDhid(int32_t deviceId);
+};
+
+std::string DeviceManager::GetDhid(int32_t deviceId)
 {
-    oss << "CooperateEvent(id:";
-    switch (event.type) {
-        case CooperateEventType::POINTER_MOVE : {
-            PointerMoveEvent e = std::get<PointerMoveEvent>(event.event);
-            oss << "pointer move, pointer:" << e.deviceId;
-            break;
-        }
-        case CooperateEventType::START: {
-            StartCooperateEvent e = std::get<StartCooperateEvent>(event.event);
-            oss << "start cooperate, remote:" << e.remoteNetworkId << ", startDeviceId:" << e.startDeviceId;
-            break;
-        }
-        case CooperateEventType::PREPARE_DINPUT_RESULT : {
-            StartRemoteInputResult e = std::get<StartRemoteInputResult>(event.event);
-            oss << "prepare remote input result, source:" << e.source << ", sink:" << e.sink
-                << ", startDeviceId:" << e.startDeviceId << ", isSuccess:" << std::boolalpha << e.success;
-            break;
-        }
-        case CooperateEventType::START_DINPUT_RESULT : {
-            StartRemoteInputResult e = std::get<StartRemoteInputResult>(event.event);
-            oss << "start remote input result, source:" << e.source << ", sink:" << e.sink
-                << ", startDeviceId:" << e.startDeviceId << ", isSuccess:" << std::boolalpha << e.success;
-            break;
-        }
-        default : {
-            oss << static_cast<int32_t>(event.type);
-            break;
-        }
-    }
-    oss << ")";
-    return oss;
+    return std::to_string(deviceId);
 }
 
 class Context {
@@ -122,17 +140,7 @@ public:
     std::string cooperated_;
     std::string startDeviceId_;
     bool isUnchain_;
-}
-
-class DeviceManager {
-public:
-    std::string GetDhid(int32_t deviceId);
 };
-
-std::string DeviceManager::GetDhid(int32_t deviceId)
-{
-    return std::to_string(deviuceId);
-}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

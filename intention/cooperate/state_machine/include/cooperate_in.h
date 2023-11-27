@@ -24,14 +24,14 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class CooperateIn : public StateMachine {
+class CooperateIn : public ICooperateState {
 public:
     CooperateIn();
     ~CooperateIn() = default;
 
     void OnEvent(Context &context, CooperateEvent &event) override {}
-    void OnEvent(CooperateEvent &event) override {}
-    void OnLeave(CooperateEvent &event) override {}
+    void OnEnter(Context &event) override {}
+    void OnLeave(Context &event) override {}
 
 private:
     class Initial final : public ICooperateStep {

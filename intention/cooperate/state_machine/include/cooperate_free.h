@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class CooperateFree final : public ICooperateState
+class CooperateFree : public ICooperateState
 {
 public:
     CooperateFree();
@@ -31,7 +31,7 @@ public:
     void OnLeave(Context &context) override;
 
 private:
-    class Initial final : public ICooperateState
+    class Initial final : public ICooperateStep
     {
     public:
         Initial(CooperateFree &parent);
@@ -47,12 +47,12 @@ private:
         void OnStart(Context &context, CooperateEvent &event);
 
         std::shared_ptr<ICooperateStep> start_ { nullptr };
-    }
+    };
 
-    class PrepareRemoteInput final : public ICooperateState
+    class PrepareRemoteInput final : public ICooperateStep
     {
     public:
-        PrepareRemoteInput(CooperateFree &parent, std::shared_ptr<ICooperateState> prev);
+        PrepareRemoteInput(CooperateFree &parent, std::shared_ptr<ICooperateStep> prev);
         ~PrepareRemoteInput() = default;
 
         void OnEvent(Context &context, CooperateEvent &event) override;
@@ -60,21 +60,21 @@ private:
         void OnReset(Context &context, CooperateEvent &event) override;
     };
     
-    class StartRemoteInput final : public ICooperateState
+    class StartRemoteInput final : public ICooperateStep
     {
     public:
-        StartRemoteInput(CooperateFree &parent, std::shared_ptr<ICooperateState> prev);
+        StartRemoteInput(CooperateFree &parent, std::shared_ptr<ICooperateStep> prev);
         ~StartRemoteInput() = default;
 
         void OnEvent(Context &context, CooperateEvent &event) override;
         void OnProgress(Context &context, CooperateEvent &event) override;
         void OnReset(Context &context, CooperateEvent &event) override;
-    }
+    };
 
-    class OpenSession final : public ICooperateState
+    class OpenSession final : public ICooperateStep
     {
     public:
-        OpenSession(CooperateFree &parent, std::shared_ptr<ICooperateState> prev);
+        OpenSession(CooperateFree &parent, std::shared_ptr<ICooperateStep> prev);
         ~OpenSession() = default;
 
         void OnEvent(Context &context, CooperateEvent &event) override;

@@ -24,14 +24,14 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class CooperateOut : public StateMachine {
+class CooperateOut : public ICooperateState {
 public:
     CooperateOut();
     ~CooperateOut() = default;
 
     void OnEvent(Context &context, CooperateEvent &event) override;
-    void OnEvent(CooperateEvent &event) override;
-    void OnLeave(CooperateEvent &event) override;
+    void OnEnter(Context &event) override;
+    void OnLeave(Context &event) override;
 
 private:
     class Initial final : public ICooperateStep {
@@ -48,12 +48,12 @@ private:
     private:
         void OnStart(Context &context, CooperateEvent &event);
 
-        std::shared_ptr<ICooperateState> stop_ { nullptr };
+        std::shared_ptr<ICooperateStep> stop_ { nullptr };
     };
 
     class StopRemoteInput : public ICooperateStep {
     public:
-        StopRemoteInput(CooperateOut &parent, std::shared_ptr<ICooperateState> prev);
+        StopRemoteInput(CooperateOut &parent, std::shared_ptr<ICooperateStep> prev);
         ~StopRemoteInput() = default;
 
         void OnEvent(Context &context, CooperateEvent &event) override;
@@ -63,7 +63,7 @@ private:
 
     class UnprepareRemoteInput : public ICooperateStep {
     public:
-        UnprepareRemoteInput(CooperateOut &parent, std::shared_ptr<ICooperateState> prev);
+        UnprepareRemoteInput(CooperateOut &parent, std::shared_ptr<ICooperateStep> prev);
         ~UnprepareRemoteInput() = default;
     
         void OnEvent(Context &context, CooperateEvent &event) override;

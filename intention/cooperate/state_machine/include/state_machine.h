@@ -31,7 +31,7 @@ public:
         COOPERATE_STATE_OUT,
         COOPERATE_STATE_IN,
         NUM_COOPERATE_STATES,
-    }
+    };
 
     StateMachine();
     ~StateMachine() = default;
@@ -45,7 +45,7 @@ private:
     size_t current_ { 0 };
     std::array<std::shared_ptr<ICooperateState>, NUM_COOPERATE_STATES> states_;
     Context context_;
-}
+};
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

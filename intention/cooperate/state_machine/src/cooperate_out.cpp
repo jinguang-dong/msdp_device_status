@@ -38,7 +38,7 @@ void CooperateOut::OnEvent(Context &context, CooperateEvent &event)
     }
 }
 
-void CooperateOut::OnEvent(Context & context)
+void CooperateOut::OnEnter(Context & context)
 {
     CALL_DEBUG_ENTER;
 }
@@ -92,7 +92,7 @@ void CooperateOut::Initial::BuildChains(std::shared_ptr<Initial> self, Cooperate
     s2->SetNext(self);
 }
 
-CooperateOut::StopRemoteInput::StopRemoteInput(CooperateOut &parent, std::shared_ptr<ICooperateState> prev)
+CooperateOut::StopRemoteInput::StopRemoteInput(CooperateOut &parent, std::shared_ptr<ICooperateStep> prev)
     : ICooperateStep(parent, prev)
 {}
 
@@ -112,7 +112,7 @@ void CooperateOut::StopRemoteInput::OnReset(Context &context, CooperateEvent &ev
     CALL_DEBUG_ENTER;
 }
 
-CooperateOut::UnprepareRemoteInput::UnprepareRemoteInput(CooperateOut &parent, std::shared_ptr<ICooperateState> prev)
+CooperateOut::UnprepareRemoteInput::UnprepareRemoteInput(CooperateOut &parent, std::shared_ptr<ICooperateStep> prev)
     : ICooperateStep(parent, prev)
 {}
 
@@ -123,7 +123,7 @@ void CooperateOut::UnprepareRemoteInput::OnEvent(Context &context, CooperateEven
 
 void CooperateOut::UnprepareRemoteInput::OnProgress(Context &context, CooperateEvent &event)
 {
-    FI_HILOGD("unprepare remote input (remote:%{public}s)", context.cooperated_);
+    FI_HILOGD("unprepare remote input (remote:%{public}s)", context.cooperated_.c_str());
     context.sender.Send(CooperateEvent(CooperateEventType::UPDATE_STATE, UpdateStateEvent {
         .current = 0,
     }));

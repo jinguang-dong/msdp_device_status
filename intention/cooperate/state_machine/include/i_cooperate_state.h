@@ -23,6 +23,7 @@
 #include <string>
 
 #include "cooperate_define.h"
+#include "channel.h"
 #include "devicestatus_define.h"
 
 namespace OHOS {
@@ -34,7 +35,7 @@ public:
     virtual ~ICooperateState() = default;
 
     virtual void OnEvent(Context &context, CooperateEvent &event) = 0;
-    virtual void OnEvent(Context &context) = 0;
+    virtual void OnEnter(Context &context) = 0;
     virtual void OnLeave(Context &context) = 0;
 
 protected:

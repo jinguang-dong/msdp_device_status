@@ -13,11 +13,6 @@
  * limitations under the License.
  */
 
-#include "cooperate_state_free.h"
-
-#include "cooperate_softbus_adapter.h"
-#include "cooperate_sm.h"
-#include "cooperate_util.h"
 #include "cooperate_free.h"
 
 namespace OHOS {
@@ -39,7 +34,7 @@ void CooperateFree::OnEvent(Context &context, CooperateEvent &event)
     if(current_ != nullptr) {
         current_->OnEvent(context, event);
     } else {
-        FI_HILOGE("In CooperateFree::OnEvent， current step is null");
+        FI_HILOGE("In CooperateFree::OnEvent, current step is null");
     }
 }
 
@@ -53,7 +48,7 @@ void CooperateFree::OnLeave(Context &context)
     CALL_INFO_TRACE;
 }
 
-CooperateFree::Initial::Initial(CooperateFree &parent) : ICooperateState(parent, nullptr)
+CooperateFree::Initial::Initial(CooperateFree &parent) : ICooperateStep(parent, nullptr)
 {
     CALL_INFO_TRACE;
 }
@@ -61,13 +56,15 @@ CooperateFree::Initial::Initial(CooperateFree &parent) : ICooperateState(parent,
 void CooperateFree::Initial::OnEvent(Context &context, CooperateEvent &event)
 {
     CALL_INFO_TRACE;
-    switch (event.type)
-    {
-        case CooperateEventType::DISABLE: {
+    switch (event.type) {
+        case CooperateEventType::DISABLE : {
             break;
         }
-        case CooperateEventType::START: {
+        case CooperateEventType::START : {
             OnStart(context, event);
+            break;
+        }
+        default : {
             break;
         }
     }
@@ -105,14 +102,13 @@ void CooperateFree::Initial::OnStart(Context &context, CooperateEvent &event)
     }
 }
 
-CooperateFree::PrepareRemoteInput::PrepareRemoteInput(CooperateFree &parent, std::shared_ptr<ICooperateState> prev)
-    : ICooperateState(parent, prev) {}
+CooperateFree::PrepareRemoteInput::PrepareRemoteInput(CooperateFree &parent, std::shared_ptr<ICooperateStep> prev)
+    : ICooperateStep(parent, prev) {}
 
 void CooperateFree::PrepareRemoteInput::OnEvent(Context &context, CooperateEvent &event)
 {
     CALL_INFO_TRACE;
-    switch (event.type)
-    {
+    switch (event.type) {
         case CooperateEventType::PREPARE_DINPUT_RESULT: {
             StartRemoteInputResult result = std::get<StartRemoteInputResult>(event.event);
             if (result.success) {
@@ -120,6 +116,9 @@ void CooperateFree::PrepareRemoteInput::OnEvent(Context &context, CooperateEvent
             } else {
                 Reset(context, event);
             }
+            break;
+        }
+        default : {
             break;
         }
     }
@@ -136,22 +135,24 @@ void CooperateFree::PrepareRemoteInput::OnReset(Context &context, CooperateEvent
     Reset(context, event);
 }
 
-CooperateFree::StartRemoteInput::StartRemoteInput(CooperateFree &parent, std::shared_ptr<ICooperateState> prev)
-    : ICooperateState(parent, event) {}
+CooperateFree::StartRemoteInput::StartRemoteInput(CooperateFree &parent, std::shared_ptr<ICooperateStep> prev)
+    : ICooperateStep(parent, prev) {}
 
 void CooperateFree::StartRemoteInput::OnEvent(Context &context, CooperateEvent &event)
 {
     CALL_INFO_TRACE;
-    switch (event.type)
-    {
+    switch (event.type) {
         case CooperateEventType::START_DINPUT_RESULT: {
             StartRemoteInputResult result = std::get<StartRemoteInputResult>(event.event);
             if (result.success) {
-                context.sender.Send(CooperateEvent(CooperateEventType::UPDATE_STATE, { .current = 1,}));
+                context.sender.Send(CooperateEvent(CooperateEventType::UPDATE_STATE, UpdateStateEvent { .current = 1,}));
                 Proceed(context, event);
             } else {
                 Reset(context, event);
             }
+            break;
+        }
+        default : {
             break;
         }
     }
@@ -163,19 +164,12 @@ void CooperateFree::StartRemoteInput::OnProgress(Context &context, CooperateEven
 void CooperateFree::StartRemoteInput::OnReset(Context &context, CooperateEvent &event)
 {}
 
-CooperateFree::OpenSession::OpenSession(CooperateFree &parent, std::shared_ptr<ICooperateState> prev)
-    : ICooperateState(parent, event) {}
+CooperateFree::OpenSession::OpenSession(CooperateFree &parent, std::shared_ptr<ICooperateStep> prev)
+    : ICooperateStep(parent, prev) {}
 
 void CooperateFree::OpenSession::OnEvent(Context &context, CooperateEvent &event)
 {
     CALL_INFO_TRACE;
-    switch (event.type)
-    {
-        case CooperateEventType::SESSION_OPEND: {
-            COOR_SOFTBUS_ADAPTER->AdapterSessionOpened(event.sessionId, event.result);
-            break;
-        }
-    }
 }
 
 void CooperateFree::OpenSession::OnProgress(Context &context, CooperateEvent &event)
