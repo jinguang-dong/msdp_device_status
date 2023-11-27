@@ -219,7 +219,7 @@ int32_t TimerManager::ResetTimerInternal(int32_t timerId)
     return RET_ERR;
 }
 
-void TimerManager::InsertTimerInternal(std::unique_ptr<TimerItem>& timer)
+void TimerManager::InsertTimerInternal(std::unique_ptr<TimerItem> &timer)
 {
     for (auto iter = timers_.begin(); iter != timers_.end(); ++iter) {
         if ((*iter)->nextCallTime > timer->nextCallTime) {

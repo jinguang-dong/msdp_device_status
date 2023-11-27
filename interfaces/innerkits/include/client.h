@@ -38,7 +38,7 @@ public:
     void RegisterDisconnectedFunction(ConnectCallback fun) override;
     void Stop() override;
     bool GetCurrentConnectedStatus() const override;
-    bool SendMessage(const NetPacket& pkt) const override;
+    bool SendMessage(const NetPacket &pkt) const override;
     void OnRecvMsg(const char *buf, size_t size) override;
     int32_t Reconnect() override;
     void OnDisconnect() override;
@@ -57,11 +57,11 @@ private:
     void OnReconnect();
     bool AddFdListener(int32_t fd);
     bool DelFdListener(int32_t fd);
-    void OnPacket(NetPacket& pkt);
-    const std::string& GetErrorStr(ErrCode code) const;
+    void OnPacket(NetPacket &pkt);
+    const std::string &GetErrorStr(ErrCode code) const;
     void OnConnected() override;
     void OnDisconnected() override;
-    void OnMsgHandler(const StreamClient& client, NetPacket& pkt);
+    void OnMsgHandler(const StreamClient &client, NetPacket &pkt);
 
 private:
     ConnectCallback funConnected_ { nullptr };

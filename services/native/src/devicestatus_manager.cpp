@@ -25,7 +25,7 @@ namespace {
 constexpr ::OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceStatusManager" };
 } // namespace
 
-void DeviceStatusManager::DeviceStatusCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
+void DeviceStatusManager::DeviceStatusCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     CHKPV(remote);
     FI_HILOGI("Recv death notice");
@@ -121,13 +121,13 @@ int32_t DeviceStatusManager::InitDataCallback()
     return true;
 }
 
-int32_t DeviceStatusManager::MsdpDataCallback(const Data& data)
+int32_t DeviceStatusManager::MsdpDataCallback(const Data &data)
 {
     NotifyDeviceStatusChange(data);
     return RET_OK;
 }
 
-int32_t DeviceStatusManager::NotifyDeviceStatusChange(const Data& devicestatusData)
+int32_t DeviceStatusManager::NotifyDeviceStatusChange(const Data &devicestatusData)
 {
     CALL_DEBUG_ENTER;
     FI_HILOGI("type:%{public}d, value:%{public}d", devicestatusData.type, devicestatusData.value);

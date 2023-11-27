@@ -151,7 +151,7 @@ int32_t DeviceStatusSrvStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int32_t DeviceStatusSrvStub::SubscribeStub(MessageParcel& data, MessageParcel& reply)
+int32_t DeviceStatusSrvStub::SubscribeStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
     int32_t type = -1;
@@ -175,7 +175,7 @@ int32_t DeviceStatusSrvStub::SubscribeStub(MessageParcel& data, MessageParcel& r
     return RET_OK;
 }
 
-int32_t DeviceStatusSrvStub::UnsubscribeStub(MessageParcel& data, MessageParcel& reply)
+int32_t DeviceStatusSrvStub::UnsubscribeStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
     int32_t type = -1;
@@ -191,7 +191,7 @@ int32_t DeviceStatusSrvStub::UnsubscribeStub(MessageParcel& data, MessageParcel&
     return RET_OK;
 }
 
-int32_t DeviceStatusSrvStub::GetLatestDeviceStatusDataStub(MessageParcel& data, MessageParcel& reply)
+int32_t DeviceStatusSrvStub::GetLatestDeviceStatusDataStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
     int32_t type = -1;
@@ -204,7 +204,7 @@ int32_t DeviceStatusSrvStub::GetLatestDeviceStatusDataStub(MessageParcel& data, 
     return RET_OK;
 }
 
-int32_t DeviceStatusSrvStub::RegisterCoordinationMonitorStub(MessageParcel& data, MessageParcel& reply)
+int32_t DeviceStatusSrvStub::RegisterCoordinationMonitorStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
     bool isCheckPermission = false;
@@ -222,7 +222,7 @@ int32_t DeviceStatusSrvStub::RegisterCoordinationMonitorStub(MessageParcel& data
     return ret;
 }
 
-int32_t DeviceStatusSrvStub::UnregisterCoordinationMonitorStub(MessageParcel& data, MessageParcel& reply)
+int32_t DeviceStatusSrvStub::UnregisterCoordinationMonitorStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
     bool isCheckPermission = false;
@@ -240,7 +240,7 @@ int32_t DeviceStatusSrvStub::UnregisterCoordinationMonitorStub(MessageParcel& da
     return ret;
 }
 
-int32_t DeviceStatusSrvStub::PrepareCoordinationStub(MessageParcel& data, MessageParcel& reply)
+int32_t DeviceStatusSrvStub::PrepareCoordinationStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
     int32_t userData = 0;
@@ -636,7 +636,7 @@ int32_t DeviceStatusSrvStub::GetDragStateStub(MessageParcel &data, MessageParcel
     return ret;
 }
 
-int32_t DeviceStatusSrvStub::RemoveHotAreaListenerStub(MessageParcel& data, MessageParcel& reply)
+int32_t DeviceStatusSrvStub::RemoveHotAreaListenerStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
     if (!CheckCooperatePermission()) {
@@ -650,7 +650,7 @@ int32_t DeviceStatusSrvStub::RemoveHotAreaListenerStub(MessageParcel& data, Mess
     return ret;
 }
 
-int32_t DeviceStatusSrvStub::UpdateDragItemStyleStub(MessageParcel& data, MessageParcel& reply)
+int32_t DeviceStatusSrvStub::UpdateDragItemStyleStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
     DragItemStyle dragItemStyle;
@@ -664,7 +664,7 @@ int32_t DeviceStatusSrvStub::UpdateDragItemStyleStub(MessageParcel& data, Messag
     return ret;
 }
 
-int32_t DeviceStatusSrvStub::GetDragSummaryStub(MessageParcel& data, MessageParcel& reply)
+int32_t DeviceStatusSrvStub::GetDragSummaryStub(MessageParcel &data, MessageParcel &reply)
 {
     std::map<std::string, int64_t> summarys;
     if (GetDragSummary(summarys) != RET_OK) {
@@ -690,7 +690,7 @@ int32_t DeviceStatusSrvStub::GetDragActionStub(MessageParcel &data, MessageParce
     return RET_OK;
 }
 
-int32_t DeviceStatusSrvStub::EnterTextEditorAreaStub(MessageParcel& data, MessageParcel& reply)
+int32_t DeviceStatusSrvStub::EnterTextEditorAreaStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
     bool enable = false;
