@@ -18,10 +18,9 @@ config("cooperate_public_config") {
 }
 
 ohos_shared_library("state_machine") {
-
   include_dirs = [
     "include",
-    "${device_status_root_path}/intention/cooperate/server/include"
+    "${device_status_root_path}/intention/cooperate/server/include",
   ]
 
   sources = [
