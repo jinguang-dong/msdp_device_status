@@ -16,9 +16,9 @@
 #ifndef COOPERATE_H
 #define COOPERATE_H
 
-#include <string>
 #include <atomic>
 #include <iostream>
+#include <string>
 #include <thread>
 
 #include "state_machine.h"

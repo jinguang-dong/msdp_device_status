@@ -22,8 +22,8 @@
 #include <set>
 #include <string>
 
-#include "cooperate_define.h"
 #include "channel.h"
+#include "cooperate_define.h"
 #include "devicestatus_define.h"
 
 namespace OHOS {

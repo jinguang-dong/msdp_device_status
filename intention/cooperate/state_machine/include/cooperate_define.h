@@ -17,8 +17,8 @@
 #define COOPERATE_DEFINE_H
 
 #include <string>
-#include <variant>
 #include <tuple>
+#include <variant>
 
 #include "channel.h"
 

@@ -15,9 +15,9 @@
 
 #include "state_machine.h"
 
+#include "cooperate_free.h"
 #include "cooperate_in.h"
 #include "cooperate_out.h"
-#include "cooperate_free.h"
 
 namespace OHOS {
 namespace Msdp {
