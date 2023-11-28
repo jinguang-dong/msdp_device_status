@@ -219,7 +219,7 @@ HWTEST_F(DeviceStatusClientTest, GetDeviceStatusDataTest001, TestSize.Level0)
     EXPECT_TRUE(data.type == type &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
 
-    Type type = static_cast<Type>(10);
+    type = static_cast<Type>(10);
     data = stationaryMgr->GetDeviceStatusData(type);
     EXPECT_TRUE(data.type == Type::TYPE_INVALID &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
