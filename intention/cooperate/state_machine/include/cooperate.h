@@ -46,4 +46,4 @@ private:
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // COOPERATE_OUT_H
+#endif // COOPERATE_H

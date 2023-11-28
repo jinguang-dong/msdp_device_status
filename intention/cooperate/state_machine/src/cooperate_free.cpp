@@ -38,12 +38,12 @@ void CooperateFree::OnEvent(Context &context, CooperateEvent &event)
     }
 }
 
-void CooperateFree::OnEnter(Context &context)
+void CooperateFree::OnEnterState(Context &context)
 {
     CALL_INFO_TRACE;
 }
 
-void CooperateFree::OnLeave(Context &context)
+void CooperateFree::OnLeaveState(Context &context)
 {
     CALL_INFO_TRACE;
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include <cooperate.h>
+#include "cooperate.h"
 
 namespace OHOS {
 namespace Msdp {

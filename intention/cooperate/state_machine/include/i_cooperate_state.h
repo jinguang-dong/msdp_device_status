@@ -35,8 +35,8 @@ public:
     virtual ~ICooperateState() = default;
 
     virtual void OnEvent(Context &context, CooperateEvent &event) = 0;
-    virtual void OnEnter(Context &context) = 0;
-    virtual void OnLeave(Context &context) = 0;
+    virtual void OnEnterState(Context &context) = 0;
+    virtual void OnLeaveState(Context &context) = 0;
 
 protected:
     class ICooperateStep {

@@ -27,8 +27,8 @@ public:
     CooperateFree();
     ~CooperateFree() = default;
     void OnEvent(Context &context, CooperateEvent &event) override;
-    void OnEnter(Context &context) override;
-    void OnLeave(Context &context) override;
+    void OnEnterState(Context &context) override;
+    void OnLeaveState(Context &context) override;
 
 private:
     class Initial final : public ICooperateStep

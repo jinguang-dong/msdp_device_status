@@ -88,40 +88,40 @@ struct CooperateEvent {
     > event;
 };
 
-// std::ostream& operator<<(std::ostream &oss, CooperateEvent &event)
-// {
-//     oss << "CooperateEvent(id:";
-//     switch (event.type) {
-//         case CooperateEventType::POINTER_MOVE : {
-//             PointerMoveEvent e = std::get<PointerMoveEvent>(event.event);
-//             oss << "pointer move, pointer:" << e.deviceId;
-//             break;
-//         }
-//         case CooperateEventType::START: {
-//             StartCooperateEvent e = std::get<StartCooperateEvent>(event.event);
-//             oss << "start cooperate, remote:" << e.remoteNetworkId << ", startDeviceId:" << e.startDeviceId;
-//             break;
-//         }
-//         case CooperateEventType::PREPARE_DINPUT_RESULT : {
-//             StartRemoteInputResult e = std::get<StartRemoteInputResult>(event.event);
-//             oss << "prepare remote input result, source:" << e.source << ", sink:" << e.sink
-//                 << ", startDeviceId:" << e.startDeviceId << ", isSuccess:" << std::boolalpha << e.success;
-//             break;
-//         }
-//         case CooperateEventType::START_DINPUT_RESULT : {
-//             StartRemoteInputResult e = std::get<StartRemoteInputResult>(event.event);
-//             oss << "start remote input result, source:" << e.source << ", sink:" << e.sink
-//                 << ", startDeviceId:" << e.startDeviceId << ", isSuccess:" << std::boolalpha << e.success;
-//             break;
-//         }
-//         default : {
-//             oss << static_cast<int32_t>(event.type);
-//             break;
-//         }
-//     }
-//     oss << ")";
-//     return oss;
-// }
+std::ostream& operator<<(std::ostream &oss, CooperateEvent &event)
+{
+    oss << "CooperateEvent(id:";
+    switch (event.type) {
+        case CooperateEventType::POINTER_MOVE : {
+            PointerMoveEvent e = std::get<PointerMoveEvent>(event.event);
+            oss << "pointer move, pointer:" << e.deviceId;
+            break;
+        }
+        case CooperateEventType::START: {
+            StartCooperateEvent e = std::get<StartCooperateEvent>(event.event);
+            oss << "start cooperate, remote:" << e.remoteNetworkId << ", startDeviceId:" << e.startDeviceId;
+            break;
+        }
+        case CooperateEventType::PREPARE_DINPUT_RESULT : {
+            StartRemoteInputResult e = std::get<StartRemoteInputResult>(event.event);
+            oss << "prepare remote input result, source:" << e.source << ", sink:" << e.sink
+                << ", startDeviceId:" << e.startDeviceId << ", isSuccess:" << std::boolalpha << e.success;
+            break;
+        }
+        case CooperateEventType::START_DINPUT_RESULT : {
+            StartRemoteInputResult e = std::get<StartRemoteInputResult>(event.event);
+            oss << "start remote input result, source:" << e.source << ", sink:" << e.sink
+                << ", startDeviceId:" << e.startDeviceId << ", isSuccess:" << std::boolalpha << e.success;
+            break;
+        }
+        default : {
+            oss << static_cast<int32_t>(event.type);
+            break;
+        }
+    }
+    oss << ")";
+    return oss;
+}
 
 class DeviceManager {
 public:

@@ -38,12 +38,12 @@ void CooperateOut::OnEvent(Context &context, CooperateEvent &event)
     }
 }
 
-void CooperateOut::OnEnter(Context & context)
+void CooperateOut::OnEnterState(Context & context)
 {
     CALL_DEBUG_ENTER;
 }
 
-void CooperateOut::OnLeave(Context & context)
+void CooperateOut::OnLeaveState(Context & context)
 {
     CALL_DEBUG_ENTER;
 }

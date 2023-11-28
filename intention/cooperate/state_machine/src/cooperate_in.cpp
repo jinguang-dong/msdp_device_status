@@ -24,6 +24,21 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "Coopera
 CooperateIn::CooperateIn()
 {}
 
+void CooperateIn::OnEvent(Context &context, CooperateEvent &event)
+{
+    CALL_DEBUG_ENTER;
+}
+
+void CooperateIn::OnEnterState(Context & context)
+{
+    CALL_DEBUG_ENTER;
+}
+
+void CooperateIn::OnLeaveState(Context & context)
+{
+    CALL_DEBUG_ENTER;
+}
+
 void CooperateIn::Initial::OnEvent(Context &context, CooperateEvent &event)
 {}
 

@@ -19,7 +19,7 @@
 #include <array>
 #include <memory>
 
-#include "state_machine.h"
+#include "i_cooperate_state.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -30,8 +30,8 @@ public:
     ~CooperateOut() = default;
 
     void OnEvent(Context &context, CooperateEvent &event) override;
-    void OnEnter(Context &event) override;
-    void OnLeave(Context &event) override;
+    void OnEnterState(Context &event) override;
+    void OnLeaveState(Context &event) override;
 
 private:
     class Initial final : public ICooperateStep {
