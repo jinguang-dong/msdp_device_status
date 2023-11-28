@@ -44,10 +44,10 @@ int32_t CGetPointerStyle(CPointerStyle* cPointerStyle);
 void CAppendExtraData(CExtraData cExtraData);
 int32_t CSetPointerVisible(bool visible);
 int32_t CEnableInputDevice(bool enable);
-int32_t CRemoveInputEventFilter(int filterId);
-void CRemoveMonitor(int monitorId);
-void CRemoveInterceptor(int interceptorId);
-void CSetPointerLocation(int physicalX, int physicalY);
+int32_t CRemoveInputEventFilter(int32_t filterId);
+void CRemoveMonitor(int32_t monitorId);
+void CRemoveInterceptor(int32_t interceptorId);
+void CSetPointerLocation(int32_t physicalX, int32_t physicalY);
 
 void CDestroyPointerEvent(CPointerEvent* cPointerEvent);
 

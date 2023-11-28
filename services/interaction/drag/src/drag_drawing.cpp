@@ -1101,7 +1101,7 @@ void DragDrawing::SetDecodeOptions(Media::DecodeOptions &decodeOpts)
 bool DragDrawing::ParserFilterInfo(FilterInfo& filterInfo)
 {
     if (g_drawingInfo.extraInfo.empty()) {
-        FI_HILOGD("the extraInfo is empty");
+        FI_HILOGD("The extraInfo is empty");
         return false;
     }
     JsonDataParser filterParser;
