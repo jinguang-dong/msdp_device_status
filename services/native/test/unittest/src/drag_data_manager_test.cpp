@@ -43,6 +43,7 @@ constexpr int32_t DISPLAY_Y { 50 };
 constexpr int32_t DRAG_NUM_ONE { 1 };
 constexpr bool HAS_CANCELED_ANIMATION { true };
 constexpr bool DRAG_WINDOW_VISIBLE { true };
+constexpr bool IS_MOTION_DRAG { true };
 constexpr int32_t INT32_BYTE { 4 };
 constexpr uint32_t DEFAULT_ICON_COLOR { 0xFF };
 constexpr int64_t START_TIME { 181154000809 };
@@ -358,6 +359,73 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest011, TestSize.Level0)
     dragDrawing.Draw(pointerEvent->GetTargetDisplayId(), pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     dragDrawing.DestroyDragWindow();
     EXPECT_EQ(dragDrawing.startNum_, START_TIME);
+}
+
+ /**
+ * @tc.name: DragDataManagerTest012
+ * @tc.desc: normal test SetShadowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest012, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    ASSERT_FALSE(pixelMap == nullptr);
+    ShadowInfo shadowInfo;
+    shadowInfo.pixelMap = pixelMap;
+    shadowInfo.x = SHADOWINFO_X;
+    shadowInfo.y = SHADOWINFO_Y;
+    DRAG_DATA_MGR.SetShadowInfo(shadowInfo);
+    EXPECT_TRUE(SHADOWINFO_X == DRAG_DATA_MGR.GetDragData().shadowInfo.x);
+    EXPECT_TRUE(SHADOWINFO_Y == DRAG_DATA_MGR.GetDragData().shadowInfo.y);
+}
+
+ /**
+ * @tc.name: DragDataManagerTest013
+ * @tc.desc: test abnormal SetDragWindowVisible and GetDragWindowVisible in devicestatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest013, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DRAG_DATA_MGR.SetDragWindowVisible(DRAG_WINDOW_VISIBLE);
+    EXPECT_TURE(DRAG_DATA_MGR.GetDragWindowVisible() == DRAG_WINDOW_VISIBLE);
+}
+
+ /**
+ * @tc.name: DragDataManagerTest014
+ * @tc.desc: test abnormal SetDragWindowVisible and GetDragWindowVisible in devicestatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest014, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DRAG_DATA_MGR.SetDragWindowVisible(DRAG_WINDOW_VISIBLE);
+    EXPECT_FALSE(DRAG_DATA_MGR.GetDragWindowVisible() != DRAG_WINDOW_VISIBLE);
+}
+
+ /**
+ * @tc.name: DragDataManagerTest015
+ * @tc.desc: test abnormal SetMotionDrag and IsMotionDrag in devicestatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest015, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DRAG_DATA_MGR.SetMotionDrag(IS_MOTION_DRAG);
+    EXPECT_TURE(DRAG_DATA_MGR.IsMotionDrag() == IS_MOTION_DRAG);
+}
+
+ /**
+ * @tc.name: DragDataManagerTest016
+* @tc.desc: test abnormal SetMotionDrag and IsMotionDrag in devicestatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest016, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DRAG_DATA_MGR.SetMotionDrag(IS_MOTION_DRAG);
+    EXPECT_FALSE(DRAG_DATA_MGR.IsMotionDrag() != IS_MOTION_DRAG);
 }
 } // namespace
 } // namespace DeviceStatus
