@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "client.h"
 
 #include <cinttypes>
@@ -165,7 +166,7 @@ bool Client::DelFdListener(int32_t fd)
     return true;
 }
 
-void Client::OnPacket(NetPacket& pkt)
+void Client::OnPacket(NetPacket &pkt)
 {
     recvFun_(*this, pkt);
 }
@@ -285,7 +286,7 @@ void Client::Stop()
     }
 }
 
-void Client::OnMsgHandler(const StreamClient& client, NetPacket& pkt)
+void Client::OnMsgHandler(const StreamClient &client, NetPacket &pkt)
 {
     CALL_DEBUG_ENTER;
     auto id = pkt.GetMsgId();
@@ -302,7 +303,7 @@ void Client::OnMsgHandler(const StreamClient& client, NetPacket& pkt)
     }
 }
 
-const std::string& Client::GetErrorStr(ErrCode code) const
+const std::string &Client::GetErrorStr(ErrCode code) const
 {
     const static std::string defErrString = "Unknown event handler error!";
     const static std::map<ErrCode, std::string> mapStrings = {

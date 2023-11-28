@@ -79,7 +79,7 @@ ErrCode DeviceStatusClient::Connect()
     return RET_OK;
 }
 
-void DeviceStatusClient::ResetProxy(const wptr<IRemoteObject>& remote)
+void DeviceStatusClient::ResetProxy(const wptr<IRemoteObject> &remote)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     CHKPV(devicestatusProxy_);
@@ -94,7 +94,7 @@ void DeviceStatusClient::ResetProxy(const wptr<IRemoteObject>& remote)
     }
 }
 
-void DeviceStatusClient::DeviceStatusDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
+void DeviceStatusClient::DeviceStatusDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     CHKPV(remote);
     DeviceStatusClient::GetInstance().ResetProxy(remote);
@@ -409,7 +409,7 @@ int32_t DeviceStatusClient::SetDragWindowVisible(bool visible)
     return devicestatusProxy_->SetDragWindowVisible(visible);
 }
 
-int32_t DeviceStatusClient::GetShadowOffset(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height)
+int32_t DeviceStatusClient::GetShadowOffset(int32_t &offsetX, int32_t &offsetY, int32_t &width, int32_t &height)
 {
     CALL_DEBUG_ENTER;
     DEV_RET_IF_NULL_WITH_RET((Connect() != RET_OK), RET_ERR);

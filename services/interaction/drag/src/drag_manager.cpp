@@ -914,7 +914,7 @@ void DragManager::HandleCtrlKeyUp()
     }
 }
 
-int32_t DragManager::GetDragAction(DragAction& dragAction) const
+int32_t DragManager::GetDragAction(DragAction &dragAction) const
 {
     CALL_DEBUG_ENTER;
     if (dragState_ != DragState::START) {

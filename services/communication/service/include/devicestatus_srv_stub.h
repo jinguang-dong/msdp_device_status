@@ -30,7 +30,7 @@ namespace Msdp {
 namespace DeviceStatus {
 class DeviceStatusSrvStub : public IRemoteStub<Idevicestatus> {
 public:
-    using ConnFunc = int32_t (DeviceStatusSrvStub::*)(MessageParcel& data, MessageParcel& reply);
+    using ConnFunc = int32_t (DeviceStatusSrvStub::*)(MessageParcel &data, MessageParcel &reply);
 
     DeviceStatusSrvStub();
     DISALLOW_COPY_AND_MOVE(DeviceStatusSrvStub);
@@ -39,30 +39,30 @@ public:
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
-    int32_t SubscribeStub(MessageParcel& data, MessageParcel& reply);
-    int32_t UnsubscribeStub(MessageParcel& data, MessageParcel& reply);
-    int32_t GetLatestDeviceStatusDataStub(MessageParcel& data, MessageParcel& reply);
-    int32_t HandleAllocSocketFdStub(MessageParcel& data, MessageParcel& reply);
-    int32_t RegisterCoordinationMonitorStub(MessageParcel& data, MessageParcel& reply);
-    int32_t UnregisterCoordinationMonitorStub(MessageParcel& data, MessageParcel& reply);
-    int32_t PrepareCoordinationStub(MessageParcel& data, MessageParcel& reply);
-    int32_t UnPrepareCoordinationStub(MessageParcel& data, MessageParcel& reply);
-    int32_t ActivateCoordinationStub(MessageParcel& data, MessageParcel& reply);
-    int32_t DeactivateCoordinationStub(MessageParcel& data, MessageParcel& reply);
-    int32_t GetCoordinationStateStub(MessageParcel& data, MessageParcel& reply);
-    int32_t StartDragStub(MessageParcel& data, MessageParcel& reply);
-    int32_t StopDragStub(MessageParcel& data, MessageParcel& reply);
-    int32_t UpdateDragStyleStub(MessageParcel& data, MessageParcel& reply);
-    int32_t GetDragTargetPidStub(MessageParcel& data, MessageParcel& reply);
-    int32_t GetUdKeyStub(MessageParcel& data, MessageParcel& reply);
-    int32_t AddDraglistenerStub(MessageParcel& data, MessageParcel& reply);
-    int32_t RemoveDraglistenerStub(MessageParcel& data, MessageParcel& reply);
-    int32_t AddSubscriptListenerStub(MessageParcel& data, MessageParcel& reply);
-    int32_t RemoveSubscriptListenerStub(MessageParcel& data, MessageParcel& reply);
-    int32_t SetDragWindowVisibleStub(MessageParcel& data, MessageParcel& reply);
-    int32_t GetShadowOffsetStub(MessageParcel& data, MessageParcel& reply);
-    int32_t UpdateShadowPicStub(MessageParcel& data, MessageParcel& reply);
-    int32_t GetDragDataStub(MessageParcel& data, MessageParcel& reply);
+    int32_t SubscribeStub(MessageParcel &data, MessageParcel &reply);
+    int32_t UnsubscribeStub(MessageParcel &data, MessageParcel &reply);
+    int32_t GetLatestDeviceStatusDataStub(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleAllocSocketFdStub(MessageParcel &data, MessageParcel &reply);
+    int32_t RegisterCoordinationMonitorStub(MessageParcel &data, MessageParcel &reply);
+    int32_t UnregisterCoordinationMonitorStub(MessageParcel &data, MessageParcel &reply);
+    int32_t PrepareCoordinationStub(MessageParcel &data, MessageParcel &reply);
+    int32_t UnPrepareCoordinationStub(MessageParcel &data, MessageParcel &reply);
+    int32_t ActivateCoordinationStub(MessageParcel &data, MessageParcel &reply);
+    int32_t DeactivateCoordinationStub(MessageParcel &data, MessageParcel &reply);
+    int32_t GetCoordinationStateStub(MessageParcel &data, MessageParcel &reply);
+    int32_t StartDragStub(MessageParcel &data, MessageParcel &reply);
+    int32_t StopDragStub(MessageParcel &data, MessageParcel &reply);
+    int32_t UpdateDragStyleStub(MessageParcel &data, MessageParcel &reply);
+    int32_t GetDragTargetPidStub(MessageParcel &data, MessageParcel &reply);
+    int32_t GetUdKeyStub(MessageParcel &data, MessageParcel &reply);
+    int32_t AddDraglistenerStub(MessageParcel &data, MessageParcel &reply);
+    int32_t RemoveDraglistenerStub(MessageParcel &data, MessageParcel &reply);
+    int32_t AddSubscriptListenerStub(MessageParcel &data, MessageParcel &reply);
+    int32_t RemoveSubscriptListenerStub(MessageParcel &data, MessageParcel &reply);
+    int32_t SetDragWindowVisibleStub(MessageParcel &data, MessageParcel &reply);
+    int32_t GetShadowOffsetStub(MessageParcel &data, MessageParcel &reply);
+    int32_t UpdateShadowPicStub(MessageParcel &data, MessageParcel &reply);
+    int32_t GetDragDataStub(MessageParcel &data, MessageParcel &reply);
     int32_t GetDragStateStub(MessageParcel &data, MessageParcel &reply);
     int32_t GetDragActionStub(MessageParcel &data, MessageParcel &reply);
     int32_t GetExtraInfoStub(MessageParcel &data, MessageParcel &reply);
@@ -74,7 +74,7 @@ private:
     bool CheckCooperatePermission();
     void InitCoordination();
     void InitDrag();
-    int32_t EnterTextEditorAreaStub(MessageParcel& data, MessageParcel& reply);
+    int32_t EnterTextEditorAreaStub(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, ConnFunc> connFuncs_;

@@ -68,7 +68,7 @@ public:
     int32_t UpdateShadowPic(const ShadowInfo &shadowInfo);
     int32_t GetDragData(DragData &dragData);
     int32_t GetDragState(DragState &dragState);
-    int32_t GetDragAction(DragAction& dragAction);
+    int32_t GetDragAction(DragAction &dragAction);
     int32_t GetExtraInfo(std::string &extraInfo);
     int32_t AllocSocketPair(int32_t moduleType);
     int32_t GetClientSocketFdOfAllocedSocketPair() const;
@@ -84,14 +84,14 @@ private:
     public:
         DeviceStatusDeathRecipient() = default;
         ~DeviceStatusDeathRecipient() = default;
-        void OnRemoteDied(const wptr<IRemoteObject>& remote);
+        void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
     private:
         DISALLOW_COPY_AND_MOVE(DeviceStatusDeathRecipient);
     };
 
     ErrCode Connect();
-    void ResetProxy(const wptr<IRemoteObject>& remote);
+    void ResetProxy(const wptr<IRemoteObject> &remote);
 
     sptr<Idevicestatus> devicestatusProxy_ { nullptr };
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ { nullptr };

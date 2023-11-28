@@ -39,7 +39,7 @@ class DrawSVGModifier : public Rosen::RSContentStyleModifier {
 public:
     explicit DrawSVGModifier(std::shared_ptr<Media::PixelMap> stylePixelMap) : stylePixelMap_(stylePixelMap) {}
     ~DrawSVGModifier() = default;
-    void Draw(Rosen::RSDrawingContext& context) const override;
+    void Draw(Rosen::RSDrawingContext &context) const override;
 
 private:
     std::shared_ptr<Media::PixelMap> stylePixelMap_ { nullptr };
@@ -167,7 +167,7 @@ private:
     int32_t GetFilePath(std::string &filePath);
     bool NeedAdjustSvgInfo();
     void SetDecodeOptions(Media::DecodeOptions &decodeOpts);
-    bool ParserFilterInfo(FilterInfo& filterInfo);
+    bool ParserFilterInfo(FilterInfo &filterInfo);
     void ProcessFilter();
     static float RadiusVp2Sigma(float radiusVp, float dipScale);
     void DoDrawMouse();
