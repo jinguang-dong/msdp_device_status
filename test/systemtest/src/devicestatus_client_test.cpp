@@ -194,32 +194,28 @@ HWTEST_F(DeviceStatusClientTest, GetDeviceStatusDataTest001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     auto stationaryMgr = StationaryManager::GetInstance();
-    Type type = Type::TYPE_ABSOLUTE_STILL;
-    Data data = stationaryMgr->GetDeviceStatusData(type);
-    EXPECT_TRUE(data.type == type &&
+    Data data = stationaryMgr->GetDeviceStatusData(Type::TYPE_ABSOLUTE_STILL);
+    EXPECT_TRUE(data.type == Type::TYPE_ABSOLUTE_STILL &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
 
-    type = Type::TYPE_VERTICAL_POSITION;
-    data = stationaryMgr->GetDeviceStatusData(type);
-    EXPECT_TRUE(data.type == type &&
+    data = stationaryMgr->GetDeviceStatusData(Type::TYPE_VERTICAL_POSITION);
+    EXPECT_TRUE(data.type == Type::TYPE_VERTICAL_POSITION &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
 
-    type = Type::TYPE_HORIZONTAL_POSITION;
-    data = stationaryMgr->GetDeviceStatusData(type);
-    EXPECT_TRUE(data.type == type &&
+    data = stationaryMgr->GetDeviceStatusData(Type::TYPE_HORIZONTAL_POSITION);
+    EXPECT_TRUE(data.type == Type::TYPE_HORIZONTAL_POSITION &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
 
     type = Type::TYPE_LID_OPEN;
-    data = stationaryMgr->GetDeviceStatusData(type);
-    EXPECT_TRUE(data.type == type &&
+    data = stationaryMgr->GetDeviceStatusData(Type::TYPE_LID_OPEN);
+    EXPECT_TRUE(data.type == Type::TYPE_LID_OPEN &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
 
-    type = Type::TYPE_INVALID;
-    data = stationaryMgr->GetDeviceStatusData(type);
-    EXPECT_TRUE(data.type == type &&
+    data = stationaryMgr->GetDeviceStatusData(Type::TYPE_INVALID);
+    EXPECT_TRUE(data.type == Type::TYPE_INVALID &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
 
-    type = static_cast<Type>(10);
+    Type type = static_cast<Type>(10);
     data = stationaryMgr->GetDeviceStatusData(type);
     EXPECT_TRUE(data.type == Type::TYPE_INVALID &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
