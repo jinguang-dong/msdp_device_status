@@ -361,7 +361,7 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest011, TestSize.Level0)
     EXPECT_EQ(dragDrawing.startNum_, START_TIME);
 }
 
- /**
+/**
  * @tc.name: DragDataManagerTest012
  * @tc.desc: normal test SetShadowInfo
  * @tc.type: FUNC
