@@ -369,20 +369,20 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest011, TestSize.Level0)
 HWTEST_F(DragDataManagerTest, DragDataManagerTest012, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE);
-    ASSERT_FALSE(dragData == std::nullopt);
+    DragData dragData;
     std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
     ASSERT_FALSE(pixelMap == nullptr);
-    DRAG_DATA_MGR.Init(dragData.value());
+    DRAG_DATA_MGR.Init(dragData);
     ShadowInfo shadowInfo;
     shadowInfo.pixelMap = pixelMap;
     shadowInfo.x = SHADOWINFO_X;
     shadowInfo.y = SHADOWINFO_Y;
-    DRAG_DATA_MGR.SetShadowInfo(shadowInfo);
-    DragData dragDataSecond = DRAG_DATA_MGR.GetDragData();
-    EXPECT_TRUE(dragDataSecond.shadowInfo.x == SHADOWINFO_X);
-    EXPECT_TRUE(dragDataSecond.shadowInfo.y == SHADOWINFO_Y);;
+    const std::vector<ShadowInfo> shadowInfos;
+    shadowInfos.push_back(shadowInfo);
+    DRAG_DATA_MGR.SetShadowInfos(shadowInfos);
+    DragData dragDataFirst = DRAG_DATA_MGR.GetDragData();
+    EXPECT_TRUE(dragDataFirst.shadowInfos.end().x == SHADOWINFO_X);
+    EXPECT_TRUE(dragDataFirst.shadowInfos.end().y == SHADOWINFO_Y);
 }
 
  /**
