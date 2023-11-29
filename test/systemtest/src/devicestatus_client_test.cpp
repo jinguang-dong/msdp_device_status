@@ -197,28 +197,34 @@ HWTEST_F(DeviceStatusClientTest, GetDeviceStatusDataTest001, TestSize.Level0)
     Data data = stationaryMgr->GetDeviceStatusData(Type::TYPE_ABSOLUTE_STILL);
     EXPECT_TRUE(data.type == Type::TYPE_ABSOLUTE_STILL &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
+    GTEST_LOG_(INFO) << "GetDeviceStatusData failed by type TYPE_ABSOLUTE_STILL";    
 
     data = stationaryMgr->GetDeviceStatusData(Type::TYPE_VERTICAL_POSITION);
     EXPECT_TRUE(data.type == Type::TYPE_VERTICAL_POSITION &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
+    GTEST_LOG_(INFO) << "GetDeviceStatusData failed by type TYPE_VERTICAL_POSITION";  
 
     data = stationaryMgr->GetDeviceStatusData(Type::TYPE_HORIZONTAL_POSITION);
     EXPECT_TRUE(data.type == Type::TYPE_HORIZONTAL_POSITION &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
+    GTEST_LOG_(INFO) << "GetDeviceStatusData failed by type TYPE_HORIZONTAL_POSITION";
 
     type = Type::TYPE_LID_OPEN;
     data = stationaryMgr->GetDeviceStatusData(Type::TYPE_LID_OPEN);
     EXPECT_TRUE(data.type == Type::TYPE_LID_OPEN &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
+    GTEST_LOG_(INFO) << "GetDeviceStatusData failed by type TYPE_LID_OPEN";
 
     data = stationaryMgr->GetDeviceStatusData(Type::TYPE_INVALID);
     EXPECT_TRUE(data.type == Type::TYPE_INVALID &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
+    GTEST_LOG_(INFO) << "GetDeviceStatusData failed by type TYPE_INVALID";
 
     Type type = static_cast<Type>(10);
     data = stationaryMgr->GetDeviceStatusData(type);
     EXPECT_TRUE(data.type == Type::TYPE_INVALID &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
+    GTEST_LOG_(INFO) << "GetDeviceStatusData failed";
 }
 } // namespace DeviceStatus
 } // namespace Msdp
