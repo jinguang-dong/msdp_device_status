@@ -389,7 +389,7 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest013, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     DRAG_DATA_MGR.SetDragWindowVisible(DRAG_WINDOW_VISIBLE);
-    EXPECT_TURE(DRAG_DATA_MGR.GetDragWindowVisible() == DRAG_WINDOW_VISIBLE);
+    EXPECT_TRUE(DRAG_DATA_MGR.GetDragWindowVisible() == DRAG_WINDOW_VISIBLE);
 }
 
  /**
@@ -413,7 +413,7 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest015, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     DRAG_DATA_MGR.SetMotionDrag(IS_MOTION_DRAG);
-    EXPECT_TURE(DRAG_DATA_MGR.IsMotionDrag() == IS_MOTION_DRAG);
+    EXPECT_TRUE(DRAG_DATA_MGR.IsMotionDrag() == IS_MOTION_DRAG);
 }
 
  /**
