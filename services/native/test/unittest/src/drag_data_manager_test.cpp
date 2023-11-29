@@ -373,7 +373,7 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest012, TestSize.Level0)
         MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE);
     ASSERT_FALSE(dragData == std::nullopt);
     std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
-    EXPECT_FALSE(pixelMap == nullptr);
+    ASSERT_FALSE(pixelMap == nullptr);
     DRAG_DATA_MGR.Init(dragData.value());
     ShadowInfo shadowInfo;
     shadowInfo.pixelMap = pixelMap;
@@ -381,8 +381,8 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest012, TestSize.Level0)
     shadowInfo.y = SHADOWINFO_Y;
     DRAG_DATA_MGR.SetShadowInfo(shadowInfo);
     DragData dragDataSecond = DRAG_DATA_MGR.GetDragData();
-    EXPECT_TRUE(SHADOWINFO_X == dragDataSecond.shadowInfo.x);
-    EXPECT_TRUE(SHADOWINFO_Y == dragDataSecond.shadowInfo.y);
+    EXPECT_TRUE(dragDataSecond.shadowInfo.x == SHADOWINFO_X);
+    EXPECT_TRUE(dragDataSecond.shadowInfo.y == SHADOWINFO_Y);;
 }
 
  /**
