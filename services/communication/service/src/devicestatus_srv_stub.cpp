@@ -33,6 +33,11 @@
 #include "include/util.h"
 #include "utility.h"
 
+// #include "display_manager.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
+#include "tokenid_kit.h"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
@@ -135,6 +140,26 @@ bool DeviceStatusSrvStub::CheckCooperatePermission()
     int32_t result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken,
         permissionName);
     return result == Security::AccessToken::PERMISSION_GRANTED;
+}
+
+bool DeviceStatusSrvStub::MyVerifySystemApp()
+{
+    CALL_DEBUG_ENTER;
+    auto callerToken = IPCSkeleton::GetCallingTokenID();
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    FI_HILOGD("token type is %{public}d", static_cast<int32_t>(tokenType));
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE
+    || tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL || callingUid == 0) {
+        FI_HILOGD("Called tokenType is native, verify success");
+        return true;
+    }
+    uint64_t accessTokenIdEx = IPCSkeleton::GetCallingFullTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIdEx)) {
+        FI_HILOGD("System api is called by non-system app");
+        return false;
+    }
+    return true;
 }
 
 int32_t DeviceStatusSrvStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -247,6 +272,10 @@ int32_t DeviceStatusSrvStub::UnregisterCoordinationMonitorStub(MessageParcel &da
 int32_t DeviceStatusSrvStub::PrepareCoordinationStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!MyVerifySystemApp()) {
+        FI_HILOGE("Verify system app failed");
+        return ERROR_NOT_SYSAPI;
+    }
     int32_t userData = 0;
     READINT32(data, userData, E_DEVICESTATUS_READ_PARCEL_ERROR);
     bool isCheckPermission = false;
@@ -287,6 +316,10 @@ int32_t DeviceStatusSrvStub::UnPrepareCoordinationStub(MessageParcel &data, Mess
 int32_t DeviceStatusSrvStub::ActivateCoordinationStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!MyVerifySystemApp()) {
+        FI_HILOGE("Verify system app failed");
+        return ERROR_NOT_SYSAPI;
+    }
     int32_t userData = 0;
     READINT32(data, userData, E_DEVICESTATUS_READ_PARCEL_ERROR);
     std::string remoteNetworkId;
