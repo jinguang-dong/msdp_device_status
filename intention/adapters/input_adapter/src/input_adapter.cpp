@@ -18,21 +18,6 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-// enum InputType {
-//     MONITOR,
-//     INTERCEPTOR,
-//     FILTER
-// }
-
-// struct InputPointerEvent {
-//     std::shared_ptr<MMI::PointerEvent> pointerEvent;
-//     InputType type;
-// }
-
-// struct InputKeyEvent {
-//     std::shared_ptr<MMI::KeyEvent> keyEvent;
-//     InputType type;
-// }
 
 bool InputAdapter::PointerFilter::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
