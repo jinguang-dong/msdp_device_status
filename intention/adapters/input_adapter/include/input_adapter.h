@@ -36,7 +36,7 @@ class InputAdapter {
         }
         bool OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override;
     private:
-        std::function<void (std::shared_ptr<MMI::PointerEvent>)> callback_ { nullptr };
+        std::function<void (std::shared_ptr<MMI::PointerEvent>)> callback_;
         mutable int32_t filterId_ { -1 };
     };
 
@@ -50,8 +50,8 @@ class InputAdapter {
         void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override;
         void OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const override;
     private:
-        std::function<void (std::shared_ptr<MMI::PointerEvent>)> pointerCallback_ { nullptr };
-        std::function<void (std::shared_ptr<MMI::keyEvent>)> keyCallback_ { nullptr };
+        std::function<void (std::shared_ptr<MMI::PointerEvent>)> pointerCallback_;
+        std::function<void (std::shared_ptr<MMI::keyEvent>)> keyCallback_;
     };
 
     class MonitorConsumer : public MMI::IInputEventConsumer {
@@ -61,7 +61,7 @@ class InputAdapter {
         void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override;
         void OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const override;
     private:
-        std::function<void (std::shared_ptr<MMI::PointerEvent>)> callback_ { nullptr };
+        std::function<void (std::shared_ptr<MMI::PointerEvent>)> callback_;
     };
 public:
     int32_t AddMonitor(std::function<void (std::shared_ptr<MMI::PointerEvent>)> callback);
