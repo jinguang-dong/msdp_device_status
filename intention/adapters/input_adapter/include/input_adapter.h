@@ -74,7 +74,7 @@ public:
 private:
     int32_t monitorId_ { -1 };
     int32_t interceptorId_ { -1 };
-    Channel<CooperateEvent>::Sender sender_;
+    Channel<CooperateEvent>::Sender sender_; 
 };
 } // namespace DeviceStatus
 } // namespace Msdp
