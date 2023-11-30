@@ -238,9 +238,7 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest006, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     DragData dragData;
-    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
-    EXPECT_FALSE(pixelMap == nullptr);
-    dragData.shadowInfos.push_back({ pixelMap, SHADOWINFO_X, SHADOWINFO_Y });
+    dragData.shadowInfos.push_back({ nullptr, SHADOWINFO_X, SHADOWINFO_Y });
     dragData.displayX = DISPLAY_X;
     dragData.displayY = DISPLAY_Y;
     DRAG_DATA_MGR.Init(dragData);

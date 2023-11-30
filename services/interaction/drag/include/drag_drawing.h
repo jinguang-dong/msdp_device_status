@@ -139,6 +139,7 @@ public:
     void OnStopDragFail(std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode,
         std::shared_ptr<Rosen::RSNode> rootNode) override;
     void OnStopAnimation() override;
+    void SetTextEditorAreaFlag(bool textEditorAreaFlag);
     int32_t EnterTextEditorArea(bool enable);
     bool GetAllowDragState();
     void SetScreenId(uint64_t screenId);
@@ -167,12 +168,14 @@ private:
     int32_t GetFilePath(std::string &filePath);
     bool NeedAdjustSvgInfo();
     void SetDecodeOptions(Media::DecodeOptions &decodeOpts);
-    bool ParserFilterInfo(FilterInfo& filterInfo);
+    bool ParserFilterInfo(FilterInfo &filterInfo);
     void ProcessFilter();
     static float RadiusVp2Sigma(float radiusVp, float dipScale);
     void DoDrawMouse();
     int32_t UpdateDefaultDragStyle(DragCursorStyle style);
     int32_t UpdateValidDragStyle(DragCursorStyle style);
+    int32_t SetNodesLocation(int32_t positionX, int32_t positionY);
+    int32_t CreateEventRunner(int32_t positionX, int32_t positionY);
     int32_t ModifyPreviewStyle(std::shared_ptr<Rosen::RSCanvasNode> node, const PreviewStyle &previewStyle);
 
 private:
@@ -188,6 +191,9 @@ private:
     void* dragExtHandle_ { nullptr };
     bool needDestroyDragWindow_ { false };
     uint64_t screenId_ { 0 };
+    bool textEditorAreaFlag_ { false };
+    int32_t resetPixelMapX_ { 0 };
+    int32_t resetPixelMapY_ { 0 };
 };
 } // namespace DeviceStatus
 } // namespace Msdp
