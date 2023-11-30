@@ -77,7 +77,7 @@ int32_t InputAdapter::AddMonitor(std::function<void(std::shared_ptr<MMI::Pointer
 }
 
 int32_t InputAdapter::AddInterceptor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointerCallback,
-   std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCallback, uint32_t deviceTags)
+    std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCallback, uint32_t deviceTags)
 {
     auto interceptor = std::make_shared<InterceptorConsumer>(pointerCallback, keyCallback);
     interceptorId_ = MMI::InputManager::GetInstance()->AddInterceptor(interceptor, COORDINATION_PRIORITY, deviceTags);
