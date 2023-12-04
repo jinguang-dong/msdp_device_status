@@ -213,10 +213,10 @@ int32_t InteractionManagerImpl::GetCoordinationState(
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
-int32_t InteractionManagerImpl::UpdateDragStyle(DragCursorStyle style)
+int32_t InteractionManagerImpl::UpdateDragCursorStyle(DragCursorStyle style)
 {
     CALL_DEBUG_ENTER;
-    return dragManagerImpl_.UpdateDragStyle(style);
+    return dragManagerImpl_.UpdateDragCursorStyle(style);
 }
 
 int32_t InteractionManagerImpl::StartDrag(const DragData &dragData, std::shared_ptr<IStartDragListener> listener)
@@ -354,17 +354,17 @@ int32_t InteractionManagerImpl::RemoveHotAreaListener(std::shared_ptr<IHotAreaLi
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
-int32_t InteractionManagerImpl::UpdatePreviewStyle(const PreviewStyle &previewStyle)
+int32_t InteractionManagerImpl::UpdateDragStyle(const DragStyle &dragStyle)
 {
     CALL_DEBUG_ENTER;
-    return dragManagerImpl_.UpdatePreviewStyle(previewStyle);
+    return dragManagerImpl_.UpdateDragStyle(dragStyle);
 }
 
-int32_t InteractionManagerImpl::UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
-    const PreviewAnimation &animation)
+int32_t InteractionManagerImpl::UpdateDragStyleWithAnimation(const DragStyle &dragStyle,
+    const DragAnimation &animation)
 {
     CALL_DEBUG_ENTER;
-    return dragManagerImpl_.UpdatePreviewStyleWithAnimation(previewStyle, animation);
+    return dragManagerImpl_.UpdateDragStyleWithAnimation(dragStyle, animation);
 }
 
 int32_t InteractionManagerImpl::GetDragSummary(std::map<std::string, int64_t> &summarys)

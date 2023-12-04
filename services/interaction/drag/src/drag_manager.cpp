@@ -222,7 +222,7 @@ int32_t DragManager::GetUdKey(std::string &udKey) const
     return RET_OK;
 }
 
-int32_t DragManager::UpdateDragStyle(DragCursorStyle style, int32_t targetPid, int32_t targetTid)
+int32_t DragManager::UpdateDragCursorStyle(DragCursorStyle style, int32_t targetPid, int32_t targetTid)
 {
     if (dragState_ != DragState::START) {
         FI_HILOGE("No drag instance running, can not update drag style");
@@ -238,7 +238,7 @@ int32_t DragManager::UpdateDragStyle(DragCursorStyle style, int32_t targetPid, i
         FI_HILOGD("Not need update drag style");
         return RET_OK;
     }
-    FI_HILOGI("Update drag style successfully");
+    FI_HILOGI("Update drag cursor style successfully");
     DRAG_DATA_MGR.SetDragStyle(style);
     DragCursorStyle updateStyle = DragCursorStyle::DEFAULT;
     if ((dragAction_ == DragAction::COPY) && (style == DragCursorStyle::MOVE)) {
@@ -247,7 +247,7 @@ int32_t DragManager::UpdateDragStyle(DragCursorStyle style, int32_t targetPid, i
         updateStyle = style;
     }
     stateNotify_.StyleChangedNotify(updateStyle);
-    return dragDrawing_.UpdateDragStyle(updateStyle);
+    return dragDrawing_.UpdateDragCursorStyle(updateStyle);
 }
 
 int32_t DragManager::UpdateShadowPic(const ShadowInfo &shadowInfo)
@@ -858,35 +858,35 @@ void DragManager::MoveTo(int32_t x, int32_t y)
     dragDrawing_.Draw(dragData.displayId, x, y);
 }
 
-int32_t DragManager::UpdatePreviewStyle(const PreviewStyle &previewStyle)
+int32_t DragManager::UpdateDragStyle(const DragStyle &dragStyle)
 {
     if (dragState_ != DragState::START && dragState_ != DragState::MOTION_DRAGGING) {
         FI_HILOGE("Drag instance not running");
         return RET_ERR;
     }
-    if (previewStyle == DRAG_DATA_MGR.GetPreviewStyle()) {
-        FI_HILOGD("Not need to update previewStyle");
+    if (dragStyle == DRAG_DATA_MGR.GetDragStyle()) {
+        FI_HILOGD("Not need to update dragStyle");
         return RET_OK;
     }
-    DRAG_DATA_MGR.SetPreviewStyle(previewStyle);
-    FI_HILOGI("Update previewStyle successfully");
-    return dragDrawing_.UpdatePreviewStyle(previewStyle);
+    DRAG_DATA_MGR.SetDragStyle(dragStyle);
+    FI_HILOGI("Update dragStyle successfully");
+    return dragDrawing_.UpdateDragStyle(dragStyle);
 }
 
-int32_t DragManager::UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
-    const PreviewAnimation &animation)
+int32_t DragManager::UpdateDragStyleWithAnimation(const DragStyle &dragStyle,
+    const DragAnimation &animation)
 {
     if (dragState_ != DragState::START && dragState_ != DragState::MOTION_DRAGGING) {
         FI_HILOGE("Drag instance not running");
         return RET_ERR;
     }
-    if (previewStyle == DRAG_DATA_MGR.GetPreviewStyle()) {
-        FI_HILOGD("Not need to update previewStyle");
+    if (dragStyle == DRAG_DATA_MGR.GetDragStyle()) {
+        FI_HILOGD("Not need to update dragStyle");
         return RET_OK;
     }
-    DRAG_DATA_MGR.SetPreviewStyle(previewStyle);
-    FI_HILOGI("Update previewStyle successfully");
-    return dragDrawing_.UpdatePreviewStyleWithAnimation(previewStyle, animation);
+    DRAG_DATA_MGR.SetDragStyle(dragStyle);
+    FI_HILOGI("Update dragStyle successfully");
+    return dragDrawing_.UpdateDragStyleWithAnimation(dragStyle, animation);
 }
 
 void DragManager::DragKeyEventCallback(std::shared_ptr<MMI::KeyEvent> keyEvent)
@@ -923,7 +923,7 @@ void DragManager::HandleCtrlKeyDown()
     }
     CHKPV(context_);
     int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
-        std::bind(&DragDrawing::UpdateDragStyle, &dragDrawing_, DragCursorStyle::COPY));
+        std::bind(&DragDrawing::UpdateDragCursorStyle, &dragDrawing_, DragCursorStyle::COPY));
     if (ret != RET_OK) {
         FI_HILOGE("Post async task failed");
     }
@@ -934,7 +934,7 @@ void DragManager::HandleCtrlKeyUp()
     CALL_DEBUG_ENTER;
     CHKPV(context_);
     int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
-        std::bind(&DragDrawing::UpdateDragStyle, &dragDrawing_, DRAG_DATA_MGR.GetDragStyle()));
+        std::bind(&DragDrawing::UpdateDragCursorStyle, &dragDrawing_, DRAG_DATA_MGR.GetDragStyle()));
     if (ret != RET_OK) {
         FI_HILOGE("Post async task failed");
     }

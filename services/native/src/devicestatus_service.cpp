@@ -811,15 +811,15 @@ int32_t DeviceStatusService::GetDragState(DragState &dragState)
     return ret;
 }
 
-int32_t DeviceStatusService::UpdateDragStyle(DragCursorStyle style)
+int32_t DeviceStatusService::UpdateDragCursorStyle(DragCursorStyle style)
 {
     CALL_DEBUG_ENTER;
     int32_t tid = static_cast<int32_t>(GetCallingTokenID());
     int32_t pid = GetCallingPid();
     int32_t ret = delegateTasks_.PostSyncTask(
-        std::bind(&DragManager::UpdateDragStyle, &dragMgr_, style, pid, tid));
+        std::bind(&DragManager::UpdateDragCursorStyle, &dragMgr_, style, pid, tid));
     if (ret != RET_OK) {
-        FI_HILOGE("Update drag style failed, ret:%{public}d", ret);
+        FI_HILOGE("Update drag cursor style failed, ret:%{public}d", ret);
     }
     return ret;
 }
@@ -1072,25 +1072,25 @@ int32_t DeviceStatusService::RemoveHotAreaListener()
     return RET_OK;
 }
 
-int32_t DeviceStatusService::UpdatePreviewStyle(const PreviewStyle &previewStyle)
+int32_t DeviceStatusService::UpdateDragStyle(const DragStyle &dragStyle)
 {
     CALL_DEBUG_ENTER;
     int32_t ret = delegateTasks_.PostSyncTask(
-        std::bind(&DragManager::UpdatePreviewStyle, &dragMgr_, previewStyle));
+        std::bind(&DragManager::UpdateDragStyle, &dragMgr_, dragStyle));
     if (ret != RET_OK) {
-        FI_HILOGE("UpdatePreviewStyle failed, ret:%{public}d", ret);
+        FI_HILOGE("UpdateDragStyle failed, ret:%{public}d", ret);
     }
     return ret;
 }
 
-int32_t DeviceStatusService::UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
-    const PreviewAnimation &animation)
+int32_t DeviceStatusService::UpdateDragStyleWithAnimation(const DragStyle &dragStyle,
+    const DragAnimation &animation)
 {
     CALL_DEBUG_ENTER;
     int32_t ret = delegateTasks_.PostSyncTask(
-        std::bind(&DragManager::UpdatePreviewStyleWithAnimation, &dragMgr_, previewStyle, animation));
+        std::bind(&DragManager::UpdateDragStyleWithAnimation, &dragMgr_, dragStyle, animation));
     if (ret != RET_OK) {
-        FI_HILOGE("UpdatePreviewStyleWithAnimation failed, ret:%{public}d", ret);
+        FI_HILOGE("UpdateDragStyleWithAnimation failed, ret:%{public}d", ret);
     }
     return ret;
 }

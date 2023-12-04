@@ -50,7 +50,7 @@ public:
         const std::string &networkId, bool isCheckPermission = false) override;
     virtual int32_t StartDrag(const DragData &dragData) override;
     virtual int32_t StopDrag(const DragDropResult &dropResult) override;
-    virtual int32_t UpdateDragStyle(DragCursorStyle style) override;
+    virtual int32_t UpdateDragCursorStyle(DragCursorStyle style) override;
     virtual int32_t UpdateShadowPic(const ShadowInfo &shadowInfo) override;
     virtual int32_t GetDragData(DragData &dragData) override;
     virtual int32_t GetDragState(DragState &dragState) override;
@@ -64,9 +64,9 @@ public:
     virtual int32_t GetShadowOffset(int32_t &offsetX, int32_t &offsetY, int32_t &width, int32_t &height) override;
     virtual int32_t AddHotAreaListener() override;
     virtual int32_t RemoveHotAreaListener() override;
-    virtual int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle) override;
-    virtual int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
-        const PreviewAnimation &animation) override;
+    virtual int32_t UpdateDragStyle(const DragStyle &dragStyle) override;
+    virtual int32_t UpdateDragStyleWithAnimation(const DragStyle &dragStyle,
+        const DragAnimation &animation) override;
     virtual int32_t GetDragSummary(std::map<std::string, int64_t> &summarys) override;
     virtual int32_t EnterTextEditorArea(bool enable) override;
     virtual int32_t GetDragAction(DragAction &dragAction) override;

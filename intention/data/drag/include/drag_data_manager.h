@@ -39,7 +39,7 @@ public:
 
 private:
     DragData dragData_;
-    DragCursorStyle dragStyle_ { DragCursorStyle::DEFAULT };
+    DragCursorStyle dragCursorStyle_ { DragCursorStyle::DEFAULT };
     std::u16string dragMessage_;
     bool visible_ { false };
     int32_t targetTid_ { -1 };

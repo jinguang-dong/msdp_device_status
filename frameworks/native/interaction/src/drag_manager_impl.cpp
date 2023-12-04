@@ -26,7 +26,7 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DragManagerImpl" };
 } // namespace
 
-int32_t DragManagerImpl::UpdateDragStyle(DragCursorStyle style)
+int32_t DragManagerImpl::UpdateDragCursorStyle(DragCursorStyle style)
 {
     CALL_DEBUG_ENTER;
     if ((style < DragCursorStyle::DEFAULT) || (style > DragCursorStyle::MOVE)) {
@@ -34,7 +34,7 @@ int32_t DragManagerImpl::UpdateDragStyle(DragCursorStyle style)
         return RET_ERR;
     }
     FI_HILOGD("Ready to modify the style(%{public}d)", static_cast<int32_t>(style));
-    return DeviceStatusClient::GetInstance().UpdateDragStyle(style);
+    return DeviceStatusClient::GetInstance().UpdateDragCursorStyle(style);
 }
 
 int32_t DragManagerImpl::StartDrag(const DragData &dragData, std::shared_ptr<IStartDragListener> listener)
@@ -276,15 +276,15 @@ int32_t DragManagerImpl::GetDragState(DragState &dragState)
     return DeviceStatusClient::GetInstance().GetDragState(dragState);
 }
 
-int32_t DragManagerImpl::UpdatePreviewStyle(const PreviewStyle &previewStyle)
+int32_t DragManagerImpl::UpdateDragStyle(const DragStyle &dragStyle)
 {
-    return DeviceStatusClient::GetInstance().UpdatePreviewStyle(previewStyle);
+    return DeviceStatusClient::GetInstance().UpdateDragStyle(dragStyle);
 }
 
-int32_t DragManagerImpl::UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
-    const PreviewAnimation &animation)
+int32_t DragManagerImpl::UpdateDragStyleWithAnimation(const DragStyle &dragStyle,
+    const DragAnimation &animation)
 {
-    return DeviceStatusClient::GetInstance().UpdatePreviewStyleWithAnimation(previewStyle, animation);
+    return DeviceStatusClient::GetInstance().UpdateDragStyleWithAnimation(dragStyle, animation);
 }
 
 int32_t DragManagerImpl::GetDragSummary(std::map<std::string, int64_t> &summarys)

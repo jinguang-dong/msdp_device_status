@@ -121,10 +121,10 @@ public:
 
     int32_t Init(const DragData &dragData);
     void Draw(int32_t displayId, int32_t displayX, int32_t displayY);
-    int32_t UpdateDragStyle(DragCursorStyle style);
+    int32_t UpdateDragCursorStyle(DragCursorStyle style);
     int32_t UpdateShadowPic(const ShadowInfo &shadowInfo);
-    int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle);
-    int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation);
+    int32_t UpdateDragStyle(const DragStyle &dragStyle);
+    int32_t UpdateDragStyleWithAnimation(const DragStyle &dragStyle, const DragAnimation &animation);
     int32_t StartVsync();
     void OnDragSuccess();
     void OnDragFail();
@@ -178,7 +178,7 @@ private:
     int32_t UpdateValidDragStyle(DragCursorStyle style);
     int32_t SetNodesLocation(int32_t positionX, int32_t positionY);
     int32_t CreateEventRunner(int32_t positionX, int32_t positionY);
-    int32_t ModifyPreviewStyle(std::shared_ptr<Rosen::RSCanvasNode> node, const PreviewStyle &previewStyle);
+    int32_t ModifyDragStyle(std::shared_ptr<Rosen::RSCanvasNode> node, const DragStyle &dragStyle);
     void MutilSelectedAnimation(int32_t positionX, int32_t positionY, int32_t adjustSize);
     void InitMutilSelectedNodes();
     void ClearMutilSelectedData();

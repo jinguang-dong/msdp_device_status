@@ -57,7 +57,7 @@ public:
 
 private:
     static std::map<DragState, std::string> dragState_;
-    static std::map<DragCursorStyle, std::string> dragStyle_;
+    static std::map<DragCursorStyle, std::string> dragCursorStyle_;
     static std::map<DragResult, std::string> dragResult_;
     static std::map<DragType, std::pair<std::string, std::string>> serialStr_;
 };

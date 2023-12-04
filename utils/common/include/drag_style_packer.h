@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PREVIEW_STYLE_PACKER_H
-#define PREVIEW_STYLE_PACKER_H
+#ifndef DRAG_STYLE_PACKER_H
+#define DRAG_STYLE_PACKER_H
 
 #include "parcel.h"
 
@@ -24,19 +24,19 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 
-class PreviewStylePacker {
+class DragStylePacker {
 public:
-    static int32_t Marshalling(const PreviewStyle &previewStyle, Parcel &data);
-    static int32_t UnMarshalling(Parcel &data, PreviewStyle &previewStyle);
+    static int32_t Marshalling(const DragStyle &dragStyle, Parcel &data);
+    static int32_t UnMarshalling(Parcel &data, DragStyle &dragStyle);
 };
 
-class PreviewAnimationPacker {
+class DragAnimationPacker {
 public:
-    static int32_t Marshalling(const PreviewAnimation &previewAnimation, Parcel &data);
-    static int32_t UnMarshalling(Parcel &data, PreviewAnimation &previewAnimation);
+    static int32_t Marshalling(const DragAnimation &dragAnimation, Parcel &data);
+    static int32_t UnMarshalling(Parcel &data, DragAnimation &dragAnimation);
 };
 
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // PREVIEW_STYLE_PACKER_H
+#endif // DRAG_STYLE_PACKER_H

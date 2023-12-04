@@ -52,7 +52,7 @@ public:
     int32_t GetDragTargetPid() const;
     int32_t GetUdKey(std::string &udKey) const;
     void SendDragData(int32_t targetTid, const std::string &udKey);
-    int32_t UpdateDragStyle(DragCursorStyle style, int32_t targetPid, int32_t targetTid);
+    int32_t UpdateDragCursorStyle(DragCursorStyle style, int32_t targetPid, int32_t targetTid);
     int32_t UpdateShadowPic(const ShadowInfo &shadowInfo);
     int32_t GetDragData(DragData &dragData);
     int32_t GetDragState(DragState &dragState);
@@ -71,9 +71,9 @@ public:
     DragResult GetDragResult() const override;
     DragState GetDragState() const override;
     void SetDragState(DragState state) override;
-    int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle) override;
-    int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
-        const PreviewAnimation &animation) override;
+    int32_t UpdateDragStyle(const DragStyle &dragStyle) override;
+    int32_t UpdateDragStyleWithAnimation(const DragStyle &dragStyle,
+        const DragAnimation &animation) override;
     int32_t GetDragSummary(std::map<std::string, int64_t> &summarys);
     void DragKeyEventCallback(std::shared_ptr<MMI::KeyEvent> keyEvent);
     int32_t EnterTextEditorArea(bool enable);

@@ -110,7 +110,7 @@ int32_t DragManager::GetUdKey(std::string &udKey) const
     return RET_ERR;
 }
 
-int32_t DragManager::UpdateDragStyle(DragCursorStyle style, int32_t targetPid, int32_t targetTid)
+int32_t DragManager::UpdateDragCursorStyle(DragCursorStyle style, int32_t targetPid, int32_t targetTid)
 {
     CALL_DEBUG_ENTER;
     return RET_ERR;

@@ -122,33 +122,33 @@ struct DragNotifyMsg {
     DragResult result { DragResult::DRAG_FAIL };
 };
 
-enum class PreviewType {
+enum class StyleType {
     FOREGROUND_COLOR = 0,
     OPACITY = 1,
     RADIUS = 2,
     SCALE = 3
 };
 
-struct PreviewStyle {
-    std::vector<PreviewType> types;
+struct DragStyle {
+    std::vector<StyleType> types;
     uint32_t foregroundColor { 0 };
     int32_t opacity { -1 };
     int32_t radius { -1 };
     float scale { -1 };
 
-    bool operator == (const PreviewStyle &other) const
+    bool operator == (const DragStyle &other) const
     {
         return types == other.types && foregroundColor == other.foregroundColor && opacity == other.opacity &&
                radius == other.radius && fabsf(scale - other.scale) < PERCISION;
     }
 
-    bool operator!=(const PreviewStyle &other) const
+    bool operator!=(const DragStyle &other) const
     {
         return !(*this == other);
     }
 };
 
-struct PreviewAnimation {
+struct DragAnimation {
     int32_t duration { -1 };
     std::string curveName;
     std::vector<float> curve;

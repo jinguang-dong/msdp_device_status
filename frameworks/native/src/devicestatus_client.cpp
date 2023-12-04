@@ -270,11 +270,11 @@ int32_t DeviceStatusClient::GetCoordinationState(int32_t userData, const std::st
 
 #endif // OHOS_BUILD_ENABLE_RUST_IMPL
 
-int32_t DeviceStatusClient::UpdateDragStyle(DragCursorStyle style)
+int32_t DeviceStatusClient::UpdateDragCursorStyle(DragCursorStyle style)
 {
     CALL_DEBUG_ENTER;
     DEV_RET_IF_NULL_WITH_RET((Connect() != RET_OK), RET_ERR);
-    return devicestatusProxy_->UpdateDragStyle(style);
+    return devicestatusProxy_->UpdateDragCursorStyle(style);
 }
 
 int32_t DeviceStatusClient::GetDragTargetPid()
@@ -465,17 +465,17 @@ int32_t DeviceStatusClient::RemoveHotAreaListener()
     return devicestatusProxy_->RemoveHotAreaListener();
 }
 
-int32_t DeviceStatusClient::UpdatePreviewStyle(const PreviewStyle &previewStyle)
+int32_t DeviceStatusClient::UpdateDragStyle(const DragStyle &dragStyle)
 {
     DEV_RET_IF_NULL_WITH_RET((Connect() != RET_OK), RET_ERR);
-    return devicestatusProxy_->UpdatePreviewStyle(previewStyle);
+    return devicestatusProxy_->UpdateDragStyle(dragStyle);
 }
 
-int32_t DeviceStatusClient::UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
-    const PreviewAnimation &animation)
+int32_t DeviceStatusClient::UpdateDragStyleWithAnimation(const DragStyle &dragStyle,
+    const DragAnimation &animation)
 {
     DEV_RET_IF_NULL_WITH_RET((Connect() != RET_OK), RET_ERR);
-    return devicestatusProxy_->UpdatePreviewStyleWithAnimation(previewStyle, animation);
+    return devicestatusProxy_->UpdateDragStyleWithAnimation(dragStyle, animation);
 }
 
 int32_t DeviceStatusClient::GetDragSummary(std::map<std::string, int64_t> &summarys)

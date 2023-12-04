@@ -133,7 +133,7 @@ public:
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 10
      */
-    int32_t UpdateDragStyle(DragCursorStyle style);
+    int32_t UpdateDragCursorStyle(DragCursorStyle style);
 
     /**
      * @brief Obtains the PID of the target window.
@@ -262,21 +262,21 @@ public:
     int32_t RemoveHotAreaListener(std::shared_ptr<IHotAreaListener> listener = nullptr);
 
     /**
-     * @brief Update preview style when dragging.
-     * @param previewStyle Indicates the preview style param for dragged item.
+     * @brief Update drag style when dragging.
+     * @param dragStyle Indicates the drag style param for dragged item.
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 11
      */
-    int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle);
+    int32_t UpdateDragStyle(const DragStyle &dragStyle);
 
     /**
-     * @brief Update preview style with animation when dragging.
-     * @param previewStyle Indicates the preview style param for dragged item.
+     * @brief Update drag style with animation when dragging.
+     * @param dragStyle Indicates the drag style param for dragged item.
      * @param animation Indicates the animation param for dragged item.
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 11
      */
-    int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation);
+    int32_t UpdateDragStyleWithAnimation(const DragStyle &dragStyle, const DragAnimation &animation);
     
     /**
      * @brief 获取拖拽对象的数据摘要。

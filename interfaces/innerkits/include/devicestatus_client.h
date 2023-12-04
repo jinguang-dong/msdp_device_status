@@ -56,7 +56,7 @@ public:
     int32_t GetCoordinationState(int32_t userData, const std::string &networkId, bool isCheckPermission = false);
     int32_t StartDrag(const DragData &dragData);
     int32_t StopDrag(const DragDropResult &dropResult);
-    int32_t UpdateDragStyle(DragCursorStyle style);
+    int32_t UpdateDragCursorStyle(DragCursorStyle style);
     int32_t GetDragTargetPid();
     int32_t GetUdKey(std::string &udKey);
     int32_t AddDraglistener();
@@ -74,8 +74,8 @@ public:
     int32_t GetClientSocketFdOfAllocedSocketPair() const;
     int32_t AddHotAreaListener();
     int32_t RemoveHotAreaListener();
-    int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle);
-    int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation);
+    int32_t UpdateDragStyle(const DragStyle &dragStyle);
+    int32_t UpdateDragStyleWithAnimation(const DragStyle &dragStyle, const DragAnimation &animation);
     int32_t GetDragSummary(std::map<std::string, int64_t> &summarys);
     int32_t EnterTextEditorArea(bool enable);
 

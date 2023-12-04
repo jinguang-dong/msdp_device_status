@@ -27,7 +27,7 @@
 #include "devicestatus_srv_proxy.h"
 #include "drag_data_packer.h"
 #include "fi_log.h"
-#include "preview_style_packer.h"
+#include "drag_style_packer.h"
 #include "stationary_callback.h"
 #include "stationary_data.h"
 #include "include/util.h"
@@ -105,7 +105,7 @@ void DeviceStatusSrvStub::InitDrag()
             &DeviceStatusSrvStub::StartDragStub },
         { static_cast<uint32_t>(DeviceInterfaceCode::STOP_DRAG),
             &DeviceStatusSrvStub::StopDragStub },
-        { static_cast<uint32_t>(DeviceInterfaceCode::UPDATED_DRAG_STYLE),
+        { static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_DRAG_CURSOR_STYLE),
             &DeviceStatusSrvStub::UpdateDragStyleStub },
         { static_cast<uint32_t>(DeviceInterfaceCode::GET_DRAG_TARGET_PID),
             &DeviceStatusSrvStub::GetDragTargetPidStub },
@@ -133,10 +133,10 @@ void DeviceStatusSrvStub::InitDrag()
             &DeviceStatusSrvStub::GetExtraInfoStub },
         {static_cast<uint32_t>(DeviceInterfaceCode::GET_DRAG_ACTION),
             &DeviceStatusSrvStub::GetDragActionStub },
-        {static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_PREVIEW_STYLE),
-            &DeviceStatusSrvStub::UpdatePreviewStyleStub },
-        {static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_PREVIEW_STYLE_WITH_ANIMATION),
-            &DeviceStatusSrvStub::UpdatePreviewStyleWithAnimationStub }
+        {static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_DRAG_STYLE),
+            &DeviceStatusSrvStub::UpdateDragStyleStub },
+        {static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_DRAG_STYLE_WITH_ANIMATION),
+            &DeviceStatusSrvStub::UpdateDragStyleWithAnimationStub }
     };
     connFuncs_.insert(dragFuncs.begin(), dragFuncs.end());
 }
@@ -432,9 +432,9 @@ int32_t DeviceStatusSrvStub::UpdateDragStyleStub(MessageParcel &data, MessagePar
 {
     int32_t style = 0;
     READINT32(data, style, E_DEVICESTATUS_READ_PARCEL_ERROR);
-    int32_t ret = UpdateDragStyle(static_cast<DragCursorStyle>(style));
+    int32_t ret = UpdateDragCursorStyle(static_cast<DragCursorStyle>(style));
     if (ret != RET_OK) {
-        FI_HILOGE("Call UpdateDragStyle failed, ret:%{public}d", ret);
+        FI_HILOGE("Call UpdateDragCursorStyle failed, ret:%{public}d", ret);
     }
     return ret;
 }
@@ -701,37 +701,37 @@ int32_t DeviceStatusSrvStub::RemoveHotAreaListenerStub(MessageParcel &data, Mess
     return ret;
 }
 
-int32_t DeviceStatusSrvStub::UpdatePreviewStyleStub(MessageParcel &data, MessageParcel &reply)
+int32_t DeviceStatusSrvStub::UpdateDragStyleStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
-    PreviewStyle previewStyle;
-    if (PreviewStylePacker::UnMarshalling(data, previewStyle) != RET_OK) {
-        FI_HILOGE("UnMarshalling previewStyle failed");
+    DragStyle dragStyle;
+    if (DragStylePacker::UnMarshalling(data, dragStyle) != RET_OK) {
+        FI_HILOGE("UnMarshalling dragStyle failed");
         return RET_ERR;
     }
-    int32_t ret = UpdatePreviewStyle(previewStyle);
+    int32_t ret = UpdateDragStyle(dragStyle);
     if (ret != RET_OK) {
-        FI_HILOGE("UpdatePreviewStyle failed, ret:%{public}d", ret);
+        FI_HILOGE("UpdateDragStyle failed, ret:%{public}d", ret);
     }
     return ret;
 }
 
-int32_t DeviceStatusSrvStub::UpdatePreviewStyleWithAnimationStub(MessageParcel &data, MessageParcel &reply)
+int32_t DeviceStatusSrvStub::UpdateDragStyleWithAnimationStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
-    PreviewStyle previewStyle;
-    if (PreviewStylePacker::UnMarshalling(data, previewStyle) != RET_OK) {
-        FI_HILOGE("UnMarshalling previewStyle failed");
+    DragStyle dragStyle;
+    if (DragStylePacker::UnMarshalling(data, dragStyle) != RET_OK) {
+        FI_HILOGE("UnMarshalling dragStyle failed");
         return RET_ERR;
     }
-    PreviewAnimation animation;
-    if (PreviewAnimationPacker::UnMarshalling(data, animation) != RET_OK) {
+    DragAnimation animation;
+    if (DragAnimationPacker::UnMarshalling(data, animation) != RET_OK) {
         FI_HILOGE("UnMarshalling animation failed");
         return RET_ERR;
     }
-    int32_t ret = UpdatePreviewStyleWithAnimation(previewStyle, animation);
+    int32_t ret = UpdateDragStyleWithAnimation(dragStyle, animation);
     if (ret != RET_OK) {
-        FI_HILOGE("UpdatePreviewStyleWithAnimation failed, ret:%{public}d", ret);
+        FI_HILOGE("UpdateDragStyleWithAnimation failed, ret:%{public}d", ret);
     }
     return ret;
 }

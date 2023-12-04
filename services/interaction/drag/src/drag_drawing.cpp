@@ -217,7 +217,7 @@ int32_t DragDrawing::Init(const DragData &dragData)
     OnStartDrag(dragAnimationData, shadowNode, dragStyleNode);
     if (!g_drawingInfo.mutilSelectedNodes.empty()) {
         g_drawingInfo.isCurrentDefaultStyle = true;
-        UpdateDragStyle(DragCursorStyle::MOVE);
+        UpdateDragCursorStyle(DragCursorStyle::MOVE);
     }
     CHKPR(rsUiDirector_, INIT_FAIL);
     if (g_drawingInfo.sourceType != MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
@@ -296,7 +296,7 @@ void DragDrawing::Draw(int32_t displayId, int32_t displayX, int32_t displayY)
     Rosen::RSTransaction::FlushImplicitTransaction();
 }
 
-int32_t DragDrawing::UpdateDragStyle(DragCursorStyle style)
+int32_t DragDrawing::UpdateDragCursorStyle(DragCursorStyle style)
 {
     FI_HILOGD("style:%{public}d", style);
     if ((style < DragCursorStyle::DEFAULT) || (style > DragCursorStyle::MOVE)) {
@@ -1334,62 +1334,62 @@ float DragDrawing::RadiusVp2Sigma(float radiusVp, float dipScale)
     return radiusPx > 0.0f ? BLUR_SIGMA_SCALE * radiusPx + 0.5f : 0.0f;
 }
 
-int32_t DragDrawing::UpdatePreviewStyle(const PreviewStyle &previewStyle)
+int32_t DragDrawing::UpdateDragStyle(const DragStyle &dragStyle)
 {
     CALL_DEBUG_ENTER;
-    if (ModifyPreviewStyle(g_drawingInfo.nodes[PIXEL_MAP_INDEX], previewStyle) != RET_OK) {
-        FI_HILOGE("ModifyPreviewStyle failed");
+    if (ModifyDragStyle(g_drawingInfo.nodes[PIXEL_MAP_INDEX], dragStyle) != RET_OK) {
+        FI_HILOGE("ModifyDragStyle failed");
         return RET_ERR;
     }
     size_t mutilSelectedNodesSize = g_drawingInfo.mutilSelectedNodes.size();
     for (size_t i = 0; i < mutilSelectedNodesSize; ++i) {
-        if (ModifyPreviewStyle(g_drawingInfo.mutilSelectedNodes[i], previewStyle) != RET_OK) {
-            FI_HILOGE("ModifyPreviewStyle failed");
+        if (ModifyDragStyle(g_drawingInfo.mutilSelectedNodes[i], dragStyle) != RET_OK) {
+            FI_HILOGE("ModifyDragStyle failed");
         }
     }
     Rosen::RSTransaction::FlushImplicitTransaction();
     return RET_OK;
 }
 
-int32_t DragDrawing::UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
-    const PreviewAnimation &animation)
+int32_t DragDrawing::UpdateDragStyleWithAnimation(const DragStyle &dragStyle,
+    const DragAnimation &animation)
 {
     CALL_DEBUG_ENTER;
     std::shared_ptr<Rosen::RSCanvasNode> pixelMapNode = g_drawingInfo.nodes[PIXEL_MAP_INDEX];
     CHKPR(pixelMapNode, RET_ERR);
-    PreviewStyle originStyle;
-    originStyle.types = previewStyle.types;
+    DragStyle originStyle;
+    originStyle.types = dragStyle.types;
     if (auto color = pixelMapNode->GetShowingProperties().GetForegroundColor(); color.has_value()) {
         originStyle.foregroundColor = color->AsArgbInt();
-        originStyle.radius = previewStyle.radius;
+        originStyle.radius = dragStyle.radius;
     }
     size_t mutilSelectedNodesSize = g_drawingInfo.mutilSelectedNodes.size();
     for (size_t i = 0; i < mutilSelectedNodesSize; ++i) {
         if (auto color =  g_drawingInfo.mutilSelectedNodes[i]->GetShowingProperties().GetForegroundColor();
             color.has_value()) {
             originStyle.foregroundColor = color->AsArgbInt();
-            originStyle.radius = previewStyle.radius;
+            originStyle.radius = dragStyle.radius;
         }
     }
-    if (ModifyPreviewStyle(pixelMapNode, originStyle) != RET_OK) {
-        FI_HILOGE("ModifyPreviewStyle failed");
+    if (ModifyDragStyle(pixelMapNode, originStyle) != RET_OK) {
+        FI_HILOGE("ModifyDragStyle failed");
         return RET_ERR;
     }
     for (size_t i = 0; i < mutilSelectedNodesSize; ++i) {
-        if (ModifyPreviewStyle(g_drawingInfo.mutilSelectedNodes[i], originStyle) != RET_OK) {
-            FI_HILOGE("ModifyPreviewStyle failed");
+        if (ModifyDragStyle(g_drawingInfo.mutilSelectedNodes[i], originStyle) != RET_OK) {
+            FI_HILOGE("ModifyDragStyle failed");
         }
     }
     Rosen::RSAnimationTimingProtocol protocol;
     protocol.SetDuration(animation.duration);
     auto curve = AnimationCurve::CreateCurve(animation.curveName, animation.curve);
     Rosen::RSNode::Animate(protocol, curve, [&]() {
-        if (ModifyPreviewStyle(pixelMapNode, previewStyle) != RET_OK) {
-            FI_HILOGE("ModifyPreviewStyle failed");
+        if (ModifyDragStyle(pixelMapNode, dragStyle) != RET_OK) {
+            FI_HILOGE("ModifyDragStyle failed");
         }
         for (size_t i = 0; i < mutilSelectedNodesSize; ++i) {
-            if (ModifyPreviewStyle(g_drawingInfo.mutilSelectedNodes[i], previewStyle) != RET_OK) {
-                FI_HILOGE("ModifyPreviewStyle failed");
+            if (ModifyDragStyle(g_drawingInfo.mutilSelectedNodes[i], dragStyle) != RET_OK) {
+                FI_HILOGE("ModifyDragStyle failed");
             }
         }
     });
@@ -1485,25 +1485,25 @@ int32_t DragDrawing::UpdateValidDragStyle(DragCursorStyle style)
     return RET_OK;
 }
 
-int32_t DragDrawing::ModifyPreviewStyle(std::shared_ptr<Rosen::RSCanvasNode> node, const PreviewStyle &previewStyle)
+int32_t DragDrawing::ModifyDragStyle(std::shared_ptr<Rosen::RSCanvasNode> node, const DragStyle &dragStyle)
 {
     CHKPR(node, RET_ERR);
-    for (const auto &type : previewStyle.types) {
+    for (const auto &type : dragStyle.types) {
         switch (type) {
-            case PreviewType::FOREGROUND_COLOR: {
-                node->SetForegroundColor(previewStyle.foregroundColor);
+            case StyleType::FOREGROUND_COLOR: {
+                node->SetForegroundColor(dragStyle.foregroundColor);
                 break;
             }
-            case PreviewType::OPACITY: {
-                node->SetAlpha(previewStyle.opacity / static_cast<float>(HEX_FF));
+            case StyleType::OPACITY: {
+                node->SetAlpha(dragStyle.opacity / static_cast<float>(HEX_FF));
                 break;
             }
-            case PreviewType::RADIUS: {
-                node->SetCornerRadius(previewStyle.radius);
+            case StyleType::RADIUS: {
+                node->SetCornerRadius(dragStyle.radius);
                 break;
             }
-            case PreviewType::SCALE: {
-                node->SetScale(previewStyle.scale);
+            case StyleType::SCALE: {
+                node->SetScale(dragStyle.scale);
                 break;
             }
             default: {
