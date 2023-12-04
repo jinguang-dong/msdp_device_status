@@ -32,7 +32,7 @@ constexpr int32_t DEFAULT_DISPLAY_ID { 0 };
 DragDataManager::DragDataManager() = default;
 DragDataManager::~DragDataManager() = default;
 
-void DragDataManager::SetDragStyle(DragCursorStyle style)
+void DragDataManager::SetDragCursorStyle(DragCursorStyle style)
 {
     dragCursorStyle_ = style;
 }
@@ -53,7 +53,7 @@ void DragDataManager::SetShadowInfos(const std::vector<ShadowInfo> &shadowInfos)
     dragData_.shadowInfos = shadowInfos;
 }
 
-DragCursorStyle DragDataManager::GetDragStyle() const
+DragCursorStyle DragDataManager::GetDragCursorStyle() const
 {
     return dragCursorStyle_;
 }

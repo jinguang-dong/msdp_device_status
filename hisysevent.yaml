@@ -150,16 +150,16 @@ SET_DRAG_WINDOW_VISIBLE_FAILED:
   ISVISBLE: {type: BOOL, desc: IsVisible}
   CURDRAGSTATE: {type: STRING, desc: dragstate}
 
-UPDATE_DRAG_STYLE_SUCCESS:
+UPDATE_DRAG_CURSOR_STYLE_SUCCESS:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: deviceStatus, desc: Update Drag Style}
-  MSG: {type: STRING, desc: Update Drag Style Successfully}
-  DRAGSTYLE: {type: STRING, desc: dragstyle}
+  MSG: {type: STRING, desc: Update Drag Cursor Style Successfully}
+  DRAGSTYLE: {type: STRING, desc: dragCursorStyle}
 
 
-UPDATE_DRAG_STYLE_FAILED:
+UPDATE_DRAG_CURSOR_STYLE_FAILED:
   __BASE: {type: FAULT, level: MINOR, tag: deviceStatus, desc: Update Drag Style}
-  MSG: {type: STRING, desc: Update Drag Style Failed}
-  DRAGSTYLE: {type: STRING, desc: dragstyle}
+  MSG: {type: STRING, desc: Update Drag Cursor Style Failed}
+  DRAGSTYLE: {type: STRING, desc: dragCursorStyle}
 
 SEND_TOKENID:
   __BASE: {type: FAULT, level: MINOR, tag: deviceStatus, desc: Send Drag Data}

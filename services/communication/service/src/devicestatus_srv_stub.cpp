@@ -106,7 +106,7 @@ void DeviceStatusSrvStub::InitDrag()
         { static_cast<uint32_t>(DeviceInterfaceCode::STOP_DRAG),
             &DeviceStatusSrvStub::StopDragStub },
         { static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_DRAG_CURSOR_STYLE),
-            &DeviceStatusSrvStub::UpdateDragStyleStub },
+            &DeviceStatusSrvStub::UpdateDragCursorStyleStub },
         { static_cast<uint32_t>(DeviceInterfaceCode::GET_DRAG_TARGET_PID),
             &DeviceStatusSrvStub::GetDragTargetPidStub },
         { static_cast<uint32_t>(DeviceInterfaceCode::GET_DRAG_TARGET_UDKEY),
@@ -428,7 +428,7 @@ int32_t DeviceStatusSrvStub::GetCooperateStateStub(MessageParcel &data, MessageP
     return ret;
 }
 
-int32_t DeviceStatusSrvStub::UpdateDragStyleStub(MessageParcel &data, MessageParcel &reply)
+int32_t DeviceStatusSrvStub::UpdateDragCursorStyleStub(MessageParcel &data, MessageParcel &reply)
 {
     int32_t style = 0;
     READINT32(data, style, E_DEVICESTATUS_READ_PARCEL_ERROR);

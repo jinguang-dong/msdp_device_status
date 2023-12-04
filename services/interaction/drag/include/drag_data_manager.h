@@ -34,9 +34,9 @@ public:
     DISALLOW_MOVE(DragDataManager);
 
     void Init(const DragData &dragData);
-    void SetDragStyle(DragCursorStyle style);
+    void SetDragCursorStyle(DragCursorStyle style);
     void SetShadowInfos(const std::vector<ShadowInfo> &shadowInfos);
-    DragCursorStyle GetDragStyle() const;
+    DragCursorStyle GetDragCursorStyle() const;
     void SetDragWindowVisible(bool visible);
     bool GetDragWindowVisible() const;
     int32_t GetShadowOffset(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height) const;

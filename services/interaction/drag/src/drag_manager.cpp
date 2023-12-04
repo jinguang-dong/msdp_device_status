@@ -225,7 +225,7 @@ int32_t DragManager::GetUdKey(std::string &udKey) const
 int32_t DragManager::UpdateDragCursorStyle(DragCursorStyle style, int32_t targetPid, int32_t targetTid)
 {
     if (dragState_ != DragState::START) {
-        FI_HILOGE("No drag instance running, can not update drag style");
+        FI_HILOGE("No drag instance running, can not update drag cursor style");
         return RET_ERR;
     }
     if ((style < DragCursorStyle::DEFAULT) || (style > DragCursorStyle::MOVE)) {
@@ -234,12 +234,12 @@ int32_t DragManager::UpdateDragCursorStyle(DragCursorStyle style, int32_t target
     }
     DRAG_DATA_MGR.SetTargetPid(targetPid);
     DRAG_DATA_MGR.SetTargetTid(targetTid);
-    if (style == DRAG_DATA_MGR.GetDragStyle()) {
-        FI_HILOGD("Not need update drag style");
+    if (style == DRAG_DATA_MGR.GetDragCursorStyle()) {
+        FI_HILOGD("Not need update drag cursor style");
         return RET_OK;
     }
     FI_HILOGI("Update drag cursor style successfully");
-    DRAG_DATA_MGR.SetDragStyle(style);
+    DRAG_DATA_MGR.SetDragCursorStyle(style);
     DragCursorStyle updateStyle = DragCursorStyle::DEFAULT;
     if ((dragAction_ == DragAction::COPY) && (style == DragCursorStyle::MOVE)) {
         updateStyle = DragCursorStyle::COPY;
@@ -447,7 +447,7 @@ void DragManager::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::AxisEvent> 
 
 void DragManager::Dump(int32_t fd) const
 {
-    DragCursorStyle style = DRAG_DATA_MGR.GetDragStyle();
+    DragCursorStyle style = DRAG_DATA_MGR.GetDragCursorStyle();
     int32_t targetTid = DRAG_DATA_MGR.GetTargetTid();
     dprintf(fd, "Drag information:\n");
 #ifdef OHOS_DRAG_ENABLE_INTERCEPTOR
@@ -918,7 +918,7 @@ void DragManager::DragKeyEventCallback(std::shared_ptr<MMI::KeyEvent> keyEvent)
 void DragManager::HandleCtrlKeyDown()
 {
     CALL_DEBUG_ENTER;
-    if (DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::MOVE) {
+    if (DRAG_DATA_MGR.GetDragCursorStyle() != DragCursorStyle::MOVE) {
         return;
     }
     CHKPV(context_);
@@ -934,7 +934,7 @@ void DragManager::HandleCtrlKeyUp()
     CALL_DEBUG_ENTER;
     CHKPV(context_);
     int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
-        std::bind(&DragDrawing::UpdateDragCursorStyle, &dragDrawing_, DRAG_DATA_MGR.GetDragStyle()));
+        std::bind(&DragDrawing::UpdateDragCursorStyle, &dragDrawing_, DRAG_DATA_MGR.GetDragCursorStyle()));
     if (ret != RET_OK) {
         FI_HILOGE("Post async task failed");
     }
