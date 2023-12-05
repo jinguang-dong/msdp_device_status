@@ -40,7 +40,9 @@ public:
         STOPDRAG_DATA = 2,
         IS_PULL_UP = 3,
         DRAG_CANCEL = 4,
-        MAX_ID = 50
+        COORDS = 5,
+        DRAG_DATA = 6,
+        MAX_ID = 50,
     };
     struct DataPacket {
         MessageId messageId;
