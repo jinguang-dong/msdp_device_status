@@ -161,6 +161,7 @@ public:
     void OnInterceptorInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void OnMonitorInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void OnSoftbusSessionClosed(const std::string &networkId);
+    static std::shared_ptr<CoordinationSM> GetInstance();
 
 private:
     void Reset(bool adjustAbsolutionLocation = false);
@@ -180,6 +181,7 @@ private:
     void OnReset(const std::string &networkId);
     std::shared_ptr<ICoordinationState> GetCurrentState();
     void RegisterSessionCallback();
+    bool HasMotionDrag();
 
 private:
     std::pair<std::string, std::string> preparedNetworkId_;
@@ -210,9 +212,8 @@ private:
     std::shared_ptr<AppExecFwk::EventRunner> runner_ { nullptr };
     std::shared_ptr<CoordinationEventHandler> eventHandler_ { nullptr };
 };
-
 #define DIS_HARDWARE DistributedHardware::DeviceManager::GetInstance()
-#define COOR_SM OHOS::DelayedSingleton<CoordinationSM>::GetInstance()
+#define COOR_SM CoordinationSM::GetInstance()
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

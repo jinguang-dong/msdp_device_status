@@ -26,11 +26,12 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DragDataManager" };
+std::shared_ptr<DragDataManager> g_instance { nullptr };
 constexpr int32_t DEFAULT_DISPLAY_ID { 0 };
 } // namespace
 
-DragDataManager::DragDataManager() = default;
-DragDataManager::~DragDataManager() = default;
+DragDataManager::DragDataManager() {}
+DragDataManager::~DragDataManager() {}
 
 void DragDataManager::SetDragStyle(DragCursorStyle style)
 {
@@ -46,6 +47,15 @@ void DragDataManager::Init(const DragData &dragData)
     }
     targetPid_ = -1;
     targetTid_ = -1;
+}
+
+std::shared_ptr<DragDataManager> DragDataManager::GetInstance()
+{
+    static std::once_flag flag;
+    std::call_once(flag, [&]() {
+        g_instance.reset(new (std::nothrow) DragDataManager());
+    });
+    return g_instance;
 }
 
 void DragDataManager::SetShadowInfos(const std::vector<ShadowInfo> &shadowInfos)

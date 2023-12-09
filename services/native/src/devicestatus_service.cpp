@@ -18,6 +18,7 @@
 #include <unistd.h>
 #include <vector>
 
+#include <dlfcn.h>
 #include <ipc_skeleton.h>
 
 #include "hitrace_meter.h"
@@ -35,9 +36,6 @@
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 #include "devicestatus_common.h"
 #include "devicestatus_hisysevent.h"
-#ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
-#include "motion_drag.h"
-#endif // OHOS_BUILD_ENABLE_MOTION_DRAG
 
 namespace OHOS {
 namespace Msdp {
@@ -47,7 +45,11 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceS
 constexpr int32_t DEFAULT_WAIT_TIME_MS { 1000 };
 constexpr int32_t WAIT_FOR_ONCE { 1 };
 constexpr int32_t MAX_N_RETRIES { 100 };
-
+#ifdef __aarch64__
+const std::string MOTION_DRAG_PLUGIN_PATH { "/system/lib64/libmotion_drag.z.so" };
+#else
+const std::string MOTION_DRAG_PLUGIN_PATH { "/system/lib/libmotion_drag.z.so" };
+#endif
 struct device_status_epoll_event {
     int32_t fd { 0 };
     EpollEventType event_type { EPOLL_EVENT_BEGIN };
@@ -61,7 +63,9 @@ DeviceStatusService::DeviceStatusService() : SystemAbility(MSDP_DEVICESTATUS_SER
 {}
 
 DeviceStatusService::~DeviceStatusService()
-{}
+{
+    DestoryMotionDrag();
+}
 
 void DeviceStatusService::OnDump()
 {}
@@ -134,6 +138,11 @@ IDragManager& DeviceStatusService::GetDragManager()
     return dragMgr_;
 }
 
+IMotionDrag *DeviceStatusService::GetMotionDrag()
+{
+    return motionDrag_;
+}
+
 int32_t DeviceStatusService::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
     CALL_DEBUG_ENTER;
@@ -197,7 +206,6 @@ bool DeviceStatusService::Init()
     }
     if (InitMotionDrag() != RET_OK) {
         FI_HILOGE("Drag adapter init failed");
-        goto INIT_FAIL;
     }
     if (DS_DUMPER->Init(this) != RET_OK) {
         FI_HILOGE("Dump init failed");
@@ -397,17 +405,38 @@ int32_t DeviceStatusService::InitDelegateTasks()
     return ret;
 }
 
+void DeviceStatusService::DestoryMotionDrag()
+{
+    CALL_INFO_TRACE;
+    CHKPV(motionDragHandler_);
+    auto destory = reinterpret_cast<DestoryInstance>(dlsym(motionDragHandler_, "DestoryInstance"));
+    if (destory != nullptr) {
+        destory(motionDrag_);
+    }
+    dlclose(motionDragHandler_);
+    motionDrag_ = nullptr;
+    motionDragHandler_ = nullptr;
+}
+
 int32_t DeviceStatusService::InitMotionDrag()
 {
     CALL_INFO_TRACE;
-#ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
-    if (motionDrag_ == nullptr) {
-        motionDrag_ = std::make_unique<MotionDrag>();
-    }
-    if (motionDrag_->Init(this) != RET_OK) {
+    motionDragHandler_ = dlopen(MOTION_DRAG_PLUGIN_PATH.c_str(), RTLD_LAZY);
+    if (motionDragHandler_ == nullptr) {
+        FI_HILOGE("Failed to open motionDrag library");
         return RET_ERR;
     }
-#endif // OHOS_BUILD_ENABLE_MOTION_DRAG
+    CreateInstance CreateInstanceFunc = reinterpret_cast<CreateInstance> (dlsym(motionDragHandler_, "CreateInstance"));
+    if (CreateInstanceFunc == nullptr) {
+        FI_HILOGE("CreateInstanceFunc is nullptr");
+        return RET_ERR;
+    }
+
+    motionDrag_ = CreateInstanceFunc(this);
+    if (motionDrag_ == nullptr) {
+        FI_HILOGE("Get motiondarg pointer failed from library");
+        return RET_ERR;
+    }
     return RET_OK;
 }
 
@@ -913,11 +942,9 @@ int32_t DeviceStatusService::OnPrepareCoordination(int32_t pid, int32_t userData
         FI_HILOGE("Sending failed");
         return MSG_SEND_FAIL;
     }
-#ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
     if (motionDrag_ != nullptr) {
         motionDrag_->RegisterCallback();
     }
-#endif // OHOS_BUILD_ENABLE_MOTION_DRAG
     return RET_OK;
 }
 

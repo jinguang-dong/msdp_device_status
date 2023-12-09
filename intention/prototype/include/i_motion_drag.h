@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,35 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef I_CONTEXT_H
-#define I_CONTEXT_H
-
-#include "i_delegate_tasks.h"
-#include "i_device_manager.h"
-#include "i_drag_manager.h"
-#include "i_motion_drag.h"
-#include "i_timer_manager.h"
+#ifndef I_MOTION_DRAG_H
+#define I_MOTION_DRAG_H
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-struct MouseLocation {
-    int32_t physicalX { 0 };
-    int32_t physicalY { 0 };
-};
-
-class IContext {
+class IMotionDrag {
 public:
-    IContext() = default;
-    virtual ~IContext() = default;
-
-    virtual IDelegateTasks& GetDelegateTasks() = 0;
-    virtual IDeviceManager& GetDeviceManager() = 0;
-    virtual ITimerManager& GetTimerManager() = 0;
-    virtual IDragManager& GetDragManager() = 0;
-    virtual IMotionDrag *GetMotionDrag() = 0;
+    IMotionDrag() = default;
+    virtual ~IMotionDrag() = default;
+    virtual void RegisterCallback() = 0;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // I_CONTEXT_H
+#endif // I_MOTION_DRAG_H

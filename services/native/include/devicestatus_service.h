@@ -58,6 +58,7 @@ public:
     IDeviceManager& GetDeviceManager() override;
     ITimerManager& GetTimerManager() override;
     IDragManager& GetDragManager() override;
+    IMotionDrag *GetMotionDrag() override;
 
     void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency,
         sptr<IRemoteDevStaCallback> callback) override;
@@ -112,6 +113,7 @@ private:
     int32_t InitDelegateTasks();
     int32_t InitTimerMgr();
     int32_t InitMotionDrag();
+    void DestoryMotionDrag();
     void OnThread();
     void OnDelegateTask(const epoll_event &ev);
     void OnTimeout(const epoll_event &ev);
@@ -141,12 +143,13 @@ private:
     std::atomic<bool> ready_ { false };
     std::shared_ptr<DeviceStatusManager> devicestatusManager_ { nullptr };
     DragManager dragMgr_;
-#ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
-    std::unique_ptr<MotionDrag> motionDrag_ { nullptr };
-#endif // OHOS_BUILD_ENABLE_MOTION_DRAG
 #ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     sptr<IntentionService> intention_;
 #endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
+    void *motionDragHandler_ { nullptr };
+    IMotionDrag *motionDrag_ { nullptr };
+    using CreateInstance = IMotionDrag *(*)(IContext*);
+    using DestoryInstance = void(*)(IMotionDrag*);
 };
 } // namespace DeviceStatus
 } // namespace Msdp
