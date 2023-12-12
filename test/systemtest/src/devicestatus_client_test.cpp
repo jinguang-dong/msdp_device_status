@@ -92,111 +92,45 @@ HWTEST_F(DeviceStatusClientTest, DeviceStatusCallbackTest001, TestSize.Level0)
 }
 
 /**
- * @tc.name: GetDeviceStatusDataTest007
+ * @tc.name: GetDeviceStatusDataTest001
  * @tc.desc: test get devicestatus data in proxy
  * @tc.type: FUNC
  */
-HWTEST_F(DeviceStatusClientTest, GetDeviceStatusDataTest007, TestSize.Level0)
+HWTEST_F(DeviceStatusClientTest, GetDeviceStatusDataTest001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    Type type = Type::TYPE_ABSOLUTE_STILL;
     auto stationaryMgr = StationaryManager::GetInstance();
-    Data data = stationaryMgr->GetDeviceStatusData(type);
-    GTEST_LOG_(INFO) << "type: " << data.type;
-    GTEST_LOG_(INFO) << "value: " << data.value;
+    Data data = stationaryMgr->GetDeviceStatusData(Type::TYPE_ABSOLUTE_STILL);
     EXPECT_TRUE(data.type == Type::TYPE_ABSOLUTE_STILL &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
-    GTEST_LOG_(INFO) << "GetDeviceStatusData failed";
-}
+    GTEST_LOG_(INFO) << "GetDeviceStatusData failed by type TYPE_ABSOLUTE_STILL";    
 
-/**
- * @tc.name: GetDeviceStatusDataTest008
- * @tc.desc: test get devicestatus data in proxy
- * @tc.type: FUNC
- */
-HWTEST_F(DeviceStatusClientTest, GetDeviceStatusDataTest008, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    Type type = Type::TYPE_VERTICAL_POSITION;
-    auto stationaryMgr = StationaryManager::GetInstance();
-    Data data = stationaryMgr->GetDeviceStatusData(type);
-    GTEST_LOG_(INFO) << "type: " << data.type;
-    GTEST_LOG_(INFO) << "value: " << data.value;
+    data = stationaryMgr->GetDeviceStatusData(Type::TYPE_VERTICAL_POSITION);
     EXPECT_TRUE(data.type == Type::TYPE_VERTICAL_POSITION &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
-    GTEST_LOG_(INFO) << "GetDeviceStatusData failed";
-}
+    GTEST_LOG_(INFO) << "GetDeviceStatusData failed by type TYPE_VERTICAL_POSITION";  
 
-/**
- * @tc.name: GetDeviceStatusDataTest009
- * @tc.desc: test get devicestatus data in proxy
- * @tc.type: FUNC
- */
-HWTEST_F(DeviceStatusClientTest, GetDeviceStatusDataTest009, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    Type type = Type::TYPE_HORIZONTAL_POSITION;
-    auto stationaryMgr = StationaryManager::GetInstance();
-    Data data = stationaryMgr->GetDeviceStatusData(type);
-    GTEST_LOG_(INFO) << "type: " << data.type;
-    GTEST_LOG_(INFO) << "value: " << data.value;
+    data = stationaryMgr->GetDeviceStatusData(Type::TYPE_HORIZONTAL_POSITION);
     EXPECT_TRUE(data.type == Type::TYPE_HORIZONTAL_POSITION &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
-    GTEST_LOG_(INFO) << "GetDeviceStatusData failed";
-}
+    GTEST_LOG_(INFO) << "GetDeviceStatusData failed by type TYPE_HORIZONTAL_POSITION";
 
-/**
- * @tc.name: GetDeviceStatusDataTest010
- * @tc.desc: test get devicestatus data in proxy
- * @tc.type: FUNC
- */
-HWTEST_F(DeviceStatusClientTest, GetDeviceStatusDataTest010, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    Type type = Type::TYPE_LID_OPEN;
-    auto stationaryMgr = StationaryManager::GetInstance();
-    Data data = stationaryMgr->GetDeviceStatusData(type);
-    GTEST_LOG_(INFO) << "type: " << data.type;
-    GTEST_LOG_(INFO) << "value: " << data.value;
+    type = Type::TYPE_LID_OPEN;
+    data = stationaryMgr->GetDeviceStatusData(Type::TYPE_LID_OPEN);
     EXPECT_TRUE(data.type == Type::TYPE_LID_OPEN &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
-    GTEST_LOG_(INFO) << "GetDeviceStatusDataTest004 failed";
-}
+    GTEST_LOG_(INFO) << "GetDeviceStatusData failed by type TYPE_LID_OPEN";
 
-/**
- * @tc.name: GetDeviceStatusDataTest011
- * @tc.desc: test get devicestatus data in proxy
- * @tc.type: FUNC
- */
-HWTEST_F(DeviceStatusClientTest, GetDeviceStatusDataTest011, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    Type type = Type::TYPE_INVALID;
-    auto stationaryMgr = StationaryManager::GetInstance();
-    Data data = stationaryMgr->GetDeviceStatusData(type);
-    GTEST_LOG_(INFO) << "type: " << data.type;
-    GTEST_LOG_(INFO) << "value: " << data.value;
+    data = stationaryMgr->GetDeviceStatusData(Type::TYPE_INVALID);
     EXPECT_TRUE(data.type == Type::TYPE_INVALID &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
-    GTEST_LOG_(INFO) << "GetDeviceStatusDataTest005 failed";
-}
+    GTEST_LOG_(INFO) << "GetDeviceStatusData failed by type TYPE_INVALID";
 
-/**
- * @tc.name: GetDeviceStatusDataTest012
- * @tc.desc: test get devicestatus data in proxy
- * @tc.type: FUNC
- */
-HWTEST_F(DeviceStatusClientTest, GetDeviceStatusDataTest012, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
     Type type = static_cast<Type>(10);
-    auto stationaryMgr = StationaryManager::GetInstance();
-    Data data = stationaryMgr->GetDeviceStatusData(type);
-    GTEST_LOG_(INFO) << "type: " << data.type;
-    GTEST_LOG_(INFO) << "value: " << data.value;
+    data = stationaryMgr->GetDeviceStatusData(type);
     EXPECT_TRUE(data.type == Type::TYPE_INVALID &&
         data.value >= OnChangedValue::VALUE_INVALID && data.value <= OnChangedValue::VALUE_EXIT);
-    GTEST_LOG_(INFO) << "GetDeviceStatusDataTest006 failed";
+    GTEST_LOG_(INFO) << "GetDeviceStatusData failed";
 }
 } // namespace DeviceStatus
 } // namespace Msdp
