@@ -18,8 +18,6 @@
 
 #include <functional>
 
-#include "singleton.h"
-
 #include "devicestatus_define.h"
 #include "device_manager_callback.h"
 #include "distributed_input_adapter.h"
@@ -76,8 +74,6 @@ private:
 };
 
 class CoordinationSM final {
-    DECLARE_DELAYED_SINGLETON(CoordinationSM);
-
     class DeviceInitCallBack : public DistributedHardware::DmInitCallback {
         void OnRemoteDied() override;
     };
@@ -107,8 +103,9 @@ class CoordinationSM final {
     };
 
 public:
+    CoordinationSM() = default;
+    ~CoordinationSM();
     void SetAbsolutionLocation(double xPercent, double yPercent);
-    DISALLOW_COPY_AND_MOVE(CoordinationSM);
     void Init();
     void OnSessionLost(SessionPtr session);
     void PrepareCoordination();
@@ -161,6 +158,7 @@ public:
     void OnInterceptorInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void OnMonitorInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void OnSoftbusSessionClosed(const std::string &networkId);
+    static std::shared_ptr<CoordinationSM> GetInstance();
 
 private:
     void Reset(bool adjustAbsolutionLocation = false);
@@ -180,6 +178,7 @@ private:
     void OnReset(const std::string &networkId);
     std::shared_ptr<ICoordinationState> GetCurrentState();
     void RegisterSessionCallback();
+    bool HasMotionDrag();
 
 private:
     std::pair<std::string, std::string> preparedNetworkId_;
@@ -209,10 +208,11 @@ private:
     std::map<CoordinationState, std::shared_ptr<ICoordinationState>> coordinationStates_;
     std::shared_ptr<AppExecFwk::EventRunner> runner_ { nullptr };
     std::shared_ptr<CoordinationEventHandler> eventHandler_ { nullptr };
+    inline static std::shared_ptr<CoordinationSM> instance_;
+    inline static std::mutex inMutex_;
 };
-
 #define DIS_HARDWARE DistributedHardware::DeviceManager::GetInstance()
-#define COOR_SM OHOS::DelayedSingleton<CoordinationSM>::GetInstance()
+#define COOR_SM CoordinationSM::GetInstance()
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

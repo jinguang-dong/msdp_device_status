@@ -210,7 +210,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult)
     if (NotifyDragResult(dropResult.result) != RET_OK) {
         FI_HILOGE("Notify drag result failed");
     }
-    DRAG_DATA_MGR.ResetDragData();
+    DRAG_DATA_MGR->ResetDragData();
     dragResult_ = static_cast<DragResult>(dropResult.result);
     StateChangedNotify(DragState::STOP);
     dragDrawing_.SetTextEditorAreaFlag(false);
@@ -220,13 +220,13 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult)
 int32_t DragManager::GetDragTargetPid() const
 {
     CALL_INFO_TRACE;
-    return DRAG_DATA_MGR.GetTargetPid();
+    return DRAG_DATA_MGR->GetTargetPid();
 }
 
 int32_t DragManager::GetUdKey(std::string &udKey) const
 {
     CALL_INFO_TRACE;
-    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    DragData dragData = DRAG_DATA_MGR->GetDragData();
     if (dragData.udKey.empty()) {
         FI_HILOGE("Target udKey is empty");
         return RET_ERR;
@@ -246,14 +246,14 @@ int32_t DragManager::UpdateDragStyle(DragCursorStyle style, int32_t targetPid, i
         FI_HILOGE("Invalid style:%{public}d", style);
         return RET_ERR;
     }
-    DRAG_DATA_MGR.SetTargetPid(targetPid);
-    DRAG_DATA_MGR.SetTargetTid(targetTid);
-    if (style == DRAG_DATA_MGR.GetDragStyle()) {
+    DRAG_DATA_MGR->SetTargetPid(targetPid);
+    DRAG_DATA_MGR->SetTargetTid(targetTid);
+    if (style == DRAG_DATA_MGR->GetDragStyle()) {
         FI_HILOGD("Not need update drag style");
         return RET_OK;
     }
     FI_HILOGI("Update drag style successfully");
-    DRAG_DATA_MGR.SetDragStyle(style);
+    DRAG_DATA_MGR->SetDragStyle(style);
     DragCursorStyle updateStyle = DragCursorStyle::DEFAULT;
     if ((dragAction_ == DragAction::COPY) && (style == DragCursorStyle::MOVE)) {
         updateStyle = DragCursorStyle::COPY;
@@ -275,7 +275,7 @@ int32_t DragManager::UpdateShadowPic(const ShadowInfo &shadowInfo)
         FI_HILOGE("No drag instance running, can not update shadow picture");
         return RET_ERR;
     }
-    DRAG_DATA_MGR.SetShadowInfos({ shadowInfo });
+    DRAG_DATA_MGR->SetShadowInfos({ shadowInfo });
     return dragDrawing_.UpdateShadowPic(shadowInfo);
 }
 
@@ -286,7 +286,7 @@ int32_t DragManager::GetDragData(DragData &dragData)
         FI_HILOGE("No drag instance running, can not get dragData");
         return RET_ERR;
     }
-    dragData = DRAG_DATA_MGR.GetDragData();
+    dragData = DRAG_DATA_MGR->GetDragData();
     return RET_OK;
 }
 
@@ -304,7 +304,7 @@ int32_t DragManager::GetDragState(DragState &dragState)
 int32_t DragManager::NotifyDragResult(DragResult result)
 {
     CALL_INFO_TRACE;
-    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    DragData dragData = DRAG_DATA_MGR->GetDragData();
     int32_t targetPid = GetDragTargetPid();
     NetPacket pkt(MessageId::DRAG_NOTIFY_RESULT);
     if ((result < DragResult::DRAG_SUCCESS) || (result > DragResult::DRAG_EXCEPTION)) {
@@ -386,7 +386,7 @@ void DragManager::OnDragUp(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CALL_INFO_TRACE;
     CHKPV(pointerEvent);
-    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    DragData dragData = DRAG_DATA_MGR->GetDragData();
     if (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         dragDrawing_.EraseMouseIcon();
         FI_HILOGI("Set the pointer cursor visible");
@@ -463,24 +463,24 @@ void DragManager::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::AxisEvent> 
 
 void DragManager::Dump(int32_t fd) const
 {
-    DragCursorStyle style = DRAG_DATA_MGR.GetDragStyle();
-    int32_t targetTid = DRAG_DATA_MGR.GetTargetTid();
+    DragCursorStyle style = DRAG_DATA_MGR->GetDragStyle();
+    int32_t targetTid = DRAG_DATA_MGR->GetTargetTid();
     dprintf(fd, "Drag information:\n");
 #ifdef OHOS_DRAG_ENABLE_INTERCEPTOR
     dprintf(fd,
             "dragState:%s | dragResult:%s | interceptorId:%d | dragTargetPid:%d | dragTargetTid:%d | "
             "cursorStyle:%s | isWindowVisble:%s\n", GetDragState(dragState_).c_str(),
             GetDragResult(dragResult_).c_str(), pointerEventInterceptorId_, GetDragTargetPid(), targetTid,
-            GetDragCursorStyle(style).c_str(), DRAG_DATA_MGR.GetDragWindowVisible() ? "true" : "false");
+            GetDragCursorStyle(style).c_str(), DRAG_DATA_MGR->GetDragWindowVisible() ? "true" : "false");
 #endif // OHOS_DRAG_ENABLE_INTERCEPTOR
 #ifdef OHOS_DRAG_ENABLE_MONITOR
     dprintf(fd,
             "dragState:%s | dragResult:%s | monitorId:%d | dragTargetPid:%d | dragTargetTid:%d | "
             "cursorStyle:%s | isWindowVisble:%s\n", GetDragState(dragState_).c_str(),
             GetDragResult(dragResult_).c_str(), pointerEventMonitorId_, GetDragTargetPid(), targetTid,
-            GetDragCursorStyle(style).c_str(), DRAG_DATA_MGR.GetDragWindowVisible() ? "true" : "false");
+            GetDragCursorStyle(style).c_str(), DRAG_DATA_MGR->GetDragWindowVisible() ? "true" : "false");
 #endif // OHOS_DRAG_ENABLE_MONITOR
-    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    DragData dragData = DRAG_DATA_MGR->GetDragData();
     std::string udKey;
     if (RET_ERR == GetUdKey(udKey)) {
         FI_HILOGE("Target udKey is empty");
@@ -492,9 +492,9 @@ void DragManager::Dump(int32_t fd) const
     dprintf(fd, "dragData = {\n"
             "\tudKey:%s\n\tfilterInfo:%s\n\textraInfo:%s\n\tsourceType:%d"
             "\tdragNum:%d\n\tpointerId:%d\n\tdisplayX:%d\n\tdisplayY:%d\n""\tdisplayId:%d\n\thasCanceledAnimation:%s\n",
-            GetAnonyString(dragData.udKey).c_str(), dragData.filterInfo.c_str(), dragData.extraInfo.c_str(), dragData.sourceType,
-            dragData.dragNum, dragData.pointerId, dragData.displayX, dragData.displayY, dragData.displayId,
-            dragData.hasCanceledAnimation ? "true" : "false");
+            GetAnonyString(dragData.udKey).c_str(), dragData.filterInfo.c_str(), dragData.extraInfo.c_str(),
+            dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX, dragData.displayY,
+            dragData.displayId, dragData.hasCanceledAnimation ? "true" : "false");
     if (dragState_ != DragState::STOP) {
         for (const auto& shadowInfo : dragData.shadowInfos) {
             CHKPV(shadowInfo.pixelMap);
@@ -555,7 +555,7 @@ std::string DragManager::GetDragCursorStyle(DragCursorStyle value) const
 
 MMI::ExtraData DragManager::CreateExtraData(bool appended)
 {
-    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    DragData dragData = DRAG_DATA_MGR->GetDragData();
     MMI::ExtraData extraData;
     extraData.buffer = dragData.buffer;
     extraData.sourceType = dragData.sourceType;
@@ -568,7 +568,7 @@ MMI::ExtraData DragManager::CreateExtraData(bool appended)
 int32_t DragManager::InitDataManager(const DragData &dragData) const
 {
     CALL_INFO_TRACE;
-    DRAG_DATA_MGR.Init(dragData);
+    DRAG_DATA_MGR->Init(dragData);
     return RET_OK;
 }
 
@@ -674,7 +674,7 @@ int32_t DragManager::OnStartDrag()
 {
     CALL_INFO_TRACE;
     auto extraData = CreateExtraData(true);
-    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    DragData dragData = DRAG_DATA_MGR->GetDragData();
     if (Rosen::DisplayManager::GetInstance().IsFoldable()) {
         Rosen::FoldDisplayMode foldMode = Rosen::DisplayManager::GetInstance().GetFoldDisplayMode();
         if (foldMode == Rosen::FoldDisplayMode::MAIN) {
@@ -716,8 +716,8 @@ int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation)
         return RET_ERR;
     }
     dragAction_.store(DragAction::MOVE);
-    DragData dragData = DRAG_DATA_MGR.GetDragData();
-    if ((dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) && !DRAG_DATA_MGR.IsMotionDrag()) {
+    DragData dragData = DRAG_DATA_MGR->GetDragData();
+    if ((dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) && !DRAG_DATA_MGR->IsMotionDrag()) {
         dragDrawing_.EraseMouseIcon();
         FI_HILOGI("Set the pointer cursor visible");
         MMI::InputManager::GetInstance()->SetPointerVisible(true);
@@ -738,9 +738,9 @@ int32_t DragManager::OnSetDragWindowVisible(bool visible)
         FI_HILOGW("No drag instance running, can not set drag window visible");
         return RET_ERR;
     }
-    DRAG_DATA_MGR.SetDragWindowVisible(visible);
+    DRAG_DATA_MGR->SetDragWindowVisible(visible);
     dragDrawing_.UpdateDragWindowState(visible);
-    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    DragData dragData = DRAG_DATA_MGR->GetDragData();
     if (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE && visible) {
         FI_HILOGI("Set the pointer cursor invisible");
         MMI::InputManager::GetInstance()->SetPointerVisible(false);
@@ -751,7 +751,7 @@ int32_t DragManager::OnSetDragWindowVisible(bool visible)
 
 int32_t DragManager::OnGetShadowOffset(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height)
 {
-    return DRAG_DATA_MGR.GetShadowOffset(offsetX, offsetY, width, height);
+    return DRAG_DATA_MGR->GetShadowOffset(offsetX, offsetY, width, height);
 }
 
 void DragManager::RegisterStateChange(std::function<void(DragState)> callback)
@@ -771,7 +771,7 @@ void DragManager::RegisterNotifyPullUp(std::function<void(void)> callback)
 void DragManager::StateChangedNotify(DragState state)
 {
     CALL_INFO_TRACE;
-    if ((stateChangedCallback_ != nullptr) && (!DRAG_DATA_MGR.IsMotionDrag())) {
+    if ((stateChangedCallback_ != nullptr) && (!DRAG_DATA_MGR->IsMotionDrag())) {
         stateChangedCallback_(state);
     }
 }
@@ -873,7 +873,7 @@ void DragManager::MoveTo(int32_t x, int32_t y)
         FI_HILOGE("Drag instance not running");
         return;
     }
-    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    DragData dragData = DRAG_DATA_MGR->GetDragData();
     FI_HILOGI("displayId:%{public}d, x:%{public}d, y:%{public}d", dragData.displayId, x, y);
     dragDrawing_.Draw(dragData.displayId, x, y);
 }
@@ -884,11 +884,11 @@ int32_t DragManager::UpdatePreviewStyle(const PreviewStyle &previewStyle)
         FI_HILOGE("Drag instance not running");
         return RET_ERR;
     }
-    if (previewStyle == DRAG_DATA_MGR.GetPreviewStyle()) {
+    if (previewStyle == DRAG_DATA_MGR->GetPreviewStyle()) {
         FI_HILOGD("Not need to update previewStyle");
         return RET_OK;
     }
-    DRAG_DATA_MGR.SetPreviewStyle(previewStyle);
+    DRAG_DATA_MGR->SetPreviewStyle(previewStyle);
     FI_HILOGI("Update previewStyle successfully");
     return dragDrawing_.UpdatePreviewStyle(previewStyle);
 }
@@ -900,11 +900,11 @@ int32_t DragManager::UpdatePreviewStyleWithAnimation(const PreviewStyle &preview
         FI_HILOGE("Drag instance not running");
         return RET_ERR;
     }
-    if (previewStyle == DRAG_DATA_MGR.GetPreviewStyle()) {
+    if (previewStyle == DRAG_DATA_MGR->GetPreviewStyle()) {
         FI_HILOGD("Not need to update previewStyle");
         return RET_OK;
     }
-    DRAG_DATA_MGR.SetPreviewStyle(previewStyle);
+    DRAG_DATA_MGR->SetPreviewStyle(previewStyle);
     FI_HILOGI("Update previewStyle successfully");
     return dragDrawing_.UpdatePreviewStyleWithAnimation(previewStyle, animation);
 }
@@ -922,19 +922,19 @@ void DragManager::DragKeyEventCallback(std::shared_ptr<MMI::KeyEvent> keyEvent)
         dragAction_.store(DragAction::MOVE);
         return;
     }
-    if ((DRAG_DATA_MGR.GetDragStyle() == DragCursorStyle::DEFAULT) ||
-        (DRAG_DATA_MGR.GetDragStyle() == DragCursorStyle::FORBIDDEN)) {
+    if ((DRAG_DATA_MGR->GetDragStyle() == DragCursorStyle::DEFAULT) ||
+        (DRAG_DATA_MGR->GetDragStyle() == DragCursorStyle::FORBIDDEN)) {
         dragAction_.store(DragAction::MOVE);
         return;
     }
     if (!iter->IsPressed()) {
-        CtrlKeyStyleChangedNotify(DRAG_DATA_MGR.GetDragStyle(), DragAction::MOVE);
-        HandleCtrlKeyEvent(DRAG_DATA_MGR.GetDragStyle(), DragAction::MOVE);
+        CtrlKeyStyleChangedNotify(DRAG_DATA_MGR->GetDragStyle(), DragAction::MOVE);
+        HandleCtrlKeyEvent(DRAG_DATA_MGR->GetDragStyle(), DragAction::MOVE);
         dragAction_.store(DragAction::MOVE);
         return;
     }
     if (iter->IsPressed()) {
-        if (DRAG_DATA_MGR.GetDragStyle() == DragCursorStyle::COPY) {
+        if (DRAG_DATA_MGR->GetDragStyle() == DragCursorStyle::COPY) {
             FI_HILOGD("Not need update drag style");
             return;
         }
@@ -994,7 +994,7 @@ int32_t DragManager::EnterTextEditorArea(bool enable)
 int32_t DragManager::GetExtraInfo(std::string &extraInfo) const
 {
     CALL_DEBUG_ENTER;
-    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    DragData dragData = DRAG_DATA_MGR->GetDragData();
     if (dragData.extraInfo.empty()) {
         FI_HILOGE("The extraInfo is empty");
         return RET_ERR;
@@ -1010,7 +1010,7 @@ int32_t DragManager::AddPrivilege(int32_t tokenId)
         FI_HILOGE("Drag instance not running");
         return RET_ERR;
     }
-    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    DragData dragData = DRAG_DATA_MGR->GetDragData();
     FI_HILOGD("Target window drag tid:%{public}d", tokenId);
     SendDragData(tokenId, dragData.udKey);
     return RET_OK;
