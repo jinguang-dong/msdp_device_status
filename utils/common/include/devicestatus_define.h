@@ -25,6 +25,7 @@ namespace Msdp {
 namespace DeviceStatus {
 #define FI_PKG_NAME "ohos.msdp.fusioninteraction"
 constexpr int32_t PERMISSION_CHECK_ERROR = 201;
+constexpr int32_t ERROR_NOT_SYSAPI = 202;
 
 #ifndef RET_OK
     #define RET_OK (0)

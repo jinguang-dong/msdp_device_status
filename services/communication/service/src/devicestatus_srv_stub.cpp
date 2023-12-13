@@ -26,10 +26,13 @@
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
 #include "drag_data_packer.h"
+#include "nativetoken_kit.h"
 #include "preview_style_packer.h"
 #include "proto.h"
 #include "stationary_callback.h"
 #include "stationary_data.h"
+#include "tokenid_kit.h"
+#include "token_setproc.h"
 #include "include/util.h"
 #include "utility.h"
 
@@ -149,6 +152,26 @@ bool DeviceStatusSrvStub::CheckCooperatePermission()
     int32_t result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken,
         permissionName);
     return result == Security::AccessToken::PERMISSION_GRANTED;
+}
+
+bool DeviceStatusSrvStub::VerifySystemApp()
+{
+    CALL_DEBUG_ENTER;
+    auto callerToken = IPCSkeleton::GetCallingTokenID();
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    FI_HILOGD("token type is %{public}d", static_cast<int32_t>(tokenType));
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE
+        || tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL || callingUid == 0) {
+        FI_HILOGD("Called tokenType is native, verify success");
+        return true;
+    }
+    uint64_t accessTokenIdEx = IPCSkeleton::GetCallingFullTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIdEx)) {
+        FI_HILOGD("System api is called by non-system app");
+        return false;
+    }
+    return true;
 }
 
 int32_t DeviceStatusSrvStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -314,6 +337,10 @@ int32_t DeviceStatusSrvStub::RegisterCooperateMonitorStub(MessageParcel &data,
     MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!VerifySystemApp()) {
+        FI_HILOGE("Verify system APP failed");
+        return ERROR_NOT_SYSAPI;
+    }
     if (!CheckCooperatePermission()) {
         FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
         return RET_ERR;
@@ -329,6 +356,10 @@ int32_t DeviceStatusSrvStub::UnregisterCooperateMonitorStub(MessageParcel &data,
     MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!VerifySystemApp()) {
+        FI_HILOGE("Verify system APP failed");
+        return ERROR_NOT_SYSAPI;
+    }
     if (!CheckCooperatePermission()) {
         FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
         return RET_ERR;
@@ -342,6 +373,10 @@ int32_t DeviceStatusSrvStub::UnregisterCooperateMonitorStub(MessageParcel &data,
 
 int32_t DeviceStatusSrvStub::PrepareCooperateStub(MessageParcel &data, MessageParcel &reply)
 {
+    if (!VerifySystemApp()) {
+        FI_HILOGE("Verify system APP failed");
+        return ERROR_NOT_SYSAPI;
+    }
     CALL_DEBUG_ENTER;
     if (!CheckCooperatePermission()) {
         FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
@@ -359,6 +394,10 @@ int32_t DeviceStatusSrvStub::PrepareCooperateStub(MessageParcel &data, MessagePa
 int32_t DeviceStatusSrvStub::UnPrepareCooperateStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!VerifySystemApp()) {
+        FI_HILOGE("Verify system APP failed");
+        return ERROR_NOT_SYSAPI;
+    }
     if (!CheckCooperatePermission()) {
         FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
         return RET_ERR;
@@ -375,6 +414,10 @@ int32_t DeviceStatusSrvStub::UnPrepareCooperateStub(MessageParcel &data, Message
 int32_t DeviceStatusSrvStub::ActivateCooperateStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!VerifySystemApp()) {
+        FI_HILOGE("Verify system APP failed");
+        return ERROR_NOT_SYSAPI;
+    }
     if (!CheckCooperatePermission()) {
         FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
         return RET_ERR;
@@ -395,6 +438,10 @@ int32_t DeviceStatusSrvStub::ActivateCooperateStub(MessageParcel &data, MessageP
 int32_t DeviceStatusSrvStub::DeactivateCooperateStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!VerifySystemApp()) {
+        FI_HILOGE("Verify system APP failed");
+        return ERROR_NOT_SYSAPI;
+    }
     if (!CheckCooperatePermission()) {
         FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
         return RET_ERR;
@@ -413,6 +460,10 @@ int32_t DeviceStatusSrvStub::DeactivateCooperateStub(MessageParcel &data, Messag
 int32_t DeviceStatusSrvStub::GetCooperateStateStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!VerifySystemApp()) {
+        FI_HILOGE("Verify system APP failed");
+        return ERROR_NOT_SYSAPI;
+    }
     if (!CheckCooperatePermission()) {
         FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
         return RET_ERR;
@@ -663,6 +714,10 @@ int32_t DeviceStatusSrvStub::GetDragDataStub(MessageParcel &data, MessageParcel 
 int32_t DeviceStatusSrvStub::AddHotAreaListenerStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!VerifySystemApp()) {
+        FI_HILOGE("Verify system APP failed");
+        return ERROR_NOT_SYSAPI;
+    }
     if (!CheckCooperatePermission()) {
         FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
         return RET_ERR;
@@ -690,6 +745,10 @@ int32_t DeviceStatusSrvStub::GetDragStateStub(MessageParcel &data, MessageParcel
 int32_t DeviceStatusSrvStub::RemoveHotAreaListenerStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!VerifySystemApp()) {
+        FI_HILOGE("Verify system APP failed");
+        return ERROR_NOT_SYSAPI;
+    }
     if (!CheckCooperatePermission()) {
         FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
         return RET_ERR;
