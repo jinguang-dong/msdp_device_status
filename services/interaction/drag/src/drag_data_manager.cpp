@@ -29,9 +29,6 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DragDat
 constexpr int32_t DEFAULT_DISPLAY_ID { 0 };
 } // namespace
 
-DragDataManager::DragDataManager() = default;
-DragDataManager::~DragDataManager() = default;
-
 void DragDataManager::SetDragStyle(DragCursorStyle style)
 {
     dragStyle_ = style;
@@ -46,6 +43,18 @@ void DragDataManager::Init(const DragData &dragData)
     }
     targetPid_ = -1;
     targetTid_ = -1;
+}
+
+std::shared_ptr<DragDataManager> DragDataManager::GetInstance()
+{
+    if (instance_ == nullptr) {
+        FI_HILOGW("DragDataManager instance is nullptr");
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (instance_ == nullptr) {
+            instance_ = std::make_shared<DragDataManager>();
+        }
+    }
+    return instance_;
 }
 
 void DragDataManager::SetShadowInfos(const std::vector<ShadowInfo> &shadowInfos)

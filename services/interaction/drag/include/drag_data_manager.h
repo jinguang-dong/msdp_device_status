@@ -20,7 +20,6 @@
 
 #include "pixel_map.h"
 #include "pointer_style.h"
-#include "singleton.h"
 
 #include "drag_data.h"
 
@@ -28,11 +27,9 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 class DragDataManager final {
-    DECLARE_SINGLETON(DragDataManager);
-
 public:
-    DISALLOW_MOVE(DragDataManager);
-
+    DragDataManager() = default;
+    ~DragDataManager() = default;
     void Init(const DragData &dragData);
     void SetDragStyle(DragCursorStyle style);
     void SetShadowInfos(const std::vector<ShadowInfo> &shadowInfos);
@@ -50,6 +47,8 @@ public:
     void ResetDragData();
     DragData GetDragData() const;
     void SetMotionDrag(bool isMotionDrag);
+    static std::shared_ptr<DragDataManager> GetInstance();
+
 private:
     bool isMotionDrag_ { false };
     bool visible_ { false };
@@ -59,10 +58,10 @@ private:
     std::u16string dragMessage_;
     DragCursorStyle dragStyle_ { DragCursorStyle::DEFAULT };
     DragData dragData_;
+    inline static std::shared_ptr<DragDataManager> instance_;
+    inline static std::mutex mutex_;
 };
-
-#define DRAG_DATA_MGR OHOS::Singleton<DragDataManager>::GetInstance()
-
+#define DRAG_DATA_MGR DragDataManager::GetInstance()
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

@@ -22,6 +22,7 @@
 #ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
 #include "i_socket_session_manager.h"
 #endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
+#include "i_motion_drag.h"
 #include "i_timer_manager.h"
 
 namespace OHOS {
@@ -41,6 +42,7 @@ public:
     virtual IDeviceManager& GetDeviceManager() = 0;
     virtual ITimerManager& GetTimerManager() = 0;
     virtual IDragManager& GetDragManager() = 0;
+    virtual IMotionDrag *GetMotionDrag() = 0;
 
 #ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     virtual ISocketSessionManager& GetSocketSessionManager() = 0;

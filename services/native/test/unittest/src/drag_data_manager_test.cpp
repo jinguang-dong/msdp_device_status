@@ -126,17 +126,17 @@ namespace {
 HWTEST_F(DragDataManagerTest, DragDataManagerTest001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::DEFAULT);
-    EXPECT_TRUE(DRAG_DATA_MGR.GetDragStyle() == DragCursorStyle::DEFAULT);
+    DRAG_DATA_MGR->SetDragStyle(DragCursorStyle::DEFAULT);
+    EXPECT_TRUE(DRAG_DATA_MGR->GetDragStyle() == DragCursorStyle::DEFAULT);
 
-    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::FORBIDDEN);
-    EXPECT_TRUE(DRAG_DATA_MGR.GetDragStyle() == DragCursorStyle::FORBIDDEN);
+    DRAG_DATA_MGR->SetDragStyle(DragCursorStyle::FORBIDDEN);
+    EXPECT_TRUE(DRAG_DATA_MGR->GetDragStyle() == DragCursorStyle::FORBIDDEN);
 
-    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::COPY);
-    EXPECT_TRUE(DRAG_DATA_MGR.GetDragStyle() == DragCursorStyle::COPY);
+    DRAG_DATA_MGR->SetDragStyle(DragCursorStyle::COPY);
+    EXPECT_TRUE(DRAG_DATA_MGR->GetDragStyle() == DragCursorStyle::COPY);
 
-    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::MOVE);
-    EXPECT_TRUE(DRAG_DATA_MGR.GetDragStyle() == DragCursorStyle::MOVE);
+    DRAG_DATA_MGR->SetDragStyle(DragCursorStyle::MOVE);
+    EXPECT_TRUE(DRAG_DATA_MGR->GetDragStyle() == DragCursorStyle::MOVE);
 }
 
 /**
@@ -147,17 +147,17 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest001, TestSize.Level0)
 HWTEST_F(DragDataManagerTest, DragDataManagerTest002, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::DEFAULT);
-    EXPECT_FALSE(DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::DEFAULT);
+    DRAG_DATA_MGR->SetDragStyle(DragCursorStyle::DEFAULT);
+    EXPECT_FALSE(DRAG_DATA_MGR->GetDragStyle() != DragCursorStyle::DEFAULT);
 
-    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::FORBIDDEN);
-    EXPECT_FALSE(DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::FORBIDDEN);
+    DRAG_DATA_MGR->SetDragStyle(DragCursorStyle::FORBIDDEN);
+    EXPECT_FALSE(DRAG_DATA_MGR->GetDragStyle() != DragCursorStyle::FORBIDDEN);
 
-    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::COPY);
-    EXPECT_FALSE(DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::COPY);
+    DRAG_DATA_MGR->SetDragStyle(DragCursorStyle::COPY);
+    EXPECT_FALSE(DRAG_DATA_MGR->GetDragStyle() != DragCursorStyle::COPY);
 
-    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::MOVE);
-    EXPECT_FALSE(DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::MOVE);
+    DRAG_DATA_MGR->SetDragStyle(DragCursorStyle::MOVE);
+    EXPECT_FALSE(DRAG_DATA_MGR->GetDragStyle() != DragCursorStyle::MOVE);
 }
 
 /**
@@ -169,12 +169,12 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest003, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     int32_t targetTid = static_cast<int32_t>(IPCSkeleton::GetCallingTokenID());
-    DRAG_DATA_MGR.SetTargetTid(targetTid);
-    EXPECT_TRUE(targetTid == DRAG_DATA_MGR.GetTargetTid());
+    DRAG_DATA_MGR->SetTargetTid(targetTid);
+    EXPECT_TRUE(targetTid == DRAG_DATA_MGR->GetTargetTid());
 
     int32_t targetPid = IPCSkeleton::GetCallingPid();
-    DRAG_DATA_MGR.SetTargetPid(targetPid);
-    EXPECT_TRUE(targetPid == DRAG_DATA_MGR.GetTargetPid());
+    DRAG_DATA_MGR->SetTargetPid(targetPid);
+    EXPECT_TRUE(targetPid == DRAG_DATA_MGR->GetTargetPid());
 }
 
 /**
@@ -186,12 +186,12 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest004, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     int32_t targetTid = static_cast<int32_t>(IPCSkeleton::GetCallingTokenID());
-    DRAG_DATA_MGR.SetTargetTid(targetTid);
-    EXPECT_FALSE(targetTid != DRAG_DATA_MGR.GetTargetTid());
+    DRAG_DATA_MGR->SetTargetTid(targetTid);
+    EXPECT_FALSE(targetTid != DRAG_DATA_MGR->GetTargetTid());
 
     int32_t targetPid = IPCSkeleton::GetCallingPid();
-    DRAG_DATA_MGR.SetTargetPid(targetPid);
-    EXPECT_FALSE(targetPid != DRAG_DATA_MGR.GetTargetPid());
+    DRAG_DATA_MGR->SetTargetPid(targetPid);
+    EXPECT_FALSE(targetPid != DRAG_DATA_MGR->GetTargetPid());
 }
 
 /**
@@ -208,21 +208,21 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest005, TestSize.Level0)
     dragData.shadowInfos.push_back({ pixelMap, SHADOWINFO_X, SHADOWINFO_Y });
     dragData.displayX = DISPLAY_X;
     dragData.displayY = DISPLAY_Y;
-    DRAG_DATA_MGR.Init(dragData);
-    DragData dragDataFirst = DRAG_DATA_MGR.GetDragData();
+    DRAG_DATA_MGR->Init(dragData);
+    DragData dragDataFirst = DRAG_DATA_MGR->GetDragData();
     EXPECT_TRUE(dragDataFirst.displayX == DISPLAY_X);
     EXPECT_TRUE(dragDataFirst.displayY == DISPLAY_Y);
     int32_t offsetX = 0;
     int32_t offsetY = 0;
     int32_t width = 0;
     int32_t height = 0;
-    DRAG_DATA_MGR.GetShadowOffset(offsetX, offsetY, width, height);
+    DRAG_DATA_MGR->GetShadowOffset(offsetX, offsetY, width, height);
     EXPECT_TRUE(offsetX == SHADOWINFO_X);
     EXPECT_TRUE(offsetY == SHADOWINFO_Y);
     EXPECT_TRUE(width == PIXEL_MAP_WIDTH);
     EXPECT_TRUE(height == PIXEL_MAP_HEIGHT);
-    DRAG_DATA_MGR.ResetDragData();
-    DragData dragDataSecond = DRAG_DATA_MGR.GetDragData();
+    DRAG_DATA_MGR->ResetDragData();
+    DragData dragDataSecond = DRAG_DATA_MGR->GetDragData();
     EXPECT_TRUE(dragDataSecond.displayX == -1);
     EXPECT_TRUE(dragDataSecond.displayY == -1);
 }
@@ -239,12 +239,12 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest006, TestSize.Level0)
     dragData.shadowInfos.push_back({ nullptr, SHADOWINFO_X, SHADOWINFO_Y });
     dragData.displayX = DISPLAY_X;
     dragData.displayY = DISPLAY_Y;
-    DRAG_DATA_MGR.Init(dragData);
+    DRAG_DATA_MGR->Init(dragData);
     int32_t offsetX = 0;
     int32_t offsetY = 0;
     int32_t width = 0;
     int32_t height = 0;
-    auto ret = DRAG_DATA_MGR.GetShadowOffset(offsetX, offsetY, width, height);
+    auto ret = DRAG_DATA_MGR->GetShadowOffset(offsetX, offsetY, width, height);
     EXPECT_TRUE(ret == -1);
 }
 
