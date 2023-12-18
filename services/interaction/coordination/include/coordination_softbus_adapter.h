@@ -26,6 +26,7 @@
 #include "socket.h"
 
 #include "coordination_util.h"
+#include "json_parser.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -40,8 +41,8 @@ public:
         STOPDRAG_DATA = 2,
         IS_PULL_UP = 3,
         DRAG_CANCEL = 4,
-        COORDS = 5,
-        DRAG_DATA = 6,
+        SYNC_COORDS = 5,
+        SYNC_DRAG_DATA = 6,
         MAX_ID = 50,
     };
     struct DataPacket {
@@ -83,6 +84,7 @@ private:
     void HandleCoordinationSessionData(int32_t sessionId, const JsonParser &parser);
     int32_t WaitSessionOpend(const std::string &remoteNetworkId, int32_t sessionId);
     void ResponseNotifyFilterAdded();
+    int32_t InitSocket(SocketInfo info, int32_t socketType, int32_t &socket);
 
     std::map<std::string, int32_t> sessionDevs_;
     std::mutex operationMutex_;

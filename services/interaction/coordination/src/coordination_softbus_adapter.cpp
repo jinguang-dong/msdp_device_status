@@ -25,10 +25,12 @@
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 
+#include "coordination_hisysevent.h"
 #include "coordination_sm.h"
 #include "device_coordination_softbus_define.h"
 #include "devicestatus_define.h"
 #include "dfs_session.h"
+#include "json_parser.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -36,9 +38,12 @@ namespace DeviceStatus {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CoordinationSoftbusAdapter" };
 std::shared_ptr<CoordinationSoftbusAdapter> g_instance = nullptr;
-constexpr uint32_t QOS_LEN = 3;
-constexpr int32_t MIN_BW = 80 * 1024 * 1024;
-constexpr int32_t LATENCY = 1600;
+constexpr uint32_t QOS_LEN { 3 };
+constexpr int32_t MIN_BW { 80 * 1024 * 1024 };
+constexpr int32_t LATENCY { 1600 };
+constexpr int32_t SOCKET_SERVER { 0 };
+constexpr int32_t SOCKET_CLIENT { 1 };
+
 void ResponseStartRemoteCoordination(int32_t sessionId, const JsonParser &parser)
 {
     CALL_DEBUG_ENTER;
@@ -129,6 +134,28 @@ static void BytesReceived(int32_t socket, const void *data, uint32_t dataLen)
     COOR_SOFTBUS_ADAPTER->OnBytes(socket, data, dataLen);
 }
 
+int32_t CoordinationSoftbusAdapter::InitSocket(SocketInfo info, int32_t socketType, int32_t &socket)
+{
+    socket = Socket(info);
+    QosTV socketQos[] = {
+        { .qos = QOS_TYPE_MIN_BW, .value = MIN_BW },
+        { .qos = QOS_TYPE_MAX_LATENCY, .value = LATENCY },
+        { .qos = QOS_TYPE_MIN_LATENCY, .value = LATENCY },
+    };
+    ISocketListener listener = {
+        .OnBind = BindLink,
+        .OnShutdown = ShutdownLink,
+        .OnBytes = BytesReceived
+    };
+
+    if (socketType == SOCKET_SERVER) {
+        return Listen(socket, socketQos, QOS_LEN, &listener);
+    } else if (socketType == SOCKET_CLIENT) {
+        return Bind(socket, socketQos, QOS_LEN, &listener);
+    }
+    return RET_ERR;
+}
+
 int32_t CoordinationSoftbusAdapter::Init()
 {
     CALL_INFO_TRACE;
@@ -139,15 +166,16 @@ int32_t CoordinationSoftbusAdapter::Init()
         FI_HILOGE("Local network id is empty");
         return RET_ERR;
     }
+    std::string bindName = SESS_NAME + localNetworkId.substr(0, BIND_STRING_LENGTH);
     std::string sessionName = SESS_NAME + localNetworkId.substr(0, INTERCEPT_STRING_LENGTH);
-    if (sessionName == localSessionName_) {
+    if (bindName == localSessionName_) {
         FI_HILOGI("Softbus session server has already created");
         return RET_OK;
     }
-    localSessionName_ = sessionName;
+    localSessionName_ = bindName;
     char name[DEVICE_NAME_SIZE_MAX] = {};
-    if (ChkAndCpyStr(name, DEVICE_NAME_SIZE_MAX, localSessionName_.c_str()) != RET_OK) {
-        FI_HILOGE("Invalid name:%{public}s", localSessionName_.c_str());
+    if (ChkAndCpyStr(name, DEVICE_NAME_SIZE_MAX, sessionName.c_str()) != RET_OK) {
+        FI_HILOGE("Invalid name:%{public}s", sessionName.c_str());
         return RET_ERR;
     }
     char pkgName[PKG_NAME_SIZE_MAX] = FI_PKG_NAME;
@@ -156,22 +184,11 @@ int32_t CoordinationSoftbusAdapter::Init()
         .pkgName = pkgName,
         .dataType = DATA_TYPE_BYTES
     };
-    socketFd_ = Socket(info);
-    QosTV serverQos[] = {
-        { .qos = QOS_TYPE_MIN_BW, .value = MIN_BW },
-        { .qos = QOS_TYPE_MAX_LATENCY, .value = LATENCY },
-        { .qos = QOS_TYPE_MIN_LATENCY, .value = LATENCY },
-    };
-    ISocketListener listener = {
-        .OnBind = BindLink,
-        .OnShutdown = ShutdownLink,
-        .OnBytes = BytesReceived
-    };
-    int32_t ret = Listen(socketFd_, serverQos, QOS_LEN, &listener);
-    if (ret == RET_OK) {
-        FI_HILOGI("server set ok");
+    int32_t ret = InitSocket(info, SOCKET_SERVER, socketFd_);
+    if (ret == RET_OK && socketFd_ != -1) {
+        FI_HILOGI("Server set ok");
     } else {
-        FI_HILOGE("server set failed, ret:%{public}d", ret);
+        FI_HILOGE("Server set failed, ret:%{public}d", ret);
     }
     return ret;
 }
@@ -248,23 +265,13 @@ int32_t CoordinationSoftbusAdapter::OpenInputSoftbus(const std::string &remoteNe
         .pkgName = pkgName,
         .dataType = DATA_TYPE_BYTES
     };
-    int32_t socket = Socket(info);
-    QosTV clientQos[] = {
-        { .qos = QOS_TYPE_MIN_BW, .value = MIN_BW },
-        { .qos = QOS_TYPE_MAX_LATENCY, .value = LATENCY },
-        { .qos = QOS_TYPE_MIN_LATENCY, .value = LATENCY },
-    };
-    ISocketListener listener = {
-        .OnBind = BindLink,
-        .OnShutdown = ShutdownLink,
-        .OnBytes = BytesReceived
-    };
-    int32_t ret = Bind(socket, clientQos, QOS_LEN, &listener);
-    if (ret == RET_OK) {
+    int32_t socket = -1;
+    int32_t ret = InitSocket(info, SOCKET_CLIENT, socket);
+    if (ret == RET_OK && socket != -1) {
         sessionDevs_[remoteNetworkId] = socket;
         ConfigTcpAlive(socket);
     } else {
-        FI_HILOGE("bind failed, ret:%{public}d", ret);
+        FI_HILOGE("Bind failed, ret:%{public}d", ret);
     }
     return ret;
 }
@@ -277,6 +284,7 @@ int32_t CoordinationSoftbusAdapter::WaitSessionOpend(const std::string &remoteNe
     auto status = openSessionWaitCond_.wait_for(waitLock, std::chrono::seconds(SESSION_WAIT_TIMEOUT_SECOND),
         [this, remoteNetworkId] () { return false; });
     if (!status) {
+        CoordinationDFX::WriteOpenSoftbusResult(remoteNetworkId, 0, STATUS_SIGN);
         FI_HILOGE("Open session timeout");
         return RET_ERR;
     }
@@ -328,6 +336,7 @@ int32_t CoordinationSoftbusAdapter::StartRemoteCoordination(const std::string &l
     }
     FI_HILOGD("isPointerButtonPressed:%{public}d", isPointerButtonPressed);
     cJSON *jsonStr = cJSON_CreateObject();
+    CHKPR(jsonStr, RET_ERR);
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_CMD_TYPE, cJSON_CreateNumber(REMOTE_COORDINATION_START));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_LOCAL_DEVICE_ID, cJSON_CreateString(localNetworkId.c_str()));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_SESSION_ID, cJSON_CreateNumber(sessionId));
@@ -337,6 +346,8 @@ int32_t CoordinationSoftbusAdapter::StartRemoteCoordination(const std::string &l
     int32_t ret = SendMsg(sessionId, sendMsg);
     cJSON_free(sendMsg);
     if (ret != RET_OK) {
+        CoordinationDFX::WriteActivate(localNetworkId, remoteNetworkId, sessionDevs_,
+            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
         FI_HILOGE("Failed to send the sendMsg, ret:%{public}d", ret);
         return RET_ERR;
     }
@@ -344,6 +355,8 @@ int32_t CoordinationSoftbusAdapter::StartRemoteCoordination(const std::string &l
         FI_HILOGD("Across with button down, waiting");
         auto status = openSessionWaitCond_.wait_for(sessionLock, std::chrono::seconds(FILTER_WAIT_TIMEOUT_SECOND));
         if (status == std::cv_status::timeout) {
+            CoordinationDFX::WriteActivate(localNetworkId, remoteNetworkId, sessionDevs_,
+                OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
             FI_HILOGE("Add filter timeout");
             return RET_ERR;
         }
@@ -362,6 +375,7 @@ int32_t CoordinationSoftbusAdapter::StartRemoteCoordinationResult(const std::str
     }
     int32_t sessionId = sessionDevs_[remoteNetworkId];
     cJSON *jsonStr = cJSON_CreateObject();
+    CHKPR(jsonStr, RET_ERR);
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_CMD_TYPE, cJSON_CreateNumber(REMOTE_COORDINATION_START_RES));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_RESULT, cJSON_CreateBool(isSuccess));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_START_DHID, cJSON_CreateString(startDeviceDhid.c_str()));
@@ -373,6 +387,7 @@ int32_t CoordinationSoftbusAdapter::StartRemoteCoordinationResult(const std::str
     int32_t ret = SendMsg(sessionId, sendMsg);
     cJSON_free(sendMsg);
     if (ret != RET_OK) {
+        CoordinationDFX::WriteActivateResult(remoteNetworkId, isSuccess);
         FI_HILOGE("Failed to send the sendMsg, ret:%{public}d", ret);
         return RET_ERR;
     }
@@ -389,6 +404,7 @@ int32_t CoordinationSoftbusAdapter::StopRemoteCoordination(const std::string &re
     }
     int32_t sessionId = sessionDevs_[remoteNetworkId];
     cJSON *jsonStr = cJSON_CreateObject();
+    CHKPR(jsonStr, RET_ERR);
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_CMD_TYPE, cJSON_CreateNumber(REMOTE_COORDINATION_STOP));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_RESULT, cJSON_CreateBool(isUnchained));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_SESSION_ID, cJSON_CreateNumber(sessionId));
@@ -397,6 +413,7 @@ int32_t CoordinationSoftbusAdapter::StopRemoteCoordination(const std::string &re
     int32_t ret = SendMsg(sessionId, sendMsg);
     cJSON_free(sendMsg);
     if (ret != RET_OK) {
+        CoordinationDFX::WriteDeactivate(remoteNetworkId, sessionDevs_, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
         FI_HILOGE("Failed to send the sendMsg, ret:%{public}d", ret);
         return RET_ERR;
     }
@@ -414,6 +431,7 @@ int32_t CoordinationSoftbusAdapter::StopRemoteCoordinationResult(const std::stri
     }
     int32_t sessionId = sessionDevs_[remoteNetworkId];
     cJSON *jsonStr = cJSON_CreateObject();
+    CHKPR(jsonStr, RET_ERR);
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_CMD_TYPE, cJSON_CreateNumber(REMOTE_COORDINATION_STOP_RES));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_RESULT, cJSON_CreateBool(isSuccess));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_SESSION_ID, cJSON_CreateNumber(sessionId));
@@ -422,6 +440,7 @@ int32_t CoordinationSoftbusAdapter::StopRemoteCoordinationResult(const std::stri
     int32_t ret = SendMsg(sessionId, sendMsg);
     cJSON_free(sendMsg);
     if (ret != RET_OK) {
+        CoordinationDFX::WriteDeactivateResult(remoteNetworkId, sessionDevs_);
         FI_HILOGE("Failed to send the sendMsg, ret:%{public}d", ret);
         return RET_ERR;
     }
@@ -491,6 +510,7 @@ int32_t CoordinationSoftbusAdapter::StartCoordinationOtherResult(const std::stri
     }
     int32_t sessionId = sessionDevs_[originNetworkId];
     cJSON *jsonStr = cJSON_CreateObject();
+    CHKPR(jsonStr, RET_ERR);
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_CMD_TYPE, cJSON_CreateNumber(REMOTE_COORDINATION_STOP_OTHER_RES));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_OTHER_DEVICE_ID, cJSON_CreateString(remoteNetworkId.c_str()));
     cJSON_AddItemToObject(jsonStr, FI_SOFTBUS_KEY_SESSION_ID, cJSON_CreateNumber(sessionId));
@@ -588,7 +608,7 @@ int32_t CoordinationSoftbusAdapter::OnBind(int32_t socket, PeerSocketInfo info)
         return RET_OK;
     }
     std::unique_lock<std::mutex> sessionLock(operationMutex_);
-    sessionDevs_[info.deviceId] = socket;
+    sessionDevs_[info.networkId] = socket;
     ConfigTcpAlive(socket);
     return RET_OK;
 }
@@ -631,9 +651,13 @@ int32_t CoordinationSoftbusAdapter::SendData(const std::string &networkId, Messa
         free(dataPacket);
         return RET_ERR;
     }
+    CoordinationState curState = COOR_SM->GetCurrentCoordinationState();
+    std::unique_lock<std::mutex> sessionLock(operationMutex_);
     int32_t result = SendBytes(sessionDevs_[networkId], dataPacket, sizeof(DataPacket) + dataLen);
     free(dataPacket);
     if (result != RET_OK) {
+        CoordinationDFX::WriteCooperateDragResult(networkId, curState,
+            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
         FI_HILOGE("Send bytes failed");
         return RET_ERR;
     }

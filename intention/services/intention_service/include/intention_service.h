@@ -16,73 +16,42 @@
 #ifndef INTENTION_SERVICE_H
 #define INTENTION_SERVICE_H
 
-#include <iremote_object.h>
-#include <system_ability.h>
+#include "nocopyable.h"
 
-#include "devicestatus_delayed_sp_singleton.h"
-#include "i_context.h"
+#include "cooperate_server.h"
+#include "drag_server.h"
 #include "intention_stub.h"
-#include "plugin_manager.h"
-#include "task_scheduler.h"
-#include "timer_manager.h"
-#include "device_manager.h"
+#include "i_context.h"
+#include "socket_server.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class IntentionService final : public IContext,
-                               public SystemAbility,
-                               public IntentionStub {
-    DECLARE_SYSTEM_ABILITY(IntentionService);
-    DECLARE_DELAYED_SP_SINGLETON(IntentionService);
-
+class IntentionService final : public IntentionStub {
 public:
-    virtual void OnDump() override;
-    virtual void OnStart() override;
-    virtual void OnStop() override;
-
-    ITaskScheduler& GetTaskScheduler() override;
-    ITimerManager& GetTimerManager() override;
-    IPluginManager& GetPluginManager() override;
-    IDeviceManager& GetDeviceManager() override;
+    IntentionService(IContext *context);
+    ~IntentionService() = default;
+    DISALLOW_COPY_AND_MOVE(IntentionService);
 
 private:
-    int32_t Enable(uint32_t intention, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Disable(uint32_t intention, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Start(uint32_t intention, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Stop(uint32_t intention, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Control(uint32_t intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t AddWatch(uint32_t intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t RemoveWatch(uint32_t intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t SetParam(uint32_t intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t GetParam(uint32_t intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
+    int32_t Enable(Intention intention, MessageParcel &data, MessageParcel &reply) override;
+    int32_t Disable(Intention intention, MessageParcel &data, MessageParcel &reply) override;
+    int32_t Start(Intention intention, MessageParcel &data, MessageParcel &reply) override;
+    int32_t Stop(Intention intention, MessageParcel &data, MessageParcel &reply) override;
+    int32_t Control(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
+    int32_t AddWatch(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
+    int32_t RemoveWatch(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
+    int32_t SetParam(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
+    int32_t GetParam(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
+
+    IPlugin* LoadPlugin(Intention intention);
 
 private:
-    TaskScheduler taskScheduler_;
-    TimerManager timerMgr_;
-    PluginManager pluginMgr_;
-    DeviceManager deviceMgr_;
+    IContext *context_ { nullptr };
+    SocketServer socketServer_;
+    CooperateServer cooperate_;
+    DragServer drag_;
 };
-
-ITaskScheduler& IntentionService::GetTaskScheduler()
-{
-    return taskScheduler_;
-}
-
-ITimerManager& IntentionService::GetTimerManager()
-{
-    return timerMgr_;
-}
-
-IPluginManager& IntentionService::GetPluginManager()
-{
-    return pluginMgr_;
-}
-
-IDeviceManager& IntentionService::GetDeviceManager()
-{
-    return deviceMgr_;
-}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

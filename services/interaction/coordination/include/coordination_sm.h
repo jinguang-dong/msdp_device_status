@@ -180,6 +180,7 @@ private:
     void OnReset(const std::string &networkId);
     std::shared_ptr<ICoordinationState> GetCurrentState();
     void RegisterSessionCallback();
+    void OpenP2PConnection(const std::string &remoteNetworkId);
 
 private:
     std::pair<std::string, std::string> preparedNetworkId_;
@@ -202,7 +203,7 @@ private:
     int32_t monitorId_ { -1 };
     int32_t filterId_ { -1 };
     std::map<CooStateChangeType, std::function<void(CoordinationState, CoordinationState)>> stateChangedCallbacks_;
-    std::function<void(std::string)> remoteNetworkIdCallback_;
+    std::vector<std::function<void(std::string)>> remoteNetworkIdCallbacks_;
     std::function<void(int32_t, int32_t)> mouseLocationCallback_;
     std::function<void(void)> notifyDragCancelCallback_;
     std::function<void(bool &)> notifyDragAllowedCallback_;

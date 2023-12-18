@@ -88,20 +88,20 @@ struct CoordsInfo {
     int32_t GetExtraInfo(std::string &extraInfo) const;
     int32_t SyncDragDataToRemote(std::string &remoteDeviceId, const DragData& dragData);
     int32_t SyncCoordsInfoToRemote(std::string &remoteDeviceId, const CoordsInfo& coordsInfo);
-    void OnRecvRemoteDragData(void *data, uint32_t dataLen);
-    void OnRecvRemoteCoordsInfo(void *data, uint32_t dataLen);
+    void OnRecvDragDataFromRemote(void *data, uint32_t dataLen);
+    void OnRecvCoordsInfoFromRemote(void *data, uint32_t dataLen);
+    void SetRemoteNetworkId(std::string networkId);
+    std::string GetRemoteNetworkId();
+    int32_t AddPrivilege(int32_t tokenId);
 #ifdef OHOS_DRAG_ENABLE_INTERCEPTOR
     class InterceptorConsumer : public MMI::IInputEventConsumer {
     public:
-        InterceptorConsumer(IContext *context,
-            std::function<void (std::shared_ptr<MMI::PointerEvent>)> cb)
-            : context_(context),
-            pointerEventCallback_(cb) {}
+        InterceptorConsumer(std::function<void (std::shared_ptr<MMI::PointerEvent>)> cb)
+            : pointerEventCallback_(cb) {}
         void OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const override;
         void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override;
         void OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const override;
     private:
-        IContext* context_ { nullptr };
         std::function<void (std::shared_ptr<MMI::PointerEvent>)> pointerEventCallback_ { nullptr };
     };
 #endif // OHOS_DRAG_ENABLE_INTERCEPTOR
@@ -135,9 +135,9 @@ private:
     std::string GetDragCursorStyle(DragCursorStyle value) const;
     static MMI::ExtraData CreateExtraData(bool appended);
     void StateChangedNotify(DragState state);
+    void CtrlKeyStyleChangedNotify(DragCursorStyle style, DragAction action);
     int32_t HandleDragResult(DragResult result, bool hasCustomAnimation);
-    void HandleCtrlKeyDown();
-    void HandleCtrlKeyUp();
+    void HandleCtrlKeyEvent(DragCursorStyle style, DragAction action);
 private:
     int32_t timerId_ { -1 };
     StateChangeNotify stateNotify_;
@@ -157,7 +157,9 @@ private:
     std::function<void(DragState)> stateChangedCallback_ { nullptr };
     std::function<void(void)> notifyPUllUpCallback_ { nullptr };
     std::shared_ptr<EventHub> eventHub_ { nullptr };
+    sptr<ISystemAbilityStatusChange> statusListener_ { nullptr };
     bool gapLessMode_ { true };
+    std::string remoteNetworkId_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

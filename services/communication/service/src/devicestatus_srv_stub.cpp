@@ -15,6 +15,8 @@
 
 #include "devicestatus_srv_stub.h"
 
+#include <unistd.h>
+
 #include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
 #include "message_parcel.h"
@@ -23,11 +25,9 @@
 #include "devicestatus_callback_proxy.h"
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
-#include "devicestatus_service.h"
-#include "devicestatus_srv_proxy.h"
 #include "drag_data_packer.h"
-#include "fi_log.h"
 #include "preview_style_packer.h"
+#include "proto.h"
 #include "stationary_callback.h"
 #include "stationary_data.h"
 #include "include/util.h"
@@ -136,7 +136,9 @@ void DeviceStatusSrvStub::InitDrag()
         {static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_PREVIEW_STYLE),
             &DeviceStatusSrvStub::UpdatePreviewStyleStub },
         {static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_PREVIEW_STYLE_WITH_ANIMATION),
-            &DeviceStatusSrvStub::UpdatePreviewStyleWithAnimationStub }
+            &DeviceStatusSrvStub::UpdatePreviewStyleWithAnimationStub },
+        {static_cast<uint32_t>(DeviceInterfaceCode::ADD_PRIVILEGE),
+            &DeviceStatusSrvStub::AddPrivilegeStub }
     };
     connFuncs_.insert(dragFuncs.begin(), dragFuncs.end());
 }
@@ -472,7 +474,7 @@ int32_t DeviceStatusSrvStub::HandleAllocSocketFdStub(MessageParcel &data, Messag
 
     int32_t clientFd = -1;
     uint32_t tokenId = GetCallingTokenID();
-    int32_t tokenType = AccessTokenKit::GetTokenTypeFlag(tokenId);
+    int32_t tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     int32_t ret = AllocSocketFd(clientName, moduleId, clientFd, tokenType);
     if (ret != RET_OK) {
         FI_HILOGE("AllocSocketFd failed, pid:%{public}d, go switch default", pid);
@@ -784,6 +786,17 @@ int32_t DeviceStatusSrvStub::GetExtraInfoStub(MessageParcel &data, MessageParcel
         return ret;
     }
     WRITESTRING(reply, extraInfo, IPC_STUB_WRITE_PARCEL_ERR);
+    return RET_OK;
+}
+
+int32_t DeviceStatusSrvStub::AddPrivilegeStub(MessageParcel &data, MessageParcel &reply)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = AddPrivilege();
+    if (ret != RET_OK) {
+        FI_HILOGE("Failed to get extraInfo in dragData");
+        return ret;
+    }
     return RET_OK;
 }
 } // namespace DeviceStatus

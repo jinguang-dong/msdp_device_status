@@ -69,7 +69,7 @@ void ClearCoordiantionSM()
     COOR_SM->monitorId_ = -1;
     COOR_SM->interceptorId_ = -1;
     COOR_SM->filterId_ = -1;
-    COOR_SM->remoteNetworkIdCallback_ = nullptr;
+    COOR_SM->remoteNetworkIdCallbacks_ = { };
     COOR_SM->mouseLocationCallback_ = nullptr;
     COOR_SM->notifyDragCancelCallback_ = nullptr;
     COOR_SM->runner_ = nullptr;

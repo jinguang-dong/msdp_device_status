@@ -28,10 +28,8 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "Interac
 } // namespace
 
 InteractionManagerImpl::InteractionManagerImpl() {}
-InteractionManagerImpl::~InteractionManagerImpl()
-{
-    CALL_DEBUG_ENTER;
-}
+
+InteractionManagerImpl::~InteractionManagerImpl() {}
 
 bool InteractionManagerImpl::InitClient()
 {
@@ -377,6 +375,12 @@ int32_t InteractionManagerImpl::EnterTextEditorArea(bool enable)
 {
     CALL_DEBUG_ENTER;
     return dragManagerImpl_.EnterTextEditorArea(enable);
+}
+
+int32_t InteractionManagerImpl::AddPrivilege()
+{
+    CALL_DEBUG_ENTER;
+    return dragManagerImpl_.AddPrivilege();
 }
 } // namespace DeviceStatus
 } // namespace Msdp
