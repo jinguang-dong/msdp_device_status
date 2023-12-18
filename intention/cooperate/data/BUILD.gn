@@ -19,6 +19,9 @@ config("intention_cooperate_data_public_config") {
 
 ohos_source_set("intention_cooperate_data") {
   sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
     debug = false

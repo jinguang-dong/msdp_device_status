@@ -31,7 +31,9 @@
 #include "drag_manager.h"
 #include "i_context.h"
 #ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
+#include "plugin_manager.h"
 #include "intention_service.h"
+#include "socket_session_manager.h"
 #endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
 #include "stationary_callback.h"
 #include "stationary_data.h"
@@ -58,6 +60,11 @@ public:
     IDeviceManager& GetDeviceManager() override;
     ITimerManager& GetTimerManager() override;
     IDragManager& GetDragManager() override;
+
+#ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
+    IPluginManager& GetPluginManager() override;
+    ISocketSessionManager& GetSocketSessionManager() override;
+#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
 
     void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency,
         sptr<IRemoteDevStaCallback> callback) override;
@@ -106,6 +113,7 @@ public:
     int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
         const PreviewAnimation &animation) override;
     int32_t GetDragSummary(std::map<std::string, int64_t> &summarys) override;
+    int32_t AddPrivilege() override;
 
 private:
     bool Init();
@@ -145,6 +153,8 @@ private:
     std::unique_ptr<MotionDrag> motionDrag_ { nullptr };
 #endif // OHOS_BUILD_ENABLE_MOTION_DRAG
 #ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
+    SocketSessionManager socketSessionMgr_;
+    PluginManager pluginMgr_;
     sptr<IntentionService> intention_;
 #endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
 };

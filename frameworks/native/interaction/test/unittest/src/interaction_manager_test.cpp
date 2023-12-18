@@ -72,21 +72,21 @@ constexpr bool HAS_CUSTOM_ANIMATION { true };
 constexpr int32_t MOVE_STEP { 10 };
 constexpr int32_t FOREGROUND_COLOR_IN { 0x33FF0000 };
 constexpr int32_t FOREGROUND_COLOR_OUT { 0x00000000 };
-constexpr int32_t RADIUS_IN { 42 };
-constexpr int32_t RADIUS_OUT { 42 };
+constexpr int32_t ANIMATION_DURATION { 500 };
 constexpr int64_t DOWN_TIME { 1 };
 const std::string UD_KEY { "Unified data key" };
-const std::string EXTRA_INFO { "{ \"drag_allow_distributed\" : false }" };
 const std::string SYSTEM_CORE { "system_core" };
 const std::string SYSTEM_BASIC { "system_basic" };
 const std::string CURVE_NAME { "cubic-bezier" };
+const std::string EXTRA_INFO { "{ \"drag_corner_radius\": 20, \"drag_allow_distributed\": false }" };
+const std::string FILTER_INFO { "{ \"dip_scale\": 3.5 }" };
 int32_t g_deviceMouseId { -1 };
 int32_t g_deviceTouchId { -1 };
 int32_t g_screenWidth { 720 };
 int32_t g_screenHeight { 1280 };
 uint64_t g_tokenID { 0 };
-const char *g_cores[] = { "ohos.permission.INPUT_MONITORING" };
-const char *g_basics[] = { "ohos.permission.COOPERATE_MANAGER" };
+const char* g_cores[] = { "ohos.permission.INPUT_MONITORING" };
+const char* g_basics[] = { "ohos.permission.COOPERATE_MANAGER" };
 std::shared_ptr<MMI::KeyEvent> g_keyEvent = MMI::KeyEvent::Create();
 } // namespace
 
@@ -121,6 +121,7 @@ public:
     static void SimulateDownKeyEvent(int32_t key);
     static void SimulateUpKeyEvent(int32_t key);
     static void PrintDragAction(DragAction dragAction);
+    static void AssignToAnimation(PreviewAnimation &animation);
 };
 
 void InteractionManagerTest::SetPermission(const std::string &level, const char** perms, size_t permAmount)
@@ -324,7 +325,7 @@ std::shared_ptr<Media::PixelMap> InteractionManagerTest::CreatePixelMap(int32_t 
     opts.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
 
     int32_t colorLen = width * height;
-    uint32_t *colors = new (std::nothrow) uint32_t[colorLen];
+    uint32_t* colors = new (std::nothrow) uint32_t[colorLen];
     CHKPP(colors);
     int32_t colorByteCount = colorLen * INT32_BYTE;
     if (memset_s(colors, colorByteCount, DEFAULT_ICON_COLOR, colorByteCount) != EOK) {
@@ -363,6 +364,8 @@ std::optional<DragData> InteractionManagerTest::CreateDragData(const std::pair<i
     dragData.displayY = location.second;
     dragData.displayId = displayId;
     dragData.hasCanceledAnimation = HAS_CANCELED_ANIMATION;
+    dragData.extraInfo = EXTRA_INFO;
+    dragData.filterInfo = FILTER_INFO;
     return dragData;
 }
 
@@ -553,6 +556,13 @@ void InteractionManagerTest::PrintDragAction(DragAction dragAction)
             FI_HILOGD("drag action: UNKNOWN");
             break;
     }
+}
+
+void InteractionManagerTest::AssignToAnimation(PreviewAnimation &animation)
+{
+    animation.duration = ANIMATION_DURATION;
+    animation.curveName = CURVE_NAME;
+    animation.curve = { 0.33, 0, 0.67, 1 };
 }
 
 class InputEventCallbackTest : public MMI::IInputEventConsumer {
@@ -1855,17 +1865,15 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_UpdatePreviewStyle, Test
     SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { enterPos.first, enterPos.second },
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, true);
     PreviewStyle previewStyleIn;
-    previewStyleIn.types  = { PreviewType::FOREGROUND_COLOR, PreviewType::RADIUS };
+    previewStyleIn.types = { PreviewType::FOREGROUND_COLOR };
     previewStyleIn.foregroundColor = FOREGROUND_COLOR_IN;
-    previewStyleIn.radius = RADIUS_IN;
     ret = InteractionManager::GetInstance()->UpdatePreviewStyle(previewStyleIn);
     EXPECT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ enterPos.first, enterPos.second }, { leavePos.first, leavePos.second },
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, true);
     PreviewStyle previewStyleOut;
-    previewStyleOut.types  = { PreviewType::FOREGROUND_COLOR, PreviewType::RADIUS };
+    previewStyleOut.types = { PreviewType::FOREGROUND_COLOR };
     previewStyleOut.foregroundColor = FOREGROUND_COLOR_OUT;
-    previewStyleOut.radius = RADIUS_OUT;
     ret = InteractionManager::GetInstance()->UpdatePreviewStyle(previewStyleOut);
     EXPECT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ leavePos.first, leavePos.second }, { DRAG_DST_X, DRAG_DST_Y },
@@ -1907,25 +1915,19 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_UpdatePreviewStyleWithAn
     SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { enterPos.first, enterPos.second },
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, true);
     PreviewStyle previewStyleIn;
-    previewStyleIn.types  = { PreviewType::FOREGROUND_COLOR, PreviewType::RADIUS };
+    previewStyleIn.types = { PreviewType::FOREGROUND_COLOR };
     previewStyleIn.foregroundColor = FOREGROUND_COLOR_IN;
-    previewStyleIn.radius = RADIUS_IN;
     PreviewAnimation animationIn;
-    animationIn.duration = 500;
-    animationIn.curveName = CURVE_NAME;
-    animationIn.curve = { 0.33, 0, 0.67, 1 };
+    AssignToAnimation(animationIn);
     ret = InteractionManager::GetInstance()->UpdatePreviewStyleWithAnimation(previewStyleIn, animationIn);
     EXPECT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ enterPos.first, enterPos.second }, { leavePos.first, leavePos.second },
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, true);
     PreviewStyle previewStyleOut;
-    previewStyleOut.types  = { PreviewType::FOREGROUND_COLOR, PreviewType::RADIUS };
+    previewStyleOut.types = { PreviewType::FOREGROUND_COLOR };
     previewStyleOut.foregroundColor = FOREGROUND_COLOR_OUT;
-    previewStyleOut.radius = RADIUS_OUT;
     PreviewAnimation animationOut;
-    animationOut.duration = 500;
-    animationOut.curveName = CURVE_NAME;
-    animationOut.curve = { 0.33, 0, 0.67, 1 };
+    AssignToAnimation(animationOut);
     ret = InteractionManager::GetInstance()->UpdatePreviewStyleWithAnimation(previewStyleOut, animationOut);
     EXPECT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ leavePos.first, leavePos.second }, { DRAG_DST_X, DRAG_DST_Y },
@@ -1951,7 +1953,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetExtraInfo, TestSize.L
         std::optional<DragData> dragData = CreateDragData({ TEST_PIXEL_MAP_WIDTH, TEST_PIXEL_MAP_HEIGHT },
             MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, DISPLAY_ID, { DRAG_SRC_X, DRAG_SRC_Y });
         ASSERT_TRUE(dragData);
-        dragData->extraInfo = EXTRA_INFO;
         std::promise<bool> promiseFlag;
         std::future<bool> futureFlag = promiseFlag.get_future();
         auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {

@@ -18,20 +18,20 @@
 
 #include "nocopyable.h"
 
+#include "cooperate_server.h"
+#include "drag_server.h"
 #include "intention_stub.h"
 #include "i_context.h"
-#include "plugin_manager.h"
+#include "socket_server.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 class IntentionService final : public IntentionStub {
 public:
-    IntentionService() = default;
+    IntentionService(IContext *context);
     ~IntentionService() = default;
     DISALLOW_COPY_AND_MOVE(IntentionService);
-
-    int32_t Init(IContext *context);
 
 private:
     int32_t Enable(Intention intention, MessageParcel &data, MessageParcel &reply) override;
@@ -44,19 +44,13 @@ private:
     int32_t SetParam(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
     int32_t GetParam(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
 
-    int32_t Enable1(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t Disable1(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t Start1(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t Stop1(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t AddWatch1(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply);
-    int32_t RemoveWatch1(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply);
-    int32_t SetParam1(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply);
-    int32_t GetParam1(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply);
-    int32_t Control1(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply);
+    IPlugin* LoadPlugin(Intention intention);
 
 private:
     IContext *context_ { nullptr };
-    PluginManager pluginMgr_;
+    SocketServer socketServer_;
+    CooperateServer cooperate_;
+    DragServer drag_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -108,9 +108,9 @@ struct DrawingInfo {
 
 struct FilterInfo {
     std::string componentType;
-    int32_t blurStyle;
-    int32_t cornerRadius;
-    float dipScale;
+    int32_t blurStyle { -1 };
+    float cornerRadius { 0.0 };
+    float dipScale { 0.0 };
 };
 
 class DragDrawing : public IDragAnimation {
@@ -155,7 +155,7 @@ private:
     int32_t DrawMouseIcon();
     int32_t DrawStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode,
         std::shared_ptr<Media::PixelMap> stylePixelMap);
-    void RunAnimation(float endAlpha, float endScale);
+    int32_t RunAnimation(std::function<int32_t()> cb);
     int32_t InitVSync(float endAlpha, float endScale);
     void OnVsync();
     void InitDrawingInfo(const DragData &dragData);
@@ -182,6 +182,7 @@ private:
     void MutilSelectedAnimation(int32_t positionX, int32_t positionY, int32_t adjustSize);
     void InitMutilSelectedNodes();
     void ClearMutilSelectedData();
+    bool ParserRadius(float &radius);
 
 private:
     int64_t startNum_ { -1 };
