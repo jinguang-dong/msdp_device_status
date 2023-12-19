@@ -36,7 +36,7 @@ ohos_source_set("device_profile_adapter") {
     "${intention_root_path}/prototype/include",
   ]
 
-  sources = [ "src/dp_adapter.cpp" ]
+  sources = [ "src/device_profile_adapter.cpp" ]
 
   configs = [ ":device_profile_adapter_config" ]
 

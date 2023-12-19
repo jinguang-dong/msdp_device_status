@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "dp_adapter.h"
+#include "device_profile_adapter.h"
 
 #include <optional>
 
@@ -185,7 +185,8 @@ int32_t DeviceProfileAdapter::GetDPValue(ValueType valueType, cJSON* jsonValue, 
             break;
         }
         default: {
-            FI_HILOGE("dpValue is neither an int type, nor a bool type, nor a string type, type:%{public}d", valueType);
+            FI_HILOGE("dpValue is neither an int type, nor a bool type, nor a string type, type:%{public}d",
+                valueType);
             return RET_ERR;
         }
     }
