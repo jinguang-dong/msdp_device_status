@@ -327,7 +327,8 @@ int32_t DeviceProfileAdapter::CreatJsonItem(cJSON* item, const DP_VALUE &dpValue
             break;
         }
         default: {
-            FI_HILOGE("valueType is neither an int type, nor a bool type, nor a string type, type:%{public}d", valueType);
+            FI_HILOGE("valueType is neither an int type, nor a bool type, nor a string type, type:%{public}d",
+                valueType);
             return RET_ERR;
         }
     }
