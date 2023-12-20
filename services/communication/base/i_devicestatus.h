@@ -76,6 +76,7 @@ public:
     virtual int32_t UpdateDragStyle(const DragStyle &dragStyle) = 0;
     virtual int32_t UpdateDragStyleWithAnimation(const DragStyle &dragStyle,
         const DragAnimation &animation) = 0;
+    virtual int32_t AddPrivilege() = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.Idevicestatus");
 };
 } // namespace DeviceStatus

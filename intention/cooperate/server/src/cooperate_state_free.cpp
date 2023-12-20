@@ -31,18 +31,18 @@ int32_t CooperateStateFree::ActivateCooperate(
 {
     CALL_INFO_TRACE;
     if (remoteNetworkId.empty()) {
-        FI_HILOGE("RemoteNetworkId is empty");
-        return static_cast<int32_t>(CooperateMessage::PARAMETER_ERROR);
+        FI_HILOGE("remoteNetworkId is empty");
+        return static_cast<int32_t>(CoordinationMessage::PARAMETER_ERROR);
     }
     std::string localNetworkId = COOPERATE::GetLocalNetworkId();
     if (localNetworkId.empty() || remoteNetworkId == localNetworkId) {
         FI_HILOGE("Input Parameters error");
-        return static_cast<int32_t>(CooperateMessage::PARAMETER_ERROR);
+        return static_cast<int32_t>(CoordinationMessage::PARAMETER_ERROR);
     }
     int32_t ret = COOR_SOFTBUS_ADAPTER->StartRemoteCooperate(localNetworkId, remoteNetworkId, true);
     if (ret != RET_OK) {
         FI_HILOGE("Start input device cooperate failed");
-        return static_cast<int32_t>(CooperateMessage::COOPERATE_FAIL);
+        return static_cast<int32_t>(CoordinationMessage::COORDINATION_FAIL);
     }
     std::string taskName = "process_start_task";
     std::function<void()> handleProcessStartFunc =
@@ -78,10 +78,10 @@ int32_t CooperateStateFree::DeactivateCooperate(const std::string &networkId, bo
     }
 
     if (!preparedNetworkId.first.empty() && !preparedNetworkId.second.empty()) {
-        FI_HILOGD("preparedNetworkId is not empty, first:%{public}s, second:%{public}s",
-            preparedNetworkId.first.c_str(), preparedNetworkId.second.c_str());
+        FI_HILOGI("preparedNetworkId is not empty, first:%{public}s, second:%{public}s, networkId:%{public}s",
+            preparedNetworkId.first.c_str(), preparedNetworkId.second.c_str(),
+            networkId.substr(0, SUBSTR_NETWORKID_LEN).c_str());
         if (networkId == preparedNetworkId.first || networkId == preparedNetworkId.second) {
-            FI_HILOGD("networkId:%{public}s", networkId.substr(0, SUBSTR_NETWORKID_LEN).c_str());
             bool ret = COOR_SM->UnchainCooperate(preparedNetworkId.first, preparedNetworkId.second);
             if (ret) {
                 COOR_SM->NotifyChainRemoved();

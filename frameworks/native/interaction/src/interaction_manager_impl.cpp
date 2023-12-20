@@ -28,10 +28,8 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "Interac
 } // namespace
 
 InteractionManagerImpl::InteractionManagerImpl() {}
-InteractionManagerImpl::~InteractionManagerImpl()
-{
-    CALL_DEBUG_ENTER;
-}
+
+InteractionManagerImpl::~InteractionManagerImpl() {}
 
 bool InteractionManagerImpl::InitClient()
 {
@@ -118,7 +116,7 @@ int32_t InteractionManagerImpl::UnregisterCoordinationListener(std::shared_ptr<I
 int32_t InteractionManagerImpl::PrepareCoordination(std::function<void(std::string, CoordinationMessage)> callback,
     bool isCompatible)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     std::lock_guard<std::mutex> guard(mutex_);
     if (!InitClient()) {
@@ -137,7 +135,7 @@ int32_t InteractionManagerImpl::PrepareCoordination(std::function<void(std::stri
 int32_t InteractionManagerImpl::UnprepareCoordination(std::function<void(std::string, CoordinationMessage)> callback,
     bool isCompatible)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     std::lock_guard<std::mutex> guard(mutex_);
     if (!InitClient()) {
@@ -156,7 +154,7 @@ int32_t InteractionManagerImpl::UnprepareCoordination(std::function<void(std::st
 int32_t InteractionManagerImpl::ActivateCoordination(const std::string &remoteNetworkId, int32_t startDeviceId,
     std::function<void(std::string, CoordinationMessage)> callback, bool isCompatible)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     std::lock_guard<std::mutex> guard(mutex_);
     if (!InitClient()) {
@@ -177,7 +175,7 @@ int32_t InteractionManagerImpl::ActivateCoordination(const std::string &remoteNe
 int32_t InteractionManagerImpl::DeactivateCoordination(bool isUnchained,
     std::function<void(std::string, CoordinationMessage)> callback, bool isCompatible)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     std::lock_guard<std::mutex> guard(mutex_);
     if (!InitClient()) {
@@ -377,6 +375,12 @@ int32_t InteractionManagerImpl::EnterTextEditorArea(bool enable)
 {
     CALL_DEBUG_ENTER;
     return dragManagerImpl_.EnterTextEditorArea(enable);
+}
+
+int32_t InteractionManagerImpl::AddPrivilege()
+{
+    CALL_DEBUG_ENTER;
+    return dragManagerImpl_.AddPrivilege();
 }
 } // namespace DeviceStatus
 } // namespace Msdp

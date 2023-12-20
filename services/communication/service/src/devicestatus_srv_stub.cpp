@@ -15,6 +15,9 @@
 
 #include "devicestatus_srv_stub.h"
 
+#include <unistd.h>
+#include <tokenid_kit.h>
+
 #include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
 #include "message_parcel.h"
@@ -23,11 +26,10 @@
 #include "devicestatus_callback_proxy.h"
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
-#include "devicestatus_service.h"
-#include "devicestatus_srv_proxy.h"
 #include "drag_data_packer.h"
-#include "fi_log.h"
 #include "drag_style_packer.h"
+#include "fi_log.h"
+#include "proto.h"
 #include "stationary_callback.h"
 #include "stationary_data.h"
 #include "include/util.h"
@@ -136,7 +138,9 @@ void DeviceStatusSrvStub::InitDrag()
         {static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_DRAG_STYLE),
             &DeviceStatusSrvStub::UpdateDragStyleStub },
         {static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_DRAG_STYLE_WITH_ANIMATION),
-            &DeviceStatusSrvStub::UpdateDragStyleWithAnimationStub }
+            &DeviceStatusSrvStub::UpdateDragStyleWithAnimationStub },
+        {static_cast<uint32_t>(DeviceInterfaceCode::ADD_PRIVILEGE),
+            &DeviceStatusSrvStub::AddPrivilegeStub }
     };
     connFuncs_.insert(dragFuncs.begin(), dragFuncs.end());
 }
@@ -149,6 +153,26 @@ bool DeviceStatusSrvStub::CheckCooperatePermission()
     int32_t result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken,
         permissionName);
     return result == Security::AccessToken::PERMISSION_GRANTED;
+}
+
+bool DeviceStatusSrvStub::IsSystemServiceCalling()
+{
+    const auto tokenId = IPCSkeleton::GetCallingTokenID();
+    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
+        flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+        FI_HILOGD("system service calling, tokenId: %{public}u, flag: %{public}u", tokenId, flag);
+        return true;
+    }
+    return false;
+}
+
+bool DeviceStatusSrvStub::IsSystemCalling()
+{
+    if (IsSystemServiceCalling()) {
+        return true;
+    }
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetCallingFullTokenID());
 }
 
 int32_t DeviceStatusSrvStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -314,6 +338,10 @@ int32_t DeviceStatusSrvStub::RegisterCooperateMonitorStub(MessageParcel &data,
     MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!IsSystemCalling()) {
+        FI_HILOGE("The caller is not system hap");
+        return RET_ERR;
+    }
     if (!CheckCooperatePermission()) {
         FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
         return RET_ERR;
@@ -329,6 +357,10 @@ int32_t DeviceStatusSrvStub::UnregisterCooperateMonitorStub(MessageParcel &data,
     MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!IsSystemCalling()) {
+        FI_HILOGE("The caller is not system hap");
+        return RET_ERR;
+    }
     if (!CheckCooperatePermission()) {
         FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
         return RET_ERR;
@@ -343,6 +375,10 @@ int32_t DeviceStatusSrvStub::UnregisterCooperateMonitorStub(MessageParcel &data,
 int32_t DeviceStatusSrvStub::PrepareCooperateStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!IsSystemCalling()) {
+        FI_HILOGE("The caller is not system hap");
+        return RET_ERR;
+    }
     if (!CheckCooperatePermission()) {
         FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
         return RET_ERR;
@@ -359,6 +395,10 @@ int32_t DeviceStatusSrvStub::PrepareCooperateStub(MessageParcel &data, MessagePa
 int32_t DeviceStatusSrvStub::UnPrepareCooperateStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!IsSystemCalling()) {
+        FI_HILOGE("The caller is not system hap");
+        return RET_ERR;
+    }
     if (!CheckCooperatePermission()) {
         FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
         return RET_ERR;
@@ -375,6 +415,10 @@ int32_t DeviceStatusSrvStub::UnPrepareCooperateStub(MessageParcel &data, Message
 int32_t DeviceStatusSrvStub::ActivateCooperateStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!IsSystemCalling()) {
+        FI_HILOGE("The caller is not system hap");
+        return RET_ERR;
+    }
     if (!CheckCooperatePermission()) {
         FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
         return RET_ERR;
@@ -395,6 +439,10 @@ int32_t DeviceStatusSrvStub::ActivateCooperateStub(MessageParcel &data, MessageP
 int32_t DeviceStatusSrvStub::DeactivateCooperateStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!IsSystemCalling()) {
+        FI_HILOGE("The caller is not system hap");
+        return RET_ERR;
+    }
     if (!CheckCooperatePermission()) {
         FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
         return RET_ERR;
@@ -413,6 +461,10 @@ int32_t DeviceStatusSrvStub::DeactivateCooperateStub(MessageParcel &data, Messag
 int32_t DeviceStatusSrvStub::GetCooperateStateStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    if (!IsSystemCalling()) {
+        FI_HILOGE("The caller is not system hap");
+        return RET_ERR;
+    }
     if (!CheckCooperatePermission()) {
         FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
         return RET_ERR;
@@ -472,7 +524,7 @@ int32_t DeviceStatusSrvStub::HandleAllocSocketFdStub(MessageParcel &data, Messag
 
     int32_t clientFd = -1;
     uint32_t tokenId = GetCallingTokenID();
-    int32_t tokenType = AccessTokenKit::GetTokenTypeFlag(tokenId);
+    int32_t tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     int32_t ret = AllocSocketFd(clientName, moduleId, clientFd, tokenType);
     if (ret != RET_OK) {
         FI_HILOGE("AllocSocketFd failed, pid:%{public}d, go switch default", pid);
@@ -784,6 +836,17 @@ int32_t DeviceStatusSrvStub::GetExtraInfoStub(MessageParcel &data, MessageParcel
         return ret;
     }
     WRITESTRING(reply, extraInfo, IPC_STUB_WRITE_PARCEL_ERR);
+    return RET_OK;
+}
+
+int32_t DeviceStatusSrvStub::AddPrivilegeStub(MessageParcel &data, MessageParcel &reply)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = AddPrivilege();
+    if (ret != RET_OK) {
+        FI_HILOGE("Failed to get extraInfo in dragData");
+        return ret;
+    }
     return RET_OK;
 }
 } // namespace DeviceStatus

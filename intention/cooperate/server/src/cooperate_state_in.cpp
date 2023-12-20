@@ -17,7 +17,6 @@
 
 #include "cooperate_device_manager.h"
 #include "cooperate_event_manager.h"
-#include "cooperate_message.h"
 #include "cooperate_sm.h"
 #include "cooperate_softbus_adapter.h"
 #include "cooperate_util.h"
@@ -37,18 +36,18 @@ int32_t CooperateStateIn::ActivateCooperate(const std::string &remoteNetworkId,
 {
     CALL_INFO_TRACE;
     if (remoteNetworkId.empty()) {
-        FI_HILOGE("RemoteNetworkId is empty");
-        return static_cast<int32_t>(CooperateMessage::PARAMETER_ERROR);
+        FI_HILOGE("remoteNetworkId is empty");
+        return static_cast<int32_t>(CoordinationMessage::PARAMETER_ERROR);
     }
     std::string localNetworkId = COOPERATE::GetLocalNetworkId();
     if (localNetworkId.empty() || remoteNetworkId == localNetworkId) {
         FI_HILOGE("Input Parameters error");
-        return static_cast<int32_t>(CooperateMessage::PARAMETER_ERROR);
+        return static_cast<int32_t>(CoordinationMessage::PARAMETER_ERROR);
     }
     int32_t ret = COOR_SOFTBUS_ADAPTER->StartRemoteCooperate(localNetworkId, remoteNetworkId, false);
     if (ret != RET_OK) {
         FI_HILOGE("Start cooperate failed");
-        return static_cast<int32_t>(CooperateMessage::COOPERATE_FAIL);
+        return static_cast<int32_t>(CoordinationMessage::COORDINATION_FAIL);
     }
     std::string taskName = "process_start_task";
     std::function<void()> handleProcessStartFunc =
@@ -60,7 +59,7 @@ int32_t CooperateStateIn::ActivateCooperate(const std::string &remoteNetworkId,
 
 int32_t CooperateStateIn::ProcessStart(const std::string &remoteNetworkId, int32_t startDeviceId)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     auto* context = COOR_EVENT_MGR->GetIContext();
     CHKPR(context, RET_ERR);
     std::string originNetworkId = COOR_DEV_MGR->GetOriginNetworkId(startDeviceId);
@@ -74,7 +73,7 @@ int32_t CooperateStateIn::ProcessStart(const std::string &remoteNetworkId, int32
 int32_t CooperateStateIn::DeactivateCooperate(const std::string &remoteNetworkId, bool isUnchained,
     const std::pair<std::string, std::string> &preparedNetworkId)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     int32_t ret = COOR_SOFTBUS_ADAPTER->StopRemoteCooperate(remoteNetworkId, isUnchained);
     if (ret != RET_OK) {
         FI_HILOGE("Stop cooperate failed");
@@ -153,7 +152,7 @@ void CooperateStateIn::OnStopRemoteInput(bool isSuccess,
 
 void CooperateStateIn::ComeBack(const std::string &remoteNetworkId, int32_t startDeviceId)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     std::vector<std::string> inputDeviceDhids = COOR_DEV_MGR->GetCooperateDhids(startDeviceId);
     if (inputDeviceDhids.empty()) {
         COOR_SM->OnStartFinish(false, remoteNetworkId, startDeviceId);

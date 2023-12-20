@@ -23,9 +23,10 @@
 #include "display_manager.h"
 #include "hitrace_meter.h"
 #include "input_manager.h"
-
+#include "distributed_file_daemon_manager.h"
 #include "coordination_device_manager.h"
 #include "coordination_event_manager.h"
+#include "coordination_hisysevent.h"
 #include "coordination_hotarea.h"
 #include "coordination_message.h"
 #include "coordination_softbus_adapter.h"
@@ -95,7 +96,7 @@ void CoordinationSM::OnReset(const std::string &networkId)
 
 void CoordinationSM::OnSessionLost(SessionPtr session)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     CHKPV(session);
     sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
     CHKPV(event);
@@ -148,7 +149,7 @@ void CoordinationSM::Reset(bool adjustAbsolutionLocation)
 
 void CoordinationSM::OnCoordinationChanged(const std::string &networkId, bool isOpen)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     CoordinationMessage msg = isOpen ? CoordinationMessage::PREPARE : CoordinationMessage::UNPREPARE;
     auto *context = COOR_EVENT_MGR->GetIContext();
     CHKPV(context);
@@ -176,6 +177,7 @@ void CoordinationSM::OnCloseCoordination(const std::string &networkId, bool isLo
             }
             D_INPUT_ADAPTER->UnPrepareRemoteInput(preparedNetworkId_.first, preparedNetworkId_.second,
                 [](bool isSuccess) {});
+            CloseP2PConnection(preparedNetworkId_.first);
         }
     }
     preparedNetworkId_ = std::make_pair("", "");
@@ -217,22 +219,57 @@ void CoordinationSM::PrepareCoordination()
             std::bind(&CoordinationSM::UpdateLastPointerEventCallback, this, std::placeholders::_1));
         monitorId_ = MMI::InputManager::GetInstance()->AddMonitor(monitor);
         if (monitorId_ <= 0) {
+            CoordinationDFX::WritePrepare(monitorId_, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
             FI_HILOGE("Failed to add monitor, error code:%{public}d", monitorId_);
             monitorId_ = -1;
             return;
         }
     }
-    DP_ADAPTER->UpdateCrossingSwitchState(true, onlineDevice_);
+    int32_t ret = DP_ADAPTER->UpdateCrossingSwitchState(true, onlineDevice_);
+    if (ret != RET_OK) {
+        CoordinationDFX::WritePrepare(monitorId_, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
+    }
 }
 
 void CoordinationSM::UnprepareCoordination()
 {
     CALL_INFO_TRACE;
-    DP_ADAPTER->UpdateCrossingSwitchState(false, onlineDevice_);
+    int32_t ret = DP_ADAPTER->UpdateCrossingSwitchState(false, onlineDevice_);
+    if (ret != RET_OK) {
+        CoordinationDFX::WriteUnprepare(OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
+    }
     std::string localNetworkId = COORDINATION::GetLocalNetworkId();
     OnCloseCoordination(localNetworkId, true);
     RemoveMonitor();
     D_INPUT_ADAPTER->UnregisterSessionStateCb();
+}
+
+void CoordinationSM::OpenP2PConnection(const std::string &remoteNetworkId)
+{
+    DistributedHardware::DmDeviceInfo remoteDeviceInfo;
+    if (strcpy_s(remoteDeviceInfo.networkId, sizeof(remoteDeviceInfo.networkId),
+                 remoteNetworkId.c_str()) != EOK) {
+        FI_HILOGW("Invalid networkid");
+    }
+    int32_t status =
+        Storage::DistributedFile::DistributedFileDaemonManager::GetInstance().OpenP2PConnection(remoteDeviceInfo);
+    if (status != RET_OK) {
+        FI_HILOGW("OpenP2PConnection, status:%{public}d.", status);
+    }
+}
+
+void CoordinationSM::CloseP2PConnection(const std::string &remoteNetworkId)
+{
+    DistributedHardware::DmDeviceInfo remoteDeviceInfo;
+    if (strcpy_s(remoteDeviceInfo.networkId, sizeof(remoteDeviceInfo.networkId),
+                 remoteNetworkId.c_str()) != EOK) {
+        FI_HILOGW("Invalid networkid");
+    }
+    int32_t status =
+        Storage::DistributedFile::DistributedFileDaemonManager::GetInstance().CloseP2PConnection(remoteDeviceInfo);
+    if (status != RET_OK) {
+        FI_HILOGW("CloseP2PConnection, status:%{public}d.", status);
+    }
 }
 
 int32_t CoordinationSM::ActivateCoordination(const std::string &remoteNetworkId, int32_t startDeviceId)
@@ -256,6 +293,7 @@ int32_t CoordinationSM::ActivateCoordination(const std::string &remoteNetworkId,
         FI_HILOGE("Open input softbus failed");
         return static_cast<int32_t>(CoordinationMessage::COORDINATION_FAIL);
     }
+
     isStarting_ = true;
     SetSinkNetworkId(remoteNetworkId);
     auto state = GetCurrentState();
@@ -461,6 +499,7 @@ void CoordinationSM::OnStartFinish(bool isSuccess, const std::string &remoteNetw
     }
 
     if (!isSuccess) {
+        CoordinationDFX::WriteActivateResult(remoteNetworkId, isSuccess);
         FI_HILOGE("Start distributed failed, startDevice:%{public}d", startDeviceId);
         NotifyRemoteStartFail(remoteNetworkId);
     } else {
@@ -471,6 +510,10 @@ void CoordinationSM::OnStartFinish(bool isSuccess, const std::string &remoteNetw
             NotifyMouseLocation(mouseLocation_.first, mouseLocation_.second);
             StateChangedNotify(CoordinationState::STATE_FREE, CoordinationState::STATE_OUT);
 #endif // OHOS_BUILD_ENABLE_MOTION_DRAG
+            std::string taskName = "open_p2p_connection";
+            std::function<void()> handleFunc =
+                std::bind(&CoordinationSM::OpenP2PConnection, this, remoteNetworkId);
+            eventHandler_->ProxyPostTask(handleFunc, taskName, 0);
         } else if (currentState_ == CoordinationState::STATE_IN) {
             std::string originNetworkId = COOR_DEV_MGR->GetOriginNetworkId(startDeviceId);
             if (!originNetworkId.empty() && (remoteNetworkId != originNetworkId)) {
@@ -486,9 +529,14 @@ void CoordinationSM::OnStartFinish(bool isSuccess, const std::string &remoteNetw
         NotifyRemoteStartSuccess(remoteNetworkId, startDeviceDhid_);
         if (currentState_ == CoordinationState::STATE_FREE) {
             UpdateState(CoordinationState::STATE_OUT);
+            CoordinationDFX::WriteCooperateDrag(remoteNetworkId, CoordinationState::STATE_FREE,
+                CoordinationState::STATE_OUT);
         } else if (currentState_ == CoordinationState::STATE_IN) {
             UpdateState(CoordinationState::STATE_FREE);
+            CoordinationDFX::WriteCooperateDrag(remoteNetworkId, CoordinationState::STATE_IN,
+                CoordinationState::STATE_FREE);
         } else {
+            CoordinationDFX::WriteCooperateDrag(remoteNetworkId, CoordinationState::STATE_OUT);
             FI_HILOGI("Current state is out");
         }
     }
@@ -588,12 +636,18 @@ bool CoordinationSM::UpdateMouseLocation()
 
 bool CoordinationSM::UnchainCoordination(const std::string &localNetworkId, const std::string &remoteNetworkId)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     int32_t ret = D_INPUT_ADAPTER->UnPrepareRemoteInput(localNetworkId, remoteNetworkId, [](bool isSuccess) {});
     if (ret != RET_OK) {
         FI_HILOGE("Failed to call distributed UnprepareRemoteInput");
         return false;
     }
+    DistributedHardware::DmDeviceInfo remoteDeviceInfo;
+    if (strcpy_s(remoteDeviceInfo.networkId, sizeof(remoteDeviceInfo.networkId),
+                 localNetworkId.c_str()) != EOK) {
+        FI_HILOGW("Invalid networkid");
+    }
+    CloseP2PConnection(localNetworkId);
     preparedNetworkId_ = std::make_pair("", "");
     return true;
 }
@@ -762,6 +816,15 @@ void CoordinationSM::OnDeviceOnline(const std::string &networkId)
 void CoordinationSM::OnDeviceOffline(const std::string &networkId)
 {
     CALL_INFO_TRACE;
+    std::string localNetworkId = COORDINATION::GetLocalNetworkId();
+    FI_HILOGI("Local device networkId: %{public}s", localNetworkId.substr(0, SUBSTR_NETWORKID_LEN).c_str());
+    FI_HILOGI("Remote device networkId: %{public}s", sinkNetworkId_.substr(0, SUBSTR_NETWORKID_LEN).c_str());
+    FI_HILOGI("Offline device networkId: %{public}s", networkId.substr(0, SUBSTR_NETWORKID_LEN).c_str());
+    if ((networkId != sinkNetworkId_ && networkId != localNetworkId) ||
+        (currentState_ == CoordinationState::STATE_FREE)) {
+        FI_HILOGI("Other device offline");
+        return;
+    }
     DP_ADAPTER->UnregisterCrossingStateListener(networkId);
     Reset(networkId);
     preparedNetworkId_ = std::make_pair("", "");
@@ -1138,7 +1201,7 @@ void CoordinationSM::NotifyChainRemoved()
 
 void CoordinationSM::NotifyUnchainedResult(const std::string &remoteNetworkId, bool isSuccess)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     FI_HILOGD("Notify unchained result, isSuccess:%{public}d", isSuccess);
     if (isSuccess) {
         COOR_SM->NotifyChainRemoved();
@@ -1157,8 +1220,9 @@ void CoordinationSM::SetSinkNetworkId(const std::string &sinkNetworkId)
 
 void CoordinationSM::SetPointerVisible()
 {
+    CALL_INFO_TRACE;
     bool hasPointer = COOR_DEV_MGR->HasLocalPointerDevice();
-    FI_HILOGD("hasPointer:%{public}s", hasPointer ? "true" : "false");
+    FI_HILOGI("hasPointer:%{public}s", hasPointer ? "true" : "false");
     MMI::InputManager::GetInstance()->SetPointerVisible(hasPointer);
 }
 

@@ -18,11 +18,11 @@
 #include <atomic>
 #include <cstdint>
 #include <fstream>
+#include <limits>
 #include <string>
 
 #include <dlfcn.h>
 
-#include "cJSON.h"
 #include "display_manager.h"
 #include "include/core/SkTextBlob.h"
 #include "image_source.h"
@@ -42,6 +42,8 @@
 #include "animation_curve.h"
 #include "devicestatus_define.h"
 #include "drag_data_manager.h"
+#include "drag_hisysevent.h"
+#include "json_parser.h"
 #include "include/util.h"
 
 namespace OHOS {
@@ -59,6 +61,8 @@ constexpr int64_t START_TIME { 181154000809 };
 constexpr int64_t INTERVAL_TIME { 16666667 };
 constexpr int32_t FRAMERATE { 30 };
 constexpr int32_t SVG_WIDTH { 40 };
+constexpr float SCALE_THRESHOLD_EIGHT { 1.0F * INT32_MAX / (SVG_WIDTH + EIGHT_SIZE) };
+constexpr float SCALE_THRESHOLD_TWELVE { 1.0F * INT32_MAX / (SVG_WIDTH + TWELVE_SIZE) };
 constexpr int32_t SIXTEEN { 16 };
 constexpr int32_t SUCCESS_ANIMATION_DURATION { 300 };
 constexpr int32_t VIEW_BOX_POS { 2 };
@@ -122,22 +126,6 @@ const std::string DRAG_ANIMATION_EXTENSION_SO_PATH { "/system/lib/drag_drop_ext/
 #endif
 const std::string BIG_FOLDER_LABEL { "scb_folder" };
 struct DrawingInfo g_drawingInfo;
-
-struct JsonDataParser {
-    JsonDataParser() = default;
-    ~JsonDataParser()
-    {
-        if (json != nullptr) {
-            cJSON_Delete(json);
-            json = nullptr;
-        }
-    }
-    operator cJSON *()
-    {
-        return json;
-    }
-    cJSON *json = nullptr;
-};
 
 bool CheckNodesValid()
 {
@@ -300,6 +288,7 @@ int32_t DragDrawing::UpdateDragCursorStyle(DragCursorStyle style)
 {
     FI_HILOGD("style:%{public}d", style);
     if ((style < DragCursorStyle::DEFAULT) || (style > DragCursorStyle::MOVE)) {
+        DragDFX::WriteUpdateDragStyle(style, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
         FI_HILOGE("Invalid style:%{public}d", style);
         return RET_ERR;
     }
@@ -325,7 +314,7 @@ int32_t DragDrawing::UpdateShadowPic(const ShadowInfo &shadowInfo)
     CHKPR(shadowNode, RET_ERR);
     DrawShadow(shadowNode);
     float scalingValue = GetScaling();
-    if ((1.0 * INT32_MAX / (SVG_WIDTH + TWELVE_SIZE)) <= scalingValue) {
+    if (SCALE_THRESHOLD_TWELVE < scalingValue || fabsf(SCALE_THRESHOLD_TWELVE - scalingValue) < EPSILON) {
         FI_HILOGE("Invalid scalingValue:%{public}f", scalingValue);
         return RET_ERR;
     }
@@ -521,15 +510,16 @@ void DragDrawing::OnStopDragSuccess(std::shared_ptr<Rosen::RSCanvasNode> shadowN
     std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode)
 {
     CALL_DEBUG_ENTER;
+    auto animateCb = std::bind(&DragDrawing::InitVSync, this, END_ALPHA, END_SCALE_SUCCESS);
     if (dragExtHandle_ == nullptr) {
         FI_HILOGE("Failed to open drag extension library");
-        RunAnimation(END_ALPHA, END_SCALE_SUCCESS);
+        RunAnimation(animateCb);
         return;
     }
     auto animationExtFunc = reinterpret_cast<DragExtFunc>(dlsym(dragExtHandle_, "OnStopDragSuccessExt"));
     if (animationExtFunc == nullptr) {
         FI_HILOGE("Failed to get drag extension func");
-        RunAnimation(END_ALPHA, END_SCALE_SUCCESS);
+        RunAnimation(animateCb);
         dlclose(dragExtHandle_);
         dragExtHandle_ = nullptr;
         return;
@@ -541,7 +531,7 @@ void DragDrawing::OnStopDragSuccess(std::shared_ptr<Rosen::RSCanvasNode> shadowN
     }
     if (!handler_->PostTask(std::bind(animationExtFunc, this, &g_drawingInfo))) {
         FI_HILOGE("Send animationExtFunc failed");
-        RunAnimation(END_ALPHA, END_SCALE_SUCCESS);
+        RunAnimation(animateCb);
     } else {
         startNum_ = START_TIME;
         needDestroyDragWindow_ = true;
@@ -553,15 +543,16 @@ void DragDrawing::OnStopDragFail(std::shared_ptr<Rosen::RSSurfaceNode> surfaceNo
     std::shared_ptr<Rosen::RSNode> rootNode)
 {
     CALL_DEBUG_ENTER;
+    auto animateCb = std::bind(&DragDrawing::InitVSync, this, END_ALPHA, END_SCALE_FAIL);
     if (dragExtHandle_ == nullptr) {
         FI_HILOGE("Failed to open drag extension library");
-        RunAnimation(END_ALPHA, END_SCALE_FAIL);
+        RunAnimation(animateCb);
         return;
     }
     auto animationExtFunc = reinterpret_cast<DragExtFunc>(dlsym(dragExtHandle_, "OnStopDragFailExt"));
     if (animationExtFunc == nullptr) {
         FI_HILOGE("Failed to get drag extension func");
-        RunAnimation(END_ALPHA, END_SCALE_FAIL);
+        RunAnimation(animateCb);
         dlclose(dragExtHandle_);
         dragExtHandle_ = nullptr;
         return;
@@ -573,7 +564,7 @@ void DragDrawing::OnStopDragFail(std::shared_ptr<Rosen::RSSurfaceNode> surfaceNo
     }
     if (!handler_->PostTask(std::bind(animationExtFunc, this, &g_drawingInfo))) {
         FI_HILOGE("Send animationExtFunc failed");
-        RunAnimation(END_ALPHA, END_SCALE_FAIL);
+        RunAnimation(animateCb);
     } else {
         startNum_ = START_TIME;
         needDestroyDragWindow_ = true;
@@ -586,17 +577,19 @@ void DragDrawing::OnStopAnimation()
     CALL_DEBUG_ENTER;
 }
 
-void DragDrawing::RunAnimation(float endAlpha, float endScale)
+int32_t DragDrawing::RunAnimation(std::function<int32_t()> cb)
 {
     CALL_DEBUG_ENTER;
     if (handler_ == nullptr) {
         auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
-        CHKPV(runner);
+        CHKPR(runner, RET_ERR);
         handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
     }
-    if (!handler_->PostTask(std::bind(&DragDrawing::InitVSync, this, endAlpha, endScale))) {
+    if (!handler_->PostTask(cb)) {
         FI_HILOGE("Send vsync event failed");
+        return RET_ERR;
     }
+    return RET_OK;
 }
 
 int32_t DragDrawing::DrawShadow(std::shared_ptr<Rosen::RSCanvasNode> shadowNode)
@@ -710,13 +703,13 @@ void DragDrawing::OnVsync()
         handler_ = nullptr;
         receiver_ = nullptr;
         if (needDestroyDragWindow_) {
-            g_drawingInfo.isRunning = false;
             CHKPV(g_drawingInfo.rootNode);
             if (drawDynamicEffectModifier_ != nullptr) {
                 g_drawingInfo.rootNode->RemoveModifier(drawDynamicEffectModifier_);
                 drawDynamicEffectModifier_ = nullptr;
             }
             DestroyDragWindow();
+            g_drawingInfo.isRunning = false;
         }
         return;
     }
@@ -1138,51 +1131,47 @@ void DragDrawing::SetDecodeOptions(Media::DecodeOptions &decodeOpts)
 
 bool DragDrawing::ParserFilterInfo(FilterInfo &filterInfo)
 {
-    if (g_drawingInfo.extraInfo.empty()) {
-        FI_HILOGD("the extraInfo is empty");
+    FI_HILOGD("ExtraInfo size:%{public}zu, extraInfo:%{public}s, filterInfo size:%{public}zu, filterInfo:%{public}s",
+        g_drawingInfo.extraInfo.size(), g_drawingInfo.extraInfo.c_str(), g_drawingInfo.filterInfo.size(),
+        g_drawingInfo.filterInfo.c_str());
+    if (g_drawingInfo.extraInfo.empty() || g_drawingInfo.filterInfo.empty()) {
+        FI_HILOGD("ExtraInfo or filterInfo is empty");
         return false;
     }
-    JsonDataParser filterParser;
-    filterParser.json = cJSON_Parse(g_drawingInfo.extraInfo.c_str());
-    FI_HILOGD("FilterInfo size:%{public}zu, filterInfo:%{public}s",
-        g_drawingInfo.extraInfo.size(), g_drawingInfo.extraInfo.c_str());
-    if (!cJSON_IsObject(filterParser.json)) {
-        FI_HILOGE("FilterInfo is not json object");
+    JsonParser extraInfoParser;
+    extraInfoParser.json = cJSON_Parse(g_drawingInfo.extraInfo.c_str());
+    if (!cJSON_IsObject(extraInfoParser.json)) {
+        FI_HILOGE("ExtraInfo is not json object");
         return false;
     }
-    cJSON *componentType = cJSON_GetObjectItemCaseSensitive(filterParser.json, "drag_data_type");
+    cJSON *componentType = cJSON_GetObjectItemCaseSensitive(extraInfoParser.json, "drag_data_type");
     if (!cJSON_IsString(componentType)) {
         FI_HILOGE("Parser componentType failed");
         return false;
     }
-    cJSON *blurStyle = cJSON_GetObjectItemCaseSensitive(filterParser.json, "drag_blur_style");
+    cJSON *blurStyle = cJSON_GetObjectItemCaseSensitive(extraInfoParser.json, "drag_blur_style");
     if (!cJSON_IsNumber(blurStyle)) {
         FI_HILOGE("Parser blurStyle failed");
         return false;
     }
-    cJSON *cornerRadius = cJSON_GetObjectItemCaseSensitive(filterParser.json, "drag_corner_radius");
+    cJSON *cornerRadius = cJSON_GetObjectItemCaseSensitive(extraInfoParser.json, "drag_corner_radius");
     if (!cJSON_IsNumber(cornerRadius)) {
         FI_HILOGE("Parser cornerRadius failed");
         return false;
     }
-    if (g_drawingInfo.filterInfo.empty()) {
-        FI_HILOGD("ExtraInfo is empty");
+
+    JsonParser filterInfoParser;
+    filterInfoParser.json = cJSON_Parse(g_drawingInfo.filterInfo.c_str());
+    if (!cJSON_IsObject(filterInfoParser.json)) {
+        FI_HILOGE("FilterInfo is not json object");
         return false;
     }
-    JsonDataParser dipScaleParser;
-    dipScaleParser.json = cJSON_Parse(g_drawingInfo.filterInfo.c_str());
-    FI_HILOGD("FilterInfo size:%{public}zu, filterInfo:%{public}s",
-        g_drawingInfo.filterInfo.size(), g_drawingInfo.filterInfo.c_str());
-    if (!cJSON_IsObject(dipScaleParser.json)) {
-        FI_HILOGE("ExtraInfo is not json object");
-        return false;
-    }
-    cJSON *dipScale = cJSON_GetObjectItemCaseSensitive(dipScaleParser.json, "dip_scale");
+    cJSON *dipScale = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "dip_scale");
     if (!cJSON_IsNumber(dipScale)) {
         FI_HILOGE("Parser dipScale failed");
         return false;
     }
-    filterInfo = { componentType->valuestring, blurStyle->valueint, cornerRadius->valueint, dipScale->valuedouble };
+    filterInfo = { componentType->valuestring, blurStyle->valueint, cornerRadius->valuedouble, dipScale->valuedouble };
     return true;
 }
 
@@ -1196,7 +1185,7 @@ bool DragDrawing::GetAllowDragState()
         FI_HILOGE("The extraInfo is greater than the length limit");
         return true;
     }
-    JsonDataParser extraInfoParser;
+    JsonParser extraInfoParser;
     extraInfoParser.json = cJSON_Parse(g_drawingInfo.extraInfo.c_str());
     if (!cJSON_IsObject(extraInfoParser.json)) {
         FI_HILOGE("The extraInfo is not a json object");
@@ -1244,6 +1233,12 @@ void DragDrawing::ProcessFilter()
             g_drawingInfo.pixelMap->GetHeight());
         filterNode->SetFrame(DEFAULT_POSITION_X, adjustSize, g_drawingInfo.pixelMap->GetWidth(),
             g_drawingInfo.pixelMap->GetHeight());
+        if (filterInfo.cornerRadius < 0 || filterInfo.dipScale < 0 || fabs(filterInfo.dipScale) < EPSILON ||
+            std::numeric_limits<float>::max() / filterInfo.dipScale < filterInfo.cornerRadius) {
+            FI_HILOGE("Invalid parameters, cornerRadius:%{public}f, dipScale:%{public}f",
+                filterInfo.cornerRadius, filterInfo.dipScale);
+            return;
+        }
         filterNode->SetCornerRadius(filterInfo.cornerRadius * filterInfo.dipScale);
         FI_HILOGD("Add filter successfully");
     }
@@ -1273,24 +1268,13 @@ int32_t DragDrawing::SetNodesLocation(int32_t positionX, int32_t positionY)
     return RET_OK;
 }
 
-int32_t DragDrawing::CreateEventRunner(int32_t positionX, int32_t positionY)
-{
-    CALL_DEBUG_ENTER;
-    if (handler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
-        CHKPR(runner, RET_ERR);
-        handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
-    }
-    if (!handler_->PostTask(std::bind(&DragDrawing::SetNodesLocation, this, positionX, positionY))) {
-        FI_HILOGE("Send animationExtFunc failed");
-        return RET_ERR;
-    }
-    return RET_OK;
-}
-
 int32_t DragDrawing::EnterTextEditorArea(bool enable)
 {
     CALL_DEBUG_ENTER;
+    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    if (dragData.hasCoordinateCorrected) {
+        return RET_ERR;
+    }
     CHKPR(g_drawingInfo.pixelMap, RET_ERR);
     if (!textEditorAreaFlag_) {
         resetPixelMapX_ = g_drawingInfo.pixelMapX;
@@ -1307,11 +1291,11 @@ int32_t DragDrawing::EnterTextEditorArea(bool enable)
         g_drawingInfo.pixelMapY = resetPixelMapY_;
         positionX = g_drawingInfo.displayX + g_drawingInfo.pixelMapX;
         positionY = g_drawingInfo.displayY + g_drawingInfo.pixelMapY - adjustSize;
-        if (CreateEventRunner(positionX, positionY) == RET_OK) {
-            FI_HILOGD("CreateEventRunner successfully");
+        if (RunAnimation(std::bind(&DragDrawing::SetNodesLocation, this, positionX, positionY)) == RET_OK) {
+            FI_HILOGD("RunAnimation successfully");
             return RET_OK;
         }
-        FI_HILOGE("CreateEventRunner failed");
+        FI_HILOGE("RunAnimation failed");
         return RET_ERR;
     }
 
@@ -1319,11 +1303,11 @@ int32_t DragDrawing::EnterTextEditorArea(bool enable)
         FI_HILOGD("enable is false or textEditorAreaFlag_ is true");
         return RET_ERR;
     }
-    if (CreateEventRunner(positionX, positionY) != RET_OK) {
-        FI_HILOGE("CreateEventRunner failed");
+    if (RunAnimation(std::bind(&DragDrawing::SetNodesLocation, this, positionX, positionY)) != RET_OK) {
+        FI_HILOGE("RunAnimation failed");
         return RET_ERR;
     }
-    FI_HILOGD("CreateEventRunner successfully");
+    FI_HILOGD("RunAnimation successfully");
     textEditorAreaFlag_ = true;
     return RET_OK;
 }
@@ -1365,7 +1349,7 @@ int32_t DragDrawing::UpdateDragStyleWithAnimation(const DragStyle &dragStyle,
     }
     size_t mutilSelectedNodesSize = g_drawingInfo.mutilSelectedNodes.size();
     for (size_t i = 0; i < mutilSelectedNodesSize; ++i) {
-        if (auto color =  g_drawingInfo.mutilSelectedNodes[i]->GetShowingProperties().GetForegroundColor();
+        if (auto color = g_drawingInfo.mutilSelectedNodes[i]->GetShowingProperties().GetForegroundColor();
             color.has_value()) {
             originStyle.foregroundColor = color->AsArgbInt();
             originStyle.radius = dragStyle.radius;
@@ -1482,12 +1466,18 @@ int32_t DragDrawing::UpdateValidDragStyle(DragCursorStyle style)
     OnDragStyle(dragStyleNode, pixelMap);
     CHKPR(rsUiDirector_, RET_ERR);
     rsUiDirector_->SendMessages();
+    DragDFX::WriteUpdateDragStyle(style, OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR);
     return RET_OK;
 }
 
 int32_t DragDrawing::ModifyDragStyle(std::shared_ptr<Rosen::RSCanvasNode> node, const DragStyle &dragStyle)
 {
+    CALL_DEBUG_ENTER;
     CHKPR(node, RET_ERR);
+    if (float radius = 0.0F; ParserRadius(radius)) {
+        node->SetCornerRadius(radius);
+        FI_HILOGD("SetCornerRadius by radius:%{public}f", radius);
+    }
     for (const auto &type : dragStyle.types) {
         switch (type) {
             case StyleType::FOREGROUND_COLOR: {
@@ -1581,6 +1571,48 @@ void DragDrawing::ClearMutilSelectedData()
     }
 }
 
+bool DragDrawing::ParserRadius(float &radius)
+{
+    FI_HILOGD("ExtraInfo size:%{public}zu, extraInfo:%{public}s, filterInfo size:%{public}zu, filterInfo:%{public}s",
+        g_drawingInfo.extraInfo.size(), g_drawingInfo.extraInfo.c_str(), g_drawingInfo.filterInfo.size(),
+        g_drawingInfo.filterInfo.c_str());
+    if (g_drawingInfo.extraInfo.empty() || g_drawingInfo.filterInfo.empty()) {
+        FI_HILOGD("ExtraInfo or filterInfo is empty");
+        return false;
+    }
+    JsonParser extraInfoParser;
+    extraInfoParser.json = cJSON_Parse(g_drawingInfo.extraInfo.c_str());
+    if (!cJSON_IsObject(extraInfoParser.json)) {
+        FI_HILOGE("ExtraInfo is not json object");
+        return false;
+    }
+    cJSON *cornerRadius = cJSON_GetObjectItemCaseSensitive(extraInfoParser.json, "drag_corner_radius");
+    if (!cJSON_IsNumber(cornerRadius)) {
+        FI_HILOGE("Parser cornerRadius failed");
+        return false;
+    }
+
+    JsonParser filterInfoParser;
+    filterInfoParser.json = cJSON_Parse(g_drawingInfo.filterInfo.c_str());
+    if (!cJSON_IsObject(filterInfoParser.json)) {
+        FI_HILOGE("FilterInfo is not json object");
+        return false;
+    }
+    cJSON *dipScale = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "dip_scale");
+    if (!cJSON_IsNumber(dipScale)) {
+        FI_HILOGE("Parser dipScale failed");
+        return false;
+    }
+    if (cornerRadius->valuedouble < 0 || dipScale->valuedouble < 0 || fabs(dipScale->valuedouble) < EPSILON ||
+        std::numeric_limits<float>::max() / dipScale->valuedouble < cornerRadius->valuedouble) {
+        FI_HILOGE("Invalid parameters, cornerRadius:%{public}f, dipScale:%{public}f",
+            cornerRadius->valuedouble, dipScale->valuedouble);
+        return false;
+    }
+    radius = cornerRadius->valuedouble * dipScale->valuedouble;
+    return true;
+}
+
 DragDrawing::~DragDrawing()
 {
     if (dragExtHandle_ != nullptr) {
@@ -1595,7 +1627,7 @@ void DrawSVGModifier::Draw(Rosen::RSDrawingContext& context) const
     CHKPV(stylePixelMap_);
     CHKPV(g_drawingInfo.pixelMap);
     float scalingValue = GetScaling();
-    if ((1.0 * INT_MAX / (SVG_WIDTH + EIGHT_SIZE)) <= scalingValue) {
+    if (SCALE_THRESHOLD_EIGHT < scalingValue || fabsf(SCALE_THRESHOLD_EIGHT - scalingValue) < EPSILON) {
         FI_HILOGE("Invalid scalingValue:%{public}f", scalingValue);
         return;
     }

@@ -26,7 +26,6 @@
         "common_event_service",
         "napi",
         "image_framework",
-        "build_framework",
         "eventhandler",
         "distributed_input",
         "device_manager",
@@ -37,13 +36,13 @@
         "window_manager",
         "hitrace",
         "ability_base",
-        "huks",
         "graphic_2d",
         "udmf",
         "device_info_manager",
         "dsoftbus",
         "motion",
-        "ylong_runtime"
+        "ylong_runtime",
+        "dfs_service"
       ],
       "third_party": [
         "cJSON",
@@ -67,6 +66,7 @@
           "//base/msdp/device_status/services:devicestatus_service",
           "//base/msdp/device_status/frameworks/native/src:deviceagent",
           "//base/msdp/device_status/sa_profile:devicestatus_sa_profile",
+          "//base/msdp/device_status/tools:devicestatus_tools",
           "//base/msdp/device_status:devicestatus_service_group"
         ]
       },

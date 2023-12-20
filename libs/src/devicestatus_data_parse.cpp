@@ -23,6 +23,7 @@
 #include "devicestatus_data_define.h"
 #include "devicestatus_errors.h"
 #include "fi_log.h"
+#include "json_parser.h"
 #include "utility.h"
 
 namespace OHOS {
@@ -43,20 +44,20 @@ int32_t DeviceStatusDataParse::CreateJsonFile()
 {
     int32_t fd = open(MSDP_DATA_PATH.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP);
     if (fd < 0) {
-        FI_HILOGE("Open failed");
+        FI_HILOGE("open failed");
         return DEVICESTATUS_FAILED;
     }
     if (close(fd) < 0) {
-        FI_HILOGE("Close fd failed, error:%{public}s, fd:%{public}d", strerror(errno), fd);
+        FI_HILOGE("close fd failed, error:%{public}s, fd:%{public}d", strerror(errno), fd);
     }
 
     struct stat buf;
     if (stat(MSDP_DATA_DIR.c_str(), &buf) != 0) {
-        FI_HILOGE("Start folder path is invalid %{public}d", errno);
+        FI_HILOGE("start folder path is invalid %{public}d", errno);
         return DEVICESTATUS_FAILED;
     }
     if (chown(MSDP_DATA_PATH.c_str(), buf.st_uid, buf.st_gid) != 0) {
-        FI_HILOGE("Chown failed, errno:%{public}d", errno);
+        FI_HILOGE("chown failed, errno:%{public}d", errno);
         return DEVICESTATUS_FAILED;
     }
 
@@ -129,7 +130,7 @@ std::string DeviceStatusDataParse::ReadJsonFile(const std::string &filePath)
         FI_HILOGE("Path is empty");
         return {};
     }
-    char realPath[PATH_MAX] = {};
+    char realPath[PATH_MAX] = { 0 };
     if (realpath(filePath.c_str(), realPath) == nullptr) {
         FI_HILOGE("Path is error, %{public}d", errno);
         return {};
@@ -191,7 +192,7 @@ std::string DeviceStatusDataParse::ReadFile(const std::string &filePath)
         return {};
     }
     std::string dataStr;
-    char buf[READ_DATA_BUFF_SIZE] = {};
+    char buf[READ_DATA_BUFF_SIZE] = { 0 };
     while (fgets(buf, sizeof(buf), fp) != nullptr) {
         dataStr += buf;
     }

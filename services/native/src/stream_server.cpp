@@ -131,7 +131,7 @@ int32_t StreamServer::SetSockOpt(int32_t &serverFd, int32_t &toReturnClientFd, i
     CALL_DEBUG_ENTER;
     static constexpr size_t bufferSize = 32 * 1024;
     static constexpr size_t nativeBufferSize = 64 * 1024;
-    
+
     if (setsockopt(serverFd, SOL_SOCKET, SO_SNDBUF, &bufferSize, sizeof(bufferSize)) != 0) {
         FI_HILOGE("setsockopt serverFd failed, errno:%{public}d", errno);
         return CloseFd(serverFd, toReturnClientFd);
@@ -215,7 +215,7 @@ void StreamServer::OnEpollRecv(int32_t fd, epoll_event &ev)
         return;
     }
     auto& buf = circleBufs_[fd];
-    char szBuf[MAX_PACKET_BUF_SIZE] = {};
+    char szBuf[MAX_PACKET_BUF_SIZE] = { 0 };
     for (int32_t i = 0; i < MAX_RECV_LIMIT; i++) {
         ssize_t size = recv(fd, szBuf, MAX_PACKET_BUF_SIZE, MSG_DONTWAIT | MSG_NOSIGNAL);
         if (size > 0) {

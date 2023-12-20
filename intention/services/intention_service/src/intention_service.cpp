@@ -15,14 +15,9 @@
 
 #include "intention_service.h"
 
-#include <unistd.h>
-#include <vector>
+#include "ipc_skeleton.h"
 
-#include "if_system_ability_manager.h"
-#include <ipc_skeleton.h>
-#include "system_ability_definition.h"
-
-#include "devicestatus_common.h"
+#include "devicestatus_define.h"
 #include "i_plugin.h"
 
 namespace OHOS {
@@ -32,152 +27,207 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "IntentionService" };
 } // namespace
 
-IntentionService::IntentionService() : SystemAbility(MSDP_DEVICESTATUS_SERVICE_ID, true)
+IntentionService::IntentionService(IContext *context)
+    : context_(context), socketServer_(context), cooperate_(context), drag_(context)
 {}
 
-IntentionService::~IntentionService()
-{}
-
-void IntentionService::OnDump()
-{}
-
-void IntentionService::OnStart()
+int32_t IntentionService::Enable(Intention intention, MessageParcel &data, MessageParcel &reply)
 {
-    CALL_INFO_TRACE;
-    if (!Publish(DelayedSpSingleton<IntentionService>::GetInstance())) {
-        FI_HILOGE("On start register to system ability manager failed");
-    }
-}
-
-void IntentionService::OnStop()
-{
-    CALL_INFO_TRACE;
-}
-
-int32_t IntentionService::Enable(uint32_t intention, MessageParcel &data, MessageParcel &reply)
-{
-    IPlugin *plugin = pluginMgr_.LoadPlugin(static_cast<Intention>(intention));
-    CHKPR(plugin, RET_ERR);
-    CallingContext context;
-
-    int32_t ret = taskScheduler_.PostSyncTask(
-        std::bind(&IPlugin::Enable, plugin, context, std::ref(data), std::ref(reply)));
+    CallingContext context {
+        .intention = intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    CHKPR(context_, RET_ERR);
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask([&] {
+        IPlugin *plugin = LoadPlugin(context.intention);
+        CHKPR(plugin, RET_ERR);
+        return plugin->Enable(context, data, reply);
+    });
     if (ret != RET_OK) {
         FI_HILOGE("Enable failed, ret:%{public}d", ret);
     }
     return ret;
 }
 
-int32_t IntentionService::Disable(uint32_t intention, MessageParcel &data, MessageParcel &reply)
+int32_t IntentionService::Disable(Intention intention, MessageParcel &data, MessageParcel &reply)
 {
-    IPlugin *plugin = pluginMgr_.LoadPlugin(static_cast<Intention>(intention));
-    CHKPR(plugin, RET_ERR);
-    CallingContext context;
-
-    int32_t ret = taskScheduler_.PostSyncTask(
-        std::bind(&IPlugin::Disable, plugin, context, std::ref(data), std::ref(reply)));
+    CallingContext context {
+        .intention = intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    CHKPR(context_, RET_ERR);
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask([&] {
+        IPlugin *plugin = LoadPlugin(context.intention);
+        CHKPR(plugin, RET_ERR);
+        return plugin->Disable(context, data, reply);
+    });
     if (ret != RET_OK) {
         FI_HILOGE("Disable failed, ret:%{public}d", ret);
     }
     return ret;
 }
 
-int32_t IntentionService::Start(uint32_t intention, MessageParcel &data, MessageParcel &reply)
+int32_t IntentionService::Start(Intention intention, MessageParcel &data, MessageParcel &reply)
 {
-    IPlugin *plugin = pluginMgr_.LoadPlugin(static_cast<Intention>(intention));
-    CHKPR(plugin, RET_ERR);
-    CallingContext context;
-
-    int32_t ret = taskScheduler_.PostSyncTask(
-        std::bind(&IPlugin::Start, plugin, context, std::ref(data), std::ref(reply)));
+    CallingContext context {
+        .intention = intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    CHKPR(context_, RET_ERR);
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask([&] {
+        IPlugin *plugin = LoadPlugin(context.intention);
+        CHKPR(plugin, RET_ERR);
+        return plugin->Start(context, data, reply);
+    });
     if (ret != RET_OK) {
         FI_HILOGE("Start failed, ret:%{public}d", ret);
     }
     return ret;
 }
 
-int32_t IntentionService::Stop(uint32_t intention, MessageParcel &data, MessageParcel &reply)
+int32_t IntentionService::Stop(Intention intention, MessageParcel &data, MessageParcel &reply)
 {
-    IPlugin *plugin = pluginMgr_.LoadPlugin(static_cast<Intention>(intention));
-    CHKPR(plugin, RET_ERR);
-    CallingContext context;
-
-    int32_t ret = taskScheduler_.PostSyncTask(
-        std::bind(&IPlugin::Stop, plugin, context, std::ref(data), std::ref(reply)));
+    CallingContext context {
+        .intention = intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    CHKPR(context_, RET_ERR);
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask([&] {
+        IPlugin *plugin = LoadPlugin(context.intention);
+        CHKPR(plugin, RET_ERR);
+        return plugin->Stop(context, data, reply);
+    });
     if (ret != RET_OK) {
         FI_HILOGE("Stop failed, ret:%{public}d", ret);
     }
     return ret;
 }
 
-int32_t IntentionService::AddWatch(uint32_t intention, uint32_t id, MessageParcel &data, MessageParcel &reply)
+int32_t IntentionService::AddWatch(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply)
 {
-    IPlugin *plugin = pluginMgr_.LoadPlugin(static_cast<Intention>(intention));
-    CHKPR(plugin, RET_ERR);
-    CallingContext context;
-
-    int32_t ret = taskScheduler_.PostSyncTask(
-        std::bind(&IPlugin::AddWatch, plugin, context, id, std::ref(data), std::ref(reply)));
+    CallingContext context {
+        .intention = intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    CHKPR(context_, RET_ERR);
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask([&] {
+        IPlugin *plugin = LoadPlugin(context.intention);
+        CHKPR(plugin, RET_ERR);
+        return plugin->AddWatch(context, id, data, reply);
+    });
     if (ret != RET_OK) {
         FI_HILOGE("AddWatch failed, ret:%{public}d", ret);
     }
     return ret;
 }
 
-int32_t IntentionService::RemoveWatch(uint32_t intention, uint32_t id, MessageParcel &data, MessageParcel &reply)
+int32_t IntentionService::RemoveWatch(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply)
 {
-    IPlugin *plugin = pluginMgr_.LoadPlugin(static_cast<Intention>(intention));
-    CHKPR(plugin, RET_ERR);
-    CallingContext context;
-
-    int32_t ret = taskScheduler_.PostSyncTask(
-        std::bind(&IPlugin::RemoveWatch, plugin, context, id, std::ref(data), std::ref(reply)));
+    CallingContext context {
+        .intention = intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    CHKPR(context_, RET_ERR);
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask([&] {
+        IPlugin *plugin = LoadPlugin(context.intention);
+        CHKPR(plugin, RET_ERR);
+        return plugin->RemoveWatch(context, id, data, reply);
+    });
     if (ret != RET_OK) {
         FI_HILOGE("RemoveWatch failed, ret:%{public}d", ret);
     }
     return ret;
 }
 
-int32_t IntentionService::SetParam(uint32_t intention, uint32_t id, MessageParcel &data, MessageParcel &reply)
+int32_t IntentionService::SetParam(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply)
 {
-    IPlugin *plugin = pluginMgr_.LoadPlugin(static_cast<Intention>(intention));
-    CHKPR(plugin, RET_ERR);
-    CallingContext context;
-
-    int32_t ret = taskScheduler_.PostSyncTask(
-        std::bind(&IPlugin::SetParam, plugin, context, id, std::ref(data), std::ref(reply)));
+    CallingContext context {
+        .intention = intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    CHKPR(context_, RET_ERR);
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask([&] {
+        IPlugin *plugin = LoadPlugin(context.intention);
+        CHKPR(plugin, RET_ERR);
+        return plugin->SetParam(context, id, data, reply);
+    });
     if (ret != RET_OK) {
         FI_HILOGE("SetParam failed, ret:%{public}d", ret);
     }
     return ret;
 }
 
-int32_t IntentionService::GetParam(uint32_t intention, uint32_t id, MessageParcel &data, MessageParcel &reply)
+int32_t IntentionService::GetParam(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply)
 {
-    IPlugin *plugin = pluginMgr_.LoadPlugin(static_cast<Intention>(intention));
-    CHKPR(plugin, RET_ERR);
-    CallingContext context;
-
-    int32_t ret = taskScheduler_.PostSyncTask(
-        std::bind(&IPlugin::GetParam, plugin, context, id, std::ref(data), std::ref(reply)));
+    CallingContext context {
+        .intention = intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    CHKPR(context_, RET_ERR);
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask([&] {
+        IPlugin *plugin = LoadPlugin(context.intention);
+        CHKPR(plugin, RET_ERR);
+        return plugin->GetParam(context, id, data, reply);
+    });
     if (ret != RET_OK) {
         FI_HILOGE("GetParam failed, ret:%{public}d", ret);
     }
     return ret;
 }
 
-int32_t IntentionService::Control(uint32_t intention, uint32_t id, MessageParcel &data, MessageParcel &reply)
+int32_t IntentionService::Control(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply)
 {
-    IPlugin *plugin = pluginMgr_.LoadPlugin(static_cast<Intention>(intention));
-    CHKPR(plugin, RET_ERR);
-    CallingContext context;
-
-    int32_t ret = taskScheduler_.PostSyncTask(
-        std::bind(&IPlugin::Control, plugin, context, id, std::ref(data), std::ref(reply)));
+    CallingContext context {
+        .intention = intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    CHKPR(context_, RET_ERR);
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask([&] {
+        IPlugin *plugin = LoadPlugin(context.intention);
+        CHKPR(plugin, RET_ERR);
+        return plugin->Control(context, id, data, reply);
+    });
     if (ret != RET_OK) {
         FI_HILOGE("Control failed, ret:%{public}d", ret);
     }
     return ret;
+}
+
+IPlugin* IntentionService::LoadPlugin(Intention intention)
+{
+    CALL_DEBUG_ENTER;
+    switch (intention) {
+        case Intention::SOCKET: {
+            return &socketServer_;
+        }
+        case Intention::COOPERATE: {
+            return &cooperate_;
+        }
+        case Intention::DRAG: {
+            return &drag_;
+        }
+        default: {
+            return nullptr;
+        }
+    }
 }
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -277,7 +277,7 @@ public:
      * @since 11
      */
     int32_t UpdateDragStyleWithAnimation(const DragStyle &dragStyle, const DragAnimation &animation);
-    
+
     /**
      * @brief 获取拖拽对象的数据摘要。
      * @param summarys 保存拖拽对象的数据摘要。
@@ -294,6 +294,8 @@ public:
      * @since 11
      */
     int32_t EnterTextEditorArea(bool enable);
+
+    int32_t AddPrivilege();
 
 private:
     InteractionManager() = default;
