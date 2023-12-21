@@ -85,7 +85,7 @@ public:
         bool isCompatible = false) override;
     int32_t StartDrag(const DragData &dragData) override;
     int32_t StopDrag(const DragDropResult &dropResult) override;
-    int32_t UpdateDragStyle(DragCursorStyle style) override;
+    int32_t UpdateDragCursorStyle(DragCursorStyle style) override;
     int32_t GetDragTargetPid() override;
     int32_t GetUdKey(std::string &udKey) override;
     int32_t AddDraglistener() override;
@@ -109,9 +109,9 @@ public:
     bool IsRunning() const override;
     int32_t AddHotAreaListener() override;
     int32_t RemoveHotAreaListener() override;
-    int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle) override;
-    int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
-        const PreviewAnimation &animation) override;
+    int32_t UpdateDragStyle(const DragStyle &dragStyle) override;
+    int32_t UpdateDragStyleWithAnimation(const DragStyle &dragStyle,
+        const DragAnimation &animation) override;
     int32_t GetDragSummary(std::map<std::string, int64_t> &summarys) override;
     int32_t AddPrivilege() override;
 

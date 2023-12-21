@@ -76,9 +76,9 @@ int32_t InteractionManager::GetCoordinationState(
     return INTER_MGR_IMPL.GetCoordinationState(networkId, callback, isCompatible);
 }
 
-int32_t InteractionManager::UpdateDragStyle(DragCursorStyle style)
+int32_t InteractionManager::UpdateDragCursorStyle(DragCursorStyle style)
 {
-    return INTER_MGR_IMPL.UpdateDragStyle(style);
+    return INTER_MGR_IMPL.UpdateDragCursorStyle(style);
 }
 
 int32_t InteractionManager::StartDrag(const DragData &dragData, std::shared_ptr<IStartDragListener> listener)
@@ -156,15 +156,15 @@ int32_t InteractionManager::RemoveHotAreaListener(std::shared_ptr<IHotAreaListen
     return INTER_MGR_IMPL.RemoveHotAreaListener(listener);
 }
 
-int32_t InteractionManager::UpdatePreviewStyle(const PreviewStyle &previewStyle)
+int32_t InteractionManager::UpdateDragStyle(const DragStyle &dragStyle)
 {
-    return INTER_MGR_IMPL.UpdatePreviewStyle(previewStyle);
+    return INTER_MGR_IMPL.UpdateDragStyle(dragStyle);
 }
 
-int32_t InteractionManager::UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
-    const PreviewAnimation &animation)
+int32_t InteractionManager::UpdateDragStyleWithAnimation(const DragStyle &dragStyle,
+    const DragAnimation &animation)
 {
-    return INTER_MGR_IMPL.UpdatePreviewStyleWithAnimation(previewStyle, animation);
+    return INTER_MGR_IMPL.UpdateDragStyleWithAnimation(dragStyle, animation);
 }
 
 int32_t InteractionManager::GetDragSummary(std::map<std::string, int64_t> &summarys)

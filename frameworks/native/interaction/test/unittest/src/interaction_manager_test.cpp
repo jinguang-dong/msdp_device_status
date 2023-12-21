@@ -121,7 +121,7 @@ public:
     static void SimulateDownKeyEvent(int32_t key);
     static void SimulateUpKeyEvent(int32_t key);
     static void PrintDragAction(DragAction dragAction);
-    static void AssignToAnimation(PreviewAnimation &animation);
+    static void AssignToAnimation(DragAnimation &animation);
 };
 
 void InteractionManagerTest::SetPermission(const std::string &level, const char** perms, size_t permAmount)
@@ -204,13 +204,13 @@ public:
 
     DragCursorStyle GetDragStyle()
     {
-        return dragStyle_;
+        return dragCursorStyle_;
     }
 
 private:
     void SetDragSyle(DragCursorStyle style)
     {
-        dragStyle_ = style;
+        dragCursorStyle_ = style;
     }
 
     std::string PrintStyleMessage(DragCursorStyle style)
@@ -230,7 +230,7 @@ private:
     }
 
 private:
-    DragCursorStyle dragStyle_ { DragCursorStyle::DEFAULT };
+    DragCursorStyle dragCursorStyle_ { DragCursorStyle::DEFAULT };
     std::string moduleName_;
 };
 
@@ -558,7 +558,7 @@ void InteractionManagerTest::PrintDragAction(DragAction dragAction)
     }
 }
 
-void InteractionManagerTest::AssignToAnimation(PreviewAnimation &animation)
+void InteractionManagerTest::AssignToAnimation(DragAnimation &animation)
 {
     animation.duration = ANIMATION_DURATION;
     animation.curveName = CURVE_NAME;
@@ -1049,10 +1049,10 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SubscriptListener_002, T
         ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
         ASSERT_EQ(ret, RET_OK);
         DragCursorStyle style = DragCursorStyle::COPY;
-        ret = InteractionManager::GetInstance()->UpdateDragStyle(style);
+        ret = InteractionManager::GetInstance()->UpdateDragCursorStyle(style);
         ASSERT_EQ(ret, RET_OK);
         style = DragCursorStyle::MOVE;
-        ret = InteractionManager::GetInstance()->UpdateDragStyle(style);
+        ret = InteractionManager::GetInstance()->UpdateDragCursorStyle(style);
         ASSERT_EQ(ret, RET_OK);
         SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
             MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, true);
@@ -1304,7 +1304,7 @@ HWTEST_F(InteractionManagerTest, GetDragTargetPid_Mouse, TestSize.Level1)
         ASSERT_EQ(ret, RET_OK);
         ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
         EXPECT_EQ(ret, RET_OK);
-        ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
+        ret = InteractionManager::GetInstance()->UpdateDragCursorStyle(DragCursorStyle::DEFAULT);
         ASSERT_EQ(ret, RET_OK);
         int32_t pid = InteractionManager::GetInstance()->GetDragTargetPid();
         FI_HILOGI("Target pid:%{public}d", pid);
@@ -1346,7 +1346,7 @@ HWTEST_F(InteractionManagerTest, GetDragTargetPid_Touch, TestSize.Level1)
         ASSERT_EQ(ret, RET_OK);
         ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
         EXPECT_EQ(ret, RET_OK);
-        ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::COPY);
+        ret = InteractionManager::GetInstance()->UpdateDragCursorStyle(DragCursorStyle::COPY);
         ASSERT_EQ(ret, RET_OK);
         int32_t pid = InteractionManager::GetInstance()->GetDragTargetPid();
         FI_HILOGI("Target pid:%{public}d", pid);
@@ -1835,12 +1835,12 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetDragSummary, TestSize
 }
 
 /**
- * @tc.name: InteractionManagerTest_UpdatePreviewStyle
+ * @tc.name: InteractionManagerTest_UpdateDragStyle
  * @tc.desc: Update drag item style
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_UpdatePreviewStyle, TestSize.Level1)
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_UpdateDragStyle, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::promise<bool> promiseFlag;
@@ -1864,17 +1864,19 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_UpdatePreviewStyle, Test
     std::pair<int32_t, int32_t> leavePos { 500, 200 };
     SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { enterPos.first, enterPos.second },
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, true);
-    PreviewStyle previewStyleIn;
-    previewStyleIn.types = { PreviewType::FOREGROUND_COLOR };
-    previewStyleIn.foregroundColor = FOREGROUND_COLOR_IN;
-    ret = InteractionManager::GetInstance()->UpdatePreviewStyle(previewStyleIn);
+    DragStyle dragStyleIn;
+    dragStyleIn.types  = { StyleType::FOREGROUND_COLOR, StyleType::RADIUS };
+    dragStyleIn.foregroundColor = FOREGROUND_COLOR_IN;
+    dragStyleIn.radius = RADIUS_IN;
+    ret = InteractionManager::GetInstance()->UpdateDragStyle(dragStyleIn);
     EXPECT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ enterPos.first, enterPos.second }, { leavePos.first, leavePos.second },
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, true);
-    PreviewStyle previewStyleOut;
-    previewStyleOut.types = { PreviewType::FOREGROUND_COLOR };
-    previewStyleOut.foregroundColor = FOREGROUND_COLOR_OUT;
-    ret = InteractionManager::GetInstance()->UpdatePreviewStyle(previewStyleOut);
+    DragStyle dragStyleOut;
+    dragStyleOut.types  = { StyleType::FOREGROUND_COLOR, StyleType::RADIUS };
+    dragStyleOut.foregroundColor = FOREGROUND_COLOR_OUT;
+    dragStyleOut.radius = RADIUS_OUT;
+    ret = InteractionManager::GetInstance()->UpdateDragStyle(dragStyleOut);
     EXPECT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ leavePos.first, leavePos.second }, { DRAG_DST_X, DRAG_DST_Y },
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, true);
@@ -1886,12 +1888,12 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_UpdatePreviewStyle, Test
 
 
 /**
- * @tc.name: InteractionManagerTest_UpdatePreviewStyleWithAnimation
+ * @tc.name: InteractionManagerTest_UpdateDragStyleWithAnimation
  * @tc.desc: Update drag item style with animation
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_UpdatePreviewStyleWithAnimation, TestSize.Level1)
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_UpdateDragStyleWithAnimation, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::promise<bool> promiseFlag;
@@ -1914,21 +1916,23 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_UpdatePreviewStyleWithAn
     std::pair<int32_t, int32_t> leavePos { 500, 200 };
     SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { enterPos.first, enterPos.second },
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, true);
-    PreviewStyle previewStyleIn;
-    previewStyleIn.types = { PreviewType::FOREGROUND_COLOR };
-    previewStyleIn.foregroundColor = FOREGROUND_COLOR_IN;
-    PreviewAnimation animationIn;
+    DragStyle dragStyleIn;
+    dragStyleIn.types  = { StyleType::FOREGROUND_COLOR, StyleType::RADIUS };
+    dragStyleIn.foregroundColor = FOREGROUND_COLOR_IN;
+    dragStyleIn.radius = RADIUS_IN;
+    DragAnimation animationIn;
     AssignToAnimation(animationIn);
-    ret = InteractionManager::GetInstance()->UpdatePreviewStyleWithAnimation(previewStyleIn, animationIn);
+    ret = InteractionManager::GetInstance()->UpdateDragStyleWithAnimation(dragStyleIn, animationIn);
     EXPECT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ enterPos.first, enterPos.second }, { leavePos.first, leavePos.second },
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, true);
-    PreviewStyle previewStyleOut;
-    previewStyleOut.types = { PreviewType::FOREGROUND_COLOR };
-    previewStyleOut.foregroundColor = FOREGROUND_COLOR_OUT;
-    PreviewAnimation animationOut;
+    DragStyle dragStyleOut;
+    dragStyleOut.types  = { StyleType::FOREGROUND_COLOR, StyleType::RADIUS };
+    dragStyleOut.foregroundColor = FOREGROUND_COLOR_OUT;
+    dragStyleOut.radius = RADIUS_OUT;
+    DragAnimation animationOut;
     AssignToAnimation(animationOut);
-    ret = InteractionManager::GetInstance()->UpdatePreviewStyleWithAnimation(previewStyleOut, animationOut);
+    ret = InteractionManager::GetInstance()->UpdateDragStyleWithAnimation(dragStyleOut, animationOut);
     EXPECT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ leavePos.first, leavePos.second }, { DRAG_DST_X, DRAG_DST_Y },
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, true);

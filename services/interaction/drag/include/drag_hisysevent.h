@@ -32,8 +32,8 @@ enum DragType : int32_t {
     STA_DRAG_FAIL = 1,
     SET_DRAG_WINDOW_SUCC = 2,
     SET_DRAG_WINDOW_FAIL = 3,
-    UPDATE_DRAG_STYLE_SUCC = 4,
-    UPDATE_DRAG_STYLE_FAIL = 5,
+    UPDATE_DRAG_CURSOR_STYLE_SUCC = 4,
+    UPDATE_DRAG_CURSOR_STYLE_FAIL = 5,
     SEND_TOKENID = 7,
     STOP_DRAG_SUCC = 8,
     STOP_DRAG_FAIL = 9,
@@ -57,7 +57,7 @@ public:
 
 private:
     static std::map<DragState, std::string> dragState_;
-    static std::map<DragCursorStyle, std::string> dragStyle_;
+    static std::map<DragCursorStyle, std::string> dragCursorStyle_;
     static std::map<DragResult, std::string> dragResult_;
     static std::map<DragType, std::pair<std::string, std::string>> serialStr_;
 };

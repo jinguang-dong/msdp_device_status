@@ -39,7 +39,7 @@ public:
     int32_t StopDrag(DragResult result, bool hasCustomAnimation);
     int32_t GetDragTargetPid() const;
     int32_t GetUdKey(std::string &udKey) const;
-    int32_t UpdateDragStyle(DragCursorStyle style, int32_t targetPid, int32_t targetTid);
+    int32_t UpdateDragCursorStyle(DragCursorStyle style, int32_t targetPid, int32_t targetTid);
     int32_t UpdateShadowPic(const ShadowInfo &shadowInfo);
     int32_t SetDragWindowVisible(bool visible);
 

@@ -59,7 +59,7 @@ private:
     int32_t GetCooperateStateStub(MessageParcel &data, MessageParcel &reply);
     int32_t StartDragStub(MessageParcel &data, MessageParcel &reply);
     int32_t StopDragStub(MessageParcel &data, MessageParcel &reply);
-    int32_t UpdateDragStyleStub(MessageParcel &data, MessageParcel &reply);
+    int32_t UpdateDragCursorStyleStub(MessageParcel &data, MessageParcel &reply);
     int32_t GetDragTargetPidStub(MessageParcel &data, MessageParcel &reply);
     int32_t GetUdKeyStub(MessageParcel &data, MessageParcel &reply);
     int32_t AddDraglistenerStub(MessageParcel &data, MessageParcel &reply);
@@ -75,8 +75,8 @@ private:
     int32_t GetExtraInfoStub(MessageParcel &data, MessageParcel &reply);
     int32_t AddHotAreaListenerStub(MessageParcel &data, MessageParcel &reply);
     int32_t RemoveHotAreaListenerStub(MessageParcel &data, MessageParcel &reply);
-    int32_t UpdatePreviewStyleStub(MessageParcel &data, MessageParcel &reply);
-    int32_t UpdatePreviewStyleWithAnimationStub(MessageParcel &data, MessageParcel &reply);
+    int32_t UpdateDragStyleStub(MessageParcel &data, MessageParcel &reply);
+    int32_t UpdateDragStyleWithAnimationStub(MessageParcel &data, MessageParcel &reply);
     int32_t GetDragSummaryStub(MessageParcel &data, MessageParcel &reply);
     bool CheckCooperatePermission();
     bool IsSystemServiceCalling();

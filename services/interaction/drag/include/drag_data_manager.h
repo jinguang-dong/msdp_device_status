@@ -34,9 +34,9 @@ public:
     DISALLOW_MOVE(DragDataManager);
 
     void Init(const DragData &dragData);
-    void SetDragStyle(DragCursorStyle style);
+    void SetDragCursorStyle(DragCursorStyle style);
     void SetShadowInfos(const std::vector<ShadowInfo> &shadowInfos);
-    DragCursorStyle GetDragStyle() const;
+    DragCursorStyle GetDragCursorStyle() const;
     void SetDragWindowVisible(bool visible);
     bool GetDragWindowVisible() const;
     int32_t GetShadowOffset(int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height) const;
@@ -45,8 +45,8 @@ public:
     void SetTargetPid(int32_t pid);
     int32_t GetTargetPid() const;
     bool IsMotionDrag() const;
-    void SetPreviewStyle(const PreviewStyle &previewStyle);
-    PreviewStyle GetPreviewStyle();
+    void SetDragStyle(const DragStyle &dragStyle);
+    DragStyle GetDragStyle();
     void ResetDragData();
     DragData GetDragData() const;
     void SetMotionDrag(bool isMotionDrag);
@@ -54,10 +54,10 @@ private:
     bool isMotionDrag_ { false };
     bool visible_ { false };
     int32_t targetPid_ { -1 };
-    PreviewStyle previewStyle_;
+    DragStyle dragStyle_;
     int32_t targetTid_ { -1 };
     std::u16string dragMessage_;
-    DragCursorStyle dragStyle_ { DragCursorStyle::DEFAULT };
+    DragCursorStyle dragCursorStyle_ { DragCursorStyle::DEFAULT };
     DragData dragData_;
 };
 

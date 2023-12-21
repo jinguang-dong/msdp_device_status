@@ -48,7 +48,7 @@ public:
         const std::string &networkId, bool isCompatible = false) = 0;
     virtual int32_t StartDrag(const DragData &dragData) = 0;
     virtual int32_t StopDrag(const DragDropResult &dropResult) = 0;
-    virtual int32_t UpdateDragStyle(DragCursorStyle style) = 0;
+    virtual int32_t UpdateDragCursorStyle(DragCursorStyle style) = 0;
     virtual int32_t GetDragTargetPid() = 0;
     virtual int32_t GetUdKey(std::string &udKey) = 0;
     virtual int32_t AddDraglistener() = 0;
@@ -73,9 +73,9 @@ public:
 
     virtual int32_t AddHotAreaListener() = 0;
     virtual int32_t RemoveHotAreaListener() = 0;
-    virtual int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle) = 0;
-    virtual int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
-        const PreviewAnimation &animation) = 0;
+    virtual int32_t UpdateDragStyle(const DragStyle &dragStyle) = 0;
+    virtual int32_t UpdateDragStyleWithAnimation(const DragStyle &dragStyle,
+        const DragAnimation &animation) = 0;
     virtual int32_t AddPrivilege() = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.Idevicestatus");
 };

@@ -49,14 +49,14 @@ public:
     int32_t AddSubscriptListener(SubscriptListenerPtr listener);
     int32_t RemoveSubscriptListener(SubscriptListenerPtr listener);
     int32_t SetDragWindowVisible(bool visible);
-    int32_t UpdateDragStyle(DragCursorStyle style);
+    int32_t UpdateDragCursorStyle(DragCursorStyle style);
     int32_t UpdateShadowPic(const ShadowInfo &shadowInfo);
     int32_t GetDragTargetPid();
     int32_t GetUdKey(std::string &udKey);
     int32_t GetShadowOffset(int32_t &offsetX, int32_t &offsetY, int32_t &width, int32_t &height);
     int32_t GetDragData(DragData &dragData);
-    int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle);
-    int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation);
+    int32_t UpdateDragStyle(const DragStyle &dragStyle);
+    int32_t UpdateDragStyleWithAnimation(const DragStyle &dragStyle, const DragAnimation &animation);
     int32_t GetDragSummary(std::map<std::string, int64_t> &summarys);
     int32_t GetDragState(DragState &dragState);
     int32_t EnterTextEditorArea(bool enable);

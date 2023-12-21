@@ -47,7 +47,7 @@ public:
         bool isCompatible = false);
     int32_t GetCoordinationState(const std::string &networkId, std::function<void(bool)> callback,
         bool isCompatible = false);
-    int32_t UpdateDragStyle(DragCursorStyle style);
+    int32_t UpdateDragCursorStyle(DragCursorStyle style);
     int32_t StartDrag(const DragData &dragData, std::shared_ptr<IStartDragListener> listener);
     int32_t StopDrag(const DragDropResult &dropResult);
     int32_t GetDragTargetPid();
@@ -63,8 +63,8 @@ public:
     int32_t GetDragState(DragState &dragState);
     int32_t AddHotAreaListener(std::shared_ptr<IHotAreaListener> listener);
     int32_t RemoveHotAreaListener(std::shared_ptr<IHotAreaListener> listener = nullptr);
-    int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle);
-    int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation);
+    int32_t UpdateDragStyle(const DragStyle &dragStyle);
+    int32_t UpdateDragStyleWithAnimation(const DragStyle &dragStyle, const DragAnimation &animation);
     int32_t GetDragSummary(std::map<std::string, int64_t> &summarys);
     int32_t EnterTextEditorArea(bool enable);
     int32_t GetDragAction(DragAction &dragAction);

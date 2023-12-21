@@ -32,7 +32,7 @@ std::map<DragState, std::string> DragDFX::dragState_ = {
     { DragState::MOTION_DRAGGING, "MOTION_DRAGGING" }
 };
 
-std::map<DragCursorStyle, std::string> DragDFX::dragStyle_ = {
+std::map<DragCursorStyle, std::string> DragDFX::dragCursorStyle_ = {
     { DragCursorStyle::DEFAULT, "DEFAULT" },
     { DragCursorStyle::FORBIDDEN, "FORBIDDEN" },
     { DragCursorStyle::COPY, "COPY" },
@@ -51,8 +51,9 @@ std::map<DragType, std::pair<std::string, std::string>> DragDFX::serialStr_ = {
     { DragType::STA_DRAG_FAIL, { "START_DRAG_FAILED", "Start drag failed" } },
     { DragType::SET_DRAG_WINDOW_SUCC, { "SET_DRAG_WINDOW_VISIBLE_SUCCESS", "Set drag window visible successfully" } },
     { DragType::SET_DRAG_WINDOW_FAIL, { "SET_DRAG_WINDOW_VISIBLE_FAILED", "Set drag window visible failed" } },
-    { DragType::UPDATE_DRAG_STYLE_SUCC, { "UPDATE_DRAG_STYLE_SUCCESS", "Update Drag Style Successfully" } },
-    { DragType::UPDATE_DRAG_STYLE_FAIL, { "UPDATE_DRAG_STYLE_FAILED", "Update drag style failed"} },
+    { DragType::UPDATE_DRAG_CURSOR_STYLE_SUCC,
+        { "UPDATE_DRAG_CURSOR_STYLE_SUCC", "Update drag cursor style successfully" } },
+    { DragType::UPDATE_DRAG_CURSOR_STYLE_FAIL, { "UPDATE_DRAG_CURSOR_STYLE_FAIL", "Update drag cursor style failed"} },
     { DragType::SEND_TOKENID, { "SEND_TOKENID", "Send token id failed" } },
     { DragType::STOP_DRAG_SUCC, { "STOP_DRAG_SUCCESS", "Stop drag successfully" } },
     { DragType::STOP_DRAG_FAIL, { "STOP_DRAG_FAILED", "Stop drag failed"} },
@@ -112,15 +113,15 @@ int32_t DragDFX::WriteDragWindowVisible(const DragState &dragState, bool visible
 
 int32_t DragDFX::WriteUpdateDragStyle(const DragCursorStyle &style, OHOS::HiviewDFX::HiSysEvent::EventType type)
 {
-    if (dragStyle_.find(style) == dragStyle_.end()) {
-        FI_HILOGE("dragStyle_ can't find the drag style");
+    if (dragCursorStyle_.find(style) == dragCursorStyle_.end()) {
+        FI_HILOGE("dragCursorStyle_ can't find the drag style");
         return RET_ERR;
     }
-    std::string dragStyle = dragStyle_[style];
+    std::string dragCursorStyle = dragCursorStyle_[style];
     if (type == OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR) {
-        return WriteModel(DragType::UPDATE_DRAG_STYLE_SUCC, "dragStyle", dragStyle);
+        return WriteModel(DragType::UPDATE_DRAG_CURSOR_STYLE_SUCC, "dragCursorStyle", dragCursorStyle);
     }
-    return WriteModel(DragType::UPDATE_DRAG_STYLE_FAIL, "dragStyle", dragStyle);
+    return WriteModel(DragType::UPDATE_DRAG_CURSOR_STYLE_FAIL, "dragCursorStyle", dragCursorStyle);
 }
 
 int32_t DragDFX::WriteSendTokenid(int32_t targetTid, const std::string &udKey)

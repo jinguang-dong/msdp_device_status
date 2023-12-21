@@ -32,9 +32,9 @@ constexpr int32_t DEFAULT_DISPLAY_ID { 0 };
 DragDataManager::DragDataManager() = default;
 DragDataManager::~DragDataManager() = default;
 
-void DragDataManager::SetDragStyle(DragCursorStyle style)
+void DragDataManager::SetDragCursorStyle(DragCursorStyle style)
 {
-    dragStyle_ = style;
+    dragCursorStyle_ = style;
 }
 
 void DragDataManager::Init(const DragData &dragData)
@@ -53,9 +53,9 @@ void DragDataManager::SetShadowInfos(const std::vector<ShadowInfo> &shadowInfos)
     dragData_.shadowInfos = shadowInfos;
 }
 
-DragCursorStyle DragDataManager::GetDragStyle() const
+DragCursorStyle DragDataManager::GetDragCursorStyle() const
 {
-    return dragStyle_;
+    return dragCursorStyle_;
 }
 
 DragData DragDataManager::GetDragData() const
@@ -114,8 +114,8 @@ void DragDataManager::ResetDragData()
 {
     CALL_DEBUG_ENTER;
     dragData_ = { };
-    previewStyle_ = { };
-    dragStyle_ = DragCursorStyle::DEFAULT;
+    dragStyle_ = { };
+    dragCursorStyle_ = DragCursorStyle::DEFAULT;
     visible_ = false;
     targetTid_ = -1;
     targetPid_ = -1;
@@ -134,14 +134,14 @@ bool DragDataManager::IsMotionDrag() const
     return isMotionDrag_;
 }
 
-void DragDataManager::SetPreviewStyle(const PreviewStyle &previewStyle)
+void DragDataManager::SetDragStyle(const DragStyle &dragStyle)
 {
-    previewStyle_ = previewStyle;
+    dragStyle_ = dragStyle;
 }
 
-PreviewStyle DragDataManager::GetPreviewStyle()
+DragStyle DragDataManager::GetDragStyle()
 {
-    return previewStyle_;
+    return dragStyle_;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -23,7 +23,7 @@
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
 #include "drag_data_packer.h"
-#include "preview_style_packer.h"
+#include "drag_style_packer.h"
 #include "stationary_callback.h"
 #include "stationary_data.h"
 #include "utility.h"
@@ -291,7 +291,7 @@ int32_t DeviceStatusSrvProxy::DeactivateCoordination(int32_t userData, bool isUn
     return ret;
 }
 
-int32_t DeviceStatusSrvProxy::UpdateDragStyle(DragCursorStyle style)
+int32_t DeviceStatusSrvProxy::UpdateDragCursorStyle(DragCursorStyle style)
 {
     CALL_DEBUG_ENTER;
     MessageParcel data;
@@ -304,7 +304,7 @@ int32_t DeviceStatusSrvProxy::UpdateDragStyle(DragCursorStyle style)
     CHKPR(remote, RET_ERR);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = remote->SendRequest(static_cast<uint32_t>(DeviceInterfaceCode::UPDATED_DRAG_STYLE),
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_DRAG_CURSOR_STYLE),
         data, reply, option);
     if (ret != RET_OK) {
         FI_HILOGE("Send request failed, ret:%{public}d", ret);
@@ -717,7 +717,7 @@ int32_t DeviceStatusSrvProxy::RemoveHotAreaListener()
     return ret;
 }
 
-int32_t DeviceStatusSrvProxy::UpdatePreviewStyle(const PreviewStyle &previewStyle)
+int32_t DeviceStatusSrvProxy::UpdateDragStyle(const DragStyle &dragStyle)
 {
     CALL_DEBUG_ENTER;
     MessageParcel data;
@@ -725,15 +725,15 @@ int32_t DeviceStatusSrvProxy::UpdatePreviewStyle(const PreviewStyle &previewStyl
         FI_HILOGE("Failed to write descriptor");
         return ERR_INVALID_VALUE;
     }
-    if (PreviewStylePacker::Marshalling(previewStyle, data) != RET_OK) {
-        FI_HILOGE("Marshalling previewStyle failed");
+    MessageParcel reply;
+    MessageOption option;
+    if (DragStylePacker::Marshalling(dragStyle, data) != RET_OK) {
+        FI_HILOGE("Marshalling dragStyle failed");
         return RET_ERR;
     }
     sptr<IRemoteObject> remote = Remote();
     CHKPR(remote, RET_ERR);
-    MessageParcel reply;
-    MessageOption option;
-    int32_t ret = remote->SendRequest(static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_PREVIEW_STYLE),
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_DRAG_STYLE),
         data, reply, option);
     if (ret != RET_OK) {
         FI_HILOGE("Send request failed, ret:%{public}d", ret);
@@ -741,8 +741,8 @@ int32_t DeviceStatusSrvProxy::UpdatePreviewStyle(const PreviewStyle &previewStyl
     return ret;
 }
 
-int32_t DeviceStatusSrvProxy::UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
-    const PreviewAnimation &animation)
+int32_t DeviceStatusSrvProxy::UpdateDragStyleWithAnimation(const DragStyle &dragStyle,
+    const DragAnimation &animation)
 {
     CALL_DEBUG_ENTER;
     MessageParcel data;
@@ -750,19 +750,19 @@ int32_t DeviceStatusSrvProxy::UpdatePreviewStyleWithAnimation(const PreviewStyle
         FI_HILOGE("Failed to write descriptor");
         return ERR_INVALID_VALUE;
     }
-    if (PreviewStylePacker::Marshalling(previewStyle, data) != RET_OK) {
-        FI_HILOGE("Marshalling previewStyle failed");
+    MessageParcel reply;
+    MessageOption option;
+    if (DragStylePacker::Marshalling(dragStyle, data) != RET_OK) {
+        FI_HILOGE("Marshalling dragStyle failed");
         return RET_ERR;
     }
-    if (PreviewAnimationPacker::Marshalling(animation, data) != RET_OK) {
+    if (DragAnimationPacker::Marshalling(animation, data) != RET_OK) {
         FI_HILOGE("Marshalling animation failed");
         return RET_ERR;
     }
     sptr<IRemoteObject> remote = Remote();
     CHKPR(remote, RET_ERR);
-    MessageParcel reply;
-    MessageOption option;
-    int32_t ret = remote->SendRequest(static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_PREVIEW_STYLE_WITH_ANIMATION),
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_DRAG_STYLE_WITH_ANIMATION),
         data, reply, option);
     if (ret != RET_OK) {
         FI_HILOGE("Send request failed, ret:%{public}d", ret);
