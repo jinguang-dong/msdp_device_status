@@ -28,10 +28,8 @@
 #include "prepare_d_input_call_back_stub.h"
 #include "simulation_event_listener_stub.h"
 #include "singleton.h"
-#include "start_d_input_call_back_stub.h"
 #include "start_stop_d_inputs_call_back_stub.h"
 #include "start_stop_result_call_back_stub.h"
-#include "stop_d_input_call_back_stub.h"
 #include "unprepare_d_input_call_back_stub.h"
 #include "register_session_state_callback_stub.h"
 
@@ -68,10 +66,8 @@ public:
 
 private:
     enum class CallbackType {
-        StartDInputCallback,
         StartDInputCallbackDHIds,
         StartDInputCallbackSink,
-        StopDInputCallback,
         StopDInputCallbackDHIds,
         StopDInputCallbackSink,
         PrepareStartDInputCallback,
@@ -83,16 +79,6 @@ private:
     struct TimerInfo {
         int32_t times { 0 };
         int32_t timerId { 0 };
-    };
-
-    class StartDInputCallback final : public DistributedHardware::DistributedInput::StartDInputCallbackStub {
-    public:
-        void OnResult(const std::string &devId, const uint32_t &inputTypes, const int32_t &status) override;
-    };
-
-    class StopDInputCallback final : public DistributedHardware::DistributedInput::StopDInputCallbackStub {
-    public:
-        void OnResult(const std::string &devId, const uint32_t &inputTypes, const int32_t &status) override;
     };
 
     class StartDInputCallbackDHIds final :
