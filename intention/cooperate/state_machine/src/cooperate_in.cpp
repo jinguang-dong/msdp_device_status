@@ -15,18 +15,24 @@
 
 #include "cooperate_in.h"
 
+#include "devicestatus_define.h"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+namespace Cooperate {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CooperateIn" };
 } // namespace
-CooperateIn::CooperateIn()
+
+CooperateIn::CooperateIn(IContext *env)
+    : env_(env)
 {}
 
-void CooperateIn::OnEvent(Context &context, CooperateEvent &event)
+void CooperateIn::OnEvent(Context &context, const CooperateEvent &event)
 {
     CALL_DEBUG_ENTER;
+    CHKPV(env_);
 }
 
 void CooperateIn::OnEnterState(Context & context)
@@ -39,64 +45,33 @@ void CooperateIn::OnLeaveState(Context & context)
     CALL_DEBUG_ENTER;
 }
 
-void CooperateIn::Initial::OnEvent(Context &context, CooperateEvent &event)
+void CooperateIn::Initial::OnEvent(Context &context, const CooperateEvent &event)
 {}
 
-void CooperateIn::Initial::OnProgress(Context &context, CooperateEvent &event)
+void CooperateIn::Initial::OnProgress(Context &context, const CooperateEvent &event)
 {}
 
-void CooperateIn::Initial::OnReset(Context &context, CooperateEvent &event)
-{
-    CALL_DEBUG_ENTER;
-    switch (event.type) {
-        case CooperateEventType::POINTER_MOVE : {
-            // 当前设备上连接的鼠标发生移动，重置穿越状态。
-            break;
-        }
-        default : {
-            break;
-        }
-    }
-}
-
-void CooperateIn::PrepareRemoteInput::OnEvent(Context &context, CooperateEvent &event)
+void CooperateIn::Initial::OnReset(Context &context, const CooperateEvent &event)
 {}
 
-void CooperateIn::PrepareRemoteInput::OnProgress(Context &context, CooperateEvent &event)
+void CooperateIn::PrepareRemoteInput::OnEvent(Context &context, const CooperateEvent &event)
 {}
 
-void CooperateIn::PrepareRemoteInput::OnReset(Context &context, CooperateEvent &event)
-{
-    if (context.isUnchain_) {
-        UnprepareRemoteInput(prepared_.first, prepared_.second);
-    }
-    Reset(context, event);
-}
-
-void CooperateIn::StartRemoteInput::OnEvent(Context &context, CooperateEvent &event)
-{
-    switch (event.type) {
-        case CooperateEventType::POINTER_MOVE : {
-            PointerMoveEvent e = std::get<PointerMoveEvent>(event.event);
-            if (context.startDeviceId_ != context.devMgr_.GetDhid(e.deviceId)) {
-                // 当前设备上连接的鼠标发生移动，需要重置穿越状态。
-                if (prev_ != nullptr) {
-                    prev_->OnReset(context, event);
-                }
-            }
-            break;
-        }
-        default : {
-            break;
-        }
-    }
-}
-
-void CooperateIn::StartRemoteInput::OnProgress(Context &context, CooperateEvent &event)
+void CooperateIn::PrepareRemoteInput::OnProgress(Context &context, const CooperateEvent &event)
 {}
 
-void CooperateIn::StartRemoteInput::OnReset(Context &context, CooperateEvent &event)
+void CooperateIn::PrepareRemoteInput::OnReset(Context &context, const CooperateEvent &event)
 {}
+
+void CooperateIn::StartRemoteInput::OnEvent(Context &context, const CooperateEvent &event)
+{}
+
+void CooperateIn::StartRemoteInput::OnProgress(Context &context, const CooperateEvent &event)
+{}
+
+void CooperateIn::StartRemoteInput::OnReset(Context &context, const CooperateEvent &event)
+{}
+} // namespace Cooperate
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

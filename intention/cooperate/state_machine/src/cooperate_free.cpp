@@ -15,20 +15,33 @@
 
 #include "cooperate_free.h"
 
+#include "devicestatus_define.h"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+namespace Cooperate {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CooperateFree" };
+constexpr int32_t PREPARE_DINPUT_TIMEOUT { 3000 };
+constexpr int32_t REPEAT_ONCE { 1 };
 } // namespace
-CooperateFree::CooperateFree()
+
+CooperateFree::CooperateFree(IContext *env)
+    : env_(env)
 {
-    auto initial = std::make_shared<Initial>(*this);
-    Initial::BuildChains(initial, *this);
-    current_ = initial;
+    initial_ = std::make_shared<Initial>(*this);
+    Initial::BuildChains(initial_, *this);
+    current_ = initial_;
 }
 
-void CooperateFree::OnEvent(Context &context, CooperateEvent &event)
+CooperateFree::~CooperateFree()
+{
+    Initial::RemoveChains(initial_);
+    initial_ = nullptr;
+}
+
+void CooperateFree::OnEvent(Context &context, const CooperateEvent &event)
 {
     CALL_INFO_TRACE;
     if (current_ != nullptr) {
@@ -39,50 +52,41 @@ void CooperateFree::OnEvent(Context &context, CooperateEvent &event)
 }
 
 void CooperateFree::OnEnterState(Context &context)
-{
-    CALL_INFO_TRACE;
-}
+{}
 
 void CooperateFree::OnLeaveState(Context &context)
-{
-    CALL_INFO_TRACE;
-}
+{}
 
-CooperateFree::Initial::Initial(CooperateFree &parent) : ICooperateStep(parent, nullptr)
-{
-    CALL_INFO_TRACE;
-}
+CooperateFree::Initial::Initial(CooperateFree &parent)
+    : ICooperateStep(parent, nullptr)
+{}
 
-void CooperateFree::Initial::OnEvent(Context &context, CooperateEvent &event)
+void CooperateFree::Initial::OnEvent(Context &context, const CooperateEvent &event)
 {
-    CALL_INFO_TRACE;
+    CALL_DEBUG_ENTER;
     switch (event.type) {
-        case CooperateEventType::DISABLE : {
+        case CooperateEventType::DISABLE: {
             break;
         }
-        case CooperateEventType::START : {
+        case CooperateEventType::START: {
             OnStart(context, event);
             break;
         }
-        default : {
+        default: {
             break;
         }
     }
 }
 
-void CooperateFree::Initial::OnProgress(Context &context, CooperateEvent &event)
-{
-    CALL_INFO_TRACE;
-}
+void CooperateFree::Initial::OnProgress(Context &context, const CooperateEvent &event)
+{}
 
-void CooperateFree::Initial::OnReset(Context &context, CooperateEvent &event)
-{
-    CALL_INFO_TRACE;
-}
+void CooperateFree::Initial::OnReset(Context &context, const CooperateEvent &event)
+{}
 
 void CooperateFree::Initial::BuildChains(std::shared_ptr<Initial> self, CooperateFree &parent)
 {
-    CALL_INFO_TRACE;
+    CALL_DEBUG_ENTER;
     auto s1 = std::make_shared<PrepareRemoteInput>(parent, self);
     self->start_ = s1;
     auto s2 = std::make_shared<StartRemoteInput>(parent, s1);
@@ -90,96 +94,109 @@ void CooperateFree::Initial::BuildChains(std::shared_ptr<Initial> self, Cooperat
     s2->SetNext(self);
 }
 
-void CooperateFree::Initial::OnStart(Context &context, CooperateEvent &event)
+void CooperateFree::Initial::RemoveChains(std::shared_ptr<Initial> self)
 {
-    CALL_INFO_TRACE;
+    self->start_->SetNext(nullptr);
+    self->start_ = nullptr;
+}
+
+void CooperateFree::Initial::OnStart(Context &context, const CooperateEvent &event)
+{
+    CALL_DEBUG_ENTER;
     StartCooperateEvent ev = std::get<StartCooperateEvent>(event.event);
-    context.cooperated_ = ev.remoteNetworkId;
+    context.remoteNetworkId_ = ev.remoteNetworkId;
+    context.startDeviceId_ = ev.startDeviceId;
+
     if (start_ != nullptr) {
         Switch(start_);
         start_->OnProgress(context, event);
     }
 }
 
-CooperateFree::PrepareRemoteInput::PrepareRemoteInput(CooperateFree &parent, std::shared_ptr<ICooperateStep> prev)
+CooperateFree::OpenSession::OpenSession(CooperateFree &parent, std::shared_ptr<ICooperateStep> prev)
     : ICooperateStep(parent, prev)
 {}
 
-void CooperateFree::PrepareRemoteInput::OnEvent(Context &context, CooperateEvent &event)
+void CooperateFree::OpenSession::OnEvent(Context &context, const CooperateEvent &event)
+{}
+
+void CooperateFree::OpenSession::OnProgress(Context &context, const CooperateEvent &event)
+{}
+
+void CooperateFree::OpenSession::OnReset(Context &context, const CooperateEvent &event)
+{}
+
+CooperateFree::PrepareRemoteInput::PrepareRemoteInput(CooperateFree &parent, std::shared_ptr<ICooperateStep> prev)
+    : ICooperateStep(parent, prev), parent_(parent)
+{}
+
+void CooperateFree::PrepareRemoteInput::OnEvent(Context &context, const CooperateEvent &event)
 {
-    CALL_INFO_TRACE;
+    CALL_DEBUG_ENTER;
     switch (event.type) {
         case CooperateEventType::PREPARE_DINPUT_RESULT: {
-            StartRemoteInputResult result = std::get<StartRemoteInputResult>(event.event);
+            PrepareRemoteInputResult result = std::get<PrepareRemoteInputResult>(event.event);
             if (result.success) {
                 Proceed(context, event);
             } else {
-                Reset(context, event);
+                OnReset(context, event);
             }
             break;
         }
-        default : {
+        default: {
             break;
         }
     }
 }
 
-void CooperateFree::PrepareRemoteInput::OnProgress(Context &context, CooperateEvent &event)
+void CooperateFree::PrepareRemoteInput::OnProgress(Context &context, const CooperateEvent &event)
 {
-    CALL_INFO_TRACE;
+    std::string originNetworkId = context.devMgr_->GetOriginNetworkId(context.startDeviceId_);
+    int32_t ret = context.dinput_->PrepareRemoteInput(context.remoteNetworkId_, originNetworkId,
+        [sender = context.sender_, remoteNetworkId = context.remoteNetworkId_,
+         originNetworkId, startDeviceId = context.startDeviceId_](bool isSuccess) mutable {
+            sender.Send(CooperateEvent(CooperateEventType::PREPARE_DINPUT_RESULT, PrepareRemoteInputResult {
+                .remoteNetworkId = remoteNetworkId,
+                .originNetworkId = originNetworkId,
+                .startDeviceId = startDeviceId,
+                .success = isSuccess,
+            }));
+        });
+    if (ret != RET_OK) {
+        FI_HILOGE("Failed to prepare remote input");
+        OnReset(context, event);
+    } else {
+        CHKPV(parent_.env_);
+        timerId_ = parent_.env_->GetTimerManager().AddTimer(PREPARE_DINPUT_TIMEOUT, REPEAT_ONCE,
+            [sender = context.sender_, remoteNetworkId = context.remoteNetworkId_,
+             originNetworkId, startDeviceId = context.startDeviceId_]() mutable {
+                sender.Send(CooperateEvent(CooperateEventType::PREPARE_DINPUT_RESULT, PrepareRemoteInputResult {
+                    .remoteNetworkId = remoteNetworkId,
+                    .originNetworkId = originNetworkId,
+                    .startDeviceId = startDeviceId,
+                    .success = false,
+                }));
+            }
+        );
+    }
 }
 
-void CooperateFree::PrepareRemoteInput::OnReset(Context &context, CooperateEvent &event)
-{
-    CALL_INFO_TRACE;
-    Reset(context, event);
-}
+void CooperateFree::PrepareRemoteInput::OnReset(Context &context, const CooperateEvent &event)
+{}
 
 CooperateFree::StartRemoteInput::StartRemoteInput(CooperateFree &parent, std::shared_ptr<ICooperateStep> prev)
     : ICooperateStep(parent, prev)
 {}
 
-void CooperateFree::StartRemoteInput::OnEvent(Context &context, CooperateEvent &event)
-{
-    CALL_INFO_TRACE;
-    switch (event.type) {
-        case CooperateEventType::START_DINPUT_RESULT: {
-            StartRemoteInputResult result = std::get<StartRemoteInputResult>(event.event);
-            if (result.success) {
-                context.sender.Send(CooperateEvent(CooperateEventType::UPDATE_STATE,
-                    UpdateStateEvent { .current = 1 }));
-                Proceed(context, event);
-            } else {
-                Reset(context, event);
-            }
-            break;
-        }
-        default : {
-            break;
-        }
-    }
-}
-
-void CooperateFree::StartRemoteInput::OnProgress(Context &context, CooperateEvent &event)
+void CooperateFree::StartRemoteInput::OnEvent(Context &context, const CooperateEvent &event)
 {}
 
-void CooperateFree::StartRemoteInput::OnReset(Context &context, CooperateEvent &event)
+void CooperateFree::StartRemoteInput::OnProgress(Context &context, const CooperateEvent &event)
 {}
 
-CooperateFree::OpenSession::OpenSession(CooperateFree &parent, std::shared_ptr<ICooperateStep> prev)
-    : ICooperateStep(parent, prev)
+void CooperateFree::StartRemoteInput::OnReset(Context &context, const CooperateEvent &event)
 {}
-
-void CooperateFree::OpenSession::OnEvent(Context &context, CooperateEvent &event)
-{
-    CALL_INFO_TRACE;
-}
-
-void CooperateFree::OpenSession::OnProgress(Context &context, CooperateEvent &event)
-{}
-
-void CooperateFree::OpenSession::OnReset(Context &context, CooperateEvent &event)
-{}
+} // namespace Cooperate
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
