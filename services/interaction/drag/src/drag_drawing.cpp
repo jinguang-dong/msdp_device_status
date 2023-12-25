@@ -143,30 +143,36 @@ bool CheckNodesValid()
     return true;
 }
 
+sptr<Rosen::Display> GetDisplay()
+{
+    sptr<Rosen::Display> display = nullptr;
+    if ((display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId)) == nullptr) {
+        FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
+    }
+    if (display == nullptr && (display = Rosen::DisplayManager::GetInstance().GetDisplayById(0)) == nullptr) {
+        FI_HILOGE("Get display info by default failed, display:%{public}d", 0);
+    }
+    return display;
+}
+
 float GetScaling()
 {
-    if (g_drawingInfo.isExistScalingVallue) {
+    if (g_drawingInfo.isExistScalingValue) {
         FI_HILOGD("deviceDpi:%{public}f", g_drawingInfo.scalingValue);
         return g_drawingInfo.scalingValue;
     }
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
+    sptr<Rosen::Display> display = GetDisplay();
     if (display == nullptr) {
-        FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-        if (display == nullptr) {
-            FI_HILOGE("Get display info failed, display is nullptr");
-            return DEFAULT_SCALING;
-        }
+        return DEFAULT_SCALING;
     }
-
     int32_t deviceDpi = display->GetDpi();
     FI_HILOGD("displayId:%{public}d, deviceDpi:%{public}d", g_drawingInfo.displayId, deviceDpi);
-    if (deviceDpi < -std::numeric_limits<float>::epsilon()) {
+    if (deviceDpi < 0) {
         FI_HILOGE("Invalid deviceDpi:%{public}d", deviceDpi);
         return DEFAULT_SCALING;
     }
     g_drawingInfo.scalingValue = (1.0 * deviceDpi * DEVICE_INDEPENDENT_PIXEL / BASELINE_DENSITY) / SVG_ORIGINAL_SIZE;
-    g_drawingInfo.isExistScalingVallue = true;
+    g_drawingInfo.isExistScalingValue = true;
     return g_drawingInfo.scalingValue;
 }
 } // namespace
@@ -203,16 +209,12 @@ int32_t DragDrawing::Init(const DragData &dragData)
         FI_HILOGE("Failed to open drag extension library");
     }
     OnStartDrag(dragAnimationData, shadowNode, dragStyleNode);
-    if (!g_drawingInfo.mutilSelectedNodes.empty()) {
+    if (!g_drawingInfo.multiSelectedNodes.empty()) {
         g_drawingInfo.isCurrentDefaultStyle = true;
         UpdateDragStyle(DragCursorStyle::MOVE);
     }
     CHKPR(rsUiDirector_, INIT_FAIL);
-    if (g_drawingInfo.sourceType != MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
-        rsUiDirector_->SendMessages();
-        return INIT_SUCCESS;
-    }
-    if (DrawMouseIcon() != RET_OK) {
+    if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE && DrawMouseIcon() != RET_OK) {
         FI_HILOGE("Draw mouse icon failed");
         return INIT_FAIL;
     }
@@ -236,7 +238,7 @@ int32_t DragDrawing::CheckDragData(const DragData &dragData)
         FI_HILOGE("Invalid sourceType:%{public}d", dragData.sourceType);
         return INIT_FAIL;
     }
-    if (dragData.dragNum < 0) {
+    if (dragData.dragNum <= 0) {
         FI_HILOGE("Invalid dragNum:%{public}d", dragData.dragNum);
         return INIT_FAIL;
     }
@@ -278,8 +280,8 @@ void DragDrawing::Draw(int32_t displayId, int32_t displayX, int32_t displayY)
     if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         DoDrawMouse();
     }
-    if (!g_drawingInfo.mutilSelectedNodes.empty() && !g_drawingInfo.mutilSelectedPixelMaps.empty()) {
-        MutilSelectedAnimation(positionX, positionY, adjustSize);
+    if (!g_drawingInfo.multiSelectedNodes.empty() && !g_drawingInfo.multiSelectedPixelMaps.empty()) {
+        MultiSelectedAnimation(positionX, positionY, adjustSize);
     }
     Rosen::RSTransaction::FlushImplicitTransaction();
 }
@@ -378,45 +380,7 @@ void DragDrawing::DestroyDragWindow()
     screenId_ = 0;
     startNum_ = START_TIME;
     needDestroyDragWindow_ = false;
-    g_drawingInfo.sourceType = -1;
-    g_drawingInfo.currentDragNum = -1;
-    g_drawingInfo.pixelMapX = -1;
-    g_drawingInfo.pixelMapY = -1;
-    g_drawingInfo.displayX = -1;
-    g_drawingInfo.displayY = -1;
-    g_drawingInfo.mouseWidth = 0;
-    g_drawingInfo.mouseHeight = 0;
-    g_drawingInfo.rootNodeWidth = -1;
-    g_drawingInfo.rootNodeHeight = -1;
-    g_drawingInfo.pixelMap = nullptr;
-    g_drawingInfo.stylePixelMap = nullptr;
-    g_drawingInfo.isPreviousDefaultStyle = false;
-    g_drawingInfo.isCurrentDefaultStyle = false;
-    g_drawingInfo.currentStyle = DragCursorStyle::DEFAULT;
-    g_drawingInfo.filterInfo.clear();
-    g_drawingInfo.extraInfo.clear();
-    RemoveModifier();
-    ClearMutilSelectedData();
-    if (!g_drawingInfo.nodes.empty()) {
-        g_drawingInfo.nodes.clear();
-        g_drawingInfo.nodes.shrink_to_fit();
-    }
-    if (g_drawingInfo.parentNode != nullptr) {
-        g_drawingInfo.parentNode->ClearChildren();
-        g_drawingInfo.parentNode.reset();
-        g_drawingInfo.parentNode = nullptr;
-    }
-    if (g_drawingInfo.rootNode != nullptr) {
-        g_drawingInfo.rootNode->ClearChildren();
-        g_drawingInfo.rootNode.reset();
-        g_drawingInfo.rootNode = nullptr;
-    }
-    if (g_drawingInfo.surfaceNode != nullptr) {
-        g_drawingInfo.surfaceNode->DetachToDisplay(g_drawingInfo.displayId);
-        g_drawingInfo.surfaceNode = nullptr;
-        g_drawingInfo.displayId = -1;
-        Rosen::RSTransaction::FlushImplicitTransaction();
-    }
+    ResetDragDrawingInfo();
     CHKPV(rsUiDirector_);
     rsUiDirector_->SetRoot(-1);
     rsUiDirector_->SendMessages();
@@ -726,7 +690,7 @@ void DragDrawing::InitDrawingInfo(const DragData &dragData)
     }
     size_t shadowInfosSize = dragData.shadowInfos.size();
     for (size_t i = 1; i < shadowInfosSize; ++i) {
-        g_drawingInfo.mutilSelectedPixelMaps.emplace_back(dragData.shadowInfos[i].pixelMap);
+        g_drawingInfo.multiSelectedPixelMaps.emplace_back(dragData.shadowInfos[i].pixelMap);
     }
     g_drawingInfo.pixelMap = dragData.shadowInfos.front().pixelMap;
     g_drawingInfo.pixelMapX = dragData.shadowInfos.front().x;
@@ -773,15 +737,8 @@ int32_t DragDrawing::InitLayer()
         rsUiDirector_->Init();
     }
     rsUiDirector_->SetRSSurfaceNode(g_drawingInfo.surfaceNode);
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
-    if (display == nullptr) {
-        FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-        if (display == nullptr) {
-            FI_HILOGE("Get display info failed, display is nullptr");
-            return RET_ERR;
-        }
-    }
+    sptr<Rosen::Display> display = GetDisplay();
+    CHKPR(display, RET_ERR);
     int32_t rootNodeSize = std::max(display->GetWidth(), display->GetHeight());
     InitCanvas(rootNodeSize, rootNodeSize);
     Rosen::RSTransaction::FlushImplicitTransaction();
@@ -817,13 +774,13 @@ void DragDrawing::InitCanvas(int32_t width, int32_t height)
     }
     g_drawingInfo.parentNode->AddChild(filterNode);
     g_drawingInfo.parentNode->AddChild(pixelMapNode);
-    if (!g_drawingInfo.mutilSelectedPixelMaps.empty()) {
-        InitMutilSelectedNodes();
-        if (!g_drawingInfo.mutilSelectedNodes.empty()) {
-            size_t mutilSelectedNodesSize = g_drawingInfo.mutilSelectedNodes.size();
-            for (size_t i = 0; i < mutilSelectedNodesSize; ++i) {
-                g_drawingInfo.rootNode->AddChild(g_drawingInfo.mutilSelectedNodes[i]);
-            }
+    if (!g_drawingInfo.multiSelectedPixelMaps.empty()) {
+        InitMultiSelectedNodes();
+    }
+    if (!g_drawingInfo.multiSelectedNodes.empty()) {
+        size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
+        for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
+            g_drawingInfo.rootNode->AddChild(g_drawingInfo.multiSelectedNodes[i]);
         }
     }
     g_drawingInfo.rootNode->AddChild(g_drawingInfo.parentNode);
@@ -847,15 +804,8 @@ void DragDrawing::CreateWindow(int32_t displayX, int32_t displayY)
     Rosen::RSSurfaceNodeType surfaceNodeType = Rosen::RSSurfaceNodeType::SELF_DRAWING_WINDOW_NODE;
     g_drawingInfo.surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, surfaceNodeType);
     CHKPV(g_drawingInfo.surfaceNode);
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
-    if (display == nullptr) {
-        FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-        if (display == nullptr) {
-            FI_HILOGE("Get display info failed, display is nullptr");
-            return;
-        }
-    }
+    sptr<Rosen::Display> display = GetDisplay();
+    CHKPV(display);
     int32_t surfaceNodeSize = std::max(display->GetWidth(), display->GetHeight());
     g_drawingInfo.surfaceNode->SetBounds(0, 0, surfaceNodeSize, surfaceNodeSize);
     g_drawingInfo.surfaceNode->SetFrameGravity(Rosen::Gravity::RESIZE_ASPECT_FILL);
@@ -1325,7 +1275,7 @@ int32_t DragDrawing::UpdatePreviewStyle(const PreviewStyle &previewStyle)
         FI_HILOGE("ModifyPreviewStyle failed");
         return RET_ERR;
     }
-    if (ModifyMultiPreviewStyle(std::vector<PreviewStyle>(g_drawingInfo.mutilSelectedNodes.size(), previewStyle)) !=
+    if (ModifyMultiPreviewStyle(std::vector<PreviewStyle>(g_drawingInfo.multiSelectedNodes.size(), previewStyle)) !=
         RET_OK) {
         FI_HILOGE("ModifyPreviewStyle failed");
         return RET_ERR;
@@ -1343,13 +1293,14 @@ int32_t DragDrawing::UpdatePreviewStyleWithAnimation(const PreviewStyle &preview
     PreviewStyle originStyle;
     originStyle.types = previewStyle.types;
     if (auto color = pixelMapNode->GetShowingProperties().GetForegroundColor(); color.has_value()) {
+        originStyle.types = { PreviewType::FOREGROUND_COLOR, PreviewType::RADIUS };
         originStyle.foregroundColor = color->AsArgbInt();
         originStyle.radius = previewStyle.radius;
     }
-    size_t mutilSelectedNodesSize = g_drawingInfo.mutilSelectedNodes.size();
+    size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
     std::vector<PreviewStyle> multiOriginStyles;
-    for (size_t i = 0; i < mutilSelectedNodesSize; ++i) {
-        if (auto color = g_drawingInfo.mutilSelectedNodes[i]->GetShowingProperties().GetForegroundColor();
+    for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
+        if (auto color = g_drawingInfo.multiSelectedNodes[i]->GetShowingProperties().GetForegroundColor();
             color.has_value()) {
             PreviewStyle currentStyle;
             currentStyle.types = { PreviewType::FOREGROUND_COLOR, PreviewType::RADIUS };
@@ -1373,7 +1324,7 @@ int32_t DragDrawing::UpdatePreviewStyleWithAnimation(const PreviewStyle &preview
         if (ModifyPreviewStyle(pixelMapNode, previewStyle) != RET_OK) {
             FI_HILOGE("ModifyPreviewStyle failed");
         }
-        if (ModifyMultiPreviewStyle(std::vector<PreviewStyle>(mutilSelectedNodesSize, previewStyle)) != RET_OK) {
+        if (ModifyMultiPreviewStyle(std::vector<PreviewStyle>(multiSelectedNodesSize, previewStyle)) != RET_OK) {
             FI_HILOGE("ModifyMultiPreviewStyle failed");
         }
     });
@@ -1507,27 +1458,27 @@ int32_t DragDrawing::ModifyPreviewStyle(std::shared_ptr<Rosen::RSCanvasNode> nod
 
 int32_t DragDrawing::ModifyMultiPreviewStyle(const std::vector<PreviewStyle> &previewStyles)
 {
-    size_t mutilSelectedNodesSize = g_drawingInfo.mutilSelectedNodes.size();
-    if (previewStyles.size() != mutilSelectedNodesSize) {
-        FI_HILOGE("Size of previewStyles:%{public}zu does not match mutilSelectedNodesSize:%{public}zu",
-            previewStyles.size(), mutilSelectedNodesSize);
+    size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
+    if (previewStyles.size() != multiSelectedNodesSize) {
+        FI_HILOGE("Size of previewStyles:%{public}zu does not match multiSelectedNodesSize:%{public}zu",
+            previewStyles.size(), multiSelectedNodesSize);
         return RET_ERR;
     }
-    for (size_t i = 0; i < mutilSelectedNodesSize; ++i) {
-        if (ModifyPreviewStyle(g_drawingInfo.mutilSelectedNodes[i], previewStyles[i]) != RET_OK) {
+    for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
+        if (ModifyPreviewStyle(g_drawingInfo.multiSelectedNodes[i], previewStyles[i]) != RET_OK) {
             FI_HILOGW("ModifyPreviewStyle No.%{public}zu failed", i);
         }
     }
     return RET_OK;
 }
 
-void DragDrawing::MutilSelectedAnimation(int32_t positionX, int32_t positionY, int32_t adjustSize)
+void DragDrawing::MultiSelectedAnimation(int32_t positionX, int32_t positionY, int32_t adjustSize)
 {
-    size_t mutilSelectedNodesSize = g_drawingInfo.mutilSelectedNodes.size();
-    size_t mutilSelectedPixelMapsSize = g_drawingInfo.mutilSelectedPixelMaps.size();
-    for (size_t i = 0; (i < mutilSelectedNodesSize) && (i < mutilSelectedPixelMapsSize); ++i) {
-        std::shared_ptr<Rosen::RSCanvasNode> mutilSelectedNode = g_drawingInfo.mutilSelectedNodes[i];
-        std::shared_ptr<Media::PixelMap> mutilSelectedPixelMap = g_drawingInfo.mutilSelectedPixelMaps[i];
+    size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
+    size_t multiSelectedPixelMapsSize = g_drawingInfo.multiSelectedPixelMaps.size();
+    for (size_t i = 0; (i < multiSelectedNodesSize) && (i < multiSelectedPixelMapsSize); ++i) {
+        std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
+        std::shared_ptr<Media::PixelMap> multiSelectedPixelMap = g_drawingInfo.multiSelectedPixelMaps[i];
         Rosen::RSAnimationTimingProtocol protocol;
         if (i == FIRST_PIXELMAP_INDEX) {
             protocol.SetDuration(SHORT_DURATION);
@@ -1535,30 +1486,30 @@ void DragDrawing::MutilSelectedAnimation(int32_t positionX, int32_t positionY, i
             protocol.SetDuration(LONG_DURATION);
         }
         Rosen::RSNode::Animate(protocol, Rosen::RSAnimationTimingCurve::EASE_IN_OUT, [&]() {
-            mutilSelectedNode->SetBounds(positionX, positionY + adjustSize, mutilSelectedPixelMap->GetWidth(),
-                mutilSelectedPixelMap->GetHeight());
-            mutilSelectedNode->SetFrame(positionX, positionY + adjustSize, mutilSelectedPixelMap->GetWidth(),
-                mutilSelectedPixelMap->GetHeight());
+            multiSelectedNode->SetBounds(positionX, positionY + adjustSize, multiSelectedPixelMap->GetWidth(),
+                multiSelectedPixelMap->GetHeight());
+            multiSelectedNode->SetFrame(positionX, positionY + adjustSize, multiSelectedPixelMap->GetWidth(),
+                multiSelectedPixelMap->GetHeight());
         });
     }
 }
 
-void DragDrawing::InitMutilSelectedNodes()
+void DragDrawing::InitMultiSelectedNodes()
 {
     CALL_DEBUG_ENTER;
-    size_t mutilSelectedPixelMapsSize = g_drawingInfo.mutilSelectedPixelMaps.size();
-    for (size_t i = 0; i < mutilSelectedPixelMapsSize; ++i) {
-        std::shared_ptr<Media::PixelMap> mutilSelectedPixelMap = g_drawingInfo.mutilSelectedPixelMaps[i];
-        std::shared_ptr<Rosen::RSCanvasNode> mutilSelectedNode = Rosen::RSCanvasNode::Create();
-        mutilSelectedNode->SetBgImageWidth(mutilSelectedPixelMap->GetWidth());
-        mutilSelectedNode->SetBgImageHeight(mutilSelectedPixelMap->GetHeight());
-        mutilSelectedNode->SetBgImagePositionX(0);
-        mutilSelectedNode->SetBgImagePositionY(0);
-        mutilSelectedNode->SetForegroundColor(TRANSPARENT_COLOR_ARGB);
+    size_t multiSelectedPixelMapsSize = g_drawingInfo.multiSelectedPixelMaps.size();
+    for (size_t i = 0; i < multiSelectedPixelMapsSize; ++i) {
+        std::shared_ptr<Media::PixelMap> multiSelectedPixelMap = g_drawingInfo.multiSelectedPixelMaps[i];
+        std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = Rosen::RSCanvasNode::Create();
+        multiSelectedNode->SetBgImageWidth(multiSelectedPixelMap->GetWidth());
+        multiSelectedNode->SetBgImageHeight(multiSelectedPixelMap->GetHeight());
+        multiSelectedNode->SetBgImagePositionX(0);
+        multiSelectedNode->SetBgImagePositionY(0);
+        multiSelectedNode->SetForegroundColor(TRANSPARENT_COLOR_ARGB);
         auto rosenImage = std::make_shared<Rosen::RSImage>();
-        rosenImage->SetPixelMap(mutilSelectedPixelMap);
+        rosenImage->SetPixelMap(multiSelectedPixelMap);
         rosenImage->SetImageRepeat(0);
-        mutilSelectedNode->SetBgImage(rosenImage);
+        multiSelectedNode->SetBgImage(rosenImage);
         float alpha = DEFAULT_ALPHA;
         float degrees = DEFAULT_ANGLE;
         if (i == FIRST_PIXELMAP_INDEX) {
@@ -1568,22 +1519,22 @@ void DragDrawing::InitMutilSelectedNodes()
             alpha = SECOND_PIXELMAP_ALPHA;
             degrees = NEGATIVE_ANGLE;
         }
-        mutilSelectedNode->SetRotation(degrees);
-        mutilSelectedNode->SetAlpha(alpha);
-        g_drawingInfo.mutilSelectedNodes.emplace_back(mutilSelectedNode);
+        multiSelectedNode->SetRotation(degrees);
+        multiSelectedNode->SetAlpha(alpha);
+        g_drawingInfo.multiSelectedNodes.emplace_back(multiSelectedNode);
     }
 }
 
-void DragDrawing::ClearMutilSelectedData()
+void DragDrawing::ClearMultiSelectedData()
 {
     CALL_DEBUG_ENTER;
-    if (!g_drawingInfo.mutilSelectedNodes.empty()) {
-        g_drawingInfo.mutilSelectedNodes.clear();
-        g_drawingInfo.mutilSelectedNodes.shrink_to_fit();
+    if (!g_drawingInfo.multiSelectedNodes.empty()) {
+        g_drawingInfo.multiSelectedNodes.clear();
+        g_drawingInfo.multiSelectedNodes.shrink_to_fit();
     }
-    if (!g_drawingInfo.mutilSelectedPixelMaps.empty()) {
-        g_drawingInfo.mutilSelectedPixelMaps.clear();
-        g_drawingInfo.mutilSelectedPixelMaps.shrink_to_fit();
+    if (!g_drawingInfo.multiSelectedPixelMaps.empty()) {
+        g_drawingInfo.multiSelectedPixelMaps.clear();
+        g_drawingInfo.multiSelectedPixelMaps.shrink_to_fit();
     }
 }
 
@@ -1627,6 +1578,49 @@ bool DragDrawing::ParserRadius(float &radius)
     }
     radius = cornerRadius->valuedouble * dipScale->valuedouble;
     return true;
+}
+
+void DragDrawing::ResetDragDrawingInfo()
+{
+    g_drawingInfo.sourceType = -1;
+    g_drawingInfo.currentDragNum = -1;
+    g_drawingInfo.pixelMapX = -1;
+    g_drawingInfo.pixelMapY = -1;
+    g_drawingInfo.displayX = -1;
+    g_drawingInfo.displayY = -1;
+    g_drawingInfo.mouseWidth = 0;
+    g_drawingInfo.mouseHeight = 0;
+    g_drawingInfo.rootNodeWidth = -1;
+    g_drawingInfo.rootNodeHeight = -1;
+    g_drawingInfo.pixelMap = nullptr;
+    g_drawingInfo.stylePixelMap = nullptr;
+    g_drawingInfo.isPreviousDefaultStyle = false;
+    g_drawingInfo.isCurrentDefaultStyle = false;
+    g_drawingInfo.currentStyle = DragCursorStyle::DEFAULT;
+    g_drawingInfo.filterInfo.clear();
+    g_drawingInfo.extraInfo.clear();
+    RemoveModifier();
+    ClearMultiSelectedData();
+    if (!g_drawingInfo.nodes.empty()) {
+        g_drawingInfo.nodes.clear();
+        g_drawingInfo.nodes.shrink_to_fit();
+    }
+    if (g_drawingInfo.parentNode != nullptr) {
+        g_drawingInfo.parentNode->ClearChildren();
+        g_drawingInfo.parentNode.reset();
+        g_drawingInfo.parentNode = nullptr;
+    }
+    if (g_drawingInfo.rootNode != nullptr) {
+        g_drawingInfo.rootNode->ClearChildren();
+        g_drawingInfo.rootNode.reset();
+        g_drawingInfo.rootNode = nullptr;
+    }
+    if (g_drawingInfo.surfaceNode != nullptr) {
+        g_drawingInfo.surfaceNode->DetachToDisplay(g_drawingInfo.displayId);
+        g_drawingInfo.surfaceNode = nullptr;
+        g_drawingInfo.displayId = -1;
+        Rosen::RSTransaction::FlushImplicitTransaction();
+    }
 }
 
 DragDrawing::~DragDrawing()
