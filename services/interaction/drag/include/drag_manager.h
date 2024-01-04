@@ -40,6 +40,13 @@ public:
     DragManager() {}
     DISALLOW_COPY_AND_MOVE(DragManager);
     ~DragManager();
+struct CoordsInfo {
+    int32_t sourceType { -1 };
+    int32_t pointerId { -1 };
+    int32_t displayY { -1 };
+    int32_t displayY { -1 };
+    int32_t pointerAction { -1 };
+};
 
     int32_t Init(IContext* context);
     void OnSessionLost(SessionPtr session);
@@ -79,6 +86,12 @@ public:
     int32_t EnterTextEditorArea(bool enable);
     int32_t GetDragAction(DragAction &dragAction) const;
     int32_t GetExtraInfo(std::string &extraInfo) const;
+    int32_t SyncDragDataToRemote(std::string &remoteDeviceId, const DragData& dragData);
+    int32_t SyncCoordsInfoToRemote(std::string &remoteDeviceId, const CoordsInfo& coordsInfo);
+    void OnRecvDragDataFromRemote(void *data, uint32_t dataLen);
+    void OnRecvCoordsInfoFromRemote(void *data, uint32_t dataLen);
+    void SetRemoteNetworkId(std::string networkId);
+    std::string GetRemoteNetworkId();
     int32_t AddPrivilege(int32_t tokenId);
 #ifdef OHOS_DRAG_ENABLE_INTERCEPTOR
     class InterceptorConsumer : public MMI::IInputEventConsumer {
@@ -145,6 +158,8 @@ private:
     std::function<void(bool)> notifyPUllUpCallback_ { nullptr };
     std::shared_ptr<EventHub> eventHub_ { nullptr };
     sptr<ISystemAbilityStatusChange> statusListener_ { nullptr };
+    bool gapLessMode_ { true };
+    std::string remoteNetworkId_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

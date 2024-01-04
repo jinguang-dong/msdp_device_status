@@ -1137,7 +1137,7 @@ void CoordinationSM::RegisterRemoteNetworkId(std::function<void(std::string)> ca
 {
     CALL_DEBUG_ENTER;
     CHKPV(callback);
-    remoteNetworkIdCallback_ = callback;
+    remoteNetworkIdCallbacks_.push_back(callback);
 }
 
 void CoordinationSM::RegisterMouseLocation(std::function<void(int32_t, int32_t)> callback)
@@ -1177,8 +1177,9 @@ void CoordinationSM::ChangeNotify(CooStateChangeType type, CoordinationState old
 
 void CoordinationSM::NotifyRemoteNetworkId(const std::string &remoteNetworkId)
 {
-    if (remoteNetworkIdCallback_ != nullptr) {
-        remoteNetworkIdCallback_(remoteNetworkId);
+    for (const auto &callback : remoteNetworkIdCallbacks_) {
+        CHKPV(callback);
+        callback(remoteNetworkId);
     }
 }
 

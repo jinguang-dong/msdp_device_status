@@ -25,6 +25,8 @@
 #include "unified_types.h"
 #include "window_manager.h"
 
+#include "coordination_sm.h"
+#include "coordination_softbus_adapter.h"
 #include "devicestatus_define.h"
 #include "drag_data.h"
 #include "drag_data_manager.h"
@@ -74,6 +76,13 @@ int32_t DragManager::Init(IContext* context)
         int32_t ret = samgrProxy->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, statusListener_);
         FI_HILOGI("SubscribeSystemAbility result:%{public}d", ret);
     });
+    if (gapLessMode_) {
+        COOR_SOFTBUS_ADAPTER->RegisterRecvFunc(CoordinationSoftbusAdapter::SYNC_DRAG_DATA,
+            std::bind(&DragManager::OnRecvDragDataFromRemote, this, std::placeholders::_1, std::placeholders::_2));
+        COOR_SOFTBUS_ADAPTER->RegisterRecvFunc(CoordinationSoftbusAdapter::SYNC_COORDS,
+            std::bind(&DragManager::OnRecvCoordsInfoFromRemote, this, std::placeholders::_1, std::placeholders::_2));
+        COOR_SM->RegisterRemoteNetworkId(std::bind(&DragManager::SetRemoteNetworkId, this, std::placeholder::_1));
+    }
     return RET_OK;
 }
 
@@ -169,6 +178,10 @@ int32_t DragManager::StartDrag(const DragData &dragData, SessionPtr sess)
     if (InitDataManager(dragData) != RET_OK) {
         FI_HILOGE("Failed to init data manager");
         return RET_ERR;
+    }
+    if (gapLessMode_) {
+        std::string remoteDeviceId;
+        SyncDragDataToRemote(remoteDeviceId, dragData);
     }
     if (OnStartDrag() != RET_OK) {
         DragDFX::WriteStartDrag(dragState_, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
@@ -349,6 +362,14 @@ int32_t DragManager::NotifyHideIcon()
 void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);
+    if (gapLessMode_) {
+        std::string remoteDeviceId; // 从COOSM 中是否可以拿到对端的remoteDeviceId
+        MMI::PointerEvent::PointerItem pointerItem;
+        pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+        CoordsInfo coordsInfo { pointerEvent->GetSourceType(), pointerEvent->GetPointerId(),
+            pointerItem.GetDisplayX(), pointerItem.GetDisplayY(), pointerEvent->GetPointerAction() };
+        SyncCoordsInfoToRemote(remoteDeviceId, coordsInfo);
+    }
     int32_t pointerAction = pointerEvent->GetPointerAction();
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
         OnDragMove(pointerEvent);
@@ -1003,6 +1024,40 @@ int32_t DragManager::GetExtraInfo(std::string &extraInfo) const
     }
     extraInfo = dragData.extraInfo;
     return RET_OK;
+}
+
+int32_t DragManager::SyncDragDataToRemote(std::string &remoteDeviceId, const DragData& dragData)
+{
+    // 将本端的dragData发送到对端，用于对端提前创建拖拽窗口，画缩略图等
+    // 可以复用 motion_drag 中的跨端逻辑
+    return RET_OK;
+}
+
+int32_t DragManager::SyncCoordsInfoToRemote(std::string &remoteDeviceId, const CoordsInfo& coordsInfo)
+{
+    // 同步到对端，必要时需要sourceType等额外信息, 或者直接把 pointerEvent 跨端传输过去
+    return RET_OK;
+}
+
+void DragManager::OnRecvDragDataFromRemote(void *data, uint32_t dataLen)
+{
+    // 解析数据, 创建预备窗口
+    // 可以复用 motion_drag 中的跨端逻辑
+}
+
+void DragManager::OnRecvCoordsInfoFromRemote(void *data, uint32_t dataLen)
+{
+    // 根据坐标计算窗口位移信息，并调用dragDrawing进行移动
+}
+
+void DragManager::SetRemoteNetworkId(std::string networkId)
+{
+    remoteNetworkId_ = networkId;
+}
+
+std::string DragManager::GetRemoteNetworkId()
+{
+    return remoteNetworkId_;
 }
 
 int32_t DragManager::AddPrivilege(int32_t tokenId)
