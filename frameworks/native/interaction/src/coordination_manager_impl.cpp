@@ -77,6 +77,7 @@ LISTENER_LABEL:
 int32_t CoordinationManagerImpl::PrepareCoordination(FuncCoordinationMessage callback, bool isCompatible)
 {
     CALL_DEBUG_ENTER;
+    coordinationSwitch_ = true;
     std::lock_guard<std::mutex> guard(mtx_);
     prepareCooCallback_ = callback;
     isPrepareCooIsCompatible_ = isCompatible;
@@ -99,6 +100,7 @@ int32_t CoordinationManagerImpl::PrepareCoordination(FuncCoordinationMessage cal
 int32_t CoordinationManagerImpl::UnprepareCoordination(FuncCoordinationMessage callback, bool isCompatible)
 {
     CALL_DEBUG_ENTER;
+    coordinationSwitch_ = false;
     CoordinationEvent event;
     event.msg = callback;
     std::lock_guard<std::mutex> guard(mtx_);
@@ -360,10 +362,16 @@ int32_t CoordinationManagerImpl::RemoveHotAreaListener(HotAreaListenerPtr listen
 void CoordinationManagerImpl::OnConnected()
 {
     CALL_INFO_TRACE;
+    if (!coordinationSwitch_) {
+        FI_HILOGI("Current coordination switcher is off, not need to recover automatically");
+        return;
+    }
     CHKPV(prepareCooCallback_);
     if (PrepareCoordination(prepareCooCallback_, isPrepareCooIsCompatible_) != RET_OK) {
         FI_HILOGE("PrepareCoordination failed");
+        return;
     }
+    FI_HILOGI("Recover coordination successfully");
 }
 
 } // namespace DeviceStatus

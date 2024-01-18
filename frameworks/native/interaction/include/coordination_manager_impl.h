@@ -79,6 +79,7 @@ private:
     std::atomic_bool isListeningProcess_ { false };
     bool isHotAreaListener_ { false };
     IClientPtr client_ { nullptr };
+    std::atomic_bool coordinationSwitch_ { false };
     std::function<void(std::string, CoordinationMessage)> prepareCooCallback_ { nullptr };
     bool isPrepareCooIsCompatible_ { false };
 };
