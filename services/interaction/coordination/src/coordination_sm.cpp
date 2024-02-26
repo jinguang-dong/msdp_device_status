@@ -817,7 +817,7 @@ bool CoordinationSM::InitDeviceManager()
     return true;
 }
 
-void CoordinationSM::OnDeviceOnline(const std::string &networkId)
+void CoordinationSM::OnDeviceOnline(const std::string &networkId, const std::string &udid)
 {
     std::string localNetworkId = COORDINATION::GetLocalNetworkId();
     FI_HILOGI("Online device networkId:%{public}s, localNetworkId:%{public}s",
@@ -825,12 +825,13 @@ void CoordinationSM::OnDeviceOnline(const std::string &networkId)
         localNetworkId.substr(0, SUBSTR_NETWORKID_LEN).c_str());
     std::lock_guard<std::mutex> guard(mutex_);
     onlineDevice_.push_back(networkId);
+    onlineDeviceMap_.emplace(udid,networkId);
     DP_ADAPTER->RegisterCrossingStateListener(networkId,
         std::bind(&CoordinationSM::OnCoordinationChanged, COOR_SM, std::placeholders::_1, std::placeholders::_2));
     COOR_SOFTBUS_ADAPTER->Init();
 }
 
-void CoordinationSM::OnDeviceOffline(const std::string &networkId)
+void CoordinationSM::OnDeviceOffline(const std::string &networkId, const std::string &udid)
 {
     CALL_INFO_TRACE;
     std::string localNetworkId = COORDINATION::GetLocalNetworkId();

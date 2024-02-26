@@ -13,13 +13,18 @@
  * limitations under the License.
  */
 
+#include <unordered_set>
+#include <string>
+#include <unistd.h>
+ 
 #include "coordination_util.h"
-
+ 
 #include "coordination_sm.h"
 #include "softbus_bus_center.h"
-
+#include "device_manager.h"
+ 
 #include "devicestatus_define.h"
-
+ 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
@@ -39,6 +44,28 @@ std::string GetLocalNetworkId()
     std::string networkId(localNode->networkId, sizeof(localNode->networkId));
     FI_HILOGD("Get local node device info, networkId:%{public}s", networkId.substr(0, SUBSTR_NETWORKID_LEN).c_str());
     return localNode->networkId;
+}
+std::string GetLocalUdid()
+{
+    OHOS::DistributedHardware::DmDeviceInfo dmDeviceInfo;
+    const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getpid());
+    int32_t errCode = OHOS::DistributedHardware::DeviceManager::GetInstance().GetLocalDeviceInfo(PKG_NAME, dmDeviceInfo);
+    if (errCode != 0) {
+        FI_HILOGE("GetLocalBasicInfo errCode = %{public}d", errCode);
+        return "";
+    }
+    std::string udid = "";
+    OHOS::DistributedHardware::DeviceManager::GetInstance().GetUuidByNetworkId(PKG_NAME, dmDeviceInfo.networkId,
+        udid);
+    return udid;
+}
+ 
+std::string GetUdidByNetworkId(std::string networkId)
+{
+    const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getpid());
+    std::string udid = "";
+    OHOS::DistributedHardware::DeviceManager::GetInstance().GetUdidByNetworkId(PKG_NAME, networkId, udid);
+    return udid;
 }
 } // namespace COORDINATION
 } // namespace DeviceStatus
