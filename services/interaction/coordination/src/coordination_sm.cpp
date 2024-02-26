@@ -655,11 +655,6 @@ bool CoordinationSM::UnchainCoordination(const std::string &localNetworkId, cons
         FI_HILOGE("Failed to call distributed UnprepareRemoteInput");
         return false;
     }
-    DistributedHardware::DmDeviceInfo remoteDeviceInfo;
-    if (strcpy_s(remoteDeviceInfo.networkId, sizeof(remoteDeviceInfo.networkId),
-                 localNetworkId.c_str()) != EOK) {
-        FI_HILOGW("Invalid networkid");
-    }
     CloseP2PConnection(localNetworkId);
     preparedNetworkId_ = std::make_pair("", "");
     sinkNetworkId_ = "";
