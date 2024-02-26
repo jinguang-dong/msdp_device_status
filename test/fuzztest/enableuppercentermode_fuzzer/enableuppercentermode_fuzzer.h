@@ -13,32 +13,9 @@
  * limitations under the License.
  */
 
-# ifndef JSON_PARSER_H
-# define JSON_PARSER_H
+#ifndef ENABLEUPPERCENTERMODE_FUZZER_H
+#define ENABLEUPPERCENTERMODE_FUZZER_H
 
-#include "cJSON.h"
+#define FUZZ_PROJECT_NAME "enableuppercentermode_fuzzer"
 
-namespace OHOS {
-namespace Msdp {
-namespace DeviceStatus {
-namespace{
-    struct JsonParser {
-    JsonParser() = default;
-    ~JsonParser()
-    {
-        if (json != nullptr) {
-            cJSON_Delete(json);
-            json = nullptr;
-        }
-    }
-    operator cJSON *()
-    {
-        return json;
-    }
-    cJSON *json = nullptr;
-};
-}
-} // namespace DeviceStatus
-} // namespace Msdp
-} // namespace OHOS
-# endif //JSON_PARSER_H
+#endif // ENABLEUPPERCENTERMODE_FUZZER_H

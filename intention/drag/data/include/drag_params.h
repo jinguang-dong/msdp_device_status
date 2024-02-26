@@ -40,7 +40,7 @@ enum DragRequestID : uint32_t {
     UPDATE_PREVIEW_STYLE_WITH_ANIMATION,
     GET_DRAG_SUMMARY,
     GET_DRAG_STATE,
-    ENTER_TEXT_EDITOR_AREA,
+    ENABLE_UPPER_CENTER_MODE,
     GET_DRAG_ACTION,
     GET_EXTRA_INFO,
 };
@@ -177,9 +177,9 @@ struct GetDragStateReply final : public ParamBase {
     DragState dragState_ { DragState::ERROR };
 };
 
-struct EnterTextEditorAreaParam final : public ParamBase {
-    EnterTextEditorAreaParam() = default;
-    EnterTextEditorAreaParam(bool enable);
+struct EnableUpperCenterModeParam final : public ParamBase {
+    EnableUpperCenterModeParam() = default;
+    EnableUpperCenterModeParam(bool enable);
 
     bool Marshalling(MessageParcel &parcel) const override;
     bool Unmarshalling(MessageParcel &parcel) override;

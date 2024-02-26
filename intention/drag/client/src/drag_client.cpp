@@ -221,7 +221,7 @@ int32_t DragClient::GetDragState(ITunnelClient &tunnel, DragState &dragState)
     return RET_ERR;
 }
 
-int32_t DragClient::EnterTextEditorArea(ITunnelClient &tunnel, bool enable)
+int32_t DragClient::EnableUpperCenterMode(ITunnelClient &tunnel, bool enable)
 {
     return RET_ERR;
 }
