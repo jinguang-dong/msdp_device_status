@@ -67,6 +67,8 @@ ohos_shared_library("intention_cooperate") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "window_manager:libdm",
+    "device_info_manager:distributed_device_profile_sdk",
+    "device_info_manager:distributed_device_profile_common",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

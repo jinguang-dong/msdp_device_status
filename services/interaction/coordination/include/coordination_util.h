@@ -24,6 +24,8 @@ namespace DeviceStatus {
 
 namespace COORDINATION {
 std::string GetLocalNetworkId();
+std::string GetLocalUdid();
+std::string GetUdidByNetworkId(std::string networkId);
 } // namespace COORDINATION
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -258,16 +258,16 @@ bool GetDragStateReply::Unmarshalling(MessageParcel &parcel)
     return true;
 }
 
-EnterTextEditorAreaParam::EnterTextEditorAreaParam(bool enable)
+EnableUpperCenterModeParam::EnableUpperCenterModeParam(bool enable)
     : enable_(enable)
 {}
 
-bool EnterTextEditorAreaParam::Marshalling(MessageParcel &parcel) const
+bool EnableUpperCenterModeParam::Marshalling(MessageParcel &parcel) const
 {
     return parcel.WriteBool(enable_);
 }
 
-bool EnterTextEditorAreaParam::Unmarshalling(MessageParcel &parcel)
+bool EnableUpperCenterModeParam::Unmarshalling(MessageParcel &parcel)
 {
     return parcel.ReadBool(enable_);
 }

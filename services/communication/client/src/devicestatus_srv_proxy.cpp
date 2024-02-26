@@ -833,7 +833,7 @@ int32_t DeviceStatusSrvProxy::EnableUpperCenterMode(bool enable)
     CHKPR(remote, RET_ERR);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = remote->SendRequest(static_cast<uint32_t>(DeviceInterfaceCode::ENTER_TEXT_EDITOR_AREA),
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(DeviceInterfaceCode::ENABLE_UPPER_CENTER_MODE),
         data, reply, option);
     if (ret != RET_OK) {
         FI_HILOGE("Send request failed, ret:%{public}d", ret);

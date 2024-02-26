@@ -128,8 +128,8 @@ void DeviceStatusSrvStub::InitDrag()
             &DeviceStatusSrvStub::GetDragStateStub },
         { static_cast<uint32_t>(DeviceInterfaceCode::GET_DRAG_SUMMARY),
             &DeviceStatusSrvStub::GetDragSummaryStub },
-        { static_cast<uint32_t>(DeviceInterfaceCode::ENTER_TEXT_EDITOR_AREA),
-            &DeviceStatusSrvStub::EnterTextEditorAreaStub },
+        { static_cast<uint32_t>(DeviceInterfaceCode::ENABLE_UPPER_CENTER_MODE),
+            &DeviceStatusSrvStub::EnableUpperCenterModeStub },
         {static_cast<uint32_t>(DeviceInterfaceCode::GET_DRAG_EXTRAINFO),
             &DeviceStatusSrvStub::GetExtraInfoStub },
         {static_cast<uint32_t>(DeviceInterfaceCode::GET_DRAG_ACTION),
@@ -814,7 +814,7 @@ int32_t DeviceStatusSrvStub::GetDragActionStub(MessageParcel &data, MessageParce
     return RET_OK;
 }
 
-int32_t DeviceStatusSrvStub::EnterTextEditorAreaStub(MessageParcel &data, MessageParcel &reply)
+int32_t DeviceStatusSrvStub::EnableUpperCenterModeStub(MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
     bool enable = false;
