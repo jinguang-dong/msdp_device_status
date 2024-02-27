@@ -60,7 +60,7 @@ int32_t DeviceProfileAdapter::UpdateCrossingSwitchState(bool state, const std::v
                       FI_HILOGI("Add device success");
                   });
     sptr<ISyncCompletedCallback> syncCallback = new(std::nothrow) SyncCallback;
-    if (syncCallback == nullptr){
+    if (syncCallback == nullptr) {
         FI_HILOGE("syncCallback is nullptr");
         return RET_ERR;
     }

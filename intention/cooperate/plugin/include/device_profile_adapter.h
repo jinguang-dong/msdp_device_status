@@ -58,7 +58,7 @@ private:
         void OnSyncCompleted(const std::map<std::string, OHOS::DistributedDeviceProfile::SyncStatus> &syncResults);
     };
 
-    class SubscribeDPChangeListener : public OHOS::DistributedDeviceProfile::ProfileChangeListenerStub { 
+    class SubscribeDPChangeListener : public OHOS::DistributedDeviceProfile::ProfileChangeListenerStub {
     public:
         SubscribeDPChangeListener();
         ~SubscribeDPChangeListener();

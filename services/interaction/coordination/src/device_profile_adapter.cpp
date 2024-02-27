@@ -62,7 +62,7 @@ int32_t DeviceProfileAdapter::UpdateCrossingSwitchState(bool state, const std::v
                       FI_HILOGI("Add device success");
                   });
     sptr<ISyncCompletedCallback> syncCallback = new(std::nothrow) SyncCallback;
-    if (syncCallback == nullptr){
+    if (syncCallback == nullptr) {
         FI_HILOGE("syncCallback is nullptr");
         return RET_ERR;
     }
@@ -145,7 +145,8 @@ void DeviceProfileAdapter::OnProfileChanged(const std::string &udid)
     std::string networkId = COOR_SM->onlineDeviceMap_[udid];
     dpCallback_(networkId, state);
 }
-void DeviceProfileAdapter::SyncCallback::OnSyncCompleted(const std::map<std::string, OHOS::DistributedDeviceProfile::SyncStatus> &syncResults)
+void DeviceProfileAdapter::SyncCallback::OnSyncCompleted(const std::map<std::string,
+    OHOS::DistributedDeviceProfile::SyncStatus> &syncResults)
 {
     for (const auto &item : syncResults) {
         FI_HILOGE("networkId: %{public}s, SyncStatus:%{public}d", item.first.c_str(), item.second);
@@ -169,8 +170,8 @@ int32_t DeviceProfileAdapter::SubscribeDPChangeListener::OnTrustDeviceProfileDel
     FI_HILOGE("OnTrustDeviceProfileDelete");
     return RET_OK;
 }
-int32_t DeviceProfileAdapter::SubscribeDPChangeListener::OnTrustDeviceProfileUpdate(const TrustDeviceProfile &oldProfile,
-    const TrustDeviceProfile &newProfile)
+int32_t DeviceProfileAdapter::SubscribeDPChangeListener::OnTrustDeviceProfileUpdate(
+    const TrustDeviceProfile &oldProfile, const TrustDeviceProfile &newProfile)
 {
     FI_HILOGE("OnTrustDeviceProfileUpdate");
     return RET_OK;
@@ -208,22 +209,24 @@ int32_t DeviceProfileAdapter::SubscribeDPChangeListener::OnServiceProfileUpdate(
     FI_HILOGE("OnServiceProfileUpdate");
     return RET_OK;
 }
-int32_t DeviceProfileAdapter::SubscribeDPChangeListener::OnCharacteristicProfileAdd(const CharacteristicProfile &profile)
+int32_t DeviceProfileAdapter::SubscribeDPChangeListener::OnCharacteristicProfileAdd(
+    const CharacteristicProfile &profile)
 {
     FI_HILOGE("OnCharacteristicProfileAdd");
     std::string udid = profile.GetDeviceId();
     DP_ADAPTER->OnProfileChanged(udid);
     return RET_OK;
 }
-int32_t DeviceProfileAdapter::SubscribeDPChangeListener::OnCharacteristicProfileDelete(const CharacteristicProfile &profile)
+int32_t DeviceProfileAdapter::SubscribeDPChangeListener::OnCharacteristicProfileDelete(
+    const CharacteristicProfile &profile)
 {
     FI_HILOGE("OnCharacteristicProfileDelete");
     std::string udid = profile.GetDeviceId();
     DP_ADAPTER->OnProfileChanged(udid);
     return RET_OK;
 }
-int32_t DeviceProfileAdapter::SubscribeDPChangeListener::OnCharacteristicProfileUpdate(const CharacteristicProfile &oldProfile,
-    const CharacteristicProfile &newProfile)
+int32_t DeviceProfileAdapter::SubscribeDPChangeListener::OnCharacteristicProfileUpdate(
+    const CharacteristicProfile &oldProfile, const CharacteristicProfile &newProfile)
 {
     FI_HILOGE("OnCharacteristicProfileUpdate");
     std::string udid = newProfile.GetDeviceId();
