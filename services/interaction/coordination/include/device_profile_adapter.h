@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,19 +21,21 @@
 #include <memory>
 #include <vector>
 
+#include "coordination_util.h"
+#include "dp_subscribe_info.h"
+#include "fi_log.h"
+#include "profile_change_listener_stub.h"
 #include "nocopyable.h"
 #include "singleton.h"
 #include "sync_completed_callback_stub.h"
-#include "profile_change_listener_stub.h"
-#include "fi_log.h"
-#include "dp_subscribe_info.h"
-#include "coordination_util.h"
+
 #define DP_ADAPTER OHOS::DelayedSingleton<DeviceProfileAdapter>::GetInstance()
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 using namespace OHOS::DistributedDeviceProfile;
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceProfileAdapter" };
 class DeviceProfileAdapter final {
     DECLARE_DELAYED_SINGLETON(DeviceProfileAdapter);
 public:
@@ -47,104 +49,33 @@ public:
     int32_t RegisterCrossingStateListener(const std::string &networkId, DPCallback callback);
 
 private:
-    void OnProfileChanged(const std::string &udid);
     int32_t RegisterProfileListener(const std::string &networkId);
+    void OnProfileChanged(const std::string &udid);
     std::mutex adapterLock_;
-    const std::string characteristicsName_ { "currentStatus" };
-    SubscribeInfo subscribeInfo_;
     DPCallback dpCallback_;
     sptr<IProfileChangeListener> subscribeDPChangeListener_ = nullptr;
+
     class SyncCallback : public OHOS::DistributedDeviceProfile::SyncCompletedCallbackStub {
-        void OnSyncCompleted(const std::map<std::string, OHOS::DistributedDeviceProfile::SyncStatus>& syncResults) {
-            constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceProfileAdapter" };
-            for (auto item : syncResults) {
-                std::string networkId = item.first;
-                int32_t syncResult = item.second;
-                FI_HILOGE("networkId: %{public}s, SyncStatus: %{public}d", networkId.c_str(), syncResult);
-            }
-        }
+        void OnSyncCompleted(const std::map<std::string, OHOS::DistributedDeviceProfile::SyncStatus> &syncResults);
     };
-    class SubscribeDPChangeListener : public OHOS::DistributedDeviceProfile::ProfileChangeListenerStub {
-    private:
-        OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceProfileAdapter" };
+
+    class SubscribeDPChangeListener : public OHOS::DistributedDeviceProfile::ProfileChangeListenerStub { 
     public:
-        SubscribeDPChangeListener()
-        {
-            FI_HILOGE("constructor!");
-        }
-        ~SubscribeDPChangeListener()
-        {
-            FI_HILOGE("destructor!");
-        }
-        int32_t OnTrustDeviceProfileAdd(const TrustDeviceProfile& profile)
-        {
-            FI_HILOGE("OnTrustDeviceProfileAdd");
-            return 0;
-        }
-        int32_t OnTrustDeviceProfileDelete(const TrustDeviceProfile& profile)
-        {
-            FI_HILOGE("OnTrustDeviceProfileDelete");
-            return 0;
-        }
-        int32_t OnTrustDeviceProfileUpdate(const TrustDeviceProfile& oldProfile,
-                                           const TrustDeviceProfile& newProfile)
-        {
-            FI_HILOGE("OnTrustDeviceProfileUpdate");
-            return 0;
-        }
-        int32_t OnDeviceProfileAdd(const DeviceProfile& profile)
-        {
-            FI_HILOGE("OnDeviceProfileAdd deviceId: %s", profile.GetDeviceId().c_str());
-            return 0;
-        }
-        int32_t OnDeviceProfileDelete(const DeviceProfile& profile)
-        {
-            FI_HILOGE("OnDeviceProfileDelete, deviceId: %s", profile.GetDeviceId().c_str());
-            return 0;
-        }
-        int32_t OnDeviceProfileUpdate(const DeviceProfile& oldProfile, const DeviceProfile& newProfile)
-        {
-            FI_HILOGE("OnDeviceProfileUpdate, oldDeviceId: %s, newDeviceId: %s",
-                      oldProfile.GetDeviceId().c_str(), newProfile.GetDeviceId().c_str());
-            return 0;
-        }
-        int32_t OnServiceProfileAdd(const ServiceProfile& profile)
-        {
-            FI_HILOGE("OnServiceProfileAdd");
-            return 0;
-        }
-        int32_t OnServiceProfileDelete(const ServiceProfile& profile)
-        {
-            FI_HILOGE("OnServiceProfileDelete");
-            return 0;
-        }
-        int32_t OnServiceProfileUpdate(const ServiceProfile& oldProfile, const ServiceProfile& newProfile)
-        {
-            FI_HILOGE("OnServiceProfileUpdate");
-            return 0;
-        }
-        int32_t OnCharacteristicProfileAdd(const CharacteristicProfile& profile)
-        {
-            FI_HILOGE("OnCharacteristicProfileAdd");
-            std::string udid = profile.GetDeviceId();
-            DP_ADAPTER->OnProfileChanged(udid);
-            return 0;
-        }
-        int32_t OnCharacteristicProfileDelete(const CharacteristicProfile& profile)
-        {
-            FI_HILOGE("OnCharacteristicProfileDelete");
-            std::string udid = profile.GetDeviceId();
-            DP_ADAPTER->OnProfileChanged(udid);
-            return 0;
-        }
-        int32_t OnCharacteristicProfileUpdate(const CharacteristicProfile& oldProfile,
-                                              const CharacteristicProfile& newProfile)
-        {
-            FI_HILOGE("OnCharacteristicProfileUpdate");
-            std::string udid = newProfile.GetDeviceId();
-            DP_ADAPTER->OnProfileChanged(udid);
-            return 0;
-        }
+        SubscribeDPChangeListener();
+        ~SubscribeDPChangeListener();
+        int32_t OnTrustDeviceProfileAdd(const TrustDeviceProfile &profile);
+        int32_t OnTrustDeviceProfileDelete(const TrustDeviceProfile &profile);
+        int32_t OnTrustDeviceProfileUpdate(const TrustDeviceProfile &oldProfile, const TrustDeviceProfile &newProfile);
+        int32_t OnDeviceProfileAdd(const DeviceProfile &profile);
+        int32_t OnDeviceProfileDelete(const DeviceProfile &profile);
+        int32_t OnDeviceProfileUpdate(const DeviceProfile &oldProfile, const DeviceProfile &newProfile);
+        int32_t OnServiceProfileAdd(const ServiceProfile &profile);
+        int32_t OnServiceProfileDelete(const ServiceProfile &profile);
+        int32_t OnServiceProfileUpdate(const ServiceProfile &oldProfile, const ServiceProfile &newProfile);
+        int32_t OnCharacteristicProfileAdd(const CharacteristicProfile &profile);
+        int32_t OnCharacteristicProfileDelete(const CharacteristicProfile &profile);
+        int32_t OnCharacteristicProfileUpdate(const CharacteristicProfile &oldProfile,
+        const CharacteristicProfile &newProfile);
     };
 };
 } // namespace DeviceStatus

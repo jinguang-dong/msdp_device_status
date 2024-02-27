@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,16 @@
  * limitations under the License.
  */
 
-#include <unordered_set>
 #include <string>
+#include <unordered_set>
 #include <unistd.h>
  
 #include "coordination_util.h"
  
 #include "coordination_sm.h"
-#include "softbus_bus_center.h"
 #include "device_manager.h"
- 
 #include "devicestatus_define.h"
- 
+ #include "softbus_bus_center.h"
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
@@ -49,9 +47,9 @@ std::string GetLocalUdid()
 {
     OHOS::DistributedHardware::DmDeviceInfo dmDeviceInfo;
     const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getpid());
-    int32_t errCode = OHOS::DistributedHardware::DeviceManager::GetInstance().GetLocalDeviceInfo(PKG_NAME, dmDeviceInfo);
+    int32_t errCode = DistributedHardware::DeviceManager::GetInstance().GetLocalDeviceInfo(PKG_NAME, dmDeviceInfo);
     if (errCode != 0) {
-        FI_HILOGE("GetLocalBasicInfo errCode = %{public}d", errCode);
+        FI_HILOGE("GetLocalBasicInfo errCode:%{public}d", errCode);
         return "";
     }
     std::string udid = "";

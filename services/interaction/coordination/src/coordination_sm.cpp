@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -825,7 +825,7 @@ void CoordinationSM::OnDeviceOnline(const std::string &networkId, const std::str
         localNetworkId.substr(0, SUBSTR_NETWORKID_LEN).c_str());
     std::lock_guard<std::mutex> guard(mutex_);
     onlineDevice_.push_back(networkId);
-    onlineDeviceMap_.emplace(udid,networkId);
+    onlineDeviceMap_.emplace(udid, networkId);
     DP_ADAPTER->RegisterCrossingStateListener(networkId,
         std::bind(&CoordinationSM::OnCoordinationChanged, COOR_SM, std::placeholders::_1, std::placeholders::_2));
     COOR_SOFTBUS_ADAPTER->Init();
@@ -974,13 +974,13 @@ void CoordinationSM::DeviceInitCallBack::OnRemoteDied()
 void CoordinationSM::DmDeviceStateCallback::OnDeviceOnline(const DistributedHardware::DmDeviceInfo &deviceInfo)
 {
     CALL_INFO_TRACE;
-    COOR_SM->OnDeviceOnline(deviceInfo.networkId);
+    COOR_SM->OnDeviceOnline(deviceInfo.networkId, deviceInfo.deviceId);
 }
 
 void CoordinationSM::DmDeviceStateCallback::OnDeviceOffline(const DistributedHardware::DmDeviceInfo &deviceInfo)
 {
     CALL_INFO_TRACE;
-    COOR_SM->OnDeviceOffline(deviceInfo.networkId);
+    COOR_SM->OnDeviceOffline(deviceInfo.networkId, deviceInfo.deviceId);
 }
 
 void CoordinationSM::DmDeviceStateCallback::OnDeviceChanged(const DistributedHardware::DmDeviceInfo &deviceInfo)

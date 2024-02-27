@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -67,8 +67,8 @@ ohos_shared_library("intention_cooperate") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "window_manager:libdm",
-    "device_info_manager:distributed_device_profile_sdk",
     "device_info_manager:distributed_device_profile_common",
+    "device_info_manager:distributed_device_profile_sdk",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"
