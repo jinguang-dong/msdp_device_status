@@ -34,7 +34,6 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 using namespace OHOS::DistributedDeviceProfile;
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceProfileAdapter" };
 class DeviceProfileAdapter final {
     DECLARE_DELAYED_SINGLETON(DeviceProfileAdapter);
 public:
@@ -52,6 +51,7 @@ private:
     void OnProfileChanged(const std::string &udid);
     std::mutex adapterLock_;
     DPCallback dpCallback_;
+    SubscribeInfo subscribeInfo_;
     sptr<IProfileChangeListener> subscribeDPChangeListener_ = nullptr;
 
     class SyncCallback : public OHOS::DistributedDeviceProfile::SyncCompletedCallbackStub {
