@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,8 @@
 
 #include <algorithm>
 #include <mutex>
-#include <unordered_set>
 
-#include "coordination_sm.h"
-#include "coordination_util.h"
+#include "cooperate_util.h"
 #include "devicestatus_define.h"
 #include "distributed_device_profile_client.h"
 #include "json_parser.h"
@@ -31,9 +29,9 @@ namespace DeviceStatus {
 using namespace OHOS::DistributedDeviceProfile;
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceProfileAdapter" };
+constexpr int32_t SAID { 2902 };
 const std::string SERVICE_ID { "deviceStatus" };
 const std::string CURRENT_STATUS { "currentStatus" };
-constexpr int32_t SAID {2902};
 } // namespace
 
 DeviceProfileAdapter::DeviceProfileAdapter() {}

@@ -21,21 +21,23 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-struct JsonParser {
-    JsonParser() = default;
-    ~JsonParser()
-    {
-        if (json != nullptr) {
-            cJSON_Delete(json);
-            json = nullptr;
+namespace {
+    struct JsonParser {
+        JsonParser() = default;
+        ~JsonParser()
+        {
+            if (json != nullptr) {
+                cJSON_Delete(json);
+                json = nullptr;
+            }
         }
-    }
     operator cJSON *()
-    {
-        return json;
-    }
-    cJSON *json = nullptr;
-};
+        {
+            return json;
+        }
+        cJSON *json = nullptr;
+    };
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

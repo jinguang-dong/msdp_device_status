@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -132,8 +132,8 @@ public:
     void OnPointerOffline(const std::string &dhid, const std::vector<std::string> &keyboards);
     void OnKeyboardOffline(const std::string &dhid);
     bool InitDeviceManager();
-    void OnDeviceOnline(const std::string &networkId);
-    void OnDeviceOffline(const std::string &networkId);
+    void OnDeviceOnline(const std::string &networkId, const std::string &udid);
+    void OnDeviceOffline(const std::string &networkId, const std::string &udid);
     void OnStartFinish(bool isSuccess, const std::string &remoteNetworkId, int32_t startDeviceId);
     void OnStopFinish(bool isSuccess, const std::string &remoteNetworkId);
     bool IsStarting() const;
@@ -161,6 +161,7 @@ public:
     void OnInterceptorInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void OnMonitorInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void OnSoftbusSessionClosed(const std::string &networkId);
+    std::map<std::string, std::string> onlineDeviceMap_;
 
 private:
     void Reset(bool adjustAbsolutionLocation = false);

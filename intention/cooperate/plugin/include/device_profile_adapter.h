@@ -24,10 +24,9 @@
 #include "coordination_util.h"
 #include "dp_subscribe_info.h"
 #include "fi_log.h"
-#include "profile_change_listener_stub.h"
 #include "nocopyable.h"
+#include "profile_change_listener_stub.h"
 #include "singleton.h"
-#include "sync_completed_callback_stub.h"
 
 #define DP_ADAPTER OHOS::DelayedSingleton<DeviceProfileAdapter>::GetInstance()
 
@@ -41,18 +40,18 @@ public:
     using DPCallback = std::function<void(const std::string &, bool)>;
     DISALLOW_COPY_AND_MOVE(DeviceProfileAdapter);
 
-    int32_t UpdateCrossingSwitchState(bool state, const std::vector<std::string> &deviceIds);
     int32_t UpdateCrossingSwitchState(bool state);
+    int32_t UpdateCrossingSwitchState(bool state, const std::vector<std::string> &deviceIds);
     bool GetCrossingSwitchState(const std::string &udid);
-    int32_t UnregisterCrossingStateListener(const std::string &networkId);
     int32_t RegisterCrossingStateListener(const std::string &networkId, DPCallback callback);
+    int32_t UnregisterCrossingStateListener(const std::string &networkId);
 
 private:
     int32_t RegisterProfileListener(const std::string &networkId);
     void OnProfileChanged(const std::string &udid);
     std::mutex adapterLock_;
-    SubscribeInfo subscribeInfo_;
     DPCallback dpCallback_;
+    SubscribeInfo subscribeInfo_;
     sptr<IProfileChangeListener> subscribeDPChangeListener_ = nullptr;
 
     class SyncCallback : public OHOS::DistributedDeviceProfile::SyncCompletedCallbackStub {
