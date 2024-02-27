@@ -40,7 +40,7 @@ std::string GetLocalNetworkId()
         return {};
     }
     std::string networkId(localNode->networkId, sizeof(localNode->networkId));
-    FI_HILOGD("Get local node device info, networkId:%{public}s", networkId.substr(0, SUBSTR_NETWORKID_LEN).c_str());
+    FI_HILOGD("Get local node device info, networkId:%{public}s", AnonyNetworkId(networkId).c_str());
     return localNode->networkId;
 }
 std::string GetLocalUdid()

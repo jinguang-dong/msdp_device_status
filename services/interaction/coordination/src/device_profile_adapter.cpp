@@ -57,14 +57,15 @@ int32_t DeviceProfileAdapter::UpdateCrossingSwitchState(bool state, const std::v
         PutCharacteristicProfile(characteristicProfile);
     DpSyncOptions dpsyncOptions;
     std::for_each(deviceIds.begin(), deviceIds.end(),
-                  [&dpsyncOptions](auto &networkId) {
-                      dpsyncOptions.AddDevice(networkId);
-                      FI_HILOGI("Add device success");
-                  });
-    sptr<ISyncCompletedCallback> syncCallback = new(std::nothrow) SyncCallback;
-    if (syncCallback == nullptr){
-        FI_HILOGE("syncCallback is nullptr");
-        return RET_ERR;
+        [&dpsyncOptions](auto &networkId) {
+            dosyncOptions.AddDevice(networkId);
+            FI_HILOGD("Add device success, networkId:%{public}s", AnonyNetworkId(networkId).c_str());
+        });
+    auto syncCallback = std::make_shared<DeviceProfileAdapter::ProfileEventCallbackImpl>();
+    ret =
+        DistributedDeviceProfileClient::GetInstance().SyncDeviceProfile(dpsyncOptions, syncCallback);
+    if (ret != 0) {
+        FI_HILOGE("Failed to synchronize the device profile");
     }
     int32_t syncRes = DistributedDeviceProfileClient::GetInstance().SyncDeviceProfile(dpsyncOptions, syncCallback);
     FI_HILOGE("DeviceOnlineNotify SyncResult %{public}d", syncRes);
