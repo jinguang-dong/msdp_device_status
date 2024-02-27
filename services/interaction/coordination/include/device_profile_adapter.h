@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,19 +17,14 @@
 #define DEVICE_PROFILE_ADAPTER_H
 
 #include <functional>
-#include <map>
 #include <memory>
 #include <vector>
 
 #include "coordination_util.h"
 #include "dp_subscribe_info.h"
-#include "fi_log.h"
-#include "profile_change_listener_stub.h"
 #include "nocopyable.h"
+#include "profile_change_listener_stub.h"
 #include "singleton.h"
-#include "sync_completed_callback_stub.h"
-
-#define DP_ADAPTER OHOS::DelayedSingleton<DeviceProfileAdapter>::GetInstance()
 
 namespace OHOS {
 namespace Msdp {
@@ -41,23 +36,30 @@ public:
     using DPCallback = std::function<void(const std::string &, bool)>;
     DISALLOW_COPY_AND_MOVE(DeviceProfileAdapter);
 
-    int32_t UpdateCrossingSwitchState(bool state, const std::vector<std::string> &deviceIds);
     int32_t UpdateCrossingSwitchState(bool state);
-    bool GetCrossingSwitchState(const std::string &udid);
-    int32_t UnregisterCrossingStateListener(const std::string &networkId);
+    bool GetCrossingSwitchState(const std::string &networkId);
     int32_t RegisterCrossingStateListener(const std::string &networkId, DPCallback callback);
+    int32_t UnregisterCrossingStateListener(const std::string &networkId);
+    void OnDeviceOnline(const std::string &networkId, const std::string &udid);
+    void OnDeviceOffline(const std::string &networkId, const std::string &udid);
 
 private:
-    int32_t RegisterProfileListener(const std::string &networkId);
+    int32_t RegisterProfileListener(const std::string &networkId, DPCallback callback);
+    int32_t UnregisterProfileListener(const std::string &networkId);
+    std::string GetNetworkIdByUdid(const std::string &udid);
+    std::string GetUdidByNetworkId(const std::string &networkId);
     void OnProfileChanged(const std::string &udid);
-    std::mutex adapterLock_;
-    SubscribeInfo subscribeInfo_;
-    DPCallback dpCallback_;
-    sptr<IProfileChangeListener> subscribeDPChangeListener_ = nullptr;
 
-    class SyncCallback : public OHOS::DistributedDeviceProfile::SyncCompletedCallbackStub {
-        void OnSyncCompleted(const std::map<std::string, OHOS::DistributedDeviceProfile::SyncStatus> &syncResults);
+    struct CrossingSwitchListener {
+        SubscribeInfo subscribeInfo;
+        DPCallback dpCallback;
     };
+
+private:
+    std::mutex adapterLock_;
+    std::unordered_map<std::string, CrossingSwitchListener> crossingSwitchListener_;
+    std::unordered_map<std::string, std::string> onlineDevUdid2NetworkId_;
+    std::unordered_map<std::string, std::string> onlineDevNetworkId2Udid_;
 
     class SubscribeDPChangeListener : public OHOS::DistributedDeviceProfile::ProfileChangeListenerStub {
     public:
@@ -78,6 +80,8 @@ private:
         const CharacteristicProfile &newProfile);
     };
 };
+#define DP_ADAPTER OHOS::DelayedSingleton<DeviceProfileAdapter>::GetInstance()
+#define DP_CLIENT DistributedDeviceProfile::DistributedDeviceProfileClient::GetInstance()
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

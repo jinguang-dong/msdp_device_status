@@ -189,9 +189,3 @@ int32_t UnsubscribeProfileEvents(const CIProfileEvents* profileEvents,
     }
     return ret;
 }
-
-int32_t SyncDeviceProfile(const CSyncOptions* syncOptions, CIProfileEventCb* syncCb)
-{
-    CALL_DEBUG_ENTER;
-    return RET_ERR;
-}

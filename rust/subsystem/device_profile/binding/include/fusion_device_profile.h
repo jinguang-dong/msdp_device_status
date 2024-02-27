@@ -95,8 +95,6 @@ int32_t SubscribeProfileEvents(const CISubscribeInfos* subscribeInfos,
 int32_t UnsubscribeProfileEvents(const CIProfileEvents* profileEvents,
                                  CIProfileEventCb* eventCb,
                                  CIProfileEvents** failedEvents);
-int32_t SyncDeviceProfile(const CSyncOptions* syncOptions,
-                          CIProfileEventCb* syncCb);
 
 #ifdef __cplusplus
 }

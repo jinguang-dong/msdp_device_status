@@ -167,23 +167,11 @@ int32_t FusionDeviceProfileAdapter::SyncCrossSwitchState(bool switchState, const
     profile.SetCharacteristicProfileJson(smsg);
     cJSON_free(smsg);
 
-    int32_t ret = DistributedDeviceProfileClient::GetInstance().PutDeviceProfile(profile);
-    if (ret != 0) {
-        FI_HILOGE("Put device profile failed, ret:%{public}d", ret);
-        return ret;
+    if (DistributedDeviceProfileClient::GetInstance().PutDeviceProfile(profile) != RET_OK) {
+        FI_HILOGE("PutDeviceProfile failed");
+        return RET_ERR;
     }
-    SyncOptions syncOptions;
-    std::for_each(deviceIds.begin(), deviceIds.end(),
-                  [&syncOptions](auto &deviceId) {
-                      syncOptions.AddDevice(deviceId);
-                      FI_HILOGD("Add device success");
-                  });
-    auto syncCallback = std::make_shared<ProfileEventCallback>(nullptr);
-    ret = DistributedDeviceProfileClient::GetInstance().SyncDeviceProfile(syncOptions, syncCallback);
-    if (ret != 0) {
-        FI_HILOGE("Sync device profile failed");
-    }
-    return ret;
+    return RET_OK;
 }
 
 bool FusionDeviceProfileAdapter::GetCrossSwitchState(const std::string &deviceId)
@@ -269,7 +257,7 @@ void FusionDeviceProfileAdapter::SaveSubscribeInfos(const std::string &deviceId,
         if (callback == nullptr) {
             subscribeInfos.clear();
             FI_HILOGE("Find callback for device %{public}s failed, and the given callback is nullptr",
-                deviceId.c_str());
+                AnonyNetworkId(deviceId).c_str());
             return;
         }
         callbacks_.insert_or_assign(deviceId, callback);

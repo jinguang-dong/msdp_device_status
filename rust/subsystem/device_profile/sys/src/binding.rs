@@ -183,8 +183,6 @@ extern "C" {
     pub fn UnsubscribeProfileEvents(profile_events: *const CIProfileEvents,
                                     event_cb: *mut CIProfileEventCb,
                                     failed_events: *mut *mut CIProfileEvents) -> i32;
-    /// Synchronizes the device profile using the specified synchronization options and callback function.
-    pub fn SyncDeviceProfile(sync_options: *const CSyncOptions, sync_cb: *const CIProfileEventCb) -> i32;
 }
 
 type CIStringVectorClone = extern "C" fn (*mut CIStringVector) -> *mut CIStringVector;

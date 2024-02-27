@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,58 +13,59 @@
  * limitations under the License.
  */
 
-#include <string>
-#include <unordered_set>
-#include <unistd.h>
- 
 #include "coordination_util.h"
- 
-#include "coordination_sm.h"
+
+#include <unistd.h>
+
 #include "device_manager.h"
 #include "devicestatus_define.h"
- #include "softbus_bus_center.h"
+#include "softbus_bus_center.h"
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace COORDINATION {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CoordinationUtil" };
+const std::string PKG_NAME_PREFIX { "DBinderBus_Dms_" };
 } // namespace
+
 std::string GetLocalNetworkId()
 {
     CALL_DEBUG_ENTER;
     auto localNode = std::make_unique<NodeBasicInfo>();
-    int32_t ret = GetLocalNodeDeviceInfo(FI_PKG_NAME, localNode.get());
-    if (ret != RET_OK) {
+    if (int32_t ret; (ret = GetLocalNodeDeviceInfo(FI_PKG_NAME, localNode.get())) != RET_OK) {
         FI_HILOGE("Get local node device info, ret:%{public}d", ret);
         return {};
     }
-    std::string networkId(localNode->networkId, sizeof(localNode->networkId));
-    FI_HILOGD("Get local node device info, networkId:%{public}s", networkId.substr(0, SUBSTR_NETWORKID_LEN).c_str());
-    return localNode->networkId;
+    FI_HILOGD("Get local node device info, networkId:%{public}s", localNode->networkId);
+    return std::string(localNode->networkId);
 }
+
+std::string GetCurrentPackageName()
+{
+    return PKG_NAME_PREFIX + std::to_string(getpid());
+}
+
+std::string GetUdidByNetworkId(const std::string &networkId)
+{
+    std::string udid { "" };
+    if (!DSTB_HARDWARE.GetUdidByNetworkId(GetCurrentPackageName(), networkId, udid)) {
+        FI_HILOGE("GetUdidByNetworkId failed");
+    }
+    return udid;
+}
+
 std::string GetLocalUdid()
 {
+    auto packageName = GetCurrentPackageName();
     OHOS::DistributedHardware::DmDeviceInfo dmDeviceInfo;
-    const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getpid());
-    int32_t errCode = DistributedHardware::DeviceManager::GetInstance().GetLocalDeviceInfo(PKG_NAME, dmDeviceInfo);
-    if (errCode != 0) {
-        FI_HILOGE("GetLocalBasicInfo errCode:%{public}d", errCode);
-        return "";
+    if (int32_t errCode = RET_OK; (errCode = DSTB_HARDWARE.GetLocalDeviceInfo(packageName, dmDeviceInfo)) != RET_OK) {
+        FI_HILOGE("GetLocalBasicInfo failed, errCode:%{public}d", errCode);
+        return {};
     }
-    std::string udid = "";
-    OHOS::DistributedHardware::DeviceManager::GetInstance().GetUuidByNetworkId(PKG_NAME, dmDeviceInfo.networkId,
-        udid);
-    return udid;
+    return COORDINATION::GetUdidByNetworkId(dmDeviceInfo.networkId);
 }
- 
-std::string GetUdidByNetworkId(std::string networkId)
-{
-    const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getpid());
-    std::string udid = "";
-    OHOS::DistributedHardware::DeviceManager::GetInstance().GetUdidByNetworkId(PKG_NAME, networkId, udid);
-    return udid;
-}
+
 } // namespace COORDINATION
 } // namespace DeviceStatus
 } // namespace Msdp

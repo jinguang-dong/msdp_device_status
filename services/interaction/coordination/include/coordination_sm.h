@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define COORDINATION_SM_H
 
 #include <functional>
+#include <unordered_map>
 
 #include "singleton.h"
 
@@ -161,7 +162,6 @@ public:
     void OnInterceptorInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void OnMonitorInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void OnSoftbusSessionClosed(const std::string &networkId);
-    std::map<std::string, std::string> onlineDeviceMap_;
 
 private:
     void Reset(bool adjustAbsolutionLocation = false);

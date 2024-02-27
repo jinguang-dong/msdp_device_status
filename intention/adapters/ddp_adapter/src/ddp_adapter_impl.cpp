@@ -255,7 +255,6 @@ int32_t DDPAdapterImpl::SetProperty(const std::string &name, const DPValue &valu
     }
 
     PutProfile();
-    SyncProfile();
     return RET_OK;
 }
 
@@ -307,22 +306,6 @@ int32_t DDPAdapterImpl::PutProfile()
     return RET_OK;
 }
 
-int32_t DDPAdapterImpl::SyncProfile()
-{
-    CALL_DEBUG_ENTER;
-    DeviceProfile::SyncOptions syncOptions;
-    std::for_each(siblings_.cbegin(), siblings_.cend(),
-        [&syncOptions](auto &networkId) {
-            syncOptions.AddDevice(networkId);
-        });
-    auto syncCallback = std::make_shared<ProfileEventCallback>(shared_from_this());
-    int32_t ret = DDP_CLIENT.SyncDeviceProfile(syncOptions, syncCallback);
-    if (ret != RET_OK) {
-        FI_HILOGE("DP::SyncDeviceProfile failed");
-        return RET_ERR;
-    }
-    return RET_OK;
-}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
