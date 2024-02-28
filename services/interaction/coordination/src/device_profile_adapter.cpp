@@ -18,7 +18,6 @@
 #include <algorithm>
 #include <mutex>
 
-#include "coordination_sm.h"
 #include "coordination_util.h"
 #include "devicestatus_define.h"
 #include "distributed_device_profile_client.h"
@@ -51,7 +50,6 @@ int32_t DeviceProfileAdapter::UpdateCrossingSwitchState(bool state)
         FI_HILOGE("PutServiceProfile failed");
         return RET_ERR;
     }
-
     DistributedDeviceProfile::CharacteristicProfile characteristicProfile;
     characteristicProfile.SetDeviceId(COORDINATION::GetLocalUdid());
     characteristicProfile.SetServiceName(SERVICE_ID);
@@ -70,7 +68,7 @@ bool DeviceProfileAdapter::GetCrossingSwitchState(const std::string &networkId)
     std::string udid = GetUdidByNetworkId(networkId);
     DistributedDeviceProfile::CharacteristicProfile profile;
     if (DP_CLIENT.GetCharacteristicProfile(udid, SERVICE_ID, CURRENT_STATUS, profile) != RET_OK) {
-        FI_HILOGE("GetCharacteristicProfile failed");
+        FI_HILOGE("GetCharacteristicProfile failed, udid:%{public}s", GetAnonyString(udid).c_str());
     }
     return (profile.GetCharacteristicValue() == "1" ? true : false);
 }
@@ -80,7 +78,7 @@ int32_t DeviceProfileAdapter::RegisterCrossingStateListener(const std::string &n
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(adapterLock_);
     if (RegisterProfileListener(networkId, callback) != RET_OK) {
-        FI_HILOGE("RegisterProfileListener failed");
+        FI_HILOGE("RegisterProfileListener failed, networkId:%{public}s", GetAnonyString(networkId).c_str());
         return RET_ERR;
     }
     return RET_OK;
@@ -91,7 +89,7 @@ int32_t DeviceProfileAdapter::UnregisterCrossingStateListener(const std::string 
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(adapterLock_);
     if (UnregisterProfileListener(networkId) != RET_OK) {
-        FI_HILOGE("UnregisterProfileListener failed");
+        FI_HILOGE("UnregisterProfileListener failed, networkId:%{public}s", GetAnonyString(networkId).c_str());
         return RET_ERR;
     }
     return RET_OK;
@@ -101,6 +99,8 @@ void DeviceProfileAdapter::OnDeviceOnline(const std::string &networkId, const st
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(adapterLock_);
+    FI_HILOGE("OnDeviceOnline, networkId:%{public}s, udid:%{public}s",
+        GetAnonyString(networkId).c_str(), GetAnonyString(udid).c_str());
     onlineDevUdid2NetworkId_.emplace(udid, networkId);
     onlineDevNetworkId2Udid_.emplace(networkId, udid);
 }
@@ -109,6 +109,8 @@ void DeviceProfileAdapter::OnDeviceOffline(const std::string &networkId, const s
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(adapterLock_);
+    FI_HILOGE("OnDeviceOffline, networkId:%{public}s, udid:%{public}s",
+        GetAnonyString(networkId).c_str(), GetAnonyString(udid).c_str());
     if (onlineDevUdid2NetworkId_.find(udid) != onlineDevUdid2NetworkId_.end()) {
         onlineDevUdid2NetworkId_.erase(udid);
     }
@@ -131,7 +133,7 @@ int32_t DeviceProfileAdapter::RegisterProfileListener(const std::string &network
     CHKPR(subscribeDPChangeListener, RET_ERR);
     subscribeInfo.SetListener(subscribeDPChangeListener);
     if (int32_t ret = DP_CLIENT.SubscribeDeviceProfile(subscribeInfo) != RET_OK) {
-        FI_HILOGE("SubscribeDeviceProfile failed, ret:%{public}d", ret);
+        FI_HILOGE("SubscribeDeviceProfile failed, ret:%{public}d, udid:%{public}s", ret, GetAnonyString(udid).c_str());
         return RET_ERR;
     }
     CrossingSwitchListener switchListener =  {
@@ -144,8 +146,9 @@ int32_t DeviceProfileAdapter::RegisterProfileListener(const std::string &network
 
 int32_t DeviceProfileAdapter::UnregisterProfileListener(const std::string &networkId)
 {
+    CALL_INFO_TRACE;
     if (crossingSwitchListener_.find(networkId) == crossingSwitchListener_.end()) {
-        FI_HILOGE("UnregisterProfileListener failed, no subscribeListener stored in DeviceProfileAdapter");
+        FI_HILOGE("NetworkId:%{public}s is not founded in crossingSwitchListener", GetAnonyString(networkId).c_str());
         return RET_ERR;
     }
     auto switchListener = crossingSwitchListener_[networkId];
@@ -161,7 +164,7 @@ int32_t DeviceProfileAdapter::UnregisterProfileListener(const std::string &netwo
 std::string DeviceProfileAdapter::GetNetworkIdByUdid(const std::string &udid)
 {
     if (onlineDevUdid2NetworkId_.find(udid) == onlineDevUdid2NetworkId_.end()) {
-        FI_HILOGE("GetNetworkIdByUdid failed");
+        FI_HILOGE("Udid:%{public}s is not founded in onlineDevUdid2NetworkId", GetAnonyString(udid).c_str());
         return {};
     }
     return onlineDevUdid2NetworkId_[udid];
@@ -170,7 +173,7 @@ std::string DeviceProfileAdapter::GetNetworkIdByUdid(const std::string &udid)
 std::string DeviceProfileAdapter::GetUdidByNetworkId(const std::string &networkId)
 {
     if (onlineDevNetworkId2Udid_.find(networkId) == onlineDevNetworkId2Udid_.end()) {
-        FI_HILOGE("GetUdidByNetworkId failed");
+        FI_HILOGE("NetworkId:%{public}s is not founded in onlineDevNetworkId2Udid", GetAnonyString(networkId).c_str());
         return {};
     }
     return onlineDevNetworkId2Udid_[networkId];
@@ -185,7 +188,7 @@ void DeviceProfileAdapter::OnProfileChanged(const std::string &udid)
         return;
     }
     if (crossingSwitchListener_.find(networkId) == crossingSwitchListener_.end()) {
-        FI_HILOGE("No crossingSwitchListener for networkId:%{public}s", AnonyNetworkId(networkId).c_str());
+        FI_HILOGE("NetworkId:%{public}s is not founded in crossingSwitchListener", GetAnonyString(networkId).c_str());
         return;
     }
     auto switchListener = crossingSwitchListener_[networkId];
@@ -224,13 +227,13 @@ int32_t DeviceProfileAdapter::SubscribeDPChangeListener::OnTrustDeviceProfileUpd
 
 int32_t DeviceProfileAdapter::SubscribeDPChangeListener::OnDeviceProfileAdd(const DeviceProfile &profile)
 {
-    FI_HILOGW("OnDeviceProfileAdd deviceId:%{public}s", profile.GetDeviceId().c_str());
+    FI_HILOGW("OnDeviceProfileAdd deviceId:%{public}s", GetAnonyString(profile.GetDeviceId()).c_str());
     return RET_OK;
 }
 
 int32_t DeviceProfileAdapter::SubscribeDPChangeListener::OnDeviceProfileDelete(const DeviceProfile &profile)
 {
-    FI_HILOGW("OnDeviceProfileDelete, deviceId:%{public}s", profile.GetDeviceId().c_str());
+    FI_HILOGW("OnDeviceProfileDelete, deviceId:%{public}s", GetAnonyString(profile.GetDeviceId()).c_str());
     return RET_OK;
 }
 
@@ -238,7 +241,7 @@ int32_t DeviceProfileAdapter::SubscribeDPChangeListener::OnDeviceProfileUpdate(c
     const DeviceProfile &newProfile)
 {
     FI_HILOGW("OnDeviceProfileUpdate, oldDeviceId:%{public}s, newDeviceId:%{public}s",
-        oldProfile.GetDeviceId().c_str(), newProfile.GetDeviceId().c_str());
+        GetAnonyString(oldProfile.GetDeviceId()).c_str(), GetAnonyString(newProfile.GetDeviceId()).c_str());
     return RET_OK;
 }
 

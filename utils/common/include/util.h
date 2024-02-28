@@ -27,6 +27,7 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace {
 constexpr size_t SUBSTR_NETWORK_ID_LEN { 6 };
+constexpr size_t SUBSTR_UDID_LEN { 6 };
 }
 int32_t GetPid();
 const char* GetProgramName();
@@ -99,11 +100,6 @@ inline bool MultiplyInt32(int32_t op1, int32_t op2, int32_t& res)
 inline bool MultiplyInt64(int64_t op1, int64_t op2, int64_t& res)
 {
     return MultiplyInt(op1, op2, std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), res);
-}
-
-inline std::string AnonyNetworkId(const std::string &networkId)
-{
-    return networkId.substr(0, SUBSTR_NETWORK_ID_LEN);
 }
 
 size_t StringSplit(const std::string &str, const std::string &sep, std::vector<std::string> &vecList);

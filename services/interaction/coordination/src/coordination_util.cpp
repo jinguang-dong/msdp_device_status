@@ -37,7 +37,7 @@ std::string GetLocalNetworkId()
         FI_HILOGE("Get local node device info, ret:%{public}d", ret);
         return {};
     }
-    FI_HILOGD("Get local node device info, networkId:%{public}s", localNode->networkId);
+    FI_HILOGD("Get local node device info, networkId:%{public}s", GetAnonyString(localNode->networkId).c_str());
     return std::string(localNode->networkId);
 }
 
@@ -50,7 +50,8 @@ std::string GetUdidByNetworkId(const std::string &networkId)
 {
     std::string udid { "" };
     if (!DSTB_HARDWARE.GetUdidByNetworkId(GetCurrentPackageName(), networkId, udid)) {
-        FI_HILOGE("GetUdidByNetworkId failed");
+        FI_HILOGE("GetUdidByNetworkId failed, networkId:%{public}s, udid:%{public}s",
+            GetAnonyString(networkId).c_str(), GetAnonyString(udid).c_str());
     }
     return udid;
 }
