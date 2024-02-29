@@ -49,7 +49,7 @@ std::string GetCurrentPackageName()
 std::string GetUdidByNetworkId(const std::string &networkId)
 {
     std::string udid { "" };
-    if (!DSTB_HARDWARE.GetUdidByNetworkId(GetCurrentPackageName(), networkId, udid)) {
+    if (DSTB_HARDWARE.GetUdidByNetworkId(GetCurrentPackageName(), networkId, udid) != RET_OK) {
         FI_HILOGE("GetUdidByNetworkId failed, networkId:%{public}s, udid:%{public}s",
             GetAnonyString(networkId).c_str(), GetAnonyString(udid).c_str());
     }

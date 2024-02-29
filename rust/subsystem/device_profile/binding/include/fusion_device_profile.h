@@ -67,7 +67,6 @@ struct CProfileChangeNotification {
 struct CIProfileEventCb {
     CIProfileEventCb* (*clone)(CIProfileEventCb* cb);
     void (*destruct)(CIProfileEventCb* cb);
-    void (*onSyncCompleted)(CIProfileEventCb* cb, const char* deviceId, int32_t sync_result);
     void (*onProfileChanged)(CIProfileEventCb* cb, const CProfileChangeNotification* notification);
 };
 

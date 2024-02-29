@@ -32,6 +32,7 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceP
 const std::string SERVICE_ID { "deviceStatus" };
 const std::string SERVICE_TYPE { "deviceStatus" };
 const std::string CURRENT_STATUS { "currentStatus" };
+const std::string CHARACTERISTIC_VALUE { "characteristicValue" };
 constexpr int32_t DEVICE_STATUS_SA_ID { 2902 };
 } // namespace
 
@@ -42,21 +43,24 @@ DeviceProfileAdapter::~DeviceProfileAdapter() {}
 int32_t DeviceProfileAdapter::UpdateCrossingSwitchState(bool state)
 {
     CALL_INFO_TRACE;
-    DistributedDeviceProfile::ServiceProfile serviceProfile;
-    serviceProfile.SetDeviceId(COORDINATION::GetLocalUdid());
-    serviceProfile.SetServiceName(SERVICE_ID);
-    serviceProfile.SetServiceType(SERVICE_TYPE);
-    if (DP_CLIENT.PutServiceProfile(serviceProfile) != RET_OK) {
-        FI_HILOGE("PutServiceProfile failed");
-        return RET_ERR;
+    if (!serviceProfileExist_) {
+        DistributedDeviceProfile::ServiceProfile serviceProfile;
+        serviceProfile.SetDeviceId(COORDINATION::GetLocalUdid());
+        serviceProfile.SetServiceName(SERVICE_ID);
+        serviceProfile.SetServiceType(SERVICE_TYPE);
+        if (int32_t ret = DP_CLIENT.PutServiceProfile(serviceProfile) != RET_OK) {
+            FI_HILOGE("PutServiceProfile failed, ret:%{public}d", ret);
+            return RET_ERR;
+        }
+        serviceProfileExist_ = true;
     }
     DistributedDeviceProfile::CharacteristicProfile characteristicProfile;
     characteristicProfile.SetDeviceId(COORDINATION::GetLocalUdid());
     characteristicProfile.SetServiceName(SERVICE_ID);
     characteristicProfile.SetCharacteristicKey(CURRENT_STATUS);
     characteristicProfile.SetCharacteristicValue(std::to_string(state));
-    if (DP_CLIENT.PutCharacteristicProfile(characteristicProfile) != RET_OK) {
-        FI_HILOGE("PutCharacteristicProfile failed");
+    if (int32_t ret = DP_CLIENT.PutCharacteristicProfile(characteristicProfile) != RET_OK) {
+        FI_HILOGE("PutCharacteristicProfile failed, ret:%{public}d", ret);
         return RET_ERR;
     }
     return RET_OK;
@@ -67,8 +71,8 @@ bool DeviceProfileAdapter::GetCrossingSwitchState(const std::string &networkId)
     CALL_INFO_TRACE;
     std::string udid = GetUdidByNetworkId(networkId);
     DistributedDeviceProfile::CharacteristicProfile profile;
-    if (DP_CLIENT.GetCharacteristicProfile(udid, SERVICE_ID, CURRENT_STATUS, profile) != RET_OK) {
-        FI_HILOGE("GetCharacteristicProfile failed, udid:%{public}s", GetAnonyString(udid).c_str());
+    if (int32_t ret = DP_CLIENT.GetCharacteristicProfile(udid, SERVICE_ID, CURRENT_STATUS, profile) != RET_OK) {
+        FI_HILOGE("GetCharacteristicProfile failed, ret:%{public}d, udid:%{public}s", ret, GetAnonyString(udid).c_str());
     }
     return (profile.GetCharacteristicValue() == "1" ? true : false);
 }
@@ -99,7 +103,7 @@ void DeviceProfileAdapter::OnDeviceOnline(const std::string &networkId, const st
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(adapterLock_);
-    FI_HILOGE("OnDeviceOnline, networkId:%{public}s, udid:%{public}s",
+    FI_HILOGI("OnDeviceOnline, networkId:%{public}s, udid:%{public}s",
         GetAnonyString(networkId).c_str(), GetAnonyString(udid).c_str());
     onlineDevUdid2NetworkId_.emplace(udid, networkId);
     onlineDevNetworkId2Udid_.emplace(networkId, udid);
@@ -109,7 +113,7 @@ void DeviceProfileAdapter::OnDeviceOffline(const std::string &networkId, const s
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(adapterLock_);
-    FI_HILOGE("OnDeviceOffline, networkId:%{public}s, udid:%{public}s",
+    FI_HILOGI("OnDeviceOffline, networkId:%{public}s, udid:%{public}s",
         GetAnonyString(networkId).c_str(), GetAnonyString(udid).c_str());
     if (onlineDevUdid2NetworkId_.find(udid) != onlineDevUdid2NetworkId_.end()) {
         onlineDevUdid2NetworkId_.erase(udid);
@@ -125,7 +129,7 @@ int32_t DeviceProfileAdapter::RegisterProfileListener(const std::string &network
     SubscribeInfo subscribeInfo;
     subscribeInfo.SetSaId(DEVICE_STATUS_SA_ID);
     std::string udid = GetUdidByNetworkId(networkId);
-    subscribeInfo.SetSubscribeKey(udid, SERVICE_ID, CURRENT_STATUS, "characteristicKey");
+    subscribeInfo.SetSubscribeKey(udid, SERVICE_ID, CURRENT_STATUS, CHARACTERISTIC_VALUE);
     subscribeInfo.AddProfileChangeType(ProfileChangeType::CHAR_PROFILE_ADD);
     subscribeInfo.AddProfileChangeType(ProfileChangeType::CHAR_PROFILE_UPDATE);
     subscribeInfo.AddProfileChangeType(ProfileChangeType::CHAR_PROFILE_DELETE);

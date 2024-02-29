@@ -30,11 +30,6 @@ const std::string SERVICE_TYPE { "deviceStatus" };
 
 #define DDP_CLIENT  DeviceProfile::DistributedDeviceProfileClient::GetInstance()
 
-void DDPAdapterImpl::ProfileEventCallback::OnSyncCompleted(const DeviceProfile::SyncResult &syncResults)
-{
-    CALL_DEBUG_ENTER;
-}
-
 void DDPAdapterImpl::ProfileEventCallback::OnProfileChanged(
     const DeviceProfile::ProfileChangeNotification &changeNotification)
 {

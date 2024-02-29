@@ -60,6 +60,7 @@ private:
     std::unordered_map<std::string, CrossingSwitchListener> crossingSwitchListener_;
     std::unordered_map<std::string, std::string> onlineDevUdid2NetworkId_;
     std::unordered_map<std::string, std::string> onlineDevNetworkId2Udid_;
+    bool serviceProfileExist_ { false };
 
     class SubscribeDPChangeListener : public OHOS::DistributedDeviceProfile::ProfileChangeListenerStub {
     public:

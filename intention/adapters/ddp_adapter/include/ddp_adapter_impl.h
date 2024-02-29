@@ -37,7 +37,6 @@ class DDPAdapterImpl final : public IDDPAdapter, public std::enable_shared_from_
         ~ProfileEventCallback() = default;
         DISALLOW_COPY_AND_MOVE(ProfileEventCallback);
 
-        void OnSyncCompleted(const DeviceProfile::SyncResult &syncResults) override;
         void OnProfileChanged(const DeviceProfile::ProfileChangeNotification &changeNotification) override;
 
     private:
