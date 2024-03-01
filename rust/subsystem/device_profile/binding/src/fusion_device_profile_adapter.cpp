@@ -158,6 +158,7 @@ int32_t FusionDeviceProfileAdapter::SyncCrossSwitchState(bool switchState, const
     CHKPR(smsg, RET_ERR);
     profile.SetCharacteristicProfileJson(smsg);
     cJSON_free(smsg);
+
     int32_t ret = DistributedDeviceProfileClient::GetInstance().PutDeviceProfile(profile);
     if (ret != 0) {
         FI_HILOGE("Put device profile failed, ret:%{public}d", ret);

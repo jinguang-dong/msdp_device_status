@@ -48,7 +48,7 @@ private:
     int32_t UnregisterProfileListener(const std::string &networkId);
     std::string GetNetworkIdByUdid(const std::string &udid);
     std::string GetUdidByNetworkId(const std::string &networkId);
-    void OnProfileChanged(const std::string &udid);
+    int32_t OnProfileChanged(const CharacteristicProfile &profile);
 
     struct CrossingSwitchListener {
         SubscribeInfo subscribeInfo;
