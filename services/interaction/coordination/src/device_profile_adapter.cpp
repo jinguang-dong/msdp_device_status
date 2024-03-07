@@ -34,6 +34,7 @@ const std::string SERVICE_TYPE { "deviceStatus" };
 const std::string CROSSING_SWITCH_STATE { "crossingSwitchState" };
 const std::string CHARACTERISTIC_VALUE { "characteristicValue" };
 constexpr int32_t DEVICE_STATUS_SA_ID { 2902 };
+constexpr int32_t DP_ERROR_CODE_DATA_EXIST { 98566164 };
 } // namespace
 
 DeviceProfileAdapter::DeviceProfileAdapter() {}
@@ -48,10 +49,12 @@ int32_t DeviceProfileAdapter::UpdateCrossingSwitchState(bool state)
         serviceProfile.SetDeviceId(COORDINATION::GetLocalUdid());
         serviceProfile.SetServiceName(SERVICE_ID);
         serviceProfile.SetServiceType(SERVICE_TYPE);
-        if (int32_t ret = DP_CLIENT.PutServiceProfile(serviceProfile) != RET_OK) {
+        int32_t ret = DP_CLIENT.PutServiceProfile(serviceProfile);
+        if (ret != RET_OK && ret != DP_ERROR_CODE_DATA_EXIST) {
             FI_HILOGE("PutServiceProfile failed, ret:%{public}d", ret);
             return RET_ERR;
         }
+        FI_HILOGI("PutServiceProfile successfully, ret:%{public}d", ret);
         serviceProfileExist_ = true;
     }
     DistributedDeviceProfile::CharacteristicProfile characteristicProfile;
@@ -187,6 +190,7 @@ std::string DeviceProfileAdapter::GetUdidByNetworkId(const std::string &networkI
 
 int32_t DeviceProfileAdapter::OnProfileChanged(const CharacteristicProfile &profile)
 {
+    CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(adapterLock_);
     std::string udid = profile.GetDeviceId();
     std::string networkId = GetNetworkIdByUdid(udid);
@@ -201,6 +205,8 @@ int32_t DeviceProfileAdapter::OnProfileChanged(const CharacteristicProfile &prof
     auto switchListener = crossingSwitchListener_[networkId];
     CHKPR(switchListener.dpCallback, RET_ERR);
     bool state = (profile.GetCharacteristicValue() == "true" ? true : false);
+    FI_HILOGE("Udid:%{public}s, networkId:%{public}s, state:%{public}s",
+        GetAnonyString(udid).c_str(), GetAnonyString(networkId).c_str(), state ? "true" : "false");
     switchListener.dpCallback(networkId, state);
     return RET_OK;
 }
