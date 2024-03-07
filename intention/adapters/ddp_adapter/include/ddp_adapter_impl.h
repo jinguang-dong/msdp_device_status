@@ -23,28 +23,20 @@
 
 #include "cJSON.h"
 #include "distributed_device_profile_client.h"
+#include "dp_subscribe_info.h"
 #include "nocopyable.h"
 
 #include "i_ddp_adapter.h"
-
+#include "profile_change_listener_stub.h"
+#include "singleton.h"
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+using namespace OHOS::DistributedDeviceProfile;
 class DDPAdapterImpl final : public IDDPAdapter, public std::enable_shared_from_this<DDPAdapterImpl> {
-    class ProfileEventCallback final : public DeviceProfile::IProfileEventCallback {
-    public:
-        explicit ProfileEventCallback(std::shared_ptr<DDPAdapterImpl> ddp) : ddp_(ddp) {}
-        ~ProfileEventCallback() = default;
-        DISALLOW_COPY_AND_MOVE(ProfileEventCallback);
-
-        void OnProfileChanged(const DeviceProfile::ProfileChangeNotification &changeNotification) override;
-
-    private:
-        std::weak_ptr<DDPAdapterImpl> ddp_;
-    };
-
     class Observer final {
     public:
+        using DPCallback = std::function<void(const std::string &, bool)>;
         explicit Observer(std::shared_ptr<IDeviceProfileObserver> observer)
             : observer_(observer) {}
 
@@ -91,18 +83,42 @@ public:
 
 private:
     void OnProfileChanged(const std::string &networkId);
-    int32_t RegisterProfileListener(const std::string &networkId);
+    int32_t RegisterProfileListener(const std::string &networkId, DPCallback callback);
     void UnregisterProfileListener(const std::string &networkId);
     int32_t GetProperty(const std::string &networkId, const std::string &name,
         std::function<int32_t(cJSON *)> parse);
     int32_t SetProperty(const std::string &name, const DPValue &value);
     int32_t PutProfile();
-
+    std::string GetNetworkIdByUdid(const std::string &udid);
+    std::string GetUdidByNetworkId(const std::string &networkId);
+    struct SwitchListener {
+        SubscribeInfo subscribeInfo;
+        DPCallback dpCallback;
     std::mutex mutex_;
     std::set<Observer> observers_;
     std::set<std::string> siblings_;
-    std::map<std::string, std::shared_ptr<ProfileEventCallback>> profileEventCbs_;
     std::map<std::string, DPValue> properties_;
+    std::unordered_map<std::string, SwitchListener> switchListener_;
+    };
+    std::weak_ptr<DDPAdapterImpl> ddp_;
+    class SubscribeDPChangeListener : public OHOS::DistributedDeviceProfile::ProfileChangeListenerStub {
+    public:
+        SubscribeDPChangeListener();
+        ~SubscribeDPChangeListener();
+        int32_t OnTrustDeviceProfileAdd(const TrustDeviceProfile &profile);
+        int32_t OnTrustDeviceProfileDelete(const TrustDeviceProfile &profile);
+        int32_t OnTrustDeviceProfileUpdate(const TrustDeviceProfile &oldProfile, const TrustDeviceProfile &newProfile);
+        int32_t OnDeviceProfileAdd(const DeviceProfile &profile);
+        int32_t OnDeviceProfileDelete(const DeviceProfile &profile);
+        int32_t OnDeviceProfileUpdate(const DeviceProfile &oldProfile, const DeviceProfile &newProfile);
+        int32_t OnServiceProfileAdd(const ServiceProfile &profile);
+        int32_t OnServiceProfileDelete(const ServiceProfile &profile);
+        int32_t OnServiceProfileUpdate(const ServiceProfile &oldProfile, const ServiceProfile &newProfile);
+        int32_t OnCharacteristicProfileAdd(const CharacteristicProfile &profile);
+        int32_t OnCharacteristicProfileDelete(const CharacteristicProfile &profile);
+        int32_t OnCharacteristicProfileUpdate(const CharacteristicProfile &oldProfile,
+        const CharacteristicProfile &newProfile);
+    };
 };
 } // namespace DeviceStatus
 } // namespace Msdp
