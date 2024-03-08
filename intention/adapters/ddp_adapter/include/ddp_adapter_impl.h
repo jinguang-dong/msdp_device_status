@@ -80,27 +80,33 @@ public:
     int32_t SetProperty(const std::string &name, bool value) override;
     int32_t SetProperty(const std::string &name, int32_t value) override;
     int32_t SetProperty(const std::string &name, const std::string &value) override;
+    std::string GetCurrentPackageName();
+    std::string GetUdidByNetworkId(const std::string &networkId);
+    std::string GetNetworkIdByUdid(const std::string &udid);
+    std::string GetLocalUdid();
 
 private:
-    void OnProfileChanged(const std::string &networkId);
-    int32_t RegisterProfileListener(const std::string &networkId, DPCallback callback);
+    int32_t OnProfileChanged(const CharacteristicProfile &profile);
+    int32_t RegisterProfileListener(const std::string &networkId, Observer::DPCallback callback);
     void UnregisterProfileListener(const std::string &networkId);
     int32_t GetProperty(const std::string &networkId, const std::string &name,
         std::function<int32_t(cJSON *)> parse);
     int32_t SetProperty(const std::string &name, const DPValue &value);
     int32_t PutProfile();
-    std::string GetNetworkIdByUdid(const std::string &udid);
-    std::string GetUdidByNetworkId(const std::string &networkId);
     struct SwitchListener {
         SubscribeInfo subscribeInfo;
-        DPCallback dpCallback;
+        Observer::DPCallback dpCallback;
+    };
     std::mutex mutex_;
     std::set<Observer> observers_;
     std::set<std::string> siblings_;
     std::map<std::string, DPValue> properties_;
     std::unordered_map<std::string, SwitchListener> switchListener_;
-    };
     std::weak_ptr<DDPAdapterImpl> ddp_;
+    std::unordered_map<std::string, std::string> onlineDevUdid2NetworkId_;
+    const std::string characteristicsName_ { "currentStatus" };
+    std::unordered_map<std::string, std::string> onlineDevNetworkId2Udid_;
+    bool serviceProfileExist_ { false };
     class SubscribeDPChangeListener : public OHOS::DistributedDeviceProfile::ProfileChangeListenerStub {
     public:
         SubscribeDPChangeListener();
@@ -120,6 +126,8 @@ private:
         const CharacteristicProfile &newProfile);
     };
 };
+#define DP_ADAPTER OHOS::DelayedSingleton<DeviceProfileAdapter>::GetInstance()
+#define DDP_CLIENT DistributedDeviceProfile::DistributedDeviceProfileClient::GetInstance()
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

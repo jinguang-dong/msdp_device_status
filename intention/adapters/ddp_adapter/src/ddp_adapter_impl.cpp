@@ -29,26 +29,32 @@ const std::string SERVICE_TYPE { "deviceStatus" };
 const std::string CURRENT_STATUS { "currentStatus" };
 const std::string CHARACTERISTIC_VALUE { "characteristicValue" };
 constexpr int32_t DEVICE_STATUS_SA_ID { 2902 };
+const std::string PKG_NAME_PREFIX { "DBinderBus_Dms_" };
 } // namespace
 
-#define DDP_CLIENT  DeviceProfile::DistributedDeviceProfileClient::GetInstance()
-
-void DDPAdapterImpl::OnProfileChanged(const std::string &networkId)
+int32_t DDPAdapterImpl::OnProfileChanged(const CharacteristicProfile &profile)
 {
     std::lock_guard guard(mutex_);
-    FI_HILOGI("Profile of \'%{public}s\' has changed", Utility::Anonymize(networkId));
-    for (const auto &item : observers_) {
-        std::shared_ptr<IDeviceProfileObserver> observer = item.Lock();
-        if (observer != nullptr) {
-            FI_HILOGD("Notify profile change: \'%{public}s\'", Utility::Anonymize(networkId));
-            observer->OnProfileChanged(networkId);
-        }
+    std::string udid = profile.GetDeviceId();
+    std::string networkId = GetNetworkIdByUdid(udid);
+    if (networkId.empty()) {
+        FI_HILOGE("Invalid networkId");
+        return RET_ERR;
     }
+    if (switchListener_.find(networkId) == switchListener_.end()) {
+        FI_HILOGE("NetworkId:%{public}s is not founded in SwitchListener", GetAnonyString(networkId).c_str());
+        return RET_ERR;
+    }
+    auto switchListener = switchListener_[networkId];
+    CHKPR(switchListener.dpCallback, RET_ERR);
+    bool state = (profile.GetCharacteristicValue() == "true" ? true : false);
+    switchListener.dpCallback(networkId, state);
+    return RET_OK;
 }
 
 void DDPAdapterImpl::AddObserver(std::shared_ptr<IDeviceProfileObserver> observer)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     std::lock_guard guard(mutex_);
     CHKPV(observer);
     observers_.erase(Observer());
@@ -57,7 +63,7 @@ void DDPAdapterImpl::AddObserver(std::shared_ptr<IDeviceProfileObserver> observe
 
 void DDPAdapterImpl::RemoveObserver(std::shared_ptr<IDeviceProfileObserver> observer)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     std::lock_guard guard(mutex_);
     if (auto iter = observers_.find(Observer(observer)); iter != observers_.end()) {
         observers_.erase(iter);
@@ -67,23 +73,23 @@ void DDPAdapterImpl::RemoveObserver(std::shared_ptr<IDeviceProfileObserver> obse
 
 void DDPAdapterImpl::AddWatch(const std::string &networkId)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     std::lock_guard guard(mutex_);
     FI_HILOGD("Add watch \'%{public}s\'", Utility::Anonymize(networkId));
-    RegisterProfileListener(networkId, callback);
+    RegisterProfileListener(networkId,dpCallback);
     siblings_.insert(networkId);
 }
 
 void DDPAdapterImpl::RemoveWatch(const std::string &networkId)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     std::lock_guard guard(mutex_);
     FI_HILOGD("Remove watch \'%{public}s\'", Utility::Anonymize(networkId));
     siblings_.erase(networkId);
     UnregisterProfileListener(networkId);
 }
 
-int32_t DDPAdapterImpl::RegisterProfileListener(const std::string &networkId, DPCallback callback)
+int32_t DDPAdapterImpl::RegisterProfileListener(const std::string &networkId, Observer::DPCallback callback)
 {
     CALL_DEBUG_ENTER;
     SubscribeInfo subscribeInfo;
@@ -96,7 +102,7 @@ int32_t DDPAdapterImpl::RegisterProfileListener(const std::string &networkId, DP
     sptr<IProfileChangeListener> subscribeDPChangeListener = new (std::nothrow) SubscribeDPChangeListener;
     CHKPR(subscribeDPChangeListener, RET_ERR);
     subscribeInfo.SetListener(subscribeDPChangeListener);
-    if (int32_t ret = DP_CLIENT.SubscribeDeviceProfile(subscribeInfo) != RET_OK) {
+    if (int32_t ret = DDP_CLIENT.SubscribeDeviceProfile(subscribeInfo) != RET_OK) {
         FI_HILOGE("SubscribeDeviceProfile failed, ret:%{public}d, udid:%{public}s", ret, GetAnonyString(udid).c_str());
         return RET_ERR;
     }
@@ -115,20 +121,12 @@ void DDPAdapterImpl::UnregisterProfileListener(const std::string &networkId)
     FI_HILOGD("Unregister profile listener for \'%{public}s\'", Utility::Anonymize(networkId));
    if (switchListener_.find(networkId) == switchListener_.end()) {
         FI_HILOGE("NetworkId:%{public}s is not founded in switchListener", GetAnonyString(networkId).c_str());
-        return RET_ERR;
     }
     auto switchListener = switchListener_[networkId];
-    if (int32_t ret = DP_CLIENT.UnSubscribeDeviceProfile(switchListener.subscribeInfo) != RET_OK) {
+    if (int32_t ret = DDP_CLIENT.UnSubscribeDeviceProfile(switchListener.subscribeInfo) != RET_OK) {
         FI_HILOGE("UnSubscribeDeviceProfile failed, ret:%{public}d", ret);
-        return RET_ERR;
     }
     switchListener_.erase(networkId);
-    return RET_OK;
-    std::list<DeviceProfile::ProfileEvent> profileEvents;
-    profileEvents.emplace_back(DeviceProfile::ProfileEvent::EVENT_PROFILE_CHANGED);
-
-    std::list<DeviceProfile::ProfileEvent> failedEvents;
-    DDP_CLIENT.UnsubscribeProfileEvents(profileEvents, profileEventCb, failedEvents);
 }
 
 int32_t DDPAdapterImpl::GetProperty(const std::string &networkId, const std::string &name, bool &value)
@@ -181,13 +179,15 @@ int32_t DDPAdapterImpl::GetProperty(const std::string &networkId, const std::str
     std::function<int32_t(cJSON *json)> parse)
 {
     CALL_DEBUG_ENTER;
-    DeviceProfile::ServiceCharacteristicProfile profile;
-    int32_t ret = DDP_CLIENT.GetDeviceProfile(networkId, SERVICE_ID, profile);
+    DistributedDeviceProfile::CharacteristicProfile profile;
+    std::string udid = "";
+    udid = DDP_CLIENT.GetUuidByNetworkId(networkId);
+    int32_t ret = DDP_CLIENT.GetCharacteristicProfile(udid, SERVICE_ID, SERVICE_ID , profile);
     if (ret != RET_OK) {
-        FI_HILOGE("DP::GetDeviceProfile failed");
+        FI_HILOGE("DP::GetCharacteristicProfile failed");
         return RET_ERR;
     }
-    std::string jsonData = profile.GetCharacteristicProfileJson();
+    std::string jsonData = profile.GetCharacteristicValue();
     JsonParser parser;
     parser.json = cJSON_Parse(jsonData.c_str());
     if (!cJSON_IsObject(parser.json)) {
@@ -235,7 +235,31 @@ int32_t DDPAdapterImpl::SetProperty(const std::string &name, const DPValue &valu
     PutProfile();
     return RET_OK;
 }
+std::string DDPAdapterImpl::GetCurrentPackageName()
+{
+    return PKG_NAME_PREFIX + std::to_string(getpid());
+}
 
+std::string DDPAdapterImpl::GetUdidByNetworkId(const std::string &networkId)
+{
+    std::string udid { "" };
+    if (GetUdidByNetworkId(GetCurrentPackageName(), networkId, udid) != RET_OK) {
+        FI_HILOGE("GetUdidByNetworkId failed, networkId:%{public}s, udid:%{public}s",
+            GetAnonyString(networkId).c_str(), GetAnonyString(udid).c_str());
+    }
+    return udid;
+}
+
+std::string DDPAdapterImpl::GetLocalUdid()
+{
+    auto packageName = GetCurrentPackageName();
+    OHOS::DistributedHardware::DmDeviceInfo dmDeviceInfo;
+    if (int32_t errCode = RET_OK; (errCode = GetLocalDeviceInfo(packageName, dmDeviceInfo)) != RET_OK) {
+        FI_HILOGE("GetLocalBasicInfo failed, errCode:%{public}d", errCode);
+        return {};
+    }
+    return GetUdidByNetworkId(dmDeviceInfo.networkId);
+}
 int32_t DDPAdapterImpl::PutProfile()
 {
     CALL_DEBUG_ENTER;
@@ -272,10 +296,10 @@ int32_t DDPAdapterImpl::PutProfile()
     std::string sProfile(cProfile);
     cJSON_free(cProfile);
 
-    DeviceProfile::ServiceCharacteristicProfile profile;
-    profile.SetServiceId(SERVICE_ID);
-    profile.SetServiceType(SERVICE_TYPE);
-    profile.SetCharacteristicProfileJson(sProfile);
+    DistributedDeviceProfile::CharacteristicProfile profile;
+    profile.SetDeviceId(SERVICE_ID);
+    profile.SetDeviveType(SERVICE_TYPE);
+    profile.SetCharacteristicValue(sProfile);
     int32_t ret = DDP_CLIENT.PutDeviceProfile(profile);
     if (ret != RET_OK) {
         FI_HILOGE("DP::PutDeviceProfile fail");
@@ -356,7 +380,7 @@ int32_t DDPAdapterImpl::SubscribeDPChangeListener::OnCharacteristicProfileAdd(
 {
     CALL_INFO_TRACE;
     std::string udid = profile.GetDeviceId();
-    DP_ADAPTER->OnProfileChanged(udid);
+    DDP_CLIENT.OnProfileChanged(udid);
     return RET_OK;
 }
 
@@ -365,7 +389,7 @@ int32_t DDPAdapterImpl::SubscribeDPChangeListener::OnCharacteristicProfileDelete
 {
     CALL_INFO_TRACE;
     std::string udid = profile.GetDeviceId();
-    DP_ADAPTER->OnProfileChanged(udid);
+    DDP_CLIENT.OnProfileChanged(udid);
     return RET_OK;
 }
 
@@ -374,7 +398,7 @@ int32_t DDPAdapterImpl::SubscribeDPChangeListener::OnCharacteristicProfileUpdate
 {
     CALL_INFO_TRACE;
     std::string udid = newProfile.GetDeviceId();
-    DP_ADAPTER->OnProfileChanged(udid);
+    DDP_CLIENT.OnProfileChanged(udid);
     return RET_OK;
 }
 } // namespace DeviceStatus
