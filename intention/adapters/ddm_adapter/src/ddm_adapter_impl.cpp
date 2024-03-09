@@ -110,28 +110,28 @@ void DDMAdapterImpl::RemoveBoardObserver(std::shared_ptr<IBoardObserver> observe
     }
 }
 
-void DDMAdapterImpl::OnBoardOnline(const std::string &networkId)
+void DDMAdapterImpl::OnBoardOnline(const DistributedHardware::DmDeviceInfo &deviceInfo)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard guard(lock_);
-    FI_HILOGI("Board \'%{public}s\' is online", Utility::Anonymize(networkId));
+    FI_HILOGI("Board \'%{public}s\' is online", Utility::Anonymize(deviceInfo.networkId));
     std::for_each(observers_.cbegin(), observers_.cend(),
-        [&networkId](const auto &item) {
+        [&deviceInfo](const auto &item) {
             if (auto observer = item.Lock(); observer != nullptr) {
-                observer->OnBoardOnline(networkId);
+                observer->OnBoardOnline(deviceInfo);
             }
         });
 }
 
-void DDMAdapterImpl::OnBoardOffline(const std::string &networkId)
+void DDMAdapterImpl::OnBoardOffline(const DistributedHardware::DmDeviceInfo &deviceInfo)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard guard(lock_);
-    FI_HILOGI("Board \'%{public}s\' is offline", Utility::Anonymize(networkId));
+    FI_HILOGI("Board \'%{public}s\' is offline", Utility::Anonymize(deviceInfo.networkId));
     std::for_each(observers_.cbegin(), observers_.cend(),
-        [&networkId](const auto &item) {
+        [&deviceInfo](const auto &item) {
             if (auto observer = item.Lock(); observer != nullptr) {
-                observer->OnBoardOffline(networkId);
+                observer->OnBoardOffline(deviceInfo);
             }
         });
 }

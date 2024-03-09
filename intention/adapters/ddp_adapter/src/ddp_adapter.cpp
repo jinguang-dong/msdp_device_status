@@ -54,6 +54,18 @@ void DDPAdapter::RemoveWatch(const std::string &networkId)
     ddp_->RemoveWatch(networkId);
 }
 
+void DDPAdapter::OnDeviceOnline(const std::string &networkId, const std::string &udid)
+{
+    CALL_DEBUG_ENTER;
+    ddp_->OnDeviceOnline(networkId, udid);
+}
+
+void DDPAdapter::OnDeviceOffline(const std::string &networkId, const std::string &udid)
+{
+    CALL_DEBUG_ENTER;
+    ddp_->OnDeviceOffline(networkId, udid);
+}
+
 int32_t DDPAdapter::GetProperty(const std::string &networkId, const std::string &name, bool &value)
 {
     CALL_DEBUG_ENTER;

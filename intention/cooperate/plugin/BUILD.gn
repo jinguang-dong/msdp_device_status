@@ -62,6 +62,7 @@ ohos_shared_library("intention_cooperate") {
 
   external_deps = [
     "c_utils:utils",
+    "device_manager:devicemanagersdk",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",

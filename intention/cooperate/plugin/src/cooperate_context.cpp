@@ -37,31 +37,34 @@ constexpr double PERCENT { 100.0 };
 
 class BoardObserver final : public IBoardObserver {
 public:
-    explicit BoardObserver(Channel<CooperateEvent>::Sender sender) : sender_(sender) {}
+    explicit BoardObserver(DDPAdapter &ddp, Channel<CooperateEvent>::Sender sender) : ddp_(ddp), sender_(sender) {}
     ~BoardObserver() = default;
     DISALLOW_COPY_AND_MOVE(BoardObserver);
 
-    void OnBoardOnline(const std::string &networkId) override
+    void OnBoardOnline(const DistributedHardware::DmDeviceInfo &deviceInfo) override
     {
-        FI_HILOGD("\'%{public}s\' is online", Utility::Anonymize(networkId));
+        FI_HILOGD("\'%{public}s\' is online", Utility::Anonymize(deviceInfo.networkId));
         sender_.Send(CooperateEvent(
             CooperateEventType::DDM_BOARD_ONLINE,
             DDMBoardOnlineEvent {
-                .networkId = networkId
+                .networkId = deviceInfo.networkId
             }));
+        ddp_.OnDeviceOnline(deviceInfo.networkId, deviceInfo.deviceId);
     }
 
-    void OnBoardOffline(const std::string &networkId) override
+    void OnBoardOffline(const DistributedHardware::DmDeviceInfo &deviceInfo) override
     {
-        FI_HILOGD("\'%{public}s\' is offline", Utility::Anonymize(networkId));
+        FI_HILOGD("\'%{public}s\' is offline", Utility::Anonymize(deviceInfo.networkId));
         sender_.Send(CooperateEvent(
             CooperateEventType::DDM_BOARD_OFFLINE,
             DDMBoardOfflineEvent {
-                .networkId = networkId
+                .networkId = deviceInfo.networkId
             }));
+        ddp_.OnDeviceffline(deviceInfo.networkId, deviceInfo.deviceId);
     }
 
 private:
+    DDPAdapter &ddp_;
     Channel<CooperateEvent>::Sender sender_;
 };
 
@@ -162,7 +165,7 @@ void Context::Disable()
 
 int32_t Context::EnableDDM()
 {
-    boardObserver_ = std::make_shared<BoardObserver>(sender_);
+    boardObserver_ = std::make_shared<BoardObserver>(ddp_, sender_);
     ddm_.AddBoardObserver(boardObserver_);
     return ddm_.Enable();
 }

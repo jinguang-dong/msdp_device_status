@@ -20,7 +20,6 @@
 
 #include "distributed_device_profile_client.h"
 #include "service_characteristic_profile.h"
-#include "sync_options.h"
 
 #include "coordination_util.h"
 #include "devicestatus_define.h"

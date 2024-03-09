@@ -19,6 +19,8 @@
 #include <memory>
 #include <string>
 
+#include "dm_device_info.h"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
@@ -27,8 +29,8 @@ public:
     IBoardObserver() = default;
     virtual ~IBoardObserver() = default;
 
-    virtual void OnBoardOnline(const std::string &networkId) = 0;
-    virtual void OnBoardOffline(const std::string &networkId) = 0;
+    virtual void OnBoardOnline(const OHOS::DistributedHardware::DmDeviceInfo &deviceInfo) = 0;
+    virtual void OnBoardOffline(const OHOS::DistributedHardware::DmDeviceInfo &deviceInfo) = 0;
 };
 
 class IDDMAdapter {
