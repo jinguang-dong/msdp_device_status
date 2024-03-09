@@ -23,12 +23,14 @@
 #include "distributed_device_profile_client.h"
 #include "json_parser.h"
 
+#undef LOG_TAG
+#define LOG_TAG "DeviceProfileAdapter"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 using namespace OHOS::DistributedDeviceProfile;
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DeviceProfileAdapter" };
 const std::string SERVICE_ID { "deviceStatus" };
 const std::string SERVICE_TYPE { "deviceStatus" };
 const std::string CROSSING_SWITCH_STATE { "crossingSwitchState" };

@@ -20,12 +20,15 @@
 #include "device_manager.h"
 #include "devicestatus_define.h"
 #include "softbus_bus_center.h"
+
+#undef LOG_TAG
+#define LOG_TAG "CoordinationUtil"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace COORDINATION {
 namespace {
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CoordinationUtil" };
 const std::string PKG_NAME_PREFIX { "DBinderBus_Dms_" };
 } // namespace
 
