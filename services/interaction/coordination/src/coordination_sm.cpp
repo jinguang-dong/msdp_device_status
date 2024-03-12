@@ -15,6 +15,7 @@
 
 #include "coordination_sm.h"
 
+#include <chrono>
 #include <cstdio>
 #include <unistd.h>
 
@@ -49,6 +50,7 @@ constexpr int32_t MOUSE_ABS_LOCATION_Y { 50 };
 constexpr int32_t COORDINATION_PRIORITY { 499 };
 constexpr int32_t MIN_HANDLER_ID { 1 };
 constexpr uint32_t P2P_SESSION_CLOSED { 1 };
+constexpr uint32_t SOFT_BUS_TIMEOUT_MS { 3000 };
 const std::string THREAD_NAME { "coordination_sm" };
 } // namespace
 
@@ -270,6 +272,23 @@ void CoordinationSM::CloseP2PConnection(const std::string &remoteNetworkId)
     }
 }
 
+int32_t CoordinationSM::OpenInputSoftbus(const std::string &remoteNetworkId)
+{
+    CALL_INFO_TRACE;
+    auto enterStamp = std::chrono::high_resolution_clock::now();
+    if (COOR_SOFTBUS_ADAPTER->OpenInputSoftbus(remoteNetworkId) != RET_OK) {
+        FI_HILOGE("Open input softbus failed, remoteNetworkId:%{public}s", GetAnonyString(remoteNetworkId).c_str());
+        return RET_ERR;
+    }
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::high_resolution_clock::now() - enterStamp);
+    if (duration > std::chrono::milliseconds(SOFT_BUS_TIMEOUT_MS)) {
+        FI_HILOGE("OpenInputSoftbus timeout, duration:%{public}lld ms", duration.count());
+        return RET_ERR;
+    }
+    return RET_OK;
+}
+
 int32_t CoordinationSM::ActivateCoordination(const std::string &remoteNetworkId, int32_t startDeviceId)
 {
     CALL_INFO_TRACE;
@@ -287,8 +306,9 @@ int32_t CoordinationSM::ActivateCoordination(const std::string &remoteNetworkId,
         }
     }
     UpdateMouseLocation();
-    if (COOR_SOFTBUS_ADAPTER->OpenInputSoftbus(remoteNetworkId) != RET_OK) {
+    if (OpenInputSoftbus(remoteNetworkId) != RET_OK) {
         FI_HILOGE("Open input softbus failed, remoteNetworkId:%{public}s", GetAnonyString(remoteNetworkId).c_str());
+        COOR_EVENT_MGR->OnStart(CoordinationMessage::ACTIVATE_FAIL);
         return COOPERATOR_FAIL;
     }
 
@@ -369,10 +389,8 @@ void CoordinationSM::StartRemoteCoordination(const std::string &remoteNetworkId,
         FI_HILOGE("Posting async task failed");
     }
     isStarting_ = true;
+    MMI::InputManager::GetInstance()->SetPointerVisible(false);
     MMI::InputManager::GetInstance()->EnableInputDevice(true);
-    if (!COOR_DEV_MGR->HasLocalPointerDevice()) {
-        MMI::InputManager::GetInstance()->SetPointerVisible(false);
-    }
     if (buttonIsPressed) {
         StartPointerEventFilter();
         COOR_SOFTBUS_ADAPTER->NotifyFilterAdded(sinkNetworkId_);
