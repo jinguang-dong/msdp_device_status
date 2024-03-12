@@ -18,12 +18,12 @@
 #include "ddp_adapter_impl.h"
 #include "devicestatus_define.h"
 
+#undef LOG_TAG
+#define LOG_TAG "DDPAdapter"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DDPAdapter" };
-} // namespace
 
 DDPAdapter::DDPAdapter()
 {
@@ -42,28 +42,16 @@ void DDPAdapter::RemoveObserver(std::shared_ptr<IDeviceProfileObserver> observer
     ddp_->RemoveObserver(observer);
 }
 
-void DDPAdapter::AddWatch(const std::string &networkId)
+void DDPAdapter::AddWatch(const std::string &networkId, const std::string &udId)
 {
     CALL_DEBUG_ENTER;
-    ddp_->AddWatch(networkId);
+    ddp_->AddWatch(networkId, udId);
 }
 
 void DDPAdapter::RemoveWatch(const std::string &networkId)
 {
     CALL_DEBUG_ENTER;
     ddp_->RemoveWatch(networkId);
-}
-
-void DDPAdapter::OnDeviceOnline(const std::string &networkId, const std::string &udid)
-{
-    CALL_DEBUG_ENTER;
-    ddp_->OnDeviceOnline(networkId, udid);
-}
-
-void DDPAdapter::OnDeviceOffline(const std::string &networkId, const std::string &udid)
-{
-    CALL_DEBUG_ENTER;
-    ddp_->OnDeviceOffline(networkId, udid);
 }
 
 int32_t DDPAdapter::GetProperty(const std::string &networkId, const std::string &name, bool &value)

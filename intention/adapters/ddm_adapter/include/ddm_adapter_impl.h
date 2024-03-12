@@ -82,7 +82,7 @@ private:
         {
             std::shared_ptr<DDMAdapterImpl> dm = dm_.lock();
             if (dm != nullptr) {
-                dm->OnBoardOnline(deviceInfo);
+                dm->OnBoardOnline(deviceInfo.networkId);
             }
         }
 
@@ -90,7 +90,7 @@ private:
         {
             std::shared_ptr<DDMAdapterImpl> dm = dm_.lock();
             if (dm != nullptr) {
-                dm->OnBoardOffline(deviceInfo);
+                dm->OnBoardOffline(deviceInfo.networkId);
             }
         }
 
@@ -101,8 +101,8 @@ private:
         std::weak_ptr<DDMAdapterImpl> dm_;
     };
 
-    void OnBoardOnline(const DistributedHardware::DmDeviceInfo &deviceInfo);
-    void OnBoardOffline(const DistributedHardware::DmDeviceInfo &deviceInfo);
+    void OnBoardOnline(const std::string &networkId);
+    void OnBoardOffline(const std::string &networkId);
 
     std::mutex lock_;
     std::shared_ptr<DmInitCb> initCb_;

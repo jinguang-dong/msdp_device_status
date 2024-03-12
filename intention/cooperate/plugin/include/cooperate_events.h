@@ -115,6 +115,7 @@ struct DumpEvent {
 
 struct DDMBoardOnlineEvent {
     std::string networkId;
+    std::string udId;
     bool normal;
 };
 

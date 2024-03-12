@@ -21,13 +21,13 @@
 #include "devicestatus_define.h"
 #include "utility.h"
 
+#undef LOG_TAG
+#define LOG_TAG "StateMachine"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace Cooperate {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "StateMachine" };
-} // namespace
 
 StateMachine::StateMachine(IContext *env)
     : env_(env)
@@ -141,7 +141,7 @@ void StateMachine::OnBoardOnline(Context &context, const CooperateEvent &event)
     auto ret = onlineBoards_.insert(onlineEvent.networkId);
     if (ret.second) {
         FI_HILOGD("Watch \'%{public}s\'", Utility::Anonymize(onlineEvent.networkId));
-        context.ddp_.AddWatch(onlineEvent.networkId);
+        context.ddp_.AddWatch(onlineEvent.networkId, onlineEvent.udId);
         Transfer(context, event);
     }
 }

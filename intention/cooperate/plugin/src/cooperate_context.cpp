@@ -25,46 +25,45 @@
 #include "dsoftbus_handler.h"
 #include "utility.h"
 
+#undef LOG_TAG
+#define LOG_TAG "CooperateContext"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace Cooperate {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "CooperateContext" };
 const std::string COOPERATE_SWITCH { "currentStatus" };
 constexpr double PERCENT { 100.0 };
 } // namespace
 
 class BoardObserver final : public IBoardObserver {
 public:
-    explicit BoardObserver(DDPAdapter &ddp, Channel<CooperateEvent>::Sender sender) : ddp_(ddp), sender_(sender) {}
+    explicit BoardObserver(Channel<CooperateEvent>::Sender sender) : sender_(sender) {}
     ~BoardObserver() = default;
     DISALLOW_COPY_AND_MOVE(BoardObserver);
 
-    void OnBoardOnline(const DistributedHardware::DmDeviceInfo &deviceInfo) override
+    void OnBoardOnline(const std::string &networkId) override
     {
-        FI_HILOGD("\'%{public}s\' is online", Utility::Anonymize(deviceInfo.networkId));
+        FI_HILOGD("\'%{public}s\' is online", Utility::Anonymize(networkId));
         sender_.Send(CooperateEvent(
             CooperateEventType::DDM_BOARD_ONLINE,
             DDMBoardOnlineEvent {
-                .networkId = deviceInfo.networkId
+                .networkId = networkId
             }));
-        ddp_.OnDeviceOnline(deviceInfo.networkId, deviceInfo.deviceId);
     }
 
-    void OnBoardOffline(const DistributedHardware::DmDeviceInfo &deviceInfo) override
+    void OnBoardOffline(const std::string &networkId) override
     {
-        FI_HILOGD("\'%{public}s\' is offline", Utility::Anonymize(deviceInfo.networkId));
+        FI_HILOGD("\'%{public}s\' is offline", Utility::Anonymize(networkId));
         sender_.Send(CooperateEvent(
             CooperateEventType::DDM_BOARD_OFFLINE,
             DDMBoardOfflineEvent {
-                .networkId = deviceInfo.networkId
+                .networkId = networkId
             }));
-        ddp_.OnDeviceffline(deviceInfo.networkId, deviceInfo.deviceId);
     }
 
 private:
-    DDPAdapter &ddp_;
     Channel<CooperateEvent>::Sender sender_;
 };
 
@@ -165,7 +164,7 @@ void Context::Disable()
 
 int32_t Context::EnableDDM()
 {
-    boardObserver_ = std::make_shared<BoardObserver>(ddp_, sender_);
+    boardObserver_ = std::make_shared<BoardObserver>(sender_);
     ddm_.AddBoardObserver(boardObserver_);
     return ddm_.Enable();
 }

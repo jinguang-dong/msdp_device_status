@@ -20,12 +20,12 @@
 #include "devicestatus_define.h"
 #include "utility.h"
 
+#undef LOG_TAG
+#define LOG_TAG "DDMAdapterImpl"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL { LOG_CORE, MSDP_DOMAIN_ID, "DDMAdapterImpl" };
-}
 
 #define D_DEV_MGR   DistributedHardware::DeviceManager::GetInstance()
 
@@ -110,28 +110,28 @@ void DDMAdapterImpl::RemoveBoardObserver(std::shared_ptr<IBoardObserver> observe
     }
 }
 
-void DDMAdapterImpl::OnBoardOnline(const DistributedHardware::DmDeviceInfo &deviceInfo)
+void DDMAdapterImpl::OnBoardOnline(const std::string &networkId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard guard(lock_);
-    FI_HILOGI("Board \'%{public}s\' is online", Utility::Anonymize(deviceInfo.networkId));
+    FI_HILOGI("Board \'%{public}s\' is online", Utility::Anonymize(networkId));
     std::for_each(observers_.cbegin(), observers_.cend(),
-        [&deviceInfo](const auto &item) {
+        [&networkId](const auto &item) {
             if (auto observer = item.Lock(); observer != nullptr) {
-                observer->OnBoardOnline(deviceInfo);
+                observer->OnBoardOnline(networkId);
             }
         });
 }
 
-void DDMAdapterImpl::OnBoardOffline(const DistributedHardware::DmDeviceInfo &deviceInfo)
+void DDMAdapterImpl::OnBoardOffline(const std::string &networkId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard guard(lock_);
-    FI_HILOGI("Board \'%{public}s\' is offline", Utility::Anonymize(deviceInfo.networkId));
+    FI_HILOGI("Board \'%{public}s\' is offline", Utility::Anonymize(networkId));
     std::for_each(observers_.cbegin(), observers_.cend(),
-        [&deviceInfo](const auto &item) {
+        [&networkId](const auto &item) {
             if (auto observer = item.Lock(); observer != nullptr) {
-                observer->OnBoardOffline(deviceInfo);
+                observer->OnBoardOffline(networkId);
             }
         });
 }

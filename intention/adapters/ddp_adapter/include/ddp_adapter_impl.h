@@ -17,6 +17,7 @@
 #define DDP_ADAPTER_IMPL_H
 
 #include <map>
+#include <unordered_map>
 #include <mutex>
 #include <set>
 #include <variant>
@@ -31,7 +32,6 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-using DPCallback = std::function<void(const std::string &, bool)>;
 using namespace OHOS::DistributedDeviceProfile;
 
 class DDPAdapterImpl final : public IDDPAdapter, public std::enable_shared_from_this<DDPAdapterImpl> {
@@ -94,10 +94,8 @@ public:
 
     void AddObserver(std::shared_ptr<IDeviceProfileObserver> observer) override;
     void RemoveObserver(std::shared_ptr<IDeviceProfileObserver> observer) override;
-    void AddWatch(const std::string &networkId) override;
+    void AddWatch(const std::string &networkId, const std::string &udId) override;
     void RemoveWatch(const std::string &networkId) override;
-    void OnDeviceOnline(const std::string &networkId, const std::string &udid) override;
-    void OnDeviceOffline(const std::string &networkId, const std::string &udid) override;
 
     int32_t GetProperty(const std::string &networkId, const std::string &name, bool &value) override;
     int32_t GetProperty(const std::string &networkId, const std::string &name, int32_t &value) override;
@@ -110,8 +108,9 @@ private:
     void OnProfileChanged(const std::string &networkId);
     int32_t RegisterProfileListener(const std::string &networkId);
     int32_t UnregisterProfileListener(const std::string &networkId);
-    std::string GetNetworkIdByUdid(const std::string &udid);
-    std::string GetUdidByNetworkId(const std::string &networkId);
+    std::string GetNetworkIdByUdId(const std::string &udid);
+    std::string GetUdIdByNetworkId(const std::string &networkId);
+    std::string GetLocalUdid();
     int32_t GetProperty(const std::string &networkId, const std::string &name,
         std::function<int32_t(cJSON *)> parse);
     int32_t SetProperty(const std::string &name, const DPValue &value);
@@ -119,12 +118,11 @@ private:
 
     std::mutex mutex_;
     std::set<Observer> observers_;
-    std::set<std::string> siblings_;
+    std::unordered_map<std::string, std::string> networkId2UdId_;
+    std::unordered_map<std::string, std::string> udId2NetworkId_;
     std::map<std::string, DPValue> properties_;
     bool isServiceProfileExist_ { false };
     std::unordered_map<std::string, SubscribeInfo> crossingSwitchSubscribeInfo_;
-    std::unordered_map<std::string, std::string> onlineDevUdid2NetworkId_;
-    std::unordered_map<std::string, std::string> onlineDevNetworkId2Udid_;
 
 };
 } // namespace DeviceStatus
