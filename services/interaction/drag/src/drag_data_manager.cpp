@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,14 @@ void DragDataManager::Init(const DragData &dragData)
 void DragDataManager::SetShadowInfos(const std::vector<ShadowInfo> &shadowInfos)
 {
     dragData_.shadowInfos = shadowInfos;
+}
+
+void DragDataManager::UpdateShadowInfos(std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
+{
+    ShadowInfo shadowInfo;
+    shadowInfo.pixelMap = pixelMap;
+    dragData_.shadowInfos.push_back(shadowInfo);
+    dragData_.dragNum++;
 }
 
 DragCursorStyle DragDataManager::GetDragStyle() const
