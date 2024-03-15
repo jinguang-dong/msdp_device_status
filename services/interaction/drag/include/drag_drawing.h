@@ -190,6 +190,7 @@ public:
     void SetScreenId(uint64_t screenId);
     int32_t RotateDragWindow(Rosen::Rotation rotation);
     void SetRotation(Rosen::Rotation rotation);
+    int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
 
 private:
     int32_t CheckDragData(const DragData &dragData);
@@ -241,7 +242,7 @@ private:
     void RotatePixelMapXY(int32_t &pixelMapX, int32_t &pixelMapY);
     void ResetParameter();
     int32_t DoRotateDragWindow(float rotation);
-
+    int32_t UpdatePixelMapsAngleAndAlpha();
 private:
     int64_t startNum_ { -1 };
     int64_t interruptNum_ { -1 };
