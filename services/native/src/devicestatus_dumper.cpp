@@ -343,12 +343,12 @@ std::string DeviceStatusDumper::GetPackageName(Security::AccessToken::AccessToke
     int32_t tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     switch (tokenType) {
         case Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE: {
-            Security::AccessToken::NativeTokenInfo tokenInfo;
-            if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, tokenInfo) != 0) {
+            std::string processName;
+            if (Security::AccessToken::AccessTokenKit::GetNativeTokenName(tokenId, processName) != 0) {
                 FI_HILOGE("Get native token info fail");
                 return packageName;
             }
-            packageName = tokenInfo.processName;
+            packageName = processName;
             break;
         }
         case Security::AccessToken::ATokenTypeEnum::TOKEN_HAP: {
