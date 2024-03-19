@@ -57,6 +57,8 @@ ohos_source_set("intention_device_manager") {
     "${device_status_root_path}/intention/prototype:intention_prototype",
   ]
 
+  public_external_deps = [ "eventhandler:libeventhandler" ]
+
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
