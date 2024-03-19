@@ -17,7 +17,6 @@
 #define COORDINATION_SM_H
 
 #include <functional>
-#include <unordered_map>
 
 #include "singleton.h"
 
@@ -117,6 +116,7 @@ public:
     int32_t ActivateCoordination(const std::string &remoteNetworkId, int32_t startDeviceId);
     int32_t DeactivateCoordination(bool isUnchained);
     int32_t GetCoordinationState(const std::string &networkId);
+    int32_t GetCoordinationState(const std::string &udId, bool &state);
     void StartRemoteCoordination(const std::string &remoteNetworkId, bool buttonIsPressed);
     void StartPointerEventFilter();
     void StartRemoteCoordinationResult(bool isSuccess,
@@ -133,8 +133,8 @@ public:
     void OnPointerOffline(const std::string &dhid, const std::vector<std::string> &keyboards);
     void OnKeyboardOffline(const std::string &dhid);
     bool InitDeviceManager();
-    void OnDeviceOnline(const std::string &networkId, const std::string &udid);
-    void OnDeviceOffline(const std::string &networkId, const std::string &udid);
+    void OnDeviceOnline(const std::string &networkId);
+    void OnDeviceOffline(const std::string &networkId);
     void OnStartFinish(bool isSuccess, const std::string &remoteNetworkId, int32_t startDeviceId);
     void OnStopFinish(bool isSuccess, const std::string &remoteNetworkId);
     bool IsStarting() const;

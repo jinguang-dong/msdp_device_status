@@ -41,7 +41,6 @@ CooperateFree::~CooperateFree()
 
 void CooperateFree::OnEvent(Context &context, const CooperateEvent &event)
 {
-    CALL_DEBUG_ENTER;
     current_->OnEvent(context, event);
 }
 
@@ -371,7 +370,7 @@ void CooperateFree::RemoteStart::OnSwitchChanged(Context &context, const Coopera
     DSoftbusStopCooperate stopNotice {};
     context.dsoftbus_.StopCooperate(parent_.process_.Peer(), stopNotice);
 
-    FI_HILOGI("[remote start] Peer(\'%{public}s\') switch off", notice.networkId.c_str());
+    FI_HILOGI("[remote start] Peer(\'%{public}s\') switch off", Utility::Anonymize(notice.networkId));
     OnReset(context, event);
 }
 

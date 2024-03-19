@@ -37,17 +37,16 @@ public:
     DISALLOW_COPY_AND_MOVE(DeviceProfileAdapter);
 
     int32_t UpdateCrossingSwitchState(bool state);
-    bool GetCrossingSwitchState(const std::string &networkId);
+    bool GetCrossingSwitchState(const std::string &udId);
     int32_t RegisterCrossingStateListener(const std::string &networkId, DPCallback callback);
     int32_t UnregisterCrossingStateListener(const std::string &networkId);
-    void OnDeviceOnline(const std::string &networkId, const std::string &udid);
-    void OnDeviceOffline(const std::string &networkId, const std::string &udid);
 
 private:
+    void OnDeviceOnline(const std::string &networkId);
+    void OnDeviceOffline(const std::string &networkId);
     int32_t RegisterProfileListener(const std::string &networkId, DPCallback callback);
     int32_t UnregisterProfileListener(const std::string &networkId);
-    std::string GetNetworkIdByUdid(const std::string &udid);
-    std::string GetUdidByNetworkId(const std::string &networkId);
+    std::string GetNetworkIdByUdId(const std::string &udId);
     int32_t OnProfileChanged(const CharacteristicProfile &profile);
 
     struct CrossingSwitchListener {
@@ -58,8 +57,7 @@ private:
 private:
     std::mutex adapterLock_;
     std::unordered_map<std::string, CrossingSwitchListener> crossingSwitchListener_;
-    std::unordered_map<std::string, std::string> onlineDevUdid2NetworkId_;
-    std::unordered_map<std::string, std::string> onlineDevNetworkId2Udid_;
+    std::unordered_map<std::string, std::string> onlineDevUdId2NetworkId_;
     bool serviceProfileExist_ { false };
 
     class SubscribeDPChangeListener : public OHOS::DistributedDeviceProfile::ProfileChangeListenerStub {

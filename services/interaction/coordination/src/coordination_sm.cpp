@@ -201,11 +201,29 @@ int32_t CoordinationSM::GetCoordinationState(const std::string &networkId)
 {
     CALL_INFO_TRACE;
     if (networkId.empty()) {
-        FI_HILOGE("Transfer network id is empty");
+        FI_HILOGE("NetworkId is empty");
         return COMMON_PARAMETER_ERROR;
     }
-    bool state = DP_ADAPTER->GetCrossingSwitchState(networkId);
+    auto udId = COORDINATION::GetUdIdByNetworkId(networkId);
+    if (udId.empty()) {
+        FI_HILOGE("UdId is empty");
+        return COMMON_PARAMETER_ERROR;
+    }
+    bool state = DP_ADAPTER->GetCrossingSwitchState(udId);
+    FI_HILOGI("NetworkId:%{public}s, state:%{public}s", GetAnonyString(networkId).c_str(), state ? "true" : "false");
     COOR_EVENT_MGR->OnGetCrossingSwitchState(state);
+    return RET_OK;
+}
+
+int32_t CoordinationSM::GetCoordinationState(const std::string &udId, bool &state)
+{
+    CALL_DEBUG_ENTER;
+    if (udId.empty()) {
+        FI_HILOGE("UdId is empty");
+        return COMMON_PARAMETER_ERROR;
+    }
+    state = DP_ADAPTER->GetCrossingSwitchState(udId);
+    FI_HILOGD("UdId:%{public}s, state:%{public}s", GetAnonyString(udId).c_str(), state ? "true" : "false");
     return RET_OK;
 }
 
@@ -751,7 +769,7 @@ bool CoordinationSM::IsStopping() const
 
 void CoordinationSM::OnKeyboardOnline(const std::string &dhid)
 {
-    CALL_INFO_TRACE;
+    CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mutex_);
     auto state = GetCurrentState();
     CHKPV(state);
@@ -760,7 +778,7 @@ void CoordinationSM::OnKeyboardOnline(const std::string &dhid)
 
 void CoordinationSM::OnPointerOffline(const std::string &dhid, const std::vector<std::string> &keyboards)
 {
-    CALL_INFO_TRACE;
+    CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mutex_);
     if (currentState_ == CoordinationState::STATE_FREE) {
         FI_HILOGI("Current state:free");
@@ -818,29 +836,27 @@ bool CoordinationSM::InitDeviceManager()
     return true;
 }
 
-void CoordinationSM::OnDeviceOnline(const std::string &networkId, const std::string &udid)
+void CoordinationSM::OnDeviceOnline(const std::string &networkId)
 {
     std::string localNetworkId = COORDINATION::GetLocalNetworkId();
     FI_HILOGI("Online device networkId:%{public}s, localNetworkId:%{public}s",
         GetAnonyString(networkId).c_str(), GetAnonyString(localNetworkId).c_str());
     std::lock_guard<std::mutex> guard(mutex_);
     onlineDevice_.push_back(networkId);
-    DP_ADAPTER->OnDeviceOnline(networkId, udid);
     DP_ADAPTER->RegisterCrossingStateListener(networkId,
         std::bind(&CoordinationSM::OnCoordinationChanged, COOR_SM, std::placeholders::_1, std::placeholders::_2));
     COOR_SOFTBUS_ADAPTER->Init();
 }
 
-void CoordinationSM::OnDeviceOffline(const std::string &networkId, const std::string &udid)
+void CoordinationSM::OnDeviceOffline(const std::string &networkId)
 {
-    CALL_INFO_TRACE;
+    CALL_DEBUG_ENTER;
     std::string localNetworkId = COORDINATION::GetLocalNetworkId();
     FI_HILOGI("Local device networkId:%{public}s, remote device networkId:%{public}s,"
         "offline device networkId:%{public}s", GetAnonyString(localNetworkId).c_str(),
         GetAnonyString(sinkNetworkId_).c_str(), GetAnonyString(networkId).c_str());
     {
         DP_ADAPTER->UnregisterCrossingStateListener(networkId);
-        DP_ADAPTER->OnDeviceOffline(networkId, udid);
         std::lock_guard<std::mutex> guard(mutex_);
         if (auto it = std::find(onlineDevice_.begin(), onlineDevice_.end(), networkId); it != onlineDevice_.end()) {
             onlineDevice_.erase(it);
@@ -970,13 +986,13 @@ void CoordinationSM::DeviceInitCallBack::OnRemoteDied()
 void CoordinationSM::DmDeviceStateCallback::OnDeviceOnline(const DistributedHardware::DmDeviceInfo &deviceInfo)
 {
     CALL_INFO_TRACE;
-    COOR_SM->OnDeviceOnline(deviceInfo.networkId, deviceInfo.deviceId);
+    COOR_SM->OnDeviceOnline(deviceInfo.networkId);
 }
 
 void CoordinationSM::DmDeviceStateCallback::OnDeviceOffline(const DistributedHardware::DmDeviceInfo &deviceInfo)
 {
     CALL_INFO_TRACE;
-    COOR_SM->OnDeviceOffline(deviceInfo.networkId, deviceInfo.deviceId);
+    COOR_SM->OnDeviceOffline(deviceInfo.networkId);
 }
 
 void CoordinationSM::DmDeviceStateCallback::OnDeviceChanged(const DistributedHardware::DmDeviceInfo &deviceInfo)
@@ -1102,7 +1118,7 @@ void CoordinationSM::OnPostMonitorInputEvent(std::shared_ptr<MMI::PointerEvent> 
     if (state == CoordinationState::STATE_IN) {
         int32_t deviceId = pointerEvent->GetDeviceId();
         if (!COOR_DEV_MGR->IsRemote(deviceId)) {
-            FI_HILOGI("Remote device id:%{public}d", deviceId);
+            FI_HILOGI("Remote device id:%{public}d, pointerEvent id:%{public}d", deviceId, pointerEvent->GetId());
             DeactivateCoordination(isUnchained_);
         }
     }
@@ -1252,7 +1268,7 @@ void CoordinationSM::SetPointerVisible()
 
 std::shared_ptr<ICoordinationState> CoordinationSM::GetCurrentState()
 {
-    FI_HILOGI("Current state:%{public}d", static_cast<int32_t>(currentState_));
+    FI_HILOGD("Current state:%{public}d", static_cast<int32_t>(currentState_));
     auto it = coordinationStates_.find(currentState_);
     if (it == coordinationStates_.end()) {
         FI_HILOGE("currentState_ not found");

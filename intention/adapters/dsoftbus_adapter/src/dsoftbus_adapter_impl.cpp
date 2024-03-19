@@ -136,7 +136,10 @@ int32_t DSoftbusAdapterImpl::SendPacket(const std::string &networkId, NetPacket 
         return RET_ERR;
     }
     StreamBuffer buffer;
-    packet.MakeData(buffer);
+    if (!packet.MakeData(buffer)) {
+        FI_HILOGE("Failed to buffer packet");
+        return RET_ERR;
+    }
     if (buffer.Size() > MAX_PACKET_BUF_SIZE) {
         FI_HILOGE("Packet is too large");
         return RET_ERR;
@@ -324,13 +327,13 @@ int32_t DSoftbusAdapterImpl::OpenSessionLocked(const std::string &networkId)
     char peerName[DEVICE_NAME_SIZE_MAX] { SERVER_SESSION_NAME };
     char peerNetworkId[PKG_NAME_SIZE_MAX] {};
     if (strcpy_s(peerNetworkId, sizeof(peerNetworkId), networkId.c_str()) != EOK) {
-        FI_HILOGE("Invalid peerNetworkId:%{public}s", GetAnonyString(networkId).c_str());
+        FI_HILOGE("Invalid peerNetworkId:%{public}s", Utility::Anonymize(networkId));
         return RET_ERR;
     }
     char pkgName[PKG_NAME_SIZE_MAX] { FI_PKG_NAME };
     FI_HILOGI("Client session name: \'%{public}s\'", name);
     FI_HILOGI("Peer name: \'%{public}s\'", peerName);
-    FI_HILOGI("Peer network id: \'%{public}s\'", peerNetworkId);
+    FI_HILOGI("Peer network id: \'%{public}s\'", Utility::Anonymize(peerNetworkId));
     FI_HILOGI("Package name: \'%{public}s\'", pkgName);
     SocketInfo info {
         .name = name,
@@ -403,6 +406,8 @@ void DSoftbusAdapterImpl::HandleSessionData(const std::string &networkId, Circle
             break;
         }
         if ((head->size + static_cast<int32_t>(sizeof(PackHead))) > circleBuffer.ResidualSize()) {
+            FI_HILOGI("Incomplete package, package size:%{public}d, residual size:%{public}d",
+                (head->size + static_cast<int32_t>(sizeof(PackHead))), circleBuffer.ResidualSize());
             break;
         }
         NetPacket packet(head->idMsg);
