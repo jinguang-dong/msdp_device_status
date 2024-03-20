@@ -71,6 +71,10 @@ GetCooperateStateParam::GetCooperateStateParam(int32_t userData, const std::stri
     : networkId(networkId), userData(userData), checkPermission(checkPermission)
 {}
 
+GetCooperateStateParam::GetCooperateStateParam(const std::string &udId, bool checkPermission)
+    : udId(udId), checkPermission(checkPermission)
+{}
+
 bool GetCooperateStateParam::Marshalling(MessageParcel &parcel) const
 {
     return (

@@ -171,6 +171,24 @@ int32_t CooperateClient::GetCooperateState(ITunnelClient &tunnel,
     return RET_OK;
 }
 
+int32_t CooperateClient::GetCooperateState(ITunnelClient &tunnel,
+    const std::string &udId, bool state)
+{
+    CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
+    CooperateEvent event { callback };
+    GetCooperateStateParam param { GenerateRequestID(), udId, state };
+    DefaultReply reply;
+
+    int32_t ret = tunnel.GetParam(Intention::COOPERATE, CooperateRequestID::GET_COOPERATE_STATE, param, reply);
+    if (ret != RET_OK) {
+        FI_HILOGE("Get cooperate state failed");
+        return ret;
+    }
+    devCooperateEvent_.insert_or_assign(param.userData, event);
+    return RET_OK;
+}
+
 int32_t CooperateClient::AddHotAreaListener(ITunnelClient &tunnel, HotAreaListenerPtr listener)
 {
     return RET_ERR;
