@@ -104,6 +104,7 @@ struct StopCooperateEvent {
 struct GetCooperateStateEvent {
     int32_t pid;
     int32_t userData;
+    int32_t udId;
     std::string networkId;
 };
 

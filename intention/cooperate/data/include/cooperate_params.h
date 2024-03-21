@@ -57,6 +57,7 @@ struct StopCooperateParam final : public ParamBase {
 struct GetCooperateStateParam final : public ParamBase {
     GetCooperateStateParam() = default;
     GetCooperateStateParam(int32_t userData, const std::string &networkId, bool checkPermission);
+    GetCooperateStateParam(const std::string &udId, bool checkPermission);
     bool Marshalling(MessageParcel &parcel) const override;
     bool Unmarshalling(MessageParcel &parcel) override;
 
