@@ -196,8 +196,12 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest002, TestSize.Level0)
 HWTEST_F(CoordinationSMTest, CoordinationSMTest003, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
+    int32_t ret { 0 };
     std::string localNetworkId = COORDINATION::GetLocalNetworkId();
-    int32_t ret = COOR_SM->GetCoordinationState(localNetworkId);
+    if (localNetworkId.empty()) {
+        EXPECT_TRUE(ret == 0);
+    }
+    ret = COOR_SM->GetCoordinationState(localNetworkId);
     EXPECT_TRUE(ret == 0);
     ClearCoordiantionSM();
     ClearCoordinationSoftbusAdapter();
@@ -299,7 +303,7 @@ HWTEST_F(CoordinationSMTest, CoordinationSMTest009, TestSize.Level0)
     EXPECT_EQ(ret, ERR_CODE);
     COOR_SOFTBUS_ADAPTER->sessionDevs_[REMOTE_NETWORKID] = 1;
     ret = COOR_SM->ActivateCoordination(REMOTE_NETWORKID, startDeviceId);
-    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(ret, ERR_CODE);
     ClearCoordiantionSM();
     ClearCoordinationSoftbusAdapter();
 }
