@@ -42,16 +42,28 @@ void DDPAdapter::RemoveObserver(std::shared_ptr<IDeviceProfileObserver> observer
     ddp_->RemoveObserver(observer);
 }
 
-void DDPAdapter::AddWatch(const std::string &networkId, const std::string &udId)
+void DDPAdapter::AddWatch(const std::string &networkId)
 {
     CALL_DEBUG_ENTER;
-    ddp_->AddWatch(networkId, udId);
+    ddp_->AddWatch(networkId);
 }
 
 void DDPAdapter::RemoveWatch(const std::string &networkId)
 {
     CALL_DEBUG_ENTER;
     ddp_->RemoveWatch(networkId);
+}
+
+void DDPAdapter::OnProfileChanged(const std::string &networkId)
+{
+    CALL_DEBUG_ENTER;
+    ddp_->OnProfileChanged(networkId);
+}
+
+std::string DDPAdapter::GetNetworkIdByUdId(const std::string &udId)
+{
+    CALL_DEBUG_ENTER;
+    return ddp_->GetNetworkIdByUdId(udId);
 }
 
 int32_t DDPAdapter::GetProperty(const std::string &networkId, const std::string &name, bool &value)

@@ -141,7 +141,7 @@ void StateMachine::OnBoardOnline(Context &context, const CooperateEvent &event)
     auto ret = onlineBoards_.insert(onlineEvent.networkId);
     if (ret.second) {
         FI_HILOGD("Watch \'%{public}s\'", Utility::Anonymize(onlineEvent.networkId));
-        context.ddp_.AddWatch(onlineEvent.networkId, onlineEvent.udId);
+        context.ddp_.AddWatch(onlineEvent.networkId);
         Transfer(context, event);
     }
 }

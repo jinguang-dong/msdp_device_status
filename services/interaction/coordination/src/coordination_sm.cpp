@@ -15,6 +15,7 @@
 
 #include "coordination_sm.h"
 
+#include <chrono>
 #include <cstdio>
 #include <unistd.h>
 
@@ -51,6 +52,7 @@ constexpr int32_t MOUSE_ABS_LOCATION_Y { 50 };
 constexpr int32_t COORDINATION_PRIORITY { 499 };
 constexpr int32_t MIN_HANDLER_ID { 1 };
 constexpr uint32_t P2P_SESSION_CLOSED { 1 };
+constexpr uint32_t SOFT_BUS_TIMEOUT_MS { 3000 };
 const std::string THREAD_NAME { "coordination_sm" };
 } // namespace
 
@@ -201,11 +203,24 @@ int32_t CoordinationSM::GetCoordinationState(const std::string &networkId)
 {
     CALL_INFO_TRACE;
     if (networkId.empty()) {
-        FI_HILOGE("Transfer network id is empty");
+        FI_HILOGE("NetworkId is empty");
         return COMMON_PARAMETER_ERROR;
     }
     bool state = DP_ADAPTER->GetCrossingSwitchState(networkId);
+    FI_HILOGI("NetworkId:%{public}s, state:%{public}s", GetAnonyString(networkId).c_str(), state ? "true" : "false");
     COOR_EVENT_MGR->OnGetCrossingSwitchState(state);
+    return RET_OK;
+}
+
+int32_t CoordinationSM::GetCoordinationState(const std::string &udId, bool &state)
+{
+    CALL_INFO_TRACE;
+    if (udId.empty()) {
+        FI_HILOGE("UdId is empty");
+        return COMMON_PARAMETER_ERROR;
+    }
+    state = DP_ADAPTER->GetCrossingSwitchState(udId);
+    FI_HILOGI("UdId:%{public}s, state:%{public}s", GetAnonyString(udId).c_str(), state ? "true" : "false");
     return RET_OK;
 }
 
@@ -272,6 +287,23 @@ void CoordinationSM::CloseP2PConnection(const std::string &remoteNetworkId)
     }
 }
 
+int32_t CoordinationSM::OpenInputSoftbus(const std::string &remoteNetworkId)
+{
+    CALL_INFO_TRACE;
+    auto enterStamp = std::chrono::high_resolution_clock::now();
+    if (COOR_SOFTBUS_ADAPTER->OpenInputSoftbus(remoteNetworkId) != RET_OK) {
+        FI_HILOGE("Open input softbus failed, remoteNetworkId:%{public}s", GetAnonyString(remoteNetworkId).c_str());
+        return RET_ERR;
+    }
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::high_resolution_clock::now() - enterStamp);
+    if (duration > std::chrono::milliseconds(SOFT_BUS_TIMEOUT_MS)) {
+        FI_HILOGE("OpenInputSoftbus timeout, duration:%{public}lld ms", duration.count());
+        return RET_ERR;
+    }
+    return RET_OK;
+}
+
 int32_t CoordinationSM::ActivateCoordination(const std::string &remoteNetworkId, int32_t startDeviceId)
 {
     CALL_INFO_TRACE;
@@ -289,7 +321,7 @@ int32_t CoordinationSM::ActivateCoordination(const std::string &remoteNetworkId,
         }
     }
     UpdateMouseLocation();
-    if (COOR_SOFTBUS_ADAPTER->OpenInputSoftbus(remoteNetworkId) != RET_OK) {
+    if (OpenInputSoftbus(remoteNetworkId) != RET_OK) {
         FI_HILOGE("Open input softbus failed, remoteNetworkId:%{public}s", GetAnonyString(remoteNetworkId).c_str());
         return COOPERATOR_FAIL;
     }
@@ -750,7 +782,7 @@ bool CoordinationSM::IsStopping() const
 
 void CoordinationSM::OnKeyboardOnline(const std::string &dhid)
 {
-    CALL_INFO_TRACE;
+    CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mutex_);
     auto state = GetCurrentState();
     CHKPV(state);
@@ -759,7 +791,7 @@ void CoordinationSM::OnKeyboardOnline(const std::string &dhid)
 
 void CoordinationSM::OnPointerOffline(const std::string &dhid, const std::vector<std::string> &keyboards)
 {
-    CALL_INFO_TRACE;
+    CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mutex_);
     if (currentState_ == CoordinationState::STATE_FREE) {
         FI_HILOGI("Current state:free");
@@ -831,7 +863,7 @@ void CoordinationSM::OnDeviceOnline(const std::string &networkId)
 
 void CoordinationSM::OnDeviceOffline(const std::string &networkId)
 {
-    CALL_INFO_TRACE;
+    CALL_DEBUG_ENTER;
     std::string localNetworkId = COORDINATION::GetLocalNetworkId();
     FI_HILOGI("Local device networkId:%{public}s, remote device networkId:%{public}s,"
         "offline device networkId:%{public}s", GetAnonyString(localNetworkId).c_str(),
@@ -1093,6 +1125,14 @@ void CoordinationSM::OnPostMonitorInputEvent(std::shared_ptr<MMI::PointerEvent> 
 {
     CALL_DEBUG_ENTER;
     CHKPV(pointerEvent);
+    if (auto pointerAction = pointerEvent->GetPointerAction();
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW) {
+        FI_HILOGD("Current pointerAction:%{public}d, skip this pointerEvent", static_cast<int32_t>(pointerAction));
+        return;
+    }
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     displayX_ = pointerItem.GetDisplayX();
@@ -1102,7 +1142,7 @@ void CoordinationSM::OnPostMonitorInputEvent(std::shared_ptr<MMI::PointerEvent> 
     if (state == CoordinationState::STATE_IN) {
         int32_t deviceId = pointerEvent->GetDeviceId();
         if (!COOR_DEV_MGR->IsRemote(deviceId)) {
-            FI_HILOGI("Remote device id:%{public}d", deviceId);
+            FI_HILOGI("Remote device id:%{public}d, pointerEvent id:%{public}d", deviceId, pointerEvent->GetId());
             DeactivateCoordination(isUnchained_);
         }
     }
@@ -1252,7 +1292,7 @@ void CoordinationSM::SetPointerVisible()
 
 std::shared_ptr<ICoordinationState> CoordinationSM::GetCurrentState()
 {
-    FI_HILOGI("Current state:%{public}d", static_cast<int32_t>(currentState_));
+    FI_HILOGD("Current state:%{public}d", static_cast<int32_t>(currentState_));
     auto it = coordinationStates_.find(currentState_);
     if (it == coordinationStates_.end()) {
         FI_HILOGE("currentState_ not found");

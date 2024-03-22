@@ -37,8 +37,10 @@ public:
 
     virtual void AddObserver(std::shared_ptr<IDeviceProfileObserver> observer) = 0;
     virtual void RemoveObserver(std::shared_ptr<IDeviceProfileObserver> observer) = 0;
-    virtual void AddWatch(const std::string &networkId, const std::string &udId) = 0;
+    virtual void AddWatch(const std::string &networkId) = 0;
     virtual void RemoveWatch(const std::string &networkId) = 0;
+    virtual void OnProfileChanged(const std::string &networkId) = 0;
+    virtual std::string GetNetworkIdByUdId(const std::string &udId) = 0;
 
     virtual int32_t GetProperty(const std::string &networkId, const std::string &name, bool &value) = 0;
     virtual int32_t GetProperty(const std::string &networkId, const std::string &name, int32_t &value) = 0;

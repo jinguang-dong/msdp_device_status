@@ -31,8 +31,10 @@ public:
 
     void AddObserver(std::shared_ptr<IDeviceProfileObserver> observer) override;
     void RemoveObserver(std::shared_ptr<IDeviceProfileObserver> observer) override;
-    void AddWatch(const std::string &networkId, const std::string &udId) override;
+    void AddWatch(const std::string &networkId) override;
     void RemoveWatch(const std::string &networkId) override;
+    void OnProfileChanged(const std::string &networkId) override;
+    std::string GetNetworkIdByUdId(const std::string &udId) override;
 
     int32_t GetProperty(const std::string &networkId, const std::string &name, bool &value) override;
     int32_t GetProperty(const std::string &networkId, const std::string &name, int32_t &value) override;
