@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -132,16 +132,18 @@ void DeviceStatusSrvStub::InitDrag()
             &DeviceStatusSrvStub::GetDragSummaryStub },
         { static_cast<uint32_t>(DeviceInterfaceCode::ENTER_TEXT_EDITOR_AREA),
             &DeviceStatusSrvStub::EnterTextEditorAreaStub },
-        {static_cast<uint32_t>(DeviceInterfaceCode::GET_DRAG_EXTRAINFO),
+        { static_cast<uint32_t>(DeviceInterfaceCode::GET_DRAG_EXTRAINFO),
             &DeviceStatusSrvStub::GetExtraInfoStub },
-        {static_cast<uint32_t>(DeviceInterfaceCode::GET_DRAG_ACTION),
+        { static_cast<uint32_t>(DeviceInterfaceCode::GET_DRAG_ACTION),
             &DeviceStatusSrvStub::GetDragActionStub },
-        {static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_PREVIEW_STYLE),
+        { static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_PREVIEW_STYLE),
             &DeviceStatusSrvStub::UpdatePreviewStyleStub },
-        {static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_PREVIEW_STYLE_WITH_ANIMATION),
+        { static_cast<uint32_t>(DeviceInterfaceCode::UPDATE_PREVIEW_STYLE_WITH_ANIMATION),
             &DeviceStatusSrvStub::UpdatePreviewStyleWithAnimationStub },
-        {static_cast<uint32_t>(DeviceInterfaceCode::ADD_PRIVILEGE),
-            &DeviceStatusSrvStub::AddPrivilegeStub }
+        { static_cast<uint32_t>(DeviceInterfaceCode::ADD_PRIVILEGE),
+            &DeviceStatusSrvStub::AddPrivilegeStub },
+        { static_cast<uint32_t>(DeviceInterfaceCode::ADD_SELECTED_PIXELMAP),
+            &DeviceStatusSrvStub::AddSelectedPixelMapStub }
     };
     connFuncs_.insert(dragFuncs.begin(), dragFuncs.end());
 }
@@ -861,6 +863,20 @@ int32_t DeviceStatusSrvStub::AddPrivilegeStub(MessageParcel &data, MessageParcel
         return ret;
     }
     return RET_OK;
+}
+
+int32_t DeviceStatusSrvStub::AddSelectedPixelMapStub(MessageParcel &data, MessageParcel &reply)
+{
+    CALL_DEBUG_ENTER;
+    auto addSelectPixelMap = Media::PixelMap::Unmarshalling(data);
+    CHKPR(addSelectPixelMap, RET_ERR);
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = std::shared_ptr<OHOS::Media::PixelMap>(addSelectPixelMap);
+    CHKPR(pixelMap, RET_ERR);
+    int32_t ret = AddSelectedPixelMap(pixelMap);
+    if (ret != RET_OK) {
+        FI_HILOGE("Add selected pixelMap failed, ret:%{public}d", ret);
+    }
+    return ret;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

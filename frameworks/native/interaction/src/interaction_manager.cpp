@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -201,6 +201,12 @@ int32_t InteractionManager::GetExtraInfo(std::string &extraInfo)
 int32_t InteractionManager::AddPrivilege()
 {
     return INTER_MGR_IMPL.AddPrivilege();
+}
+
+int32_t InteractionManager::AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap,
+    std::function<void(bool)> callback)
+{
+    return INTER_MGR_IMPL.AddSelectedPixelMap(pixelMap, callback);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

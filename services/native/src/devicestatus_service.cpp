@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1205,6 +1205,17 @@ int32_t DeviceStatusService::AddPrivilege()
         return RET_ERR;
     }
     return RET_OK;
+}
+
+int32_t DeviceStatusService::AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = delegateTasks_.PostSyncTask(
+        std::bind(&DragManager::AddSelectedPixelMap, &dragMgr_, pixelMap));
+    if (ret != RET_OK) {
+        FI_HILOGE("Add selected pixelMap failed, ret:%{public}d", ret);
+    }
+    return ret;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

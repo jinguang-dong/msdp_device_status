@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,7 @@ public:
     int32_t OnNotifyHideIcon(const StreamClient& client, NetPacket& pkt);
     int32_t OnStateChangedMessage(const StreamClient &client, NetPacket &pkt);
     int32_t OnDragStyleChangedMessage(const StreamClient &client, NetPacket &pkt);
+    int32_t OnAddSelectedPixelMapResult(const StreamClient &client, NetPacket &pkt);
     int32_t AddDraglistener(DragListenerPtr listener);
     int32_t RemoveDraglistener(DragListenerPtr listener);
     int32_t AddSubscriptListener(SubscriptListenerPtr listener);
@@ -63,6 +64,7 @@ public:
     int32_t GetDragAction(DragAction &dragAction);
     int32_t GetExtraInfo(std::string &extraInfo);
     int32_t AddPrivilege();
+    int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap, std::function<void(bool)> callback);
 
 private:
     std::mutex mtx_;
@@ -71,6 +73,7 @@ private:
     std::list<DragListenerPtr> dragListener_;
     std::shared_ptr<IStartDragListener> startDragListener_ { nullptr };
     std::list<SubscriptListenerPtr> subscriptListener_;
+    std::function<void(bool)> addSelectedPixelMapCallback_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

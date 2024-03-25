@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,6 +81,7 @@ public:
     int32_t GetDragAction(DragAction &dragAction) const;
     int32_t GetExtraInfo(std::string &extraInfo) const;
     int32_t AddPrivilege(int32_t tokenId);
+    int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
     int32_t RotateDragWindow(Rosen::Rotation rotation) override;
 #ifdef OHOS_DRAG_ENABLE_INTERCEPTOR
     class InterceptorConsumer : public MMI::IInputEventConsumer {
@@ -132,7 +133,7 @@ private:
     inline std::string GetDragStyleName(DragCursorStyle style);
     DragCursorStyle GetRealDragStyle(DragCursorStyle style);
     void GetDragBehavior(const DragDropResult &dropResult, DragBehavior &dragBehavior);
-
+    int32_t NotifyAddSelectedPixelMapResult(bool result);
 private:
     int32_t timerId_ { -1 };
     StateChangeNotify stateNotify_;
