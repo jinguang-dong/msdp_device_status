@@ -328,6 +328,7 @@ int32_t CoordinationSM::ActivateCoordination(const std::string &remoteNetworkId,
     UpdateMouseLocation();
     if (OpenInputSoftbus(remoteNetworkId) != RET_OK) {
         FI_HILOGE("Open input softbus failed, remoteNetworkId:%{public}s", GetAnonyString(remoteNetworkId).c_str());
+        COOR_EVENT_MGR->OnStart(CoordinationMessage::ACTIVATE_FAIL);
         return COOPERATOR_FAIL;
     }
 
@@ -408,10 +409,8 @@ void CoordinationSM::StartRemoteCoordination(const std::string &remoteNetworkId,
         FI_HILOGE("Posting async task failed");
     }
     isStarting_ = true;
+    MMI::InputManager::GetInstance()->SetPointerVisible(false);
     MMI::InputManager::GetInstance()->EnableInputDevice(true);
-    if (!COOR_DEV_MGR->HasLocalPointerDevice()) {
-        MMI::InputManager::GetInstance()->SetPointerVisible(false);
-    }
     if (buttonIsPressed) {
         StartPointerEventFilter();
         COOR_SOFTBUS_ADAPTER->NotifyFilterAdded(sinkNetworkId_);
