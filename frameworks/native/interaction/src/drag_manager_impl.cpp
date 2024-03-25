@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -302,6 +302,33 @@ int32_t DragManagerImpl::GetExtraInfo(std::string &extraInfo)
 int32_t DragManagerImpl::AddPrivilege()
 {
     return DeviceStatusClient::GetInstance().AddPrivilege();
+}
+
+int32_t DragManagerImpl::OnAddSelectedPixelMapResult(const StreamClient &client, NetPacket &pkt)
+{
+    CALL_DEBUG_ENTER;
+    bool result = false;
+
+    pkt >> result;
+    if (pkt.ChkRWError()) {
+        FI_HILOGE("Packet read coordination msg failed");
+        return RET_ERR;
+    }
+    CHKPR(addSelectedPixelMapCallback_, RET_ERR);
+    addSelectedPixelMapCallback_(result);
+    return RET_OK;
+}
+
+int32_t DragManagerImpl::AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap,
+    std::function<void(bool)> callback)
+{
+    CALL_DEBUG_ENTER;
+    CHKPR(pixelMap, RET_ERR);
+    CHKPR(callback, RET_ERR);
+
+    std::lock_guard<std::mutex> guard(mtx_);
+    addSelectedPixelMapCallback_ = callback;
+    return DeviceStatusClient::GetInstance().AddSelectedPixelMap(pixelMap);
 }
 } // namespace DeviceStatus
 } // namespace Msdp
