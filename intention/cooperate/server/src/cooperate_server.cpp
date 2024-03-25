@@ -155,6 +155,23 @@ int32_t CooperateServer::GetParam(CallingContext &context, uint32_t id, MessageP
             CHKPR(cooperate, RET_ERR);
             return cooperate->GetCooperateState(context.pid, param.userData, param.networkId);
         }
+        case CooperateRequestID::GET_COOPERATE_STATE_SYNC: {
+            GetCooperateStateSyncParam param;
+            if (!param.Unmarshalling(data)) {
+                FI_HILOGE("GetCooperateStateParam::Unmarshalling fail");
+                return RET_ERR;
+            }
+            CHKPR(context_, RET_ERR);
+            ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
+            CHKPR(cooperate, RET_ERR);
+            bool state { false };
+            if(cooperate->GetCooperateState(context.pid, param.udId, state) != RET_OK){
+                FI_HILOGE("GetCooperateState fail");
+                return RET_ERR;
+            }
+            state = reply.state;
+            return RET_OK;
+        }
         default: {
             FI_HILOGE("Unexpected request ID (%{public}u)", id);
             return RET_ERR;

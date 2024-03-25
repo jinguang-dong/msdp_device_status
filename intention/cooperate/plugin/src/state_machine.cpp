@@ -28,6 +28,9 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace Cooperate {
+namespace {
+    const std::string COOPERATE_SWITCH { "currentStatus" };
+} // namespace
 
 StateMachine::StateMachine(IContext *env)
     : env_(env)
@@ -131,7 +134,13 @@ void StateMachine::DisableCooperate(Context &context, const CooperateEvent &even
 }
 
 void StateMachine::GetCooperateState(Context &context, const CooperateEvent &event)
-{}
+{
+    CALL_DEBUG_ENTER;
+    GetCooperateStateEvent CooperateEvent = std::get<GetCooperateStateEvent>(event.event);
+    bool state { false };
+    context.ddp_.GetProperty(CooperateEvent.networkId,COOPERATE_SWITCH,state);
+    Transfer(context, event);    
+}
 
 void StateMachine::OnBoardOnline(Context &context, const CooperateEvent &event)
 {
