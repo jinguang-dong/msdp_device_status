@@ -153,11 +153,10 @@ int32_t Cooperate::GetCooperateState(int32_t pid, int32_t userData, const std::s
     return RET_OK;
 }
 
-int32_t Cooperate::GetCooperateState(int32_t pid, const std::string &udId, bool &state)
+int32_t Cooperate::GetCooperateState(const std::string &udId, bool &state)
 {
     CALL_DEBUG_ENTER;
-    context_.GetDP.GetProperty(udId,COOPERATE_SWITCH,state);
-    return RET_OK;
+    return context_.GetDP().GetProperty(udId, COOPERATE_SWITCH, state);
 }
 
 void Cooperate::Dump(int32_t fd)

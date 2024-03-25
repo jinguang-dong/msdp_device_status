@@ -28,6 +28,7 @@ enum CooperateRequestID : uint32_t {
     REGISTER_HOTAREA_LISTENER,
     UNREGISTER_HOTAREA_LISTENER,
     GET_COOPERATE_STATE,
+    GET_COOPERATE_STATE_SYNC,
 };
 
 struct StartCooperateParam final : public ParamBase {

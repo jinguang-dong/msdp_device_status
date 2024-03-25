@@ -36,8 +36,8 @@ struct DefaultReply final : public ParamBase {
 };
 
 struct BoolenReply final : public ParamBase {
-    DefaultParam() = default;
-    DefaultParam(bool state);
+    BoolenReply() = default;
+    BoolenReply(bool state);
     bool Marshalling(MessageParcel &parcel) const override;
     bool Unmarshalling(MessageParcel &parcel) override;
     bool state { false };

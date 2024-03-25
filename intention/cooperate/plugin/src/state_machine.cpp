@@ -28,9 +28,6 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace Cooperate {
-namespace {
-    const std::string COOPERATE_SWITCH { "currentStatus" };
-} // namespace
 
 StateMachine::StateMachine(IContext *env)
     : env_(env)
@@ -134,13 +131,7 @@ void StateMachine::DisableCooperate(Context &context, const CooperateEvent &even
 }
 
 void StateMachine::GetCooperateState(Context &context, const CooperateEvent &event)
-{
-    CALL_DEBUG_ENTER;
-    GetCooperateStateEvent CooperateEvent = std::get<GetCooperateStateEvent>(event.event);
-    bool state { false };
-    context.ddp_.GetProperty(CooperateEvent.networkId,COOPERATE_SWITCH,state);
-    Transfer(context, event);    
-}
+{}
 
 void StateMachine::OnBoardOnline(Context &context, const CooperateEvent &event)
 {
@@ -150,7 +141,7 @@ void StateMachine::OnBoardOnline(Context &context, const CooperateEvent &event)
     auto ret = onlineBoards_.insert(onlineEvent.networkId);
     if (ret.second) {
         FI_HILOGD("Watch \'%{public}s\'", Utility::Anonymize(onlineEvent.networkId));
-        context.ddp_.AddWatch(onlineEvent.networkId);
+        env_->GetDP().AddWatch(onlineEvent.networkId);
         Transfer(context, event);
     }
 }
@@ -163,7 +154,7 @@ void StateMachine::OnBoardOffline(Context &context, const CooperateEvent &event)
     if (auto iter = onlineBoards_.find(offlineEvent.networkId); iter != onlineBoards_.end()) {
         onlineBoards_.erase(iter);
         FI_HILOGD("Remove watch \'%{public}s\'", Utility::Anonymize(offlineEvent.networkId));
-        context.ddp_.RemoveWatch(offlineEvent.networkId);
+        env_->GetDP().RemoveWatch(offlineEvent.networkId);
         Transfer(context, event);
     }
 }
@@ -262,7 +253,7 @@ void StateMachine::RemoveWatches(Context &context)
     for (auto iter = onlineBoards_.begin();
          iter != onlineBoards_.end(); iter = onlineBoards_.begin()) {
         FI_HILOGD("Remove watch \'%{public}s\'", Utility::Anonymize(*iter));
-        context.ddp_.RemoveWatch(*iter);
+        env_->GetDP().RemoveWatch(*iter);
         onlineBoards_.erase(iter);
     }
 }

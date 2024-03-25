@@ -165,11 +165,14 @@ int32_t CooperateServer::GetParam(CallingContext &context, uint32_t id, MessageP
             ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
             CHKPR(cooperate, RET_ERR);
             bool state { false };
-            if(cooperate->GetCooperateState(context.pid, param.udId, state) != RET_OK){
-                FI_HILOGE("GetCooperateState fail");
+            if (cooperate->GetCooperateState(param.udId, state) != RET_OK) {
+                FI_HILOGE("GetCooperateState failed");
                 return RET_ERR;
             }
-            state = reply.state;
+            if (!BoolenReply(state).Marshalling(reply)) {
+                FI_HILOGE("Marshalling state failed");
+                return RET_ERR;
+            }
             return RET_OK;
         }
         default: {

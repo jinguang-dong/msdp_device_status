@@ -42,8 +42,7 @@ bool DefaultReply::Unmarshalling(MessageParcel &parcel)
     return true;
 }
 
-BoolenReply::BoolenReply(bool state)
-    : state(state)
+BoolenReply::BoolenReply(bool state) : state(state)
 {}
 
 bool BoolenReply::Marshalling(MessageParcel &parcel) const

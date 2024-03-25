@@ -175,18 +175,13 @@ int32_t CooperateClient::GetCooperateState(ITunnelClient &tunnel, const std::str
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
-    GetCooperateState param { udId };
+    GetCooperateStateSyncParam param { udId };
     BoolenReply reply;
-
     if (tunnel.GetParam(Intention::COOPERATE, CooperateRequestID::GET_COOPERATE_STATE_SYNC, param, reply) != RET_OK) {
         FI_HILOGE("Get cooperate state failed");
         return RET_ERR;
     }
-    MessageParcel replyParcel;
-    if (!reply.Unmarshalling(replyParcel)) {
-        FI_HILOGE("BoolenReply::Unmarshalling fail");
-        return RET_ERR;
-    }
+    state = reply.state;
     return RET_OK;
 }
 

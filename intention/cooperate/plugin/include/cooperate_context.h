@@ -43,6 +43,7 @@ public:
     void Disable();
 
     Channel<CooperateEvent>::Sender Sender() const;
+    IDDPAdapter& GetDP() const;
     std::string Local() const;
     std::string Peer() const;
     int32_t StartDeviceId() const;
@@ -60,7 +61,6 @@ public:
     void OnPointerEvent(const InputPointerEvent &event);
 
     DDMAdapter ddm_;
-    DDPAdapter ddp_;
     DSoftbusHandler dsoftbus_;
     EventManager eventMgr_;
     HotArea hotArea_;
