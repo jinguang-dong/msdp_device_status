@@ -47,6 +47,8 @@ ohos_source_set("intention_timer_manager") {
     "${device_status_utils_path}:devicestatus_util",
   ]
 
+  public_external_deps = [ "eventhandler:libeventhandler" ]
+
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",

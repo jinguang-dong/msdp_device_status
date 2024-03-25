@@ -39,6 +39,8 @@ ohos_source_set("devicestatus_vdev") {
 
   deps = [ "${device_status_utils_path}:devicestatus_util" ]
 
+  public_external_deps = [ "eventhandler:libeventhandler" ]
+
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
