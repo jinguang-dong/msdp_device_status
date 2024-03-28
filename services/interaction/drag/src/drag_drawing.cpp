@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,7 +126,6 @@ constexpr float BEZIER_040 { 0.40f };
 constexpr float BEZIER_060 { 0.60f };
 constexpr float BEZIER_067 { 0.67f };
 constexpr float BEZIER_100 { 1.00f };
-constexpr float DEFAULT_OPACITY { 0.95f };
 constexpr float MAX_OPACITY { 1.0f };
 constexpr float MIN_OPACITY { 0.4f };
 constexpr int32_t TIME_DRAG_CHANGE_STYLE { 50 };
@@ -962,6 +961,7 @@ void DragDrawing::InitDrawingInfo(const DragData &dragData)
     float scalingValue = 0.0f;
     if (dragOriginDpi > EPSILON) {
         scalingValue = GetScaling() / dragOriginDpi;
+        CHKPV(g_drawingInfo.pixelMap);
         g_drawingInfo.pixelMap->scale(scalingValue, scalingValue, Media::AntiAliasingOption::HIGH);
     }
     g_drawingInfo.pixelMapX = dragData.shadowInfos.front().x;
@@ -985,6 +985,7 @@ void DragDrawing::InitDrawingInfo(const DragData &dragData)
         std::shared_ptr<Media::PixelMap> pixelMap = dragData.shadowInfos[i].pixelMap;
         if (dragOriginDpi > EPSILON) {
             scalingValue = GetScaling() / dragOriginDpi;
+            CHKPV(pixelMap);
             pixelMap->scale(scalingValue, scalingValue, Media::AntiAliasingOption::HIGH);
         }
         g_drawingInfo.multiSelectedPixelMaps.emplace_back(pixelMap);
@@ -1448,12 +1449,11 @@ bool DragDrawing::ParserExtraInfo(const std::string &extraInfoStr, ExtraInfo &ex
     }
     cJSON *opacity = cJSON_GetObjectItemCaseSensitive(extraInfoParser.json, "dip_opacity");
     if (cJSON_IsNumber(opacity)) {
-        extraInfo.opacity = DEFAULT_OPACITY;
-    }
-    if ((opacity->valuedouble) > MAX_OPACITY || (opacity->valuedouble) < MIN_OPACITY) {
-        FI_HILOGE("Parser opacity limits abnormal, ret:%{public}f", opacity->valuedouble);
-    } else {
-        extraInfo.opacity = static_cast<float>(opacity->valuedouble);
+        if ((opacity->valuedouble) > MAX_OPACITY || (opacity->valuedouble) < MIN_OPACITY) {
+            FI_HILOGE("Parser opacity limits abnormal, opacity:%{public}f", opacity->valuedouble);
+        } else {
+            extraInfo.opacity = static_cast<float>(opacity->valuedouble);
+        }
     }
     return true;
 }
@@ -1811,11 +1811,18 @@ void DragDrawing::MultiSelectedAnimation(int32_t positionX, int32_t positionY, i
         } else {
             protocol.SetDuration(LONG_DURATION);
         }
+        CHKPV(g_drawingInfo.pixelMap);
+        CHKPV(multiSelectedNode);
+        CHKPV(multiSelectedPixelMap);
+        int32_t multiSelectedPositionX = positionX + (g_drawingInfo.pixelMap->GetWidth() / TWICE_SIZE) -
+            (multiSelectedPixelMap->GetWidth() / TWICE_SIZE);
+        int32_t multiSelectedPositionY = positionY + (g_drawingInfo.pixelMap->GetHeight() / TWICE_SIZE) -
+            (multiSelectedPixelMap->GetHeight() / TWICE_SIZE);
         Rosen::RSNode::Animate(protocol, Rosen::RSAnimationTimingCurve::EASE_IN_OUT, [&]() {
-            multiSelectedNode->SetBounds(positionX, positionY + adjustSize, multiSelectedPixelMap->GetWidth(),
-                multiSelectedPixelMap->GetHeight());
-            multiSelectedNode->SetFrame(positionX, positionY + adjustSize, multiSelectedPixelMap->GetWidth(),
-                multiSelectedPixelMap->GetHeight());
+            multiSelectedNode->SetBounds(multiSelectedPositionX, multiSelectedPositionY + adjustSize,
+                multiSelectedPixelMap->GetWidth(), multiSelectedPixelMap->GetHeight());
+            multiSelectedNode->SetFrame(multiSelectedPositionX, multiSelectedPositionY + adjustSize,
+                multiSelectedPixelMap->GetWidth(), multiSelectedPixelMap->GetHeight());
         });
     }
 }
