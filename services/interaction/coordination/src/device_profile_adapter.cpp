@@ -82,7 +82,7 @@ bool DeviceProfileAdapter::GetCrossingSwitchState(const std::string &udId)
             ret, GetAnonyString(udId).c_str());
     }
     bool state = (profile.GetCharacteristicValue() == "true" ? true : false);
-    FI_HILOGD("GetCrossingSwitchState for udId:%{public}s successfully, state:%{public}s",
+    FI_HILOGI("GetCrossingSwitchState for udId:%{public}s successfully, state:%{public}s",
         GetAnonyString(udId).c_str(),  state ? "true" : "false");
     return state;
 }
@@ -96,6 +96,7 @@ int32_t DeviceProfileAdapter::RegisterCrossingStateListener(const std::string &n
         FI_HILOGE("RegisterProfileListener failed, networkId:%{public}s", GetAnonyString(networkId).c_str());
         return RET_ERR;
     }
+    FI_HILOGI("RegisterCrossingStateListener successfully, networkId:%{public}s", GetAnonyString(networkId).c_str());
     return RET_OK;
 }
 
@@ -153,6 +154,7 @@ int32_t DeviceProfileAdapter::RegisterProfileListener(const std::string &network
         .dpCallback = callback
     };
     crossingSwitchListener_.emplace(networkId, switchListener);
+    FI_HILOGI("RegisterProfileListener successfully, networkId:%{public}s", GetAnonyString(networkId).c_str());
     return RET_OK;
 }
 
@@ -169,6 +171,7 @@ int32_t DeviceProfileAdapter::UnregisterProfileListener(const std::string &netwo
         return RET_ERR;
     }
     crossingSwitchListener_.erase(networkId);
+    FI_HILOGI("UnregisterProfileListener successfully, networkId:%{public}s", GetAnonyString(networkId).c_str());
     return RET_OK;
 }
 
@@ -198,7 +201,7 @@ int32_t DeviceProfileAdapter::OnProfileChanged(const CharacteristicProfile &prof
     auto switchListener = crossingSwitchListener_[networkId];
     CHKPR(switchListener.dpCallback, RET_ERR);
     bool state = (profile.GetCharacteristicValue() == "true" ? true : false);
-    FI_HILOGE("UdId:%{public}s, networkId:%{public}s, state:%{public}s",
+    FI_HILOGI("UdId:%{public}s, networkId:%{public}s, state:%{public}s",
         GetAnonyString(udId).c_str(), GetAnonyString(networkId).c_str(), state ? "true" : "false");
     switchListener.dpCallback(networkId, state);
     return RET_OK;
