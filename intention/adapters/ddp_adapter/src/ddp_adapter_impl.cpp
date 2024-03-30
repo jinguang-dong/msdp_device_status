@@ -117,7 +117,7 @@ int32_t DDPAdapterImpl::RegisterProfileListener(const std::string &networkId)
         new (std::nothrow) DeviceProfileChangeListener(shared_from_this());
     CHKPR(subscribeDPChangeListener, RET_ERR);
     subscribeInfo.SetListener(subscribeDPChangeListener);
-    if (int32_t ret = DDP_CLIENT.SubscribeDeviceProfile(subscribeInfo) != RET_OK) {
+    if (int32_t ret = DDP_CLIENT.SubscribeDeviceProfile(subscribeInfo); ret != RET_OK) {
         FI_HILOGE("SubscribeDeviceProfile failed, ret:%{public}d, udId:%{public}s",
             ret, Utility::Anonymize(udId));
         return RET_ERR;
@@ -136,7 +136,7 @@ int32_t DDPAdapterImpl::UnregisterProfileListener(const std::string &networkId)
         return RET_ERR;
     }
     auto subscribeInfo = crossingSwitchSubscribeInfo_[networkId];
-    if (int32_t ret = DDP_CLIENT.UnSubscribeDeviceProfile(subscribeInfo) != RET_OK) {
+    if (int32_t ret = DDP_CLIENT.UnSubscribeDeviceProfile(subscribeInfo); ret != RET_OK) {
         FI_HILOGE("UnSubscribeDeviceProfile failed, ret:%{public}d", ret);
         return RET_ERR;
     }
@@ -196,8 +196,8 @@ int32_t DDPAdapterImpl::GetProperty(const std::string &networkId, const std::str
     CALL_DEBUG_ENTER;
     std::string udId = GetUdIdByNetworkId(networkId);
     DistributedDeviceProfile::CharacteristicProfile profile;
-    if (int32_t ret = DDP_CLIENT.GetCharacteristicProfile(udId, SERVICE_ID, CROSSING_SWITCH_STATE, profile)
-        != RET_OK) {
+    if (int32_t ret = DDP_CLIENT.GetCharacteristicProfile(udId, SERVICE_ID, CROSSING_SWITCH_STATE, profile);
+        ret != RET_OK) {
         FI_HILOGE("GetCharacteristicProfile failed, ret:%{public}d, udId:%{public}s",
             ret, Utility::Anonymize(udId));
         return RET_ERR;
@@ -316,7 +316,7 @@ int32_t DDPAdapterImpl::PutCharacteristicProfile(const std::string &profileStr)
     characteristicProfile.SetServiceName(SERVICE_ID);
     characteristicProfile.SetCharacteristicKey(CROSSING_SWITCH_STATE);
     characteristicProfile.SetCharacteristicValue(profileStr);
-    if (int32_t ret = DDP_CLIENT.PutCharacteristicProfile(characteristicProfile) != RET_OK) {
+    if (int32_t ret = DDP_CLIENT.PutCharacteristicProfile(characteristicProfile); ret != RET_OK) {
         FI_HILOGE("PutCharacteristicProfile failed, ret:%{public}d", ret);
         return RET_ERR;
     }
@@ -351,7 +351,7 @@ std::string DDPAdapterImpl::GetLocalNetworkId()
 {
     auto packageName = GetCurrentPackageName();
     OHOS::DistributedHardware::DmDeviceInfo dmDeviceInfo;
-    if (int32_t errCode = DSTB_HARDWARE.GetLocalDeviceInfo(packageName, dmDeviceInfo) != RET_OK) {
+    if (int32_t errCode = DSTB_HARDWARE.GetLocalDeviceInfo(packageName, dmDeviceInfo); errCode != RET_OK) {
         FI_HILOGE("GetLocalBasicInfo failed, errCode:%{public}d", errCode);
         return {};
     }
@@ -380,7 +380,8 @@ std::string DDPAdapterImpl::GetNetworkIdByUdId(const std::string &udId)
 std::string DDPAdapterImpl::GetUdIdByNetworkId(const std::string &networkId)
 {
     std::string udId { "Empty" };
-    if (int32_t errCode = DSTB_HARDWARE.GetUdidByNetworkId(GetCurrentPackageName(), networkId, udId) != RET_OK) {
+    if (int32_t errCode = DSTB_HARDWARE.GetUdidByNetworkId(GetCurrentPackageName(), networkId, udId);
+        errCode != RET_OK) {
         FI_HILOGE("GetUdIdByNetworkId failed, errCode:%{public}d, networkId:%{public}s, udId:%{public}s", errCode,
             Utility::Anonymize(networkId), Utility::Anonymize(udId));
     }

@@ -140,6 +140,11 @@ Context::Context(IContext *env)
       inputEventBuilder_(env), inputEventInterceptor_(env), env_(env)
 {}
 
+IDDPAdapter& Context::GetDP() const
+{
+    return env_->GetDP();
+}
+
 void Context::AttachSender(Channel<CooperateEvent>::Sender sender)
 {
     sender_ = sender;
@@ -284,6 +289,31 @@ void Context::ResetCursorPosition()
     };
     SetCursorPosition(defaultCursorPos);
 }
+
+
+#ifdef ENABLE_PERFORMANCE_CHECK
+void Context::StartTrace(const std::string &name)
+{
+    std::lock_guard guard { lock_ };
+    if (traces_.find(name) != traces_.end()) {
+        return;
+    }
+    traces_.emplace(name, std::chrono::steady_clock::now());
+    FI_HILOGI("Start tracing \'%{public}s\'", name.c_str());
+}
+
+void Context::FinishTrace(const std::string &name)
+{
+    std::lock_guard guard { lock_ };
+    if (auto iter = traces_.find(name); iter != traces_.end()) {
+        FI_HILOGI("Finish tracing \'%{public}s\', elapsed:%{public}lld ms", name.c_str(),
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now() - iter->second).count());
+        traces_.erase(iter);
+    }
+}
+#endif // ENABLE_PERFORMANCE_CHECK
+
 } // namespace Cooperate
 } // namespace DeviceStatus
 } // namespace Msdp
