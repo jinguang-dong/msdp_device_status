@@ -11,16 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! data definitions.
+//! IPC data definitions.
 
-mod ipc_impl;
-mod plugin_manager;
-
-pub use ipc_impl::basic::{AllocSocketPairParam, BasicParamID};
-pub use ipc_impl::coordination::{
-    GeneralCoordinationParam, GetCoordinationStateParam, StartCoordinationParam,
-    StopCoordinationParam,
-};
-pub use ipc_impl::default::{CallingContext, DefaultReply};
-pub use ipc_impl::drag::{CDragData, DragData};
-pub use plugin_manager::{IPlugin, Intention};
+pub mod basic;
+pub mod coordination;
+pub mod default;
+pub mod drag;

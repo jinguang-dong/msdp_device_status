@@ -1,32 +1,30 @@
-/*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright (C) 2023 Huawei Device Co., Ltd.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 //! IPC data definitions of DRAG module.
 
-use std::ffi::{ c_char, CString };
-use std::fmt::{ Display, Formatter, Error };
-
-use hilog_rust::{ info, hilog, HiLogLabel, LogType };
-use ipc_rust::{ BorrowedMsgParcel, Serialize, Deserialize, IpcResult };
+use std::ffi::{c_char, CString};
+use std::fmt::{Display, Error, Formatter};
 
 use fusion_utils_rust::call_debug_enter;
+use hilog_rust::{hilog, info, HiLogLabel, LogType};
+use ipc::parcel::{Deserialize, MsgParcel, Serialize};
+use ipc::IpcResult;
 
 const LOG_LABEL: HiLogLabel = HiLogLabel {
     log_type: LogType::LogCore,
     domain: 0xD002220,
-    tag: "FusionDragData"
+    tag: "FusionDragData",
 };
 
 /// C representation of [`ShadowInfo`].
@@ -59,8 +57,7 @@ pub struct ShadowInfo {
 
 impl ShadowInfo {
     /// Converts `CShadowInfo` type to `ShadowInfo` type
-    pub fn from_c(value: &mut CShadowInfo) -> Self
-    {
+    pub fn from_c(value: &mut CShadowInfo) -> Self {
         call_debug_enter!("ShadowInfo::from_c");
         Self {
             x: value.x,
@@ -70,8 +67,7 @@ impl ShadowInfo {
 }
 
 impl Serialize for ShadowInfo {
-    fn serialize(&self, parcel: &mut BorrowedMsgParcel<'_>) -> IpcResult<()>
-    {
+    fn serialize(&self, parcel: &mut MsgParcel) -> IpcResult<()> {
         call_debug_enter!("ShadowInfo::serialize");
         self.x.serialize(parcel)?;
         self.y.serialize(parcel)?;
@@ -80,8 +76,7 @@ impl Serialize for ShadowInfo {
 }
 
 impl Deserialize for ShadowInfo {
-    fn deserialize(parcel: &BorrowedMsgParcel<'_>) -> IpcResult<Self>
-    {
+    fn deserialize(parcel: &mut MsgParcel) -> IpcResult<Self> {
         call_debug_enter!("ShadowInfo::deserialize");
         let shadow_info = Self {
             x: i32::deserialize(parcel)?,
@@ -115,13 +110,10 @@ pub struct DragData {
 
 impl DragData {
     /// Converts `CDragData` type to `DragData` type
-    pub fn from_c(value: &mut CDragData) -> Self
-    {
+    pub fn from_c(value: &mut CDragData) -> Self {
         call_debug_enter!("DragData::from_c");
         let mut buf: Vec<u8> = Vec::new();
-        let ts = unsafe {
-            std::slice::from_raw_parts(value.buffer, value.buffer_size)
-        };
+        let ts = unsafe { std::slice::from_raw_parts(value.buffer, value.buffer_size) };
         info!(LOG_LABEL, "Fill buffer");
         for item in ts.iter() {
             buf.push(*item);
@@ -142,8 +134,7 @@ impl DragData {
 }
 
 impl Serialize for DragData {
-    fn serialize(&self, parcel: &mut BorrowedMsgParcel<'_>) -> IpcResult<()>
-    {
+    fn serialize(&self, parcel: &mut MsgParcel) -> IpcResult<()> {
         info!(LOG_LABEL, "In DragData::serialize() enter");
         self.shadow_info.serialize(parcel)?;
         self.buffer.serialize(parcel)?;
@@ -159,8 +150,7 @@ impl Serialize for DragData {
 }
 
 impl Deserialize for DragData {
-    fn deserialize(parcel: &BorrowedMsgParcel<'_>) -> IpcResult<Self>
-    {
+    fn deserialize(parcel: &mut MsgParcel) -> IpcResult<Self> {
         info!(LOG_LABEL, "In DragData::deserialize() enter");
         let drag_data = Self {
             shadow_info: ShadowInfo::deserialize(parcel)?,
@@ -178,8 +168,7 @@ impl Deserialize for DragData {
 }
 
 impl Display for DragData {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error>
-    {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         writeln!(f, "\nDragData {{")?;
         writeln!(f, "  shadow_info: {{")?;
         writeln!(f, "    x: {},", self.shadow_info.x)?;
@@ -192,7 +181,11 @@ impl Display for DragData {
         writeln!(f, "  display_x: {},", self.display_x)?;
         writeln!(f, "  display_y: {},", self.display_y)?;
         writeln!(f, "  display_id: {},", self.display_id)?;
-        writeln!(f, "  has_canceled_animation: {},", self.has_canceled_animation)?;
+        writeln!(
+            f,
+            "  has_canceled_animation: {},",
+            self.has_canceled_animation
+        )?;
         writeln!(f, "}}")?;
         Ok(())
     }
