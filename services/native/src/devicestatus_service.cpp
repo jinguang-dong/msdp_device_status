@@ -1183,6 +1183,18 @@ int32_t DeviceStatusService::UpdatePreviewStyleWithAnimation(const PreviewStyle 
     return ret;
 }
 
+int32_t DeviceStatusService::RotateDragWindowSync(const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = delegateTasks_.PostSyncTask(
+        std::bind(&DragManager::RotateDragWindowSync, &dragMgr_, rsTransaction));
+    if (ret != RET_OK) {
+        FI_HILOGE("RotateDragWindowSync failed, ret:%{public}d", ret);
+    }
+    return ret;
+}
+
+
 int32_t DeviceStatusService::GetDragSummary(std::map<std::string, int64_t> &summarys)
 {
     int32_t ret = delegateTasks_.PostSyncTask(

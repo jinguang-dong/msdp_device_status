@@ -28,6 +28,7 @@
 #include "i_start_drag_listener.h"
 #include "i_hotarea_listener.h"
 #include "i_subscript_listener.h"
+#include "transaction/rs_transaction.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -291,6 +292,14 @@ public:
      * @since 11
      */
     int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation);
+
+    /**
+     * @brief Rotate drag window sync.
+     * @param rsTransaction Indicates utterances rotate the sync handle.
+     * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
+     * @since 12
+     */
+    int32_t RotateDragWindowSync(const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr);
 
     /**
      * @brief Obtains data summary of the drag object.

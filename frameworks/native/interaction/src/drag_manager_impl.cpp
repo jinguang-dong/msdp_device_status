@@ -278,6 +278,11 @@ int32_t DragManagerImpl::UpdatePreviewStyleWithAnimation(const PreviewStyle &pre
     return DeviceStatusClient::GetInstance().UpdatePreviewStyleWithAnimation(previewStyle, animation);
 }
 
+int32_t DragManagerImpl::RotateDragWindowSync(const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
+{
+    return DeviceStatusClient::GetInstance().RotateDragWindowSync(rsTransaction);
+}
+
 int32_t DragManagerImpl::GetDragSummary(std::map<std::string, int64_t> &summarys)
 {
     CALL_DEBUG_ENTER;

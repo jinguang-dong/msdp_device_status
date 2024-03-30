@@ -386,6 +386,12 @@ int32_t InteractionManagerImpl::UpdatePreviewStyleWithAnimation(const PreviewSty
     return dragManagerImpl_.UpdatePreviewStyleWithAnimation(previewStyle, animation);
 }
 
+int32_t InteractionManagerImpl::RotateDragWindowSync(const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
+{
+    CALL_DEBUG_ENTER;
+    return dragManagerImpl_.RotateDragWindowSync(rsTransaction);
+}
+
 int32_t InteractionManagerImpl::GetDragSummary(std::map<std::string, int64_t> &summarys)
 {
     CALL_DEBUG_ENTER;
