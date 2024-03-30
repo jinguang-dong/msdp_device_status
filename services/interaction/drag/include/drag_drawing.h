@@ -130,6 +130,21 @@ struct ExtraInfo {
     float opacity { 0.95f };
 };
 
+enum class ScreenSizeType {
+    // Undefined screen width
+    UNDEFINED = 0,
+    // Screen width size is XS, grids is 2
+    XS,
+    // Screen width size is SM, grids is 4
+    SM,
+    // Screen width size is MD, grids is 8
+    MD,
+    // Screen width size is LG, grids is 12
+    LG,
+    // Screen width size is XL, maxi number of grids
+    XL,
+};
+
 struct DrawingInfo {
     std::atomic_bool isRunning { false };
     std::atomic_bool isPreviousDefaultStyle { false };
@@ -203,6 +218,8 @@ public:
     void SetRotation(Rosen::Rotation rotation);
     int32_t RotateDragWindowAsync(Rosen::Rotation rotation);
     int32_t RotateDragWindowSync(const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr);
+    float CalculateWidthScale();
+    float GetMaxWidthScale(int32_t width);
 
 private:
     int32_t CheckDragData(const DragData &dragData);
@@ -286,6 +303,7 @@ private:
     DragWindowRotationInfo DragWindowRotateInfo_;
     int32_t timerId_ {-1};
     IContext* context_ {nullptr};
+    ScreenSizeType currentScreenSize_ = ScreenSizeType::UNDEFINED;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
