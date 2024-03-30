@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,7 +126,6 @@ constexpr float BEZIER_040 { 0.40f };
 constexpr float BEZIER_060 { 0.60f };
 constexpr float BEZIER_067 { 0.67f };
 constexpr float BEZIER_100 { 1.00f };
-constexpr float DEFAULT_OPACITY { 0.95f };
 constexpr float MAX_OPACITY { 1.0f };
 constexpr float MIN_OPACITY { 0.4f };
 constexpr int32_t TIME_DRAG_CHANGE_STYLE { 50 };
@@ -137,6 +136,13 @@ constexpr int32_t TIME_STOP_SUCCESS_STYLE { 150 };
 constexpr int32_t TIME_STOP { 0 };
 constexpr int64_t TIME_SLEEP { 30000 };
 constexpr int32_t INTERRUPT_SCALE { 15 };
+constexpr float MAX_SCREEN_WIDTH_SM { 320.0f };
+constexpr float MAX_SCREEN_WIDTH_MD { 600.0f };
+constexpr float MAX_SCREEN_WIDTH_LG { 840.0f };
+constexpr float MAX_SCREEN_WIDTH_XL { 1024.0f };
+constexpr float SCALE_SM { 3.0f / 4 };
+constexpr float SCALE_MD { 4.0f / 8 };
+constexpr float SCALE_LG { 5.0f / 12 };
 const std::string THREAD_NAME { "os_AnimationEventRunner" };
 const std::string COPY_DRAG_PATH { "/system/etc/device_status/drag_icon/Copy_Drag.svg" };
 const std::string COPY_ONE_DRAG_PATH { "/system/etc/device_status/drag_icon/Copy_One_Drag.svg" };
@@ -248,8 +254,8 @@ int32_t DragDrawing::Init(const DragData &dragData)
         return INIT_FAIL;
     }
     rsUiDirector_->SendMessages();
-    return INIT_SUCCESS;
     FI_HILOGD("leave");
+    return INIT_SUCCESS;
 }
 
 int32_t DragDrawing::CheckDragData(const DragData &dragData)
@@ -358,8 +364,8 @@ int32_t DragDrawing::UpdateShadowPic(const ShadowInfo &shadowInfo)
     Rosen::RSTransaction::FlushImplicitTransaction();
     CHKPR(rsUiDirector_, RET_ERR);
     rsUiDirector_->SendMessages();
-    return RET_OK;
     FI_HILOGD("leave");
+    return RET_OK;
 }
 
 void DragDrawing::OnDragSuccess()
@@ -810,8 +816,8 @@ int32_t DragDrawing::RunAnimation(std::function<int32_t()> cb)
         FI_HILOGE("Send vsync event failed");
         return RET_ERR;
     }
-    return RET_OK;
     FI_HILOGD("leave");
+    return RET_OK;
 }
 
 int32_t DragDrawing::DrawShadow(std::shared_ptr<Rosen::RSCanvasNode> shadowNode)
@@ -824,8 +830,8 @@ int32_t DragDrawing::DrawShadow(std::shared_ptr<Rosen::RSCanvasNode> shadowNode)
     }
     drawPixelMapModifier_ = std::make_shared<DrawPixelMapModifier>();
     shadowNode->AddModifier(drawPixelMapModifier_);
-    return RET_OK;
     FI_HILOGD("leave");
+    return RET_OK;
 }
 
 int32_t DragDrawing::DrawMouseIcon()
@@ -843,8 +849,8 @@ int32_t DragDrawing::DrawMouseIcon()
     }
     drawMouseIconModifier_ = std::make_shared<DrawMouseIconModifier>();
     mouseIconNode->AddModifier(drawMouseIconModifier_);
-    return RET_OK;
     FI_HILOGD("leave");
+    return RET_OK;
 }
 
 int32_t DragDrawing::DrawStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode,
@@ -859,8 +865,8 @@ int32_t DragDrawing::DrawStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNod
     }
     drawSVGModifier_ = std::make_shared<DrawSVGModifier>(stylePixelMap);
     dragStyleNode->AddModifier(drawSVGModifier_);
-    return RET_OK;
     FI_HILOGD("leave");
+    return RET_OK;
 }
 
 int32_t DragDrawing::InitVSync(float endAlpha, float endScale)
@@ -886,8 +892,8 @@ int32_t DragDrawing::InitVSync(float endAlpha, float endScale)
     Rosen::RSTransaction::FlushImplicitTransaction();
     startNum_ = START_TIME;
     needDestroyDragWindow_ = true;
-    return StartVsync();
     FI_HILOGD("leave");
+    return StartVsync();
 }
 
 int32_t DragDrawing::StartVsync()
@@ -958,14 +964,22 @@ void DragDrawing::InitDrawingInfo(const DragData &dragData)
         return;
     }
     g_drawingInfo.pixelMap = dragData.shadowInfos.front().pixelMap;
+    g_drawingInfo.pixelMapX = dragData.shadowInfos.front().x;
+    g_drawingInfo.pixelMapY = dragData.shadowInfos.front().y;
     float dragOriginDpi = DRAG_DATA_MGR.GetDragOriginDpi();
     float scalingValue = 0.0f;
     if (dragOriginDpi > EPSILON) {
         scalingValue = GetScaling() / dragOriginDpi;
+        CHKPV(g_drawingInfo.pixelMap);
         g_drawingInfo.pixelMap->scale(scalingValue, scalingValue, Media::AntiAliasingOption::HIGH);
+        g_drawingInfo.pixelMapX = g_drawingInfo.pixelMapX * scalingValue;
+        g_drawingInfo.pixelMapY = g_drawingInfo.pixelMapY * scalingValue;
     }
-    g_drawingInfo.pixelMapX = dragData.shadowInfos.front().x;
-    g_drawingInfo.pixelMapY = dragData.shadowInfos.front().y;
+    float widthScale = CalculateWidthScale();
+    CHKPV(g_drawingInfo.pixelMap);
+    g_drawingInfo.pixelMap->scale(widthScale, widthScale, Media::AntiAliasingOption::HIGH);
+    g_drawingInfo.pixelMapX = g_drawingInfo.pixelMapX * widthScale;
+    g_drawingInfo.pixelMapY = g_drawingInfo.pixelMapY * widthScale;
     g_drawingInfo.lastPixelMapX = g_drawingInfo.pixelMapX;
     g_drawingInfo.lastPixelMapY = g_drawingInfo.pixelMapY;
     g_drawingInfo.currentDragNum = dragData.dragNum;
@@ -985,6 +999,7 @@ void DragDrawing::InitDrawingInfo(const DragData &dragData)
         std::shared_ptr<Media::PixelMap> pixelMap = dragData.shadowInfos[i].pixelMap;
         if (dragOriginDpi > EPSILON) {
             scalingValue = GetScaling() / dragOriginDpi;
+            CHKPV(pixelMap);
             pixelMap->scale(scalingValue, scalingValue, Media::AntiAliasingOption::HIGH);
         }
         g_drawingInfo.multiSelectedPixelMaps.emplace_back(pixelMap);
@@ -1039,8 +1054,8 @@ int32_t DragDrawing::InitLayer()
         RotateDragWindow(rotation_);
     }
     Rosen::RSTransaction::FlushImplicitTransaction();
-    return RET_OK;
     FI_HILOGD("leave");
+    return RET_OK;
 }
 
 void DragDrawing::InitCanvas(int32_t width, int32_t height)
@@ -1198,8 +1213,8 @@ int32_t DragDrawing::UpdateSvgNodeInfo(xmlNodePtr curNode, int32_t extendSvgWidt
     }
 
     xmlSetProp(curNode, BAD_CAST "viewBox", BAD_CAST tgtViewBox.c_str());
-    return RET_OK;
     FI_HILOGD("leave");
+    return RET_OK;
 }
 
 xmlNodePtr DragDrawing::GetRectNode(xmlNodePtr curNode)
@@ -1215,8 +1230,8 @@ xmlNodePtr DragDrawing::GetRectNode(xmlNodePtr curNode)
         }
         curNode = curNode->next;
     }
-    return curNode;
     FI_HILOGD("leave");
+    return curNode;
 }
 
 xmlNodePtr DragDrawing::UpdateRectNode(int32_t extendSvgWidth, xmlNodePtr curNode)
@@ -1241,7 +1256,6 @@ xmlNodePtr DragDrawing::UpdateRectNode(int32_t extendSvgWidth, xmlNodePtr curNod
     }
     FI_HILOGE("Empty node of XML");
     return nullptr;
-    FI_HILOGD("leave");
 }
 
 void DragDrawing::UpdateTspanNode(xmlNodePtr curNode)
@@ -1277,8 +1291,8 @@ int32_t DragDrawing::ParseAndAdjustSvgInfo(xmlNodePtr curNode)
     curNode = UpdateRectNode(extendSvgWidth, curNode);
     CHKPR(curNode, RET_ERR);
     UpdateTspanNode(curNode);
-    return RET_OK;
     FI_HILOGD("leave");
+    return RET_OK;
 }
 
 std::shared_ptr<Media::PixelMap> DragDrawing::DecodeSvgToPixelMap(
@@ -1312,8 +1326,8 @@ std::shared_ptr<Media::PixelMap> DragDrawing::DecodeSvgToPixelMap(
     Media::DecodeOptions decodeOpts;
     SetDecodeOptions(decodeOpts);
     std::shared_ptr<Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOpts, errCode);
-    return pixelMap;
     FI_HILOGD("leave");
+    return pixelMap;
 }
 
 bool DragDrawing::NeedAdjustSvgInfo()
@@ -1334,8 +1348,8 @@ bool DragDrawing::NeedAdjustSvgInfo()
         (g_drawingInfo.currentDragNum == DRAG_NUM_ONE)) {
         return false;
     }
-    return true;
     FI_HILOGD("leave");
+    return true;
 }
 
 int32_t DragDrawing::GetFilePath(std::string &filePath)
@@ -1368,8 +1382,8 @@ int32_t DragDrawing::GetFilePath(std::string &filePath)
             break;
         }
     }
-    return RET_OK;
     FI_HILOGD("leave");
+    return RET_OK;
 }
 
 void DragDrawing::SetDecodeOptions(Media::DecodeOptions &decodeOpts)
@@ -1448,12 +1462,11 @@ bool DragDrawing::ParserExtraInfo(const std::string &extraInfoStr, ExtraInfo &ex
     }
     cJSON *opacity = cJSON_GetObjectItemCaseSensitive(extraInfoParser.json, "dip_opacity");
     if (cJSON_IsNumber(opacity)) {
-        extraInfo.opacity = DEFAULT_OPACITY;
-    }
-    if ((opacity->valuedouble) > MAX_OPACITY || (opacity->valuedouble) < MIN_OPACITY) {
-        FI_HILOGE("Parser opacity limits abnormal, ret:%{public}f", opacity->valuedouble);
-    } else {
-        extraInfo.opacity = static_cast<float>(opacity->valuedouble);
+        if ((opacity->valuedouble) > MAX_OPACITY || (opacity->valuedouble) < MIN_OPACITY) {
+            FI_HILOGE("Parser opacity limits abnormal, opacity:%{public}f", opacity->valuedouble);
+        } else {
+            extraInfo.opacity = static_cast<float>(opacity->valuedouble);
+        }
     }
     return true;
 }
@@ -1555,8 +1568,8 @@ int32_t DragDrawing::SetNodesLocation(int32_t positionX, int32_t positionY)
     startNum_ = START_TIME;
     needDestroyDragWindow_ = false;
     StartVsync();
-    return RET_OK;
     FI_HILOGD("leave");
+    return RET_OK;
 }
 
 
@@ -1583,7 +1596,6 @@ int32_t DragDrawing::EnterTextEditorArea(bool enable)
     DRAG_DATA_MGR.SetTextEditorAreaFlag(enable);
     FI_HILOGI("EnterTextEditorArea %{public}s successfully", (enable ? "true" : "false"));
     return RET_OK;
-    FI_HILOGD("leave");
 }
 
 float DragDrawing::RadiusVp2Sigma(float radiusVp, float dipScale)
@@ -1605,8 +1617,8 @@ int32_t DragDrawing::UpdatePreviewStyle(const PreviewStyle &previewStyle)
         return RET_ERR;
     }
     Rosen::RSTransaction::FlushImplicitTransaction();
-    return RET_OK;
     FI_HILOGD("leave");
+    return RET_OK;
 }
 
 int32_t DragDrawing::UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
@@ -1652,8 +1664,8 @@ int32_t DragDrawing::UpdatePreviewStyleWithAnimation(const PreviewStyle &preview
             FI_HILOGE("ModifyMultiPreviewStyle failed");
         }
     });
-    return RET_OK;
     FI_HILOGD("leave");
+    return RET_OK;
 }
 
 void DragDrawing::DoDrawMouse()
@@ -1778,8 +1790,8 @@ int32_t DragDrawing::ModifyPreviewStyle(std::shared_ptr<Rosen::RSCanvasNode> nod
             }
         }
     }
-    return RET_OK;
     FI_HILOGD("leave");
+    return RET_OK;
 }
 
 int32_t DragDrawing::ModifyMultiPreviewStyle(const std::vector<PreviewStyle> &previewStyles)
@@ -1811,11 +1823,18 @@ void DragDrawing::MultiSelectedAnimation(int32_t positionX, int32_t positionY, i
         } else {
             protocol.SetDuration(LONG_DURATION);
         }
+        CHKPV(g_drawingInfo.pixelMap);
+        CHKPV(multiSelectedNode);
+        CHKPV(multiSelectedPixelMap);
+        int32_t multiSelectedPositionX = positionX + (g_drawingInfo.pixelMap->GetWidth() / TWICE_SIZE) -
+            (multiSelectedPixelMap->GetWidth() / TWICE_SIZE);
+        int32_t multiSelectedPositionY = positionY + (g_drawingInfo.pixelMap->GetHeight() / TWICE_SIZE) -
+            (multiSelectedPixelMap->GetHeight() / TWICE_SIZE);
         Rosen::RSNode::Animate(protocol, Rosen::RSAnimationTimingCurve::EASE_IN_OUT, [&]() {
-            multiSelectedNode->SetBounds(positionX, positionY + adjustSize, multiSelectedPixelMap->GetWidth(),
-                multiSelectedPixelMap->GetHeight());
-            multiSelectedNode->SetFrame(positionX, positionY + adjustSize, multiSelectedPixelMap->GetWidth(),
-                multiSelectedPixelMap->GetHeight());
+            multiSelectedNode->SetBounds(multiSelectedPositionX, multiSelectedPositionY + adjustSize,
+                multiSelectedPixelMap->GetWidth(), multiSelectedPixelMap->GetHeight());
+            multiSelectedNode->SetFrame(multiSelectedPositionX, multiSelectedPositionY + adjustSize,
+                multiSelectedPixelMap->GetWidth(), multiSelectedPixelMap->GetHeight());
         });
     }
 }
@@ -2335,6 +2354,89 @@ void DrawDragStopModifier::SetStyleAlpha(float alpha)
         styleAlpha_->Set(alpha);
     }
     FI_HILOGD("leave");
+}
+
+float DragDrawing::CalculateWidthScale()
+{
+    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
+    if (display == nullptr) {
+        FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
+        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
+        if (display == nullptr) {
+            FI_HILOGE("Get display info failed, display is nullptr");
+            return DEFAULT_SCALING;
+        }
+    }
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (defaultDisplay == nullptr) {
+        FI_HILOGE("defaultDisplay is nullptr");
+        return DEFAULT_SCALING;
+    }
+    int32_t width = display->GetWidth();
+    float density = defaultDisplay->GetVirtualPixelRatio();
+    FI_HILOGD("density:%{public}f, width:%{public}d", density, width);
+    if (width < MAX_SCREEN_WIDTH_SM * density) {
+        currentScreenSize_ = ScreenSizeType::XS;
+    } else if (width < MAX_SCREEN_WIDTH_MD * density) {
+        currentScreenSize_ = ScreenSizeType::SM;
+    } else if (width < MAX_SCREEN_WIDTH_LG * density) {
+        currentScreenSize_ = ScreenSizeType::MD;
+    } else if (width < MAX_SCREEN_WIDTH_XL * density) {
+        currentScreenSize_ = ScreenSizeType::LG;
+    } else {
+        currentScreenSize_ = ScreenSizeType::XL;
+    }
+    float widthScale = GetMaxWidthScale(width);
+    return widthScale;
+}
+
+float DragDrawing::GetMaxWidthScale(int32_t width)
+{
+    float scale = 1.0;
+    float widthScale = 1.0;
+    if (g_drawingInfo.pixelMap == nullptr) {
+        FI_HILOGE("pixelMap is nullptr");
+        return DEFAULT_SCALING;
+    }
+    int32_t pixelMapWidth = g_drawingInfo.pixelMap->GetWidth();
+    if (pixelMapWidth == 0) {
+        FI_HILOGW("pixelMapWidth is 0");
+        return DEFAULT_SCALING;
+    }
+    switch (currentScreenSize_) {
+        case ScreenSizeType::XS: {
+            return widthScale;
+        }
+        case ScreenSizeType::SM: {
+            scale = width * SCALE_SM;
+            if (pixelMapWidth > scale) {
+                widthScale = scale / pixelMapWidth;
+                return widthScale;
+            }
+            return widthScale;
+        }
+        case ScreenSizeType::MD: {
+            scale = width * SCALE_MD;
+            if (pixelMapWidth > scale) {
+                widthScale = scale / pixelMapWidth;
+                return widthScale;
+            }
+            return widthScale;
+        }
+        case ScreenSizeType::LG: {
+            scale = width * SCALE_LG;
+            if (pixelMapWidth > scale) {
+                widthScale = scale / pixelMapWidth;
+                return widthScale;
+            }
+            return widthScale;
+        }
+        default: {
+            FI_HILOGI("Screen Size Type is XL");
+            break;
+        }
+    }
+    return widthScale;
 }
 } // namespace DeviceStatus
 } // namespace Msdp
