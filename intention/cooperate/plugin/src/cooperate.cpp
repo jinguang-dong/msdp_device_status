@@ -25,6 +25,7 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace Cooperate {
 namespace {
+    const std::string COOPERATE_SWITCH { "currentStatus" };
 } // namespace
 
 Cooperate::Cooperate(IContext *env)
@@ -149,6 +150,13 @@ int32_t Cooperate::GetCooperateState(int32_t pid, int32_t userData, const std::s
             .userData = userData,
             .networkId = networkId,
         }));
+    return RET_OK;
+}
+
+int32_t Cooperate::GetCooperateState(int32_t pid, const std::string &udId, bool &state)
+{
+    CALL_DEBUG_ENTER;
+    context_.GetDP.GetProperty(udId,COOPERATE_SWITCH,state);
     return RET_OK;
 }
 
