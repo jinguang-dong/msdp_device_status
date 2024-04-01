@@ -129,6 +129,21 @@ struct ExtraInfo {
     float opacity { 0.95f };
 };
 
+enum class ScreenSizeType {
+    // Undefined screen width
+    UNDEFINED = 0,
+    // Screen width size is XS, grids is 2
+    XS,
+    // Screen width size is SM, grids is 4
+    SM,
+    // Screen width size is MD, grids is 8
+    MD,
+    // Screen width size is LG, grids is 12
+    LG,
+    // Screen width size is XL, maxi number of grids
+    XL,
+};
+
 struct DrawingInfo {
     std::atomic_bool isRunning { false };
     std::atomic_bool isPreviousDefaultStyle { false };
@@ -196,6 +211,8 @@ public:
     int32_t RotateDragWindow(Rosen::Rotation rotation);
     void SetRotation(Rosen::Rotation rotation);
     int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
+    float CalculateWidthScale();
+    float GetMaxWidthScale(int32_t width);
 
 private:
     int32_t CheckDragData(const DragData &dragData);
@@ -246,6 +263,7 @@ private:
     void UpdateAnimationProtocol(Rosen::RSAnimationTimingProtocol protocol);
     void RotateDisplayXY(int32_t &displayX, int32_t &displayY);
     void RotatePixelMapXY(int32_t &pixelMapX, int32_t &pixelMapY);
+    void ResetAnimationParameter();
     void ResetParameter();
     int32_t DoRotateDragWindow(float rotation);
     int32_t UpdatePixelMapsAngleAndAlpha();
@@ -273,6 +291,7 @@ private:
     bool needRotatePixelMapXY_ { false };
     uint64_t screenId_ { 0 };
     Rosen::Rotation rotation_ { Rosen::Rotation::ROTATION_0 };
+    ScreenSizeType currentScreenSize_ = ScreenSizeType::UNDEFINED;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
