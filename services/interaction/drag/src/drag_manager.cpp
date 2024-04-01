@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1185,6 +1185,49 @@ int32_t DragManager::RotateDragWindow(Rosen::Rotation rotation)
         return RET_OK;
     }
     return dragDrawing_.RotateDragWindow(rotation);
+    FI_HILOGD("leave");
+}
+
+int32_t DragManager::NotifyAddSelectedPixelMapResult(bool result)
+{
+    FI_HILOGD("enter");
+    NetPacket pkt(MessageId::ADD_SELECTED_PIXELMAP_RESULT);
+    pkt << result;
+    if (pkt.ChkRWError()) {
+        FI_HILOGE("Failed to packet write data");
+        return RET_ERR;
+    }
+    CHKPR(dragOutSession_, RET_ERR);
+    if (!dragOutSession_->SendMsg(pkt)) {
+        FI_HILOGE("Failed to send message");
+        return MSG_SEND_FAIL;
+    }
+    return RET_OK;
+    FI_HILOGD("leave");
+}
+
+int32_t DragManager::AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
+{
+    FI_HILOGD("enter");
+    if (dragState_ != DragState::START) {
+        FI_HILOGE("Drag not running");
+        if (NotifyAddSelectedPixelMapResult(false) != RET_OK) {
+            FI_HILOGE("Notify addSelectedPixelMap result failed");
+        }
+        return RET_ERR;
+    }
+    if (dragDrawing_.AddSelectedPixelMap(pixelMap) != RET_OK) {
+        FI_HILOGE("Add select pixelmap fail");
+        if (NotifyAddSelectedPixelMapResult(false) != RET_OK) {
+            FI_HILOGE("Notify addSelectedPixelMap result failed");
+        }
+        return RET_ERR;
+    }
+    DRAG_DATA_MGR.UpdateShadowInfos(pixelMap);
+    if (NotifyAddSelectedPixelMapResult(true) != RET_OK) {
+        FI_HILOGW("Notify addSelectedPixelMap result failed");
+    }
+    return RET_OK;
     FI_HILOGD("leave");
 }
 } // namespace DeviceStatus

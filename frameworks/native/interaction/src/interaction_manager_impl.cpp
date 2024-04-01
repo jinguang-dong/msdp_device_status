@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,7 +72,9 @@ void InteractionManagerImpl::InitMsgHandler()
         {MessageId::DRAG_NOTIFY_HIDE_ICON,
             MsgCallbackBind2(&DragManagerImpl::OnNotifyHideIcon, &dragManagerImpl_)},
         {MessageId::DRAG_STYLE_LISTENER,
-            MsgCallbackBind2(&DragManagerImpl::OnDragStyleChangedMessage, &dragManagerImpl_)}
+            MsgCallbackBind2(&DragManagerImpl::OnDragStyleChangedMessage, &dragManagerImpl_)},
+        {MessageId::ADD_SELECTED_PIXELMAP_RESULT,
+            MsgCallbackBind2(&DragManagerImpl::OnAddSelectedPixelMapResult, &dragManagerImpl_)}
     };
     CHKPV(client_);
     for (auto &it : funs) {
@@ -402,6 +404,13 @@ int32_t InteractionManagerImpl::AddPrivilege()
 {
     CALL_DEBUG_ENTER;
     return dragManagerImpl_.AddPrivilege();
+}
+
+int32_t InteractionManagerImpl::AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap,
+    std::function<void(bool)> callback)
+{
+    CALL_DEBUG_ENTER;
+    return dragManagerImpl_.AddSelectedPixelMap(pixelMap, callback);
 }
 } // namespace DeviceStatus
 } // namespace Msdp
