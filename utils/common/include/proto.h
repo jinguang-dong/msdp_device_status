@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,7 +62,8 @@ enum class MessageId : int32_t {
     DRAG_NOTIFY_RESULT,
     DRAG_STATE_LISTENER,
     DRAG_NOTIFY_HIDE_ICON,
-    DRAG_STYLE_LISTENER
+    DRAG_STYLE_LISTENER,
+    ADD_SELECTED_PIXELMAP_RESULT
 };
 
 enum TokenType : int32_t {
