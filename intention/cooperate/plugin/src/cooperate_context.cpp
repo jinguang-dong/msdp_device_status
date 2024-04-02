@@ -140,6 +140,11 @@ Context::Context(IContext *env)
       inputEventBuilder_(env), inputEventInterceptor_(env), env_(env)
 {}
 
+IDDPAdapter& Context::GetDP() const
+{
+    return env_->GetDP();
+}
+
 void Context::AttachSender(Channel<CooperateEvent>::Sender sender)
 {
     sender_ = sender;

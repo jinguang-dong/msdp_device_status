@@ -43,6 +43,7 @@ public:
     void Disable();
 
     Channel<CooperateEvent>::Sender Sender() const;
+    IDDPAdapter& GetDP() const;
     std::string Local() const;
     std::string Peer() const;
     int32_t StartDeviceId() const;
