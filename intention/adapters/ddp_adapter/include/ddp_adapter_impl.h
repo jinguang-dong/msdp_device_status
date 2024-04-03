@@ -73,10 +73,13 @@ public:
     void RemoveWatch(const std::string &networkId) override;
     void OnProfileChanged(const std::string &networkId) override;
     std::string GetNetworkIdByUdId(const std::string &udId) override;
+    std::string GetUdIdByNetworkId(const std::string &networkId) override;
+    int32_t UpdateCrossingSwitchState(bool state) override;
+    int32_t GetCrossingSwitchState(const std::string &udId, bool &state)override;
 
-    int32_t GetProperty(const std::string &networkId, const std::string &name, bool &value) override;
-    int32_t GetProperty(const std::string &networkId, const std::string &name, int32_t &value) override;
-    int32_t GetProperty(const std::string &networkId, const std::string &name, std::string &value) override;
+    int32_t GetProperty(const std::string &udId, const std::string &name, bool &value) override;
+    int32_t GetProperty(const std::string &udId, const std::string &name, int32_t &value) override;
+    int32_t GetProperty(const std::string &udId, const std::string &name, std::string &value) override;
     int32_t SetProperty(const std::string &name, bool value) override;
     int32_t SetProperty(const std::string &name, int32_t value) override;
     int32_t SetProperty(const std::string &name, const std::string &value) override;
@@ -87,8 +90,7 @@ private:
     std::string GetCurrentPackageName();
     std::string GetLocalNetworkId();
     std::string GetLocalUdId();
-    std::string GetUdIdByNetworkId(const std::string &networkId);
-    int32_t GetProperty(const std::string &networkId, const std::string &name,
+    int32_t GetProperty(const std::string &udId, const std::string &name,
         std::function<int32_t(cJSON *)> parse);
     int32_t SetProperty(const std::string &name, const DPValue &value);
     int32_t GenerateProfileStr(std::string &profileStr);

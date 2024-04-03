@@ -87,7 +87,8 @@ void DeviceProfileObserver::OnProfileChanged(const std::string &networkId)
     FI_HILOGI("Profile of \'%{public}s\' has changed", Utility::Anonymize(networkId));
     bool switchStatus = false;
 
-    int32_t ret = env_->GetDP().GetProperty(networkId, COOPERATE_SWITCH, switchStatus);
+    auto udId = env_->GetDP().GetUdIdByNetworkId(networkId);
+    int32_t ret = env_->GetDP().GetCrossingSwitchState(udId, switchStatus);
     if (ret != RET_OK) {
         FI_HILOGE("Failed to query switch status of \'%{public}s\'", Utility::Anonymize(networkId));
         return;
@@ -230,7 +231,7 @@ NormalizedCoordinate Context::NormalizedCursorPosition() const
 
 void Context::EnableCooperate(const EnableCooperateEvent &event)
 {
-    int32_t ret = env_->GetDP().SetProperty(COOPERATE_SWITCH, true);
+    int32_t ret = env_->GetDP().UpdateCrossingSwitchState(true);
     if (ret != RET_OK) {
         FI_HILOGE("Failed to update switch status");
     }
@@ -238,7 +239,7 @@ void Context::EnableCooperate(const EnableCooperateEvent &event)
 
 void Context::DisableCooperate(const DisableCooperateEvent &event)
 {
-    int32_t ret = env_->GetDP().SetProperty(COOPERATE_SWITCH, false);
+    int32_t ret = env_->GetDP().UpdateCrossingSwitchState(false);
     if (ret != RET_OK) {
         FI_HILOGE("Failed to update switch status");
     }
@@ -299,14 +300,14 @@ void Context::StartTrace(const std::string &name)
         return;
     }
     traces_.emplace(name, std::chrono::steady_clock::now());
-    FI_HILOGI("Start tracing \'%{public}s\'", name.c_str());
+    FI_HILOGI("[PERF]Start tracing \'%{public}s\'", name.c_str());
 }
 
 void Context::FinishTrace(const std::string &name)
 {
     std::lock_guard guard { lock_ };
     if (auto iter = traces_.find(name); iter != traces_.end()) {
-        FI_HILOGI("Finish tracing \'%{public}s\', elapsed:%{public}lld ms", name.c_str(),
+        FI_HILOGI("[PERF]Finish tracing \'%{public}s\', elapsed:%{public}lld ms", name.c_str(),
             std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::steady_clock::now() - iter->second).count());
         traces_.erase(iter);

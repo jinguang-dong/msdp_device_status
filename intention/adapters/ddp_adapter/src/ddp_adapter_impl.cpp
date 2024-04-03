@@ -144,10 +144,40 @@ int32_t DDPAdapterImpl::UnregisterProfileListener(const std::string &networkId)
     return RET_OK;
 }
 
-int32_t DDPAdapterImpl::GetProperty(const std::string &networkId, const std::string &name, bool &value)
+int32_t DDPAdapterImpl::UpdateCrossingSwitchState(bool state)
 {
     CALL_DEBUG_ENTER;
-    return GetProperty(networkId, name, [&name, &value](cJSON *json) {
+    if (PutServiceProfile() != RET_OK) {
+        FI_HILOGE("PutServiceProfile failed");
+        return RET_ERR;
+    }
+    std::string profileStr = (state ? "true" : "false");
+    if (PutCharacteristicProfile(profileStr) != RET_OK) {
+        FI_HILOGE("PutCharacteristicProfile failed");
+        return RET_ERR;
+    }
+    return RET_OK;
+}
+
+int32_t DDPAdapterImpl::GetCrossingSwitchState(const std::string &udId, bool &state)
+{
+    CALL_DEBUG_ENTER;
+    DistributedDeviceProfile::CharacteristicProfile profile;
+    if (int32_t ret = DDP_CLIENT.GetCharacteristicProfile(udId, SERVICE_ID, CROSSING_SWITCH_STATE, profile);
+        ret != RET_OK) {
+        FI_HILOGE("GetCharacteristicProfile failed, ret: %{public}d, udId: %{public}s",
+            ret, Utility::Anonymize(udId));
+    }
+    state = (profile.GetCharacteristicValue() == "true" ? true : false);
+    FI_HILOGD("GetCrossingSwitchState for udId: %{public}s successfully,state: %{public}s",
+        Utility::Anonymize(udId), state ? "true" : "false");
+    return RET_OK;
+}
+
+int32_t DDPAdapterImpl::GetProperty(const std::string &udId, const std::string &name, bool &value)
+{
+    CALL_DEBUG_ENTER;
+    return GetProperty(udId, name, [&name, &value](cJSON *json) {
         FI_HILOGD("Get bool property: %{public}s", name.c_str());
         if (cJSON_IsBool(json)) {
             value = cJSON_IsTrue(json);
@@ -161,10 +191,10 @@ int32_t DDPAdapterImpl::GetProperty(const std::string &networkId, const std::str
     });
 }
 
-int32_t DDPAdapterImpl::GetProperty(const std::string &networkId, const std::string &name, int32_t &value)
+int32_t DDPAdapterImpl::GetProperty(const std::string &udId, const std::string &name, int32_t &value)
 {
     CALL_DEBUG_ENTER;
-    return GetProperty(networkId, name, [&name, &value](cJSON *json) {
+    return GetProperty(udId, name, [&name, &value](cJSON *json) {
         FI_HILOGD("Get integer property: %{public}s", name.c_str());
         if (!cJSON_IsNumber(json)) {
             FI_HILOGE("Unexpected data type");
@@ -175,10 +205,10 @@ int32_t DDPAdapterImpl::GetProperty(const std::string &networkId, const std::str
     });
 }
 
-int32_t DDPAdapterImpl::GetProperty(const std::string &networkId, const std::string &name, std::string &value)
+int32_t DDPAdapterImpl::GetProperty(const std::string &udId, const std::string &name, std::string &value)
 {
     CALL_DEBUG_ENTER;
-    return GetProperty(networkId, name, [&name, &value](cJSON *json) {
+    return GetProperty(udId, name, [&name, &value](cJSON *json) {
         FI_HILOGD("Get string property: %{public}s", name.c_str());
         if (!cJSON_IsString(json) && !cJSON_IsRaw(json)) {
             FI_HILOGE("Unexpected data type");
@@ -190,11 +220,10 @@ int32_t DDPAdapterImpl::GetProperty(const std::string &networkId, const std::str
     });
 }
 
-int32_t DDPAdapterImpl::GetProperty(const std::string &networkId, const std::string &name,
+int32_t DDPAdapterImpl::GetProperty(const std::string &udId, const std::string &name,
     std::function<int32_t(cJSON *json)> parse)
 {
     CALL_DEBUG_ENTER;
-    std::string udId = GetUdIdByNetworkId(networkId);
     DistributedDeviceProfile::CharacteristicProfile profile;
     if (int32_t ret = DDP_CLIENT.GetCharacteristicProfile(udId, SERVICE_ID, CROSSING_SWITCH_STATE, profile);
         ret != RET_OK) {
@@ -326,7 +355,7 @@ int32_t DDPAdapterImpl::PutCharacteristicProfile(const std::string &profileStr)
 int32_t DDPAdapterImpl::PutProfile()
 {
     CALL_DEBUG_ENTER;
-    if(PutServiceProfile() != RET_OK) {
+    if (PutServiceProfile() != RET_OK) {
         FI_HILOGE("PutServiceProfile failed");
         return RET_ERR;
     }

@@ -18,6 +18,7 @@
 #include "cooperate_params.h"
 #include "default_params.h"
 #include "devicestatus_define.h"
+#include "utility.h"
 
 #undef LOG_TAG
 #define LOG_TAG "CooperateServer"
@@ -184,6 +185,8 @@ int32_t CooperateServer::GetParam(CallingContext &context, uint32_t id, MessageP
                 FI_HILOGE("GetCooperateState failed");
                 return RET_ERR;
             }
+            FI_HILOGI("GetCooperateState for udId: %{public}s successfully, state: %{public}s",
+                Utility::Anonymize(param.udId), state ? "true" : "false");
             if (!BoolenReply(state).Marshalling(reply)) {
                 FI_HILOGE("Marshalling state failed");
                 return RET_ERR;

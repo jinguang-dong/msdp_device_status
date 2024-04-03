@@ -125,7 +125,7 @@ int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remot
 
 #ifdef ENABLE_PERFORMANCE_CHECK
     std::ostringstream ss;
-    ss << "start cooperation with " << Utility::Anonymize(remoteNetworkId);
+    ss << "start_cooperation_with_" << Utility::Anonymize(remoteNetworkId);
     context_.StartTrace(ss.str());
 #endif // ENABLE_PERFORMANCE_CHECK
     context_.Sender().Send(CooperateEvent(
@@ -168,7 +168,7 @@ int32_t Cooperate::GetCooperateState(int32_t pid, int32_t userData, const std::s
 int32_t Cooperate::GetCooperateState(const std::string &udId, bool &state)
 {
     CALL_DEBUG_ENTER;
-    return context_.GetDP().GetProperty(udId, COOPERATE_SWITCH, state);
+    return context_.GetDP().GetCrossingSwitchState(udId, state);
 }
 
 void Cooperate::Dump(int32_t fd)
