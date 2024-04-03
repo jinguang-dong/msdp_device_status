@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -310,6 +310,15 @@ public:
     int32_t EnterTextEditorArea(bool enable);
 
     int32_t AddPrivilege();
+
+    /**
+     * @brief Add an image to the drag list.
+     * @param pixelMap Add Selected image information.
+     * @param callback Indicates the callback used to notify addSelectedPixelMap result.
+     * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
+     * @since 12
+     */
+    int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap, std::function<void(bool)> callback);
 
 private:
     InteractionManager() = default;
