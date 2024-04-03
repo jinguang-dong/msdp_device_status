@@ -41,10 +41,12 @@ public:
     virtual void RemoveWatch(const std::string &networkId) = 0;
     virtual void OnProfileChanged(const std::string &networkId) = 0;
     virtual std::string GetNetworkIdByUdId(const std::string &udId) = 0;
-
-    virtual int32_t GetProperty(const std::string &networkId, const std::string &name, bool &value) = 0;
-    virtual int32_t GetProperty(const std::string &networkId, const std::string &name, int32_t &value) = 0;
-    virtual int32_t GetProperty(const std::string &networkId, const std::string &name, std::string &value) = 0;
+    virtual std::string GetUdIdByNetworkId(const std::string &networkId) = 0;
+    virtual int32_t UpdateCrossingSwitchState(bool state) = 0;
+    virtual int32_t GetCrossingSwitchState(const std::string &udId, bool &state) = 0;
+    virtual int32_t GetProperty(const std::string &udId, const std::string &name, bool &value) = 0;
+    virtual int32_t GetProperty(const std::string &udId, const std::string &name, int32_t &value) = 0;
+    virtual int32_t GetProperty(const std::string &udId, const std::string &name, std::string &value) = 0;
     virtual int32_t SetProperty(const std::string &name, bool value) = 0;
     virtual int32_t SetProperty(const std::string &name, int32_t value) = 0;
     virtual int32_t SetProperty(const std::string &name, const std::string &value) = 0;

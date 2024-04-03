@@ -66,22 +66,40 @@ std::string DDPAdapter::GetNetworkIdByUdId(const std::string &udId)
     return ddp_->GetNetworkIdByUdId(udId);
 }
 
-int32_t DDPAdapter::GetProperty(const std::string &networkId, const std::string &name, bool &value)
-{
+std::string DDPAdapter::GetUdIdByNetworkId(const std::string &networkId)
+ {
+     CALL_DEBUG_ENTER;
+    return ddp_->GetUdIdByNetworkId(networkId);
+ }
+ 
+int32_t DDPAdapter::UpdateCrossingSwitchState(bool state)
+ {
+     CALL_DEBUG_ENTER;
+    return ddp_->UpdateCrossingSwitchState(state);
+ }
+ 
+int32_t DDPAdapter::GetCrossingSwitchState(const std::string &udId, bool &state)
+ {
     CALL_DEBUG_ENTER;
-    return ddp_->GetProperty(networkId, name, value);
+    return ddp_->GetCrossingSwitchState(udId, state);
 }
 
-int32_t DDPAdapter::GetProperty(const std::string &networkId, const std::string &name, int32_t &value)
+int32_t DDPAdapter::GetProperty(const std::string &udId, const std::string &name, bool &value)
 {
     CALL_DEBUG_ENTER;
-    return ddp_->GetProperty(networkId, name, value);
+    return ddp_->GetProperty(udId, name, value);
 }
 
-int32_t DDPAdapter::GetProperty(const std::string &networkId, const std::string &name, std::string &value)
+int32_t DDPAdapter::GetProperty(const std::string &udId, const std::string &name, int32_t &value)
 {
     CALL_DEBUG_ENTER;
-    return ddp_->GetProperty(networkId, name, value);
+    return ddp_->GetProperty(udId, name, value);
+}
+
+int32_t DDPAdapter::GetProperty(const std::string &udId, const std::string &name, std::string &value)
+{
+    CALL_DEBUG_ENTER;
+    return ddp_->GetProperty(udId, name, value);
 }
 
 int32_t DDPAdapter::SetProperty(const std::string &name, bool value)
