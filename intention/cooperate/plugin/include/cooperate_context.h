@@ -68,6 +68,8 @@ public:
     void RemoteStartSuccess(const DSoftbusStartCooperateFinished &event);
     void RelayCooperate(const DSoftbusRelayCooperate &event);
     void OnPointerEvent(const InputPointerEvent &event);
+    void SetCursorPosition();
+    void ResetCursorPosition();
 
     void OnTransitionOut();
     void OnTransitionIn();
@@ -97,7 +99,6 @@ private:
     int32_t EnableDevMgr();
     void DisableDevMgr();
     void SetCursorPosition(const Coordinate &cursorPos);
-    void ResetCursorPosition();
 
     IContext *env_ { nullptr };
     Channel<CooperateEvent>::Sender sender_;

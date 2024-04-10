@@ -74,35 +74,6 @@ int32_t DSoftbusHandler::StartCooperate(const std::string &networkId, const DSof
 {
     CALL_INFO_TRACE;
     NetPacket packet(MessageId::DSOFTBUS_START_COOPERATE);
-    int32_t ret = env_->GetDSoftbus().SendPacket(networkId, packet);
-    if (ret != RET_OK) {
-        OnCommunicationFailure(networkId);
-    }
-    return ret;
-}
-
-int32_t DSoftbusHandler::StartCooperateResponse(const std::string &networkId,
-    const DSoftbusStartCooperateResponse &event)
-{
-    CALL_INFO_TRACE;
-    NetPacket packet(MessageId::DSOFTBUS_START_COOPERATE_RESPONSE);
-    packet << event.normal;
-    if (packet.ChkRWError()) {
-        FI_HILOGE("Failed to write data packet");
-        return RET_ERR;
-    }
-    int32_t ret = env_->GetDSoftbus().SendPacket(networkId, packet);
-    if (ret != RET_OK) {
-        OnCommunicationFailure(networkId);
-    }
-    return ret;
-}
-
-int32_t DSoftbusHandler::StartCooperateFinish(const std::string &networkId,
-    const DSoftbusStartCooperateFinished &event)
-{
-    CALL_INFO_TRACE;
-    NetPacket packet(MessageId::DSOFTBUS_START_COOPERATE_FINISHED);
     packet << event.originNetworkId << event.cursorPos.x
         << event.cursorPos.y << event.success;
     if (packet.ChkRWError()) {
@@ -208,14 +179,6 @@ bool DSoftbusHandler::OnPacket(const std::string &networkId, NetPacket &packet)
             OnStartCooperate(networkId, packet);
             break;
         }
-        case MessageId::DSOFTBUS_START_COOPERATE_RESPONSE: {
-            OnStartCooperateResponse(networkId, packet);
-            break;
-        }
-        case MessageId::DSOFTBUS_START_COOPERATE_FINISHED: {
-            OnStartCooperateFinish(networkId, packet);
-            break;
-        }
         case MessageId::DSOFTBUS_STOP_COOPERATE: {
             OnStopCooperate(networkId, packet);
             break;
@@ -261,34 +224,6 @@ void DSoftbusHandler::OnStartCooperate(const std::string &networkId, NetPacket &
     CALL_INFO_TRACE;
     DSoftbusStartCooperate event {
         .networkId = networkId,
-        .normal = true,
-    };
-    SendEvent(CooperateEvent(
-        CooperateEventType::DSOFTBUS_START_COOPERATE,
-        event));
-}
-
-void DSoftbusHandler::OnStartCooperateResponse(const std::string &networkId, NetPacket &packet)
-{
-    CALL_INFO_TRACE;
-    DSoftbusStartCooperateResponse event {
-        .networkId = networkId,
-    };
-    packet >> event.normal;
-    if (packet.ChkRWError()) {
-        FI_HILOGE("Failed to read data packet");
-        return;
-    }
-    SendEvent(CooperateEvent(
-        CooperateEventType::DSOFTBUS_START_COOPERATE_RESPONSE,
-        event));
-}
-
-void DSoftbusHandler::OnStartCooperateFinish(const std::string &networkId, NetPacket &packet)
-{
-    CALL_INFO_TRACE;
-    DSoftbusStartCooperateFinished event {
-        .networkId = networkId,
     };
     packet >> event.originNetworkId >> event.cursorPos.x
         >> event.cursorPos.y >> event.success;
@@ -297,7 +232,7 @@ void DSoftbusHandler::OnStartCooperateFinish(const std::string &networkId, NetPa
         return;
     }
     SendEvent(CooperateEvent(
-        CooperateEventType::DSOFTBUS_START_COOPERATE_FINISHED,
+        CooperateEventType::DSOFTBUS_START_COOPERATE,
         event));
 }
 
