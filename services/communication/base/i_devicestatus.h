@@ -22,6 +22,7 @@
 #include "msdp_ipc_interface_code.h"
 #include "stationary_callback.h"
 #include "stationary_data.h"
+#include "transaction/rs_transaction.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -77,6 +78,7 @@ public:
     virtual int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle) = 0;
     virtual int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
         const PreviewAnimation &animation) = 0;
+    virtual int32_t RotateDragWindowSync(const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) = 0;
     virtual int32_t AddPrivilege() = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.Idevicestatus");
 };

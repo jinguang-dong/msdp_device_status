@@ -21,6 +21,7 @@
 #include "display_manager.h"
 #include "event_handler.h"
 #include "event_runner.h"
+#include "i_context.h"
 #include "libxml/tree.h"
 #include "libxml/parser.h"
 #include "modifier/rs_extended_modifier.h"
@@ -178,13 +179,19 @@ struct DrawingInfo {
     FilterInfo filterInfo;
 };
 
+struct DragWindowRotationInfo {
+    float rotation {0.0f};
+    float pivotX {0.0f};
+    float pivotY {0.0f};
+};
+
 class DragDrawing : public IDragAnimation {
 public:
     DragDrawing() = default;
     DISALLOW_COPY_AND_MOVE(DragDrawing);
     ~DragDrawing();
 
-    int32_t Init(const DragData &dragData);
+    int32_t Init(const DragData &dragData, IContext* context);
     void Draw(int32_t displayId, int32_t displayX, int32_t displayY, bool isNeedAdjustDisplayXY = true);
     int32_t UpdateDragStyle(DragCursorStyle style);
     int32_t UpdateShadowPic(const ShadowInfo &shadowInfo);
@@ -209,8 +216,9 @@ public:
     int32_t EnterTextEditorArea(bool enable);
     bool GetAllowDragState();
     void SetScreenId(uint64_t screenId);
-    int32_t RotateDragWindow(Rosen::Rotation rotation);
     void SetRotation(Rosen::Rotation rotation);
+    int32_t RotateDragWindowAsync(Rosen::Rotation rotation);
+    int32_t RotateDragWindowSync(const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr);
     float CalculateWidthScale();
     float GetMaxWidthScale(int32_t width);
 
@@ -265,7 +273,10 @@ private:
     void RotatePixelMapXY(int32_t &pixelMapX, int32_t &pixelMapY);
     void ResetAnimationParameter();
     void ResetParameter();
-    int32_t DoRotateDragWindow(float rotation);
+    int32_t DoRotateDragWindow(float rotation,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction, bool isAnimated);
+    int32_t RotateDragWindow(Rosen::Rotation rotation,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr, bool isAnimated = false);
 
 private:
     int64_t startNum_ { -1 };
@@ -290,6 +301,10 @@ private:
     bool needRotatePixelMapXY_ { false };
     uint64_t screenId_ { 0 };
     Rosen::Rotation rotation_ { Rosen::Rotation::ROTATION_0 };
+    std::atomic_bool isRunningRotateAnimation_ {false};
+    DragWindowRotationInfo DragWindowRotateInfo_;
+    int32_t timerId_ {-1};
+    IContext* context_ {nullptr};
     ScreenSizeType currentScreenSize_ = ScreenSizeType::UNDEFINED;
 };
 } // namespace DeviceStatus

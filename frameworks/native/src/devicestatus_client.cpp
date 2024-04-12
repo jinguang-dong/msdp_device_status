@@ -485,6 +485,12 @@ int32_t DeviceStatusClient::UpdatePreviewStyleWithAnimation(const PreviewStyle &
     return devicestatusProxy_->UpdatePreviewStyleWithAnimation(previewStyle, animation);
 }
 
+int32_t DeviceStatusClient::RotateDragWindowSync(const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
+{
+    DEV_RET_IF_NULL_WITH_RET((Connect() != RET_OK), RET_ERR);
+    return devicestatusProxy_->RotateDragWindowSync(rsTransaction);
+}
+
 int32_t DeviceStatusClient::GetDragSummary(std::map<std::string, int64_t> &summarys)
 {
     CALL_DEBUG_ENTER;

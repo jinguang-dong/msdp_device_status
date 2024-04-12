@@ -62,6 +62,7 @@ enum class DeviceInterfaceCode {
     ALLOC_SOCKET_FD = 60,
     ADD_HOT_AREA_MONITOR = 70,
     REMOVE_HOT_AREA_MONITOR,
+    ROTATE_DRAG_WINDOW_SYNC,
 };
 } // namespace Msdp
 } // namespace OHOS

@@ -789,6 +789,31 @@ int32_t DeviceStatusSrvProxy::UpdatePreviewStyleWithAnimation(const PreviewStyle
     return ret;
 }
 
+int32_t DeviceStatusSrvProxy::RotateDragWindowSync(const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
+{
+    CALL_DEBUG_ENTER;
+    CHKPR(rsTransaction, ERR_INVALID_VALUE);
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(DeviceStatusSrvProxy::GetDescriptor())) {
+        FI_HILOGE("Failed to write descriptor");
+        return ERR_INVALID_VALUE;
+    }
+    if (!data.WriteParcelable(rsTransaction.get())) {
+        FI_HILOGE("Write transaction sync id failed");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    CHKPR(remote, RET_ERR);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(DeviceInterfaceCode::ROTATE_DRAG_WINDOW_SYNC),
+        data, reply, option);
+    if (ret != RET_OK) {
+        FI_HILOGE("Send request failed, ret:%{public}d", ret);
+    }
+    return ret;
+}
+
 int32_t DeviceStatusSrvProxy::GetDragSummary(std::map<std::string, int64_t> &summarys)
 {
     CALL_DEBUG_ENTER;

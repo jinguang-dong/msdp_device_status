@@ -27,6 +27,7 @@ config("devicestatus_public_config") {
     "${device_status_root_path}/utils/ipc/include",
     "${device_status_root_path}/services/communication/base/",
     "${device_status_root_path}/services/communication/client/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client/core",
   ]
 
   if (fusion_intention_framework) {
