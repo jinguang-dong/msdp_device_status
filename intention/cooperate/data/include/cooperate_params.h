@@ -72,10 +72,12 @@ struct GetCooperateStateParam final : public ParamBase {
 
 struct RegisterEventListenerParam final : public ParamBase {
     RegisterEventListenerParam() = default;
-    RegisterEventListenerParam(const std::string &networkId);
+    RegisterEventListenerParam(int32_t userData, const std::string &networkId, bool checkPermission);
     bool Marshalling(MessageParcel &parcel) const override;
     bool Unmarshalling(MessageParcel &parcel) override;
     std::string networkId;
+    int32_t userData { -1 };
+    bool checkPermission { false };
 };
 
 using UnregisterEventListenerParam = RegisterEventListenerParam;

@@ -251,6 +251,7 @@ void JsEventTarget::AddListener(napi_env env, const std::string &type, const std
     napi_ref ref = nullptr;
     CHKRV(napi_create_reference(env, handle, 1, &ref), CREATE_REFERENCE);
     sptr<JsUtil::MouseCallbackInfo> monitor = new (std::nothrow) JsUtil::MouseCallbackInfo();
+    // 在这把 UtilNapiError::HandleExecuteResult 包在一个callback中，然后添加一条向上通知监听成功与否的消息，在改回调中进行抛异常
     if (monitor == nullptr) {
         FI_HILOGE("Null monitor, release callback");
         RELEASE_CALLBACKINFO(env, ref);
