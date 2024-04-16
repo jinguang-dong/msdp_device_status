@@ -42,6 +42,7 @@ constexpr int32_t MIN_BW { 80 * 1024 * 1024 };
 constexpr int32_t LATENCY { 1600 };
 constexpr int32_t SOCKET_SERVER { 0 };
 constexpr int32_t SOCKET_CLIENT { 1 };
+constexpr uint32_t SOFT_BUS_TIMEOUT_MS { 3000 };
 }
 
 std::mutex DSoftbusAdapterImpl::mutex_;
@@ -369,11 +370,17 @@ int32_t DSoftbusAdapterImpl::OpenSessionLocked(const std::string &networkId)
         .dataType = DATA_TYPE_BYTES
     };
     int32_t socket { -1 };
-
+    auto enterStamp = std::chrono::high_resolution_clock::now();
     int32_t ret = InitSocket(info, SOCKET_CLIENT, socket);
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::high_resolution_clock::now() - enterStamp);
     if (ret != RET_OK) {
         FI_HILOGE("Failed to bind %{public}s", Utility::Anonymize(networkId));
         return ret;
+    }
+    if (duration > std::chrono::milliseconds(SOFT_BUS_TIMEOUT_MS)) {
+        FI_HILOGE("OpenInputSoftbus timeout, duration:%{public}lld ms", duration.count());
+        return RET_ERR;
     }
     ConfigTcpAlive(socket);
 
