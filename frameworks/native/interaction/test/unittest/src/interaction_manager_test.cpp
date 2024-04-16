@@ -833,7 +833,8 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Nor
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, COMMON_PARAMETER_ERROR);
     if (ret == RET_OK) {
-    ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
+        ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
+            std::future_status::timeout);
     }
 #else
     ASSERT_EQ(ret, ERROR_UNSUPPORT);
