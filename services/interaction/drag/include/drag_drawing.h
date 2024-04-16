@@ -121,8 +121,7 @@ struct FilterInfo {
     float dipScale { 0.0f };
     float cornerRadius { 0.0f };
     float opacity { 0.95f };
-    float coef1 { 0.0f };
-    float coef2 { 0.0f };
+    Rosen::Vector2f coef_;
 };
 
 struct ExtraInfo {
@@ -178,7 +177,6 @@ struct DrawingInfo {
     std::shared_ptr<Media::PixelMap> stylePixelMap { nullptr };
     ExtraInfo extraInfo;
     FilterInfo filterInfo;
-    Rosen::Vector2f coef_;
 };
 
 class DragDrawing : public IDragAnimation {
