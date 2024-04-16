@@ -1470,6 +1470,15 @@ bool DragDrawing::ParserFilterInfo(const std::string &filterInfoStr, FilterInfo 
             filterInfo.opacity = static_cast<float>(opacity->valuedouble);
         }
     }
+    cJSON *coef1 = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "blur_coef1");
+    if (cJSON_IsNumber(coef1)) {
+        filterInfo.coef1 = static_cast<float>(coef1->valuedouble);
+    }
+    cJSON *coef2 = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "blur_coef2");
+    if (cJSON_IsNumber(coef2)) {
+        filterInfo.coef2 = static_cast<float>(coef2->valuedouble);
+    }
+    g_drawingInfo.coef_ = {filterInfo.coef1, filterInfo.coef2};
     return true;
 }
 
@@ -1571,6 +1580,7 @@ void DragDrawing::ProcessFilter()
             FI_HILOGE("Create backgroundFilter failed");
             return;
         }
+        filterNode->SetGreyCoef(g_drawingInfo.coef_);
         filterNode->SetBackgroundFilter(backFilter);
         filterNode->SetBounds(DEFAULT_POSITION_X, adjustSize, g_drawingInfo.pixelMap->GetWidth(),
             g_drawingInfo.pixelMap->GetHeight());
