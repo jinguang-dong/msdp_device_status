@@ -121,6 +121,7 @@ struct FilterInfo {
     float dipScale { 0.0f };
     float cornerRadius { 0.0f };
     float opacity { 0.95f };
+    Rosen::Vector2f coef_;
 };
 
 struct ExtraInfo {
