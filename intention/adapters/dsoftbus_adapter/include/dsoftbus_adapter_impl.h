@@ -107,6 +107,22 @@ private:
     std::set<Observer> observers_;
     std::map<std::string, Session> sessions_;
 
+#ifdef ENABLE_PERFORMANCE_CHECK
+    class PerfChecker {
+    public:
+        void StartTrace();
+        void FinishTrace(bool isSuccess = true);
+        void Dump();
+    private:
+        std::chrono::time_point<std::chrono::steady_clock> startTimeStamp_;
+        int32_t maxDuration_ { std::numeric_limits<int32_t>::min() };
+        int32_t minDuration_ { std::numeric_limits<int32_t>::max() };
+        std::vector<int32_t> durationList_;
+        std::mutex perfLock_;
+    };
+    PerfChecker perfChecker_;
+#endif // ENABLE_PERFORMANCE_CHECK
+
     static std::mutex mutex_;
     static std::shared_ptr<DSoftbusAdapterImpl> instance_;
 };
