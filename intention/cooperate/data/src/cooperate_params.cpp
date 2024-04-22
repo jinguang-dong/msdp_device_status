@@ -89,17 +89,26 @@ bool GetCooperateStateParam::Unmarshalling(MessageParcel &parcel)
     );
 }
 
-RegisterEventListenerParam::RegisterEventListenerParam(const std::string &networkId) : networkId(networkId)
+RegisterEventListenerParam::RegisterEventListenerParam(int32_t userData, const std::string &networkId,
+    bool checkPermission) : networkId(networkId), userData(userData), checkPermission(checkPermission)
 {}
 
 bool RegisterEventListenerParam::Marshalling(MessageParcel &parcel) const
 {
-    return parcel.WriteString(networkId);
+    return (
+        parcel.WriteInt32(userData) &&
+        parcel.WriteString(networkId) &&
+        parcel.WriteBool(checkPermission)
+    );
 }
 
 bool RegisterEventListenerParam::Unmarshalling(MessageParcel &parcel)
 {
-    return parcel.ReadString(networkId);
+    return (
+        parcel.ReadInt32(userData) &&
+        parcel.ReadString(networkId) &&
+        parcel.ReadBool(checkPermission)
+    );
 }
 
 GetCooperateStateSyncParam::GetCooperateStateSyncParam(const std::string &udId) : udId(udId)

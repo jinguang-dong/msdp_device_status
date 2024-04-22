@@ -207,8 +207,8 @@ int32_t CooperateClient::GetCooperateState(ITunnelClient &tunnel, const std::str
     return RET_OK;
 }
 
-int32_t CooperateClient::RegisterEventListener(ITunnelClient &tunnel,
-    const std::string &networkId, MouseLocationListenerPtr listener)
+int32_t CooperateClient::RegisterEventListener(ITunnelClient &tunnel, const std::string &networkId,
+    MouseLocationListenerPtr listener, bool isCheckPermission)
 {
     CALL_DEBUG_ENTER;
     CHKPR(listener, COMMON_PARAMETER_ERROR);
@@ -218,7 +218,7 @@ int32_t CooperateClient::RegisterEventListener(ITunnelClient &tunnel,
         FI_HILOGE("This listener for networkId:%{public}s already exists", Utility::Anonymize(networkId));
         return RET_ERR;
     }
-    RegisterEventListenerParam param { networkId };
+    RegisterEventListenerParam param { GenerateRequestID(), networkId, isCheckPermission };
     DefaultReply reply;
     if (int32_t ret = tunnel.AddWatch(Intention::COOPERATE, CooperateRequestID::REGISTER_EVENT_LISTENER, param, reply);
         ret != RET_OK) {
@@ -226,12 +226,13 @@ int32_t CooperateClient::RegisterEventListener(ITunnelClient &tunnel,
         return ret;
     }
     eventListener_[networkId].insert(listener);
+    devCooperateEvent_.insert_or_assign(param.userData, event);
     FI_HILOGI("Add listener for networkId:%{public}s successfully", Utility::Anonymize(networkId));
     return RET_OK;
 }
 
-int32_t CooperateClient::UnregisterEventListener(ITunnelClient &tunnel,
-    const std::string &networkId, MouseLocationListenerPtr listener)
+int32_t CooperateClient::UnregisterEventListener(ITunnelClient &tunnel, const std::string &networkId,
+    MouseLocationListenerPtr listener, bool isCheckPermission)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
@@ -244,7 +245,7 @@ int32_t CooperateClient::UnregisterEventListener(ITunnelClient &tunnel,
         FI_HILOGE("Current listener for networkId:%{public}s is not registered", Utility::Anonymize(networkId));
         return RET_ERR;
     }
-    UnregisterEventListenerParam param { networkId };
+    UnregisterEventListenerParam param { GenerateRequestID(), networkId, isCheckPermission };
     DefaultReply reply;
     if (int32_t ret = tunnel.RemoveWatch(Intention::COOPERATE,
         CooperateRequestID::UNREGISTER_EVENT_LISTENER, param, reply); ret != RET_OK) {
@@ -257,6 +258,7 @@ int32_t CooperateClient::UnregisterEventListener(ITunnelClient &tunnel,
         return RET_OK;
     }
     eventListener_[networkId].erase(listener);
+    devCooperateEvent_.insert_or_assign(param.userData, event);
     FI_HILOGD("Remove listener for networkId:%{public}s", Utility::Anonymize(networkId));
     if (eventListener_[networkId].empty()) {
         eventListener_.erase(networkId);
