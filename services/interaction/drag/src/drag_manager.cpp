@@ -359,15 +359,17 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);
     int32_t pointerAction = pointerEvent->GetPointerAction();
+    FI_HILOGI("DragCallback, pointerAction:%{public}d", pointerAction);
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
         OnDragMove(pointerEvent);
         return;
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
         OnDragUp(pointerEvent);
+        dragDrawing_.NotifyDragInfo(DragEvent::DRAG_UP, pointerEvent->GetPointerId());
         return;
     }
-    FI_HILOGW("Unknow action, sourceType:%{public}d, pointerId:%{public}d, pointerAction:%{public}d",
+    FI_HILOGW("Unknown action, sourceType:%{public}d, pointerId:%{public}d, pointerAction:%{public}d",
         pointerEvent->GetSourceType(), pointerEvent->GetPointerId(), pointerAction);
 }
 
@@ -376,10 +378,13 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     CHKPV(pointerEvent);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    int32_t pointId = pointerEvent->GetPointerId();
+    int32_t displayX = pointerItem.GetDisplayX();
+    int32_t displayY = pointerItem.GetDisplayY();
     FI_HILOGD("SourceType:%{public}d, pointerId:%{public}d, displayX:%{public}d, displayY:%{public}d",
-        pointerEvent->GetSourceType(), pointerEvent->GetPointerId(),
-        pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
-    dragDrawing_.Draw(pointerEvent->GetTargetDisplayId(), pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        pointerEvent->GetSourceType(), pointId, displayX, displayY);
+    dragDrawing_.NotifyDragInfo(DragEvent::DRAG_MOVE, pointId, displayX, displayY);
+    dragDrawing_.Draw(pointerEvent->GetTargetDisplayId(), displayX, displayY);
 }
 
 void DragManager::SendDragData(int32_t targetTokenId, const std::string &udKey)

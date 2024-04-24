@@ -134,6 +134,19 @@ struct DragNotifyMsg {
     DragBehavior dragBehavior { DragBehavior::UNKNOWN };
 };
 
+enum class DragEventInfo {
+    DRAG_START = 0,
+    DRAG_MOVE = 1,
+    DRAG_UP = 2
+};
+
+struct PreviewStyle {
+    DragEvent dragEvent;
+    int32_t pointId { -1 };
+    int32_t displayX { -1 };
+    int32_t displayY { -1 };
+}
+
 enum class PreviewType {
     FOREGROUND_COLOR = 0,
     OPACITY = 1,

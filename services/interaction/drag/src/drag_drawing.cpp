@@ -472,8 +472,8 @@ void DragDrawing::OnStartDrag(const DragAnimationData &dragAnimationData,
         FI_HILOGE("Fail to open drag drop extension library");
         return;
     }
-    auto dragDropExtFunc = reinterpret_cast<DragExtFunc>(dlsym(dragExtHandler_, "OnStartDragExt"));
-    if (dragDropExtFunc == nullptr) {
+    auto dragDropStartExtFunc = reinterpret_cast<DragExtFunc>(dlsym(dragStartExtHandler_, "OnStartDragExt"));
+    if (dragDropStartExtFunc == nullptr) {
         FI_HILOGE("Fail to get drag drop extension function");
         dlclose(dragExtHandler_);
         dragExtHandler_ = nullptr;
@@ -485,7 +485,7 @@ void DragDrawing::OnStartDrag(const DragAnimationData &dragAnimationData,
         CHKPV(runner);
         handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
     }
-    if (!handler_->PostTask(std::bind(dragDropExtFunc, &g_dragData))) {
+    if (!handler_->PostTask(std::bind(dragDropStartExtFunc, g_dragData))) {
         FI_HILOGE("Start style animation failed");
     }
 #endif // OHOS_DRAG_ENABLE_ANIMATION
