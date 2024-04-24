@@ -493,7 +493,7 @@ void DragDrawing::OnStartDrag(const DragAnimationData &dragAnimationData,
 
 void DragDrawing::NotifyDragInfo(DragEvent dragType, int32_t pointId, int32_t displayX, int32_t displayY) {
     FI_HILOGD("dragType:%{public}d, pointId:%{public}d, displayX:%{public}d, displayY:%{public}d",
-              dragType, pointId, displayX, displayY);
+        dragType, pointId, displayX, displayY);
     if (pointId < 0) {
         FI_HILOGE("Invalid pointId:%{public}d", pointId);
         return;
