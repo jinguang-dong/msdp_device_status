@@ -134,13 +134,13 @@ struct DragNotifyMsg {
     DragBehavior dragBehavior { DragBehavior::UNKNOWN };
 };
 
-enum class DragEventInfo {
+enum class DragEvent {
     DRAG_START = 0,
     DRAG_MOVE = 1,
     DRAG_UP = 2
 };
 
-struct PreviewStyle {
+struct DragEventInfo {
     DragEvent dragEvent;
     int32_t pointId { -1 };
     int32_t displayX { -1 };
