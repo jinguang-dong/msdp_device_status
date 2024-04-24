@@ -1,31 +1,29 @@
-/*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright (C) 2023 Huawei Device Co., Ltd.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 //! IPC data definitions of Coordination module.
 
-use std::ffi::{ c_char, CString };
-
-use hilog_rust::{ hilog, HiLogLabel, LogType };
-use ipc_rust::{ BorrowedMsgParcel, Serialize, Deserialize, IpcResult };
+use std::ffi::{c_char, CString};
 
 use fusion_utils_rust::call_debug_enter;
+use hilog_rust::{hilog, HiLogLabel, LogType};
+use ipc::parcel::{Deserialize, MsgParcel, Serialize};
+use ipc::IpcResult;
 
 const LOG_LABEL: HiLogLabel = HiLogLabel {
     log_type: LogType::LogCore,
     domain: 0xD002220,
-    tag: "FusionCoordinationData"
+    tag: "FusionCoordinationData",
 };
 
 /// General parameters of request of multi-device cooperation.
@@ -36,8 +34,7 @@ pub struct GeneralCoordinationParam {
 }
 
 impl Serialize for GeneralCoordinationParam {
-    fn serialize(&self, parcel: &mut BorrowedMsgParcel<'_>) -> IpcResult<()>
-    {
+    fn serialize(&self, parcel: &mut MsgParcel) -> IpcResult<()> {
         call_debug_enter!("GeneralCoordinationParam::serialize");
         self.user_data.serialize(parcel)?;
         Ok(())
@@ -45,8 +42,7 @@ impl Serialize for GeneralCoordinationParam {
 }
 
 impl Deserialize for GeneralCoordinationParam {
-    fn deserialize(parcel: &BorrowedMsgParcel<'_>) -> IpcResult<Self>
-    {
+    fn deserialize(parcel: &mut MsgParcel) -> IpcResult<Self> {
         call_debug_enter!("GeneralCoordinationParam::deserialize");
         Ok(Self {
             user_data: i32::deserialize(parcel)?,
@@ -65,8 +61,7 @@ pub struct StartCoordinationParam {
 }
 
 impl Serialize for StartCoordinationParam {
-    fn serialize(&self, parcel: &mut BorrowedMsgParcel<'_>) -> IpcResult<()>
-    {
+    fn serialize(&self, parcel: &mut MsgParcel) -> IpcResult<()> {
         call_debug_enter!("StartCoordinationParam::serialize");
         self.user_data.serialize(parcel)?;
         self.start_device_id.serialize(parcel)?;
@@ -76,8 +71,7 @@ impl Serialize for StartCoordinationParam {
 }
 
 impl Deserialize for StartCoordinationParam {
-    fn deserialize(parcel: &BorrowedMsgParcel<'_>) -> IpcResult<Self>
-    {
+    fn deserialize(parcel: &mut MsgParcel) -> IpcResult<Self> {
         call_debug_enter!("StartCoordinationParam::deserialize");
         Ok(Self {
             user_data: i32::deserialize(parcel)?,
@@ -96,8 +90,7 @@ pub struct StopCoordinationParam {
 }
 
 impl Serialize for StopCoordinationParam {
-    fn serialize(&self, parcel: &mut BorrowedMsgParcel<'_>) -> IpcResult<()>
-    {
+    fn serialize(&self, parcel: &mut MsgParcel) -> IpcResult<()> {
         call_debug_enter!("StopCoordinationParam::serialize");
         self.user_data.serialize(parcel)?;
         self.is_unchained.serialize(parcel)?;
@@ -106,8 +99,7 @@ impl Serialize for StopCoordinationParam {
 }
 
 impl Deserialize for StopCoordinationParam {
-    fn deserialize(parcel: &BorrowedMsgParcel<'_>) -> IpcResult<Self>
-    {
+    fn deserialize(parcel: &mut MsgParcel) -> IpcResult<Self> {
         call_debug_enter!("StopCoordinationParam::deserialize");
         Ok(Self {
             user_data: i32::deserialize(parcel)?,
@@ -126,8 +118,7 @@ pub struct GetCoordinationStateParam {
 }
 
 impl Serialize for GetCoordinationStateParam {
-    fn serialize(&self, parcel: &mut BorrowedMsgParcel<'_>) -> IpcResult<()>
-    {
+    fn serialize(&self, parcel: &mut MsgParcel) -> IpcResult<()> {
         call_debug_enter!("GetCoordinationStateParam::serialize");
         self.user_data.serialize(parcel)?;
         self.device_id.serialize(parcel)?;
@@ -136,8 +127,7 @@ impl Serialize for GetCoordinationStateParam {
 }
 
 impl Deserialize for GetCoordinationStateParam {
-    fn deserialize(parcel: &BorrowedMsgParcel<'_>) -> IpcResult<Self>
-    {
+    fn deserialize(parcel: &mut MsgParcel) -> IpcResult<Self> {
         call_debug_enter!("GetCoordinationStateParam::deserialize");
         Ok(Self {
             user_data: i32::deserialize(parcel)?,

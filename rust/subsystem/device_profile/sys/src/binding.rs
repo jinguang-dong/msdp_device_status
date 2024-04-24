@@ -1,23 +1,21 @@
-/*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright (C) 2023 Huawei Device Co., Ltd.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 //! rust device profile binding sys
 
 #![allow(dead_code)]
 
-use std::ffi::{ c_char, c_int };
+use std::ffi::{c_char, c_int};
 
 /// Constant for device profile
 pub const RET_OK: i32 = 0;
@@ -37,18 +35,23 @@ pub struct CServiceCharacteristicProfile {
 }
 
 /// Type definition for the clone function of the `CIProfileEvents` struct.
-pub type CIProfileEventsClone = extern "C" fn (profile_events: *mut CIProfileEvents) -> *mut CIProfileEvents;
+pub type CIProfileEventsClone =
+    extern "C" fn(profile_events: *mut CIProfileEvents) -> *mut CIProfileEvents;
 /// Type definition for the destruct function of the `CIProfileEvents` struct.
-pub type CIProfileEventsDestruct = extern "C" fn (profile_events: *mut CIProfileEvents);
+pub type CIProfileEventsDestruct = extern "C" fn(profile_events: *mut CIProfileEvents);
 
-/// Represents a CIProfileEvents object that contains profile events information.
+/// Represents a CIProfileEvents object that contains profile events
+/// information.
 #[repr(C)]
 pub struct CIProfileEvents {
-    /// An optional clone function pointer for creating a clone of the `CIProfileEvents` object.
+    /// An optional clone function pointer for creating a clone of the
+    /// `CIProfileEvents` object.
     pub clone: Option<CIProfileEventsClone>,
-    /// An optional destruct function pointer for cleaning up the resources associated with the `CIProfileEvents` object
+    /// An optional destruct function pointer for cleaning up the resources
+    /// associated with the `CIProfileEvents` object
     pub destruct: Option<CIProfileEventsDestruct>,
-    /// A mutable pointer to an array of unsigned 32-bit integers representing the profile events.
+    /// A mutable pointer to an array of unsigned 32-bit integers representing
+    /// the profile events.
     pub profile_events: *mut u32,
     /// The number of profile events in the `profile_events` array.
     pub num_of_profile_events: usize,
@@ -64,18 +67,22 @@ pub struct CSubscribeInfo {
 }
 
 /// Type definition for the clone function of the `CISubscribeInfos` struct.
-pub type CISubscribeInfosClone = extern "C" fn (profile_events: *mut CISubscribeInfos) -> *mut CISubscribeInfos;
+pub type CISubscribeInfosClone =
+    extern "C" fn(profile_events: *mut CISubscribeInfos) -> *mut CISubscribeInfos;
 /// Type definition for the destruct function of the `CISubscribeInfos` struct.
-pub type CISubscribeInfosDestruct = extern "C" fn (profile_events: *mut CISubscribeInfos);
+pub type CISubscribeInfosDestruct = extern "C" fn(profile_events: *mut CISubscribeInfos);
 
 /// Struct representing subscription information.
 #[repr(C)]
 pub struct CISubscribeInfos {
-    /// An optional clone function for creating a clone of the `CISubscribeInfos` object.
+    /// An optional clone function for creating a clone of the
+    /// `CISubscribeInfos` object.
     pub clone: Option<CISubscribeInfosClone>,
-    /// An optional destruct function for cleaning up the `CISubscribeInfos` object.
+    /// An optional destruct function for cleaning up the `CISubscribeInfos`
+    /// object.
     pub destruct: Option<CISubscribeInfosDestruct>,
-    /// A pointer to an array of `CSubscribeInfo` objects containing subscription details.
+    /// A pointer to an array of `CSubscribeInfo` objects containing
+    /// subscription details.
     pub subscribe_infos: *const CSubscribeInfo,
     /// The number of `CSubscribeInfo` objects in the `subscribe_infos` array.
     pub num_of_subscribe_infos: usize,
@@ -122,11 +129,13 @@ pub struct CProfileChangeNotification {
 }
 
 /// Type definition for the clone function of a CIProfileEventCb.
-pub type CIProfileEventCbClone = extern "C" fn (profile_events: *mut CIProfileEventCb) -> *mut CIProfileEventCb;
+pub type CIProfileEventCbClone =
+    extern "C" fn(profile_events: *mut CIProfileEventCb) -> *mut CIProfileEventCb;
 /// Type definition for the destruct function of a CIProfileEventCb.
-pub type CIProfileEventCbDestruct = extern "C" fn (profile_events: *mut CIProfileEventCb);
+pub type CIProfileEventCbDestruct = extern "C" fn(profile_events: *mut CIProfileEventCb);
 /// Type definition for the callback function when the profile changes.
-pub type OnProfileChanged = extern "C" fn (cb: *mut CIProfileEventCb, notification: *const CProfileChangeNotification);
+pub type OnProfileChanged =
+    extern "C" fn(cb: *mut CIProfileEventCb, notification: *const CProfileChangeNotification);
 
 /// Struct representing a callback for profile events.
 #[repr(C)]
@@ -143,12 +152,14 @@ pub struct CIProfileEventCb {
 #[repr(i32)]
 #[derive(Copy, Clone)]
 pub enum CSyncMode {
-    /// The pull synchronization mode, where the local device pulls data from the remote device.
+    /// The pull synchronization mode, where the local device pulls data from
+    /// the remote device.
     Pull,
-    /// The push synchronization mode, where the local device pushes data to the remote device.
+    /// The push synchronization mode, where the local device pushes data to the
+    /// remote device.
     Push,
-    /// The push-pull synchronization mode, where the local and remote devices can push and pull data 
-    /// in either direction.
+    /// The push-pull synchronization mode, where the local and remote devices
+    /// can push and pull data in either direction.
     PushPull,
 }
 
@@ -163,28 +174,36 @@ pub struct CSyncOptions {
     pub n_device_ids: usize,
 }
 
-// These C interfaces are defined in lib: device_profile:fusion_device_profile_binding.
+// These C interfaces are defined in lib:
+// device_profile:fusion_device_profile_binding.
 extern "C" {
     /// Puts a device profile into the system.
     pub fn PutDeviceProfile(profile: *const CServiceCharacteristicProfile) -> i32;
     /// Gets a device profile from the system.
-    pub fn GetDeviceProfile(ud_id: *const c_char,
-                        service_id: *const c_char,
-                        profile: *mut CServiceCharacteristicProfile) -> i32;
+    pub fn GetDeviceProfile(
+        ud_id: *const c_char,
+        service_id: *const c_char,
+        profile: *mut CServiceCharacteristicProfile,
+    ) -> i32;
     /// Subscribes to profile events for the specified subscribe information.
-    pub fn SubscribeProfileEvents(subscribe_infos: *const CISubscribeInfos,
-                                  event_cb: *mut CIProfileEventCb,
-                                  failed_events: *mut *mut CIProfileEvents) -> i32;
-    /// Unsubscribes from profile events for the specified profile events and callback function.
-    pub fn UnsubscribeProfileEvents(profile_events: *const CIProfileEvents,
-                                    event_cb: *mut CIProfileEventCb,
-                                    failed_events: *mut *mut CIProfileEvents) -> i32;
+    pub fn SubscribeProfileEvents(
+        subscribe_infos: *const CISubscribeInfos,
+        event_cb: *mut CIProfileEventCb,
+        failed_events: *mut *mut CIProfileEvents,
+    ) -> i32;
+    /// Unsubscribes from profile events for the specified profile events and
+    /// callback function.
+    pub fn UnsubscribeProfileEvents(
+        profile_events: *const CIProfileEvents,
+        event_cb: *mut CIProfileEventCb,
+        failed_events: *mut *mut CIProfileEvents,
+    ) -> i32;
 }
 
-type CIStringVectorClone = extern "C" fn (*mut CIStringVector) -> *mut CIStringVector;
-type CIStringVectorDestruct = extern "C" fn (*mut CIStringVector);
-type CIStringVectorAt = extern "C" fn (*mut CIStringVector, usize) -> *const c_char;
-type CIStringVectorSize = extern "C" fn (*mut CIStringVector) -> usize;
+type CIStringVectorClone = extern "C" fn(*mut CIStringVector) -> *mut CIStringVector;
+type CIStringVectorDestruct = extern "C" fn(*mut CIStringVector);
+type CIStringVectorAt = extern "C" fn(*mut CIStringVector, usize) -> *const c_char;
+type CIStringVectorSize = extern "C" fn(*mut CIStringVector) -> usize;
 
 /// Struct representing a CIStringVector.
 #[repr(C)]
@@ -199,28 +218,33 @@ pub struct CIStringVector {
     pub get_size: Option<CIStringVectorSize>,
 }
 
-type CICrossStateListenerClone = extern "C" fn (listener: *mut CICrossStateListener) -> *mut CICrossStateListener;
-type CICrossStateListenerDestruct = extern "C" fn (listener: *mut CICrossStateListener);
-type OnCrossStateUpdate = extern "C" fn (listener: *mut CICrossStateListener, device_id: *const c_char, state: u32);
+type CICrossStateListenerClone =
+    extern "C" fn(listener: *mut CICrossStateListener) -> *mut CICrossStateListener;
+type CICrossStateListenerDestruct = extern "C" fn(listener: *mut CICrossStateListener);
+type OnCrossStateUpdate =
+    extern "C" fn(listener: *mut CICrossStateListener, device_id: *const c_char, state: u32);
 
 /// A struct representing a cross-state listener.
 #[repr(C)]
 pub struct CICrossStateListener {
     /// An optional function pointer for cloning the cross-state listener.
     pub clone: Option<CICrossStateListenerClone>,
-    /// An optional function pointer for destructing or cleaning up the cross-state listener.
+    /// An optional function pointer for destructing or cleaning up the
+    /// cross-state listener.
     pub destruct: Option<CICrossStateListenerDestruct>,
     /// An optional callback function for handling cross-state update events.
     pub on_update: Option<OnCrossStateUpdate>,
 }
 
-// These C interfaces are defined in lib: device_profile:fusion_device_profile_binding.
+// These C interfaces are defined in lib:
+// device_profile:fusion_device_profile_binding.
 extern "C" {
     /// Updates the state of the cross switch for all registered devices.
     ///
     /// # Arguments
     ///
-    /// * `state` - An unsigned integer value that represents the cross switch state.
+    /// * `state` - An unsigned integer value that represents the cross switch
+    ///   state.
     ///
     /// # Returns
     ///
@@ -231,33 +255,42 @@ extern "C" {
     /// # Arguments
     ///
     /// * `state` - The state to synchronize the cross switch to.
-    /// * `device_ids` - A mutable pointer that contains the device IDs to synchronize.
+    /// * `device_ids` - A mutable pointer that contains the device IDs to
+    ///   synchronize.
     ///
     /// # Returns
     ///
-    /// Returns an `i32` value representing the result of the synchronization operation.
+    /// Returns an `i32` value representing the result of the synchronization
+    /// operation.
     pub fn SyncCrossSwitchState(state: u32, device_ids: *mut CIStringVector) -> i32;
     /// Retrieves the state of the cross switch for a specific device.
     ///
     /// # Arguments
     ///
-    /// * `device_id` - The ID of the device to retrieve the cross switch state for.
+    /// * `device_id` - The ID of the device to retrieve the cross switch state
+    ///   for.
     ///
     /// # Returns
     ///
-    /// Returns an `i32` value representing the state of the cross switch for the specified device.
+    /// Returns an `i32` value representing the state of the cross switch for
+    /// the specified device.
     pub fn GetCrossSwitchState(device_id: *const c_char) -> i32;
     /// Registers a cross state listener for a specific device.
     ///
     /// # Arguments
     ///
     /// * `device_id` - The ID of the device to register the listener for.
-    /// * `listener` - A mutable pointer to the cross state listener to register.
+    /// * `listener` - A mutable pointer to the cross state listener to
+    ///   register.
     ///
     /// # Returns
     ///
-    /// Returns an `i32` value representing the result of the registration operation.
-    pub fn RegisterCrossStateListener(device_id: *const c_char, listener: *mut CICrossStateListener) -> i32;
+    /// Returns an `i32` value representing the result of the registration
+    /// operation.
+    pub fn RegisterCrossStateListener(
+        device_id: *const c_char,
+        listener: *mut CICrossStateListener,
+    ) -> i32;
     /// Unregisters a cross state listener for a specific device.
     ///
     /// # Arguments
@@ -266,13 +299,14 @@ extern "C" {
     ///
     /// # Returns
     ///
-    /// Returns an `i32` value representing the result of the unregistration operation.
+    /// Returns an `i32` value representing the result of the unregistration
+    /// operation.
     pub fn UnregisterCrossStateListener(device_id: *const c_char) -> i32;
 }
 
-type CIStringClone = extern "C" fn (*mut CIString) -> *mut CIString;
-type CIStringDestruct = extern "C" fn (*mut CIString);
-type CIStringGetData = extern "C" fn (*mut CIString) -> *const c_char;
+type CIStringClone = extern "C" fn(*mut CIString) -> *mut CIString;
+type CIStringDestruct = extern "C" fn(*mut CIString);
+type CIStringGetData = extern "C" fn(*mut CIString) -> *const c_char;
 
 // Struct representing a CIString.
 #[repr(C)]
@@ -285,7 +319,8 @@ pub struct CIString {
     pub data: Option<CIStringGetData>,
 }
 
-// These C interfaces are defined in lib: device_profile:fusion_device_profile_binding.
+// These C interfaces are defined in lib:
+// device_profile:fusion_device_profile_binding.
 extern "C" {
     /// Retrieves an access token from a C++ API.
     pub fn GetAccessToken();
@@ -293,7 +328,8 @@ extern "C" {
     ///
     /// # Returns
     ///
-    /// A mutable pointer to CIString. Please note that the pointer may be null if there is an error or no local network
-    /// ID is available.The caller should handle null pointer values appropriately.
+    /// A mutable pointer to CIString. Please note that the pointer may be null
+    /// if there is an error or no local network ID is available.The caller
+    /// should handle null pointer values appropriately.
     pub fn GetLocalNetworkId() -> *mut CIString;
 }

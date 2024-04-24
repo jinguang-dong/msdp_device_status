@@ -1,23 +1,22 @@
-/*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright (C) 2023 Huawei Device Co., Ltd.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 //! Several macros
 
 #![allow(dead_code)]
 
-/// macro define_enum can be used to define enum type, which is associated with several helper functions.
+/// macro define_enum can be used to define enum type, which is associated with
+/// several helper functions.
 #[macro_export]
 macro_rules! define_enum {
     {
@@ -52,8 +51,8 @@ macro_rules! define_enum {
             }
         }
 
-        impl ipc_rust::Serialize for $name {
-            fn serialize(&self, parcel: &mut ipc_rust::BorrowedMsgParcel<'_>) -> ipc_rust::IpcResult<()> {
+        impl ipc::parcel::Serialize for $name {
+            fn serialize(&self, parcel: &mut ipc::parcel::MsgParcel) -> ipc::IpcResult<()> {
                 match self {
                     $(
                         Self::$item => {
@@ -64,8 +63,8 @@ macro_rules! define_enum {
             }
         }
 
-        impl ipc_rust::Deserialize for $name {
-            fn deserialize(parcel: &ipc_rust::BorrowedMsgParcel<'_>) -> ipc_rust::IpcResult<Self> {
+        impl ipc::parcel::Deserialize for $name {
+            fn deserialize(parcel: &mut ipc::parcel::MsgParcel) -> ipc::IpcResult<Self> {
                 match u32::deserialize(parcel) {
                     Ok(val) => {
                         match $name::try_from(val) {
@@ -73,7 +72,7 @@ macro_rules! define_enum {
                                 Ok(e)
                             }
                             Err(_) => {
-                                Err(ipc_rust::IpcStatusCode::InvalidValue)
+                                Err(ipc::IpcStatusCode::InvalidValue)
                             }
                         }
                     }
@@ -89,16 +88,14 @@ macro_rules! define_enum {
 /// Helper to log the enter and leave of function calls.
 pub struct InnerFunctionTracer<'a> {
     log: Box<dyn Fn(&str, &str)>,
-    func_name: &'a str
+    func_name: &'a str,
 }
 
 impl<'a> InnerFunctionTracer<'a> {
     /// Construct a new instance of [`InnerFunctionTracer`].
     pub fn new(log: Box<dyn Fn(&str, &str)>, func_name: &'a str) -> Self {
         log(func_name, "enter");
-        Self {
-            log, func_name
-        }
+        Self { log, func_name }
     }
 }
 
@@ -138,7 +135,8 @@ macro_rules! call_info_trace {
     };
 }
 
-/// When the expression is an `Err` variant, "log(C function name) failed" is recorded and return the error.
+/// When the expression is an `Err` variant, "log(C function name) failed" is
+/// recorded and return the error.
 #[macro_export]
 macro_rules! err_log {
     ($expr:expr, $log:expr) => {
