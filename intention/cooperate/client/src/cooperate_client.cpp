@@ -198,11 +198,11 @@ int32_t CooperateClient::GetCooperateState(ITunnelClient &tunnel, const std::str
     GetCooperateStateSyncParam param { udId };
     BooleanReply reply;
     if (tunnel.GetParam(Intention::COOPERATE, CooperateRequestID::GET_COOPERATE_STATE_SYNC, param, reply) != RET_OK) {
-        FI_HILOGE("Get cooperate state failed udId: %{public}s", Utility::Anonymize(udId));
+        FI_HILOGE("Get cooperate state failed udId: %{public}s", Utility::Anonymize(udId).c_str());
         return RET_ERR;
     }
     FI_HILOGI("GetCooperateState for udId: %{public}s successfully,state: %{public}s",
-        Utility::Anonymize(udId), state ? "true" : "false");
+        Utility::Anonymize(udId).c_str(), state ? "true" : "false");
     state = reply.state;
     return RET_OK;
 }
@@ -215,7 +215,7 @@ int32_t CooperateClient::RegisterEventListener(ITunnelClient &tunnel,
     std::lock_guard<std::mutex> guard(mtx_);
     if (eventListener_.find(networkId) != eventListener_.end() &&
         eventListener_[networkId].find(listener) != eventListener_[networkId].end()) {
-        FI_HILOGE("This listener for networkId:%{public}s already exists", Utility::Anonymize(networkId));
+        FI_HILOGE("This listener for networkId:%{public}s already exists", Utility::Anonymize(networkId).c_str());
         return RET_ERR;
     }
     RegisterEventListenerParam param { networkId };
@@ -226,7 +226,7 @@ int32_t CooperateClient::RegisterEventListener(ITunnelClient &tunnel,
         return ret;
     }
     eventListener_[networkId].insert(listener);
-    FI_HILOGI("Add listener for networkId:%{public}s successfully", Utility::Anonymize(networkId));
+    FI_HILOGI("Add listener for networkId:%{public}s successfully", Utility::Anonymize(networkId).c_str());
     return RET_OK;
 }
 
@@ -236,27 +236,29 @@ int32_t CooperateClient::UnregisterEventListener(ITunnelClient &tunnel,
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
     if (eventListener_.find(networkId) == eventListener_.end()) {
-        FI_HILOGE("No listener for networkId:%{public}s is registered", Utility::Anonymize(networkId));
+        FI_HILOGE("No listener for networkId:%{public}s is registered", Utility::Anonymize(networkId).c_str());
         return RET_ERR;
     }
     if (eventListener_.find(networkId) != eventListener_.end() && listener != nullptr &&
         eventListener_[networkId].find(listener) == eventListener_[networkId].end()) {
-        FI_HILOGE("Current listener for networkId:%{public}s is not registered", Utility::Anonymize(networkId));
+        FI_HILOGE("Current listener for networkId:%{public}s is not registered", Utility::Anonymize(networkId).c_str());
         return RET_ERR;
     }
     if (listener == nullptr) {
         eventListener_.erase(networkId);
-        FI_HILOGI("Remove all listener for networkId:%{public}s", Utility::Anonymize(networkId));
+        FI_HILOGI("Remove all listener for networkId:%{public}s", Utility::Anonymize(networkId).c_str());
     } else {
         eventListener_[networkId].erase(listener);
-        FI_HILOGI("Remove listener for networkId:%{public}s", Utility::Anonymize(networkId));
+        FI_HILOGI("Remove listener for networkId:%{public}s", Utility::Anonymize(networkId).c_str());
         if (eventListener_[networkId].empty()) {
             eventListener_.erase(networkId);
-            FI_HILOGD("No listener for networkId:%{public}s, clean current networkId", Utility::Anonymize(networkId));
+            FI_HILOGD("No listener for networkId:%{public}s, clean current networkId",
+                Utility::Anonymize(networkId).c_str());
         }
     }
     if (eventListener_.find(networkId) != eventListener_.end()) {
-        FI_HILOGD("UnregisterEventListener for networkId:%{public}s successfully", Utility::Anonymize(networkId));
+        FI_HILOGD("UnregisterEventListener for networkId:%{public}s successfully",
+            Utility::Anonymize(networkId).c_str());
         return RET_OK;
     }
     UnregisterEventListenerParam param { networkId };
@@ -266,7 +268,7 @@ int32_t CooperateClient::UnregisterEventListener(ITunnelClient &tunnel,
         FI_HILOGE("UnregisterEventListener failed, ret:%{public}d", ret);
         return ret;
     }
-    FI_HILOGD("Unregister all Listener for networkId:%{public}s successfully", Utility::Anonymize(networkId));
+    FI_HILOGD("Unregister all Listener for networkId:%{public}s successfully", Utility::Anonymize(networkId).c_str());
     return RET_OK;
 }
 
@@ -466,7 +468,7 @@ void CooperateClient::OnDevMouseLocationListener(const std::string &networkId, c
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
     if (eventListener_.find(networkId) == eventListener_.end()) {
-        FI_HILOGI("No listener for networkId:%{public}s is registered", Utility::Anonymize(networkId));
+        FI_HILOGI("No listener for networkId:%{public}s is registered", Utility::Anonymize(networkId).c_str());
         return;
     }
     for (const auto &listener : eventListener_[networkId]) {
@@ -474,7 +476,8 @@ void CooperateClient::OnDevMouseLocationListener(const std::string &networkId, c
             listener->OnMouseLocationEvent(networkId, event);
             FI_HILOGD("Trigger listener for networkId:%{public}s,"
             "displayX:%{public}d, displayY:%{public}d, displayWidth:%{public}d, displayHeight:%{public}d",
-            Utility::Anonymize(networkId), event.displayX, event.displayY, event.displayWidth, event.displayHeight);
+                Utility::Anonymize(networkId).c_str(), event.displayX, event.displayY,
+                event.displayWidth, event.displayHeight);
     }
 }
 
