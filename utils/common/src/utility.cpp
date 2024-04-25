@@ -42,10 +42,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr size_t ANONYMIZED_ID_SIZE { 32 };
-constexpr size_t ID_PART_SIZE { 4 };
-constexpr size_t FULL_MASKED_ID_SIZE { 12 };
-constexpr size_t MASK_SIZE { 6 };
+constexpr size_t SUBSTR_ID_LENGTH { 5 };
 } // namespace
 
 size_t Utility::CopyNulstr(char *dest, size_t size, const char *src)
@@ -116,47 +113,13 @@ bool Utility::IsInteger(const std::string &target)
 
 const char* Utility::Anonymize(const char *id) noexcept
 {
-    static char idBuf[ANONYMIZED_ID_SIZE] {};
-    char *pBuf = idBuf;
-    size_t bufSize = sizeof(idBuf);
-    size_t idLen;
-    errno_t err;
-
-    if (id == nullptr) {
-        goto FULL_MASK;
+    std::string idStr(id);
+    if (idStr.empty() || idStr.length() < SUBSTR_ID_LENGTH) {
+        return "******";
     }
-    idLen = std::strlen(id);
-    if (idLen < FULL_MASKED_ID_SIZE) {
-        goto FULL_MASK;
-    }
-    err = ::memcpy_s(pBuf, bufSize, id, ID_PART_SIZE);
-    if (err != EOK) {
-        goto FULL_MASK;
-    }
-    pBuf += ID_PART_SIZE;
-    bufSize -= ID_PART_SIZE;
-
-    err = ::memset_s(pBuf, bufSize, '*', MASK_SIZE);
-    if (err != EOK) {
-        goto FULL_MASK;
-    }
-    pBuf += MASK_SIZE;
-    bufSize -= MASK_SIZE;
-
-    err = ::strcpy_s(pBuf, bufSize, &id[idLen - ID_PART_SIZE]);
-    if (err != EOK) {
-        goto FULL_MASK;
-    }
-    return idBuf;
-
-FULL_MASK:
-    char *tp = idBuf + MASK_SIZE;
-
-    for (pBuf = idBuf; pBuf < tp; ++pBuf) {
-        *pBuf = '*';
-    }
-    *pBuf = '\0';
-    return idBuf;
+    static std::string anonymizedId =
+        idStr.substr(0, SUBSTR_ID_LENGTH) + "******" + idStr.substr(idStr.length() - SUBSTR_ID_LENGTH);
+    return anonymizedId.c_str();
 }
 
 bool Utility::DoesFileExist(const char *path)
