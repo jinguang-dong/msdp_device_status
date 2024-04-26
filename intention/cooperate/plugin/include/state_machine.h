@@ -20,10 +20,7 @@
 
 #include "app_mgr_interface.h"
 #include "iapplication_state_observer.h"
-<<<<<<< HEAD
 #include "accesstoken_kit.h"
-=======
->>>>>>> 3e2b65aa31632cc487b31007466d15372c1a285d
 
 #include "i_cooperate_state.h"
 
@@ -67,12 +64,8 @@ private:
     void OnSoftbusSessionClosed(Context &context, const CooperateEvent &event);
     void Transfer(Context &context, const CooperateEvent &event);
     sptr<AppExecFwk::IAppMgr> GetAppMgr();
-<<<<<<< HEAD
     int32_t RegisterApplicationStateObserver(Channel<CooperateEvent>::Sender sender, const std::vector<std::string> &packageName);
     std::vector<std::string> GetPackageName(Security::AccessToken::AccessTokenID tokenId);
-=======
-    int32_t RegisterApplicationStateObserver(Channel<CooperateEvent>::Sender sender);
->>>>>>> 3e2b65aa31632cc487b31007466d15372c1a285d
     void UnregisterApplicationStateObserver();
     void AddSessionObserver(Context &context, const EnableCooperateEvent &event);
     void RemoveSessionObserver(Context &context, const DisableCooperateEvent &event);

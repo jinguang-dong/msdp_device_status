@@ -62,10 +62,7 @@ ohos_shared_library("intention_cooperate") {
   ]
 
   external_deps = [
-<<<<<<< HEAD
     "access_token:libaccesstoken_sdk",
-=======
->>>>>>> 3e2b65aa31632cc487b31007466d15372c1a285d
     "ability_runtime:app_manager",
     "access_token:libtoken_setproc",
     "c_utils:utils",
