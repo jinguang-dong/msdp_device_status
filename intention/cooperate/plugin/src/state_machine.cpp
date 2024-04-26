@@ -328,12 +328,21 @@ sptr<AppExecFwk::IAppMgr> StateMachine::GetAppMgr()
     return iface_cast<AppExecFwk::IAppMgr>(appMgrObj);
 }
 
+<<<<<<< HEAD
 int32_t StateMachine::RegisterApplicationStateObserver(Channel<CooperateEvent>::Sender sender, const std::vector<std::string> &bundleNames)
+=======
+int32_t StateMachine::RegisterApplicationStateObserver(Channel<CooperateEvent>::Sender sender)
+>>>>>>> 3e2b65aa31632cc487b31007466d15372c1a285d
 {
     auto appMgr = GetAppMgr();
     CHKPR(appMgr, RET_ERR);
     appStateObserver_ = sptr<AppStateObserver>::MakeSptr(sender);
+<<<<<<< HEAD
     FI_HILOGI("Register application %{public}s state observer", bundleNames.back().c_str());
+=======
+    std::vector<std::string> bundleNames { "com.huawei.associateassistant" };
+    FI_HILOGI("Register application(\"com.huawei.associateassistant\") state observer");
+>>>>>>> 3e2b65aa31632cc487b31007466d15372c1a285d
     auto err = appMgr->RegisterApplicationStateObserver(appStateObserver_, bundleNames);
     if (err != ERR_OK) {
         appStateObserver_.clear();
@@ -348,7 +357,11 @@ void StateMachine::UnregisterApplicationStateObserver()
     CHKPV(appStateObserver_);
     auto appMgr = GetAppMgr();
     CHKPV(appMgr);
+<<<<<<< HEAD
     FI_HILOGI("Unregister application associateassistant state observer");
+=======
+    FI_HILOGI("Unregister application(\"com.huawei.associateassistant\") state observer");
+>>>>>>> 3e2b65aa31632cc487b31007466d15372c1a285d
     auto err = appMgr->UnregisterApplicationStateObserver(appStateObserver_);
     if (err != ERR_OK) {
         FI_HILOGE("IAppMgr::UnregisterApplicationStateObserver fail, error:%{public}d", err);
@@ -358,8 +371,12 @@ void StateMachine::UnregisterApplicationStateObserver()
 
 void StateMachine::AddSessionObserver(Context &context, const EnableCooperateEvent &event)
 {
+<<<<<<< HEAD
     std::vector<std::string> packageName = GetPackageName(event.tokenId);
     RegisterApplicationStateObserver(context.Sender(), packageName);
+=======
+    RegisterApplicationStateObserver(context.Sender());
+>>>>>>> 3e2b65aa31632cc487b31007466d15372c1a285d
 }
 
 std::vector<std::string> StateMachine::GetPackageName(Security::AccessToken::AccessTokenID tokenId)
