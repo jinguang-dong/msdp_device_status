@@ -358,7 +358,7 @@ void StateMachine::UnregisterApplicationStateObserver()
 
 void StateMachine::AddSessionObserver(Context &context, const EnableCooperateEvent &event)
 {
-    std::vector<std::string> packageName = GetPacketName(event.tokenId);
+    std::vector<std::string> packageName = GetPackageName(event.tokenId);
     RegisterApplicationStateObserver(context.Sender(), packageName);
 }
 
@@ -372,7 +372,7 @@ std::vector<std::string> StateMachine::GetPackageName(Security::AccessToken::Acc
             if (Security::AccessToken::AccessTokenKit::GetHapTokenInfo(tokenId, hapInfo) != 0) {
                 FI_HILOGE("Get hap token info failed");
             } else {
-                packageName = hapInfo.bundleName;
+                packageName.push_back(hapInfo.bundleName);
             }
             break;
         }
@@ -382,7 +382,7 @@ std::vector<std::string> StateMachine::GetPackageName(Security::AccessToken::Acc
             if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, tokenInfo) != 0) {
                 FI_HILOGE("Get native token info failed");
             } else {
-                packageName = tokenInfo.processName;
+                packageName.push_back(tokenInfo.processName);
             }
             break;
         }
