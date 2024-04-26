@@ -328,13 +328,12 @@ sptr<AppExecFwk::IAppMgr> StateMachine::GetAppMgr()
     return iface_cast<AppExecFwk::IAppMgr>(appMgrObj);
 }
 
-int32_t StateMachine::RegisterApplicationStateObserver(Channel<CooperateEvent>::Sender sender)
+int32_t StateMachine::RegisterApplicationStateObserver(Channel<CooperateEvent>::Sender sender, const std::vector<std::string> &bundleNames)
 {
     auto appMgr = GetAppMgr();
     CHKPR(appMgr, RET_ERR);
     appStateObserver_ = sptr<AppStateObserver>::MakeSptr(sender);
-    std::vector<std::string> bundleNames { "com.huawei.associateassistant" };
-    FI_HILOGI("Register application(\"com.huawei.associateassistant\") state observer");
+    FI_HILOGI("Register application %{public}s state observer", bundleNames.back().c_str());
     auto err = appMgr->RegisterApplicationStateObserver(appStateObserver_, bundleNames);
     if (err != ERR_OK) {
         appStateObserver_.clear();
@@ -349,7 +348,7 @@ void StateMachine::UnregisterApplicationStateObserver()
     CHKPV(appStateObserver_);
     auto appMgr = GetAppMgr();
     CHKPV(appMgr);
-    FI_HILOGI("Unregister application(\"com.huawei.associateassistant\") state observer");
+    FI_HILOGI("Unregister application associateassistant state observer");
     auto err = appMgr->UnregisterApplicationStateObserver(appStateObserver_);
     if (err != ERR_OK) {
         FI_HILOGE("IAppMgr::UnregisterApplicationStateObserver fail, error:%{public}d", err);
@@ -359,9 +358,41 @@ void StateMachine::UnregisterApplicationStateObserver()
 
 void StateMachine::AddSessionObserver(Context &context, const EnableCooperateEvent &event)
 {
-    RegisterApplicationStateObserver(context.Sender());
+    std::vector<std::string> packageName = GetPackageName(event.tokenId);
+    RegisterApplicationStateObserver(context.Sender(), packageName);
 }
 
+std::vector<std::string> StateMachine::GetPackageName(Security::AccessToken::AccessTokenID tokenId)
+{
+    std::vector<std::string> packageName = std::vector<std::string>();
+    int32_t tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    switch (tokenType) {
+        case Security::AccessToken::ATokenTypeEnum::TOKEN_HAP: {
+            Security::AccessToken::HapTokenInfo hapInfo;
+            if (Security::AccessToken::AccessTokenKit::GetHapTokenInfo(tokenId, hapInfo) != 0) {
+                FI_HILOGE("Get hap token info failed");
+            } else {
+                packageName.push_back(hapInfo.bundleName);
+            }
+            break;
+        }
+        case Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE:
+        case Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL: {
+            Security::AccessToken::NativeTokenInfo tokenInfo;
+            if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, tokenInfo) != 0) {
+                FI_HILOGE("Get native token info failed");
+            } else {
+                packageName.push_back(tokenInfo.processName);
+            }
+            break;
+        }
+        default: {
+            FI_HILOGW("token type not match");
+            break;
+        }
+    }
+    return packageName;
+}
 void StateMachine::RemoveSessionObserver(Context &context, const DisableCooperateEvent &event)
 {
     UnregisterApplicationStateObserver();
