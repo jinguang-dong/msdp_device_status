@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../device_status.gni")
 
-group("interaction_adapter_test") {
+group("intention_adapter_test") {
   testonly = true
   deps = []
   deps += [ "unittest:unittest" ]
