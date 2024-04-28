@@ -373,9 +373,9 @@ HWTEST_F(DsoftbusAdapterTest, HandleRawData, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
-    CircleStreamBuffer circleBuffer;
+    std::string networkId("softbus");
     int32_t *data = new int32_t(SOCKET);
-    ASSERT_NO_FATAL_FAILURE(DSoftbusAdapterImpl::GetInstance()->HandleRawData(NetworkId, data, sizeof(data)));
+    ASSERT_NO_FATAL_FAILURE(DSoftbusAdapterImpl::GetInstance()->HandleRawData(networkId, data, sizeof(data)));
     RemovePermission();
 }
 } // namespace DeviceStatus
