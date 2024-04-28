@@ -196,7 +196,7 @@ HWTEST_F(DsoftbusAdapterTest, TestOpenSession, TestSize.Level1)
     CALL_TEST_DEBUG;
     SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
     std::shared_ptr<DSoftbusAdapter>dSoftbusAdapter = std::make_shared<DSoftbusAdapter>();
-    std::string networkId("cde2b5b4453a5b3ec566f836ffa7a4aab52c4b9c8a0b34f3d6aaca4566db24f0");
+    std::string networkId("softbus");
     int32_t ret = dSoftbusAdapter->OpenSession(networkId);
     ASSERT_EQ(ret, RET_ERR);
     RemovePermission();
@@ -213,7 +213,7 @@ HWTEST_F(DsoftbusAdapterTest, TestCloseSession, TestSize.Level1)
     CALL_TEST_DEBUG;
     SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
     std::shared_ptr<DSoftbusAdapter>dSoftbusAdapter = std::make_shared<DSoftbusAdapter>();
-    std::string networkId("cde2b5b4453a5b3ec566f836ffa7a4aab52c4b9c8a0b34f3d6aaca4566db24f0");
+    std::string networkId("softbus");
     int32_t ret = dSoftbusAdapter->OpenSession(networkId);
     ASSERT_EQ(ret, RET_ERR);
     ASSERT_NO_FATAL_FAILURE(dSoftbusAdapter->CloseSession(networkId));
@@ -231,7 +231,7 @@ HWTEST_F(DsoftbusAdapterTest, SendPacket, TestSize.Level1)
     CALL_TEST_DEBUG;
     SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
     std::shared_ptr<DSoftbusAdapter>dSoftbusAdapter = std::make_shared<DSoftbusAdapter>();
-    std::string networkId("cde2b5b4453a5b3ec566f836ffa7a4aab52c4b9c8a0b34f3d6aaca4566db24f0");
+    std::string networkId("softbus");
     NetPacket packet(MessageId::DSOFTBUS_START_COOPERATE);
     ASSERT_NO_FATAL_FAILURE(dSoftbusAdapter->SendPacket(networkId, packet));
     RemovePermission();
@@ -248,7 +248,7 @@ HWTEST_F(DsoftbusAdapterTest, SendParcel, TestSize.Level1)
     CALL_TEST_DEBUG;
     SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
     std::shared_ptr<DSoftbusAdapter>dSoftbusAdapter = std::make_shared<DSoftbusAdapter>();
-    std::string networkId("cde2b5b4453a5b3ec566f836ffa7a4aab52c4b9c8a0b34f3d6aaca4566db24f0");
+    std::string networkId("softbus");
     Parcel parcel;
     ASSERT_NO_FATAL_FAILURE(dSoftbusAdapter->SendParcel(networkId, parcel));
     RemovePermission();
@@ -358,7 +358,7 @@ HWTEST_F(DsoftbusAdapterTest, HandleSessionData, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
-    std::string networkId("cde2b5b4453a5b3ec566f836ffa7a4aab52c4b9c8a0b34f3d6aaca4566db24f0");
+    std::string networkId("softbus");
     CircleStreamBuffer circleBuffer;
     ASSERT_NO_FATAL_FAILURE(DSoftbusAdapterImpl::GetInstance()->HandleSessionData(networkId, circleBuffer));
     RemovePermission();
