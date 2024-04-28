@@ -221,7 +221,6 @@ HWTEST_F(DsoftbusAdapterTest, TestCloseSession, TestSize.Level1)
     RemovePermission();
 }
 
-
 /**
  * @tc.name: TestSendPacket
  * @tc.desc: Test SendPacket
@@ -321,7 +320,7 @@ HWTEST_F(DsoftbusAdapterTest, InitSocket, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
- HWTEST_F(DsoftbusAdapterTest, OnBind, TestSize.Level1)
+HWTEST_F(DsoftbusAdapterTest, OnBind, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
@@ -339,7 +338,7 @@ HWTEST_F(DsoftbusAdapterTest, InitSocket, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
- HWTEST_F(DsoftbusAdapterTest, OnBytes, TestSize.Level1)
+HWTEST_F(DsoftbusAdapterTest, OnBytes, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
@@ -354,7 +353,7 @@ HWTEST_F(DsoftbusAdapterTest, InitSocket, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
- HWTEST_F(DsoftbusAdapterTest, HandleSessionData, TestSize.Level1)
+HWTEST_F(DsoftbusAdapterTest, HandleSessionData, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
@@ -368,7 +367,7 @@ HWTEST_F(DsoftbusAdapterTest, InitSocket, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
- HWTEST_F(DsoftbusAdapterTest, HandleRawData, TestSize.Level1)
+HWTEST_F(DsoftbusAdapterTest, HandleRawData, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
