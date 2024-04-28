@@ -22,9 +22,7 @@ ohos_unittest("DsoftbusAdapterTest") {
     cfi_cross_dso = true
     debug = false
   }
-  cflags = [
-    "-Dprivate=public",
-  ]
+  cflags = [ "-Dprivate=public" ]
 
   branch_protector_ret = "pac_ret"
 
@@ -37,7 +35,7 @@ ohos_unittest("DsoftbusAdapterTest") {
 
   sources = [ "src/dsoftbus_adapter_test.cpp" ]
 
-  deps = [ 
+  deps = [
     "${device_status_root_path}/intention/adapters/dsoftbus_adapter:intention_dsoftbus_adapter",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/utils/common:devicestatus_util",
@@ -57,7 +55,5 @@ ohos_unittest("DsoftbusAdapterTest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":DsoftbusAdapterTest",
-  ]
+  deps = [ ":DsoftbusAdapterTest" ]
 }
