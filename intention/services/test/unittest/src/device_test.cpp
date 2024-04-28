@@ -12,6 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#define private public
+#define protected public
+
 #include <gtest/gtest.h>
 
 #include "device.h"
@@ -58,6 +62,7 @@ HWTEST_F(DeviceTest, OpenTest001, TestSize.Level0)
     dev->SetDevPath(devPath_);
     int32_t ret = dev->Open();
     EXPECT_EQ(ret, RET_OK);
+    dev->Close();
 }
 
 /**
