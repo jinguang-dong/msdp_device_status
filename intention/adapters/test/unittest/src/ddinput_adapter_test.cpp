@@ -47,7 +47,7 @@ constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 const std::string SYSTEM_CORE { "system_core" };
 uint64_t g_tokenID { 0 };
 const char* g_cores[] = { "ohos.permission.INPUT_MONITORING" };
-std::string defaultNetworkId { "Default NetworkId" };
+const std::string DEFAUIT_NETWORKID { "Default NetworkId" };
 } // namespace
 
 class DDInputAdapterTest : public testing::Test {
@@ -113,7 +113,7 @@ HWTEST_F(DDInputAdapterTest, TestNeedFilterOut, TestSize.Level1)
     SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
     std::shared_ptr<IDInputAdapter> dinputAdapter = std::make_shared<DInputAdapter>(nullptr);
     IDInputAdapter::BusinessEvent businessEvent;
-    bool ret = dinputAdapter->IsNeedFilterOut(defaultNetworkId, std::move(businessEvent));
+    bool ret = dinputAdapter->IsNeedFilterOut(DEFAUIT_NETWORKID, std::move(businessEvent));
     ASSERT_FALSE(ret);
     RemovePermission();
 }
@@ -134,7 +134,7 @@ HWTEST_F(DDInputAdapterTest, StartRemoteInput, TestSize.Level1)
         FI_HILOGI("On callback");
     };
     std::vector<std::string> inputDeviceDhids {};
-    bool ret = dinputAdapter->StartRemoteInput(defaultNetworkId, defaultNetworkId, inputDeviceDhids, callback);
+    bool ret = dinputAdapter->StartRemoteInput(DEFAUIT_NETWORKID, DEFAUIT_NETWORKID, inputDeviceDhids, callback);
     ASSERT_TRUE(ret);
     RemovePermission();
 }
@@ -155,7 +155,7 @@ HWTEST_F(DDInputAdapterTest, StopRemoteInput, TestSize.Level1)
         FI_HILOGI("On callback");
     };
     std::vector<std::string> inputDeviceDhids {};
-    bool ret = dinputAdapter->StopRemoteInput(defaultNetworkId, defaultNetworkId, inputDeviceDhids, callback);
+    bool ret = dinputAdapter->StopRemoteInput(DEFAUIT_NETWORKID, DEFAUIT_NETWORKID, inputDeviceDhids, callback);
     ASSERT_TRUE(ret);
     RemovePermission();
 }
@@ -176,7 +176,7 @@ HWTEST_F(DDInputAdapterTest, StopRemoteInput_0, TestSize.Level1)
         FI_HILOGI("On callback");
     };
     std::vector<std::string> inputDeviceDhids {};
-    bool ret = dinputAdapter->StopRemoteInput(defaultNetworkId, inputDeviceDhids, callback);
+    bool ret = dinputAdapter->StopRemoteInput(DEFAUIT_NETWORKID, inputDeviceDhids, callback);
     ASSERT_TRUE(ret);
     RemovePermission();
 }
@@ -197,7 +197,7 @@ HWTEST_F(DDInputAdapterTest, PrepareRemoteInput, TestSize.Level1)
         FI_HILOGI("On callback");
     };
     std::vector<std::string> inputDeviceDhids {};
-    bool ret = dinputAdapter->PrepareRemoteInput(defaultNetworkId, defaultNetworkId, callback);
+    bool ret = dinputAdapter->PrepareRemoteInput(DEFAUIT_NETWORKID, DEFAUIT_NETWORKID, callback);
     ASSERT_TRUE(ret);
     RemovePermission();
 }
@@ -218,7 +218,7 @@ HWTEST_F(DDInputAdapterTest, UnPrepareRemoteInput, TestSize.Level1)
         FI_HILOGI("On callback");
     };
     std::vector<std::string> inputDeviceDhids {};
-    bool ret = dinputAdapter->UnPrepareRemoteInput(defaultNetworkId, defaultNetworkId, callback);
+    bool ret = dinputAdapter->UnPrepareRemoteInput(DEFAUIT_NETWORKID, DEFAUIT_NETWORKID, callback);
     ASSERT_TRUE(ret);
     RemovePermission();
 }
@@ -239,7 +239,7 @@ HWTEST_F(DDInputAdapterTest, PrepareRemoteInput_0, TestSize.Level1)
         FI_HILOGI("On callback");
     };
     std::vector<std::string> inputDeviceDhids {};
-    bool ret = dinputAdapter->PrepareRemoteInput(defaultNetworkId, callback);
+    bool ret = dinputAdapter->PrepareRemoteInput(DEFAUIT_NETWORKID, callback);
     ASSERT_TRUE(ret);
     RemovePermission();
 }
@@ -260,7 +260,7 @@ HWTEST_F(DDInputAdapterTest, UnPrepareRemoteInput_0, TestSize.Level1)
         FI_HILOGI("On callback");
     };
     std::vector<std::string> inputDeviceDhids {};
-    bool ret = dinputAdapter->UnPrepareRemoteInput(defaultNetworkId, callback);
+    bool ret = dinputAdapter->UnPrepareRemoteInput(DEFAUIT_NETWORKID, callback);
     ASSERT_TRUE(ret);
     RemovePermission();
 }
