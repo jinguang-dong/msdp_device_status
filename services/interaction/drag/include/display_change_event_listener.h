@@ -49,6 +49,16 @@ private:
     sptr<DisplayChangeEventListener> displayChangeEventListener_ { nullptr };
     IContext *context_ { nullptr };
 };
+
+class DisplayFoldStatusListener : public Rosen::DisplayManager::IFoldStatusListener {
+public:
+    explicit DisplayFoldStatusListener(IContext *context);
+    ~DisplayFoldStatusListener() = default;
+    void OnFoldStatusChanged(Rosen:FoldStatus foldStatus) override;
+
+private:
+    IContext *context_ { nullptr };
+};
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

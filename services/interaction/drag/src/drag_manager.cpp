@@ -475,6 +475,7 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     dragDrawing_.NotifyDragInfo(DragEvent::DRAG_MOVE, pointerId, displayX, displayY);
 #endif // OHOS_DRAG_ENABLE_ANIMATION
     dragDrawing_.Draw(pointerEvent->GetTargetDisplayId(), displayX, displayY);
+    lastPointerEvent_ = pointerEvent;
 }
 
 void DragManager::SendDragData(int32_t targetTid, const std::string &udKey)
@@ -514,6 +515,7 @@ int32_t DragManager::OnDragUp(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         FI_HILOGW("Timeout, automatically stop dragging");
         this->StopDrag(dropResult);
     });
+    lastPointerEvent_ = nullptr;
     FI_HILOGI("leave");
     return RET_OK;
 }
@@ -1259,6 +1261,22 @@ int32_t DragManager::RotateDragWindow(Rosen::Rotation rotation)
     }
     FI_HILOGD("leave");
     return dragDrawing_.RotateDragWindow(rotation);
+}
+
+int32_t DragManager::ProcessDragCancel(Rosen:FoldStatus foldStatus)
+{
+    if (dragState_ == DragState::START) {
+        FI_HILOGI("Fold status changed, current status:%{public}d, need stop drag",
+            static_cast<int32_t>(foldStatus));
+        CHKPR(lastPointerEvent_, RET_ERR);
+        std::shared_ptr<MMI::PointerEvent> pointerEvent =
+            std::make_shared<MMI::PointerEvent>(*lastPointerEvent_.get());
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+        pointerEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
+        pointerEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_NO_INTERCEPT);
+        MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent);
+    }
+    return RET_OK;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

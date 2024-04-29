@@ -90,6 +90,7 @@ public:
     int32_t GetExtraInfo(std::string &extraInfo) const override;
     int32_t AddPrivilege(int32_t tokenId) override;
     int32_t RotateDragWindow(Rosen::Rotation rotation) override;
+    int32_t ProcessDragCancel(Rosen:FoldStatus foldStatus) override;
 #ifdef OHOS_DRAG_ENABLE_INTERCEPTOR
     class InterceptorConsumer : public MMI::IInputEventConsumer {
     public:
@@ -167,6 +168,7 @@ private:
     sptr<ISystemAbilityStatusChange> statusListener_ { nullptr };
     bool isControlMultiScreenVisible_ = false;
     sptr<ISystemAbilityStatusChange> displayAbilityStatusChange_ { nullptr };
+    std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ {nullptr};
 };
 } // namespace DeviceStatus
 } // namespace Msdp
