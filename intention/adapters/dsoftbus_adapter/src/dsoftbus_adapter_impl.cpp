@@ -42,6 +42,9 @@ constexpr int32_t MIN_BW { 80 * 1024 * 1024 };
 constexpr int32_t LATENCY { 1600 };
 constexpr int32_t SOCKET_SERVER { 0 };
 constexpr int32_t SOCKET_CLIENT { 1 };
+#ifdef ENABLE_PERFORMANCE_CHECK
+constexpr int32_t INVALID_DURATION { -1 };
+#endif // ENABLE_PERFORMANCE_CHECK
 }
 
 std::mutex DSoftbusAdapterImpl::mutex_;
@@ -106,13 +109,23 @@ int32_t DSoftbusAdapterImpl::OpenSession(const std::string &networkId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard guard(lock_);
-    return OpenSessionLocked(networkId);
+#ifdef ENABLE_PERFORMANCE_CHECK
+    perfChecker_.StartTrace();
+#endif // ENABLE_PERFORMANCE_CHECK
+    int32_t ret = OpenSessionLocked(networkId);
+#ifdef ENABLE_PERFORMANCE_CHECK
+    perfChecker_.FinishTrace(ret == RET_OK);
+#endif // ENABLE_PERFORMANCE_CHECK
+    return ret;
 }
 
 void DSoftbusAdapterImpl::CloseSession(const std::string &networkId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard guard(lock_);
+#ifdef ENABLE_PERFORMANCE_CHECK
+    perfChecker_.Dump();
+#endif // ENABLE_PERFORMANCE_CHECK
     if (auto iter = sessions_.find(networkId); iter != sessions_.end()) {
         ::Shutdown(iter->second.socket_);
         sessions_.erase(iter);
@@ -122,6 +135,9 @@ void DSoftbusAdapterImpl::CloseSession(const std::string &networkId)
 void DSoftbusAdapterImpl::CloseAllSessions()
 {
     CALL_DEBUG_ENTER;
+#ifdef ENABLE_PERFORMANCE_CHECK
+    perfChecker_.Dump();
+#endif // ENABLE_PERFORMANCE_CHECK
     std::lock_guard guard(lock_);
     CloseAllSessionsLocked();
 }
@@ -485,6 +501,45 @@ void DSoftbusAdapterImpl::HandleRawData(const std::string &networkId, const void
         }
     }
 }
+
+#ifdef ENABLE_PERFORMANCE_CHECK
+void DSoftbusAdapterImpl::PerfChecker::StartTrace()
+{
+    CALL_DEBUG_ENTER;
+    std::lock_guard guard { perfLock_ };
+    startTimeStamp_ = std::chrono::steady_clock::now();
+}
+
+void DSoftbusAdapterImpl::PerfChecker::FinishTrace(bool isSuccess)
+{
+    CALL_DEBUG_ENTER;
+    std::lock_guard guard { perfLock_ };
+    if (!isSuccess) {
+        durationList_.push_back(INVALID_DURATION);
+        FI_HILOGI("[PERF] OpenSession failed");
+        return;
+    }
+    auto curDuration = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now() - startTimeStamp_).count();
+    FI_HILOGI("[PERF] Finish tracing, elapsed: %{public}lld ms", curDuration);
+    minDuration_ = std::min(static_cast<int32_t> (curDuration), minDuration_);
+    maxDuration_ = std::max(static_cast<int32_t> (curDuration), maxDuration_);
+    durationList_.push_back(curDuration);
+}
+
+void DSoftbusAdapterImpl::PerfChecker::Dump()
+{
+    CALL_DEBUG_ENTER;
+    std::lock_guard guard { perfLock_ };
+    FI_HILOGI("[PERF] performanceInfo: maxDuration: %{public}d minDuration: %{public}d ", maxDuration_, minDuration_);
+    std::string durationStr;
+    for (const auto duration : durationList_) {
+        durationStr += std::to_string(duration) + ", ";
+    }
+    FI_HILOGI("[PERF] Duration: %{public}s", durationStr.c_str());
+}
+#endif // ENABLE_PERFORMANCE_CHECK
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

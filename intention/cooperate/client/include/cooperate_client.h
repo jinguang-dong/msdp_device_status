@@ -107,7 +107,7 @@ private:
 
     std::list<CooperateListenerPtr> devCooperateListener_;
     std::map<std::string, std::set<MouseLocationListenerPtr>> eventListener_;
-    std::list<HotAreaListenerPtr> devHotAreaListener_;
+    std::list<HotAreaListenerPtr> devHotAreaListeners_;
     std::map<int32_t, CooperateEvent> devCooperateEvent_;
     mutable std::mutex mtx_;
     std::atomic_bool isListeningProcess_ { false };

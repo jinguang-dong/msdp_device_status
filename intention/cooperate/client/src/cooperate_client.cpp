@@ -274,7 +274,7 @@ int32_t CooperateClient::AddHotAreaListener(ITunnelClient &tunnel, HotAreaListen
 {
     CALL_DEBUG_ENTER;
     CHKPR(listener, RET_ERR);
-    if (std::find(devHotAreaListener_.begin(), devHotAreaListener_.end(), listener) != devHotAreaListener_.end()) {
+    if (std::find(devHotAreaListeners_.begin(), devHotAreaListeners_.end(), listener) != devHotAreaListeners_.end()) {
         FI_HILOGD("Current listener is registered already");
         return RET_ERR;
     }
@@ -285,7 +285,7 @@ int32_t CooperateClient::AddHotAreaListener(ITunnelClient &tunnel, HotAreaListen
         FI_HILOGE("AddHotAreaListener failed, ret:%{public}d", ret);
         return ret;
     }
-    devHotAreaListener_.push_back(listener);
+    devHotAreaListeners_.push_back(listener);
     return RET_OK;
 }
 
@@ -293,20 +293,20 @@ int32_t CooperateClient::RemoveHotAreaListener(ITunnelClient &tunnel, HotAreaLis
 {
     CALL_DEBUG_ENTER;
     if (listener != nullptr &&
-        std::find(devHotAreaListener_.begin(), devHotAreaListener_.end(), listener) == devHotAreaListener_.end()) {
+        std::find(devHotAreaListeners_.begin(), devHotAreaListeners_.end(), listener) == devHotAreaListeners_.end()) {
         FI_HILOGD("Current listener is not registered");
         return RET_ERR;
     }
     if (listener == nullptr) {
-        devHotAreaListener_.clear();
+        devHotAreaListeners_.clear();
     } else {
-        for (auto it = devHotAreaListener_.begin(); it != devHotAreaListener_.end(); ++it) {
+        for (auto it = devHotAreaListeners_.begin(); it != devHotAreaListeners_.end(); ++it) {
             if (*it == listener) {
-                devHotAreaListener_.erase(it);
+                devHotAreaListeners_.erase(it);
             }
         }
     }
-    if (!devHotAreaListener_.empty()) {
+    if (!devHotAreaListeners_.empty()) {
         FI_HILOGI("RemoveHotAreaListener successfully");
         return RET_OK;
     }
@@ -456,7 +456,7 @@ void CooperateClient::OnDevHotAreaListener(int32_t displayX,
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
-    for (const auto &item : devHotAreaListener_) {
+    for (const auto &item : devHotAreaListeners_) {
         item->OnHotAreaMessage(displayX, displayY, type, isEdge);
     }
 }

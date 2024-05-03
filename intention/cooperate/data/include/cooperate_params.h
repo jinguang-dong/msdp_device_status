@@ -99,7 +99,6 @@ struct RegisterHotAreaListenerParam final : public ParamBase {
 };
 
 using UnregisterHotAreaListenerParam = RegisterHotAreaListenerParam;
-
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
