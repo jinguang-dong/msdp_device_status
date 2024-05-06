@@ -194,8 +194,8 @@ void StreamServer::ReleaseSession(int32_t fd, epoll_event &ev)
     if (auto it = circleBufs_.find(fd); it != circleBufs_.end()) {
         circleBufs_.erase(it);
     }
-    auto DeviceStatusService = DeviceStatus::DelayedSpSingleton<DeviceStatus::DeviceStatusService>::GetInstance();
-    DeviceStatusService->DelEpoll(EPOLL_EVENT_SOCKET, fd);
+    auto deviceStatusService = DeviceStatus::DelayedSpSingleton<DeviceStatus::DeviceStatusService>::GetInstance();
+    deviceStatusService->DelEpoll(EPOLL_EVENT_SOCKET, fd);
     if (close(fd) < 0) {
         FI_HILOGE("Close fd failed, error:%{public}s, fd:%{public}d", strerror(errno), fd);
     }

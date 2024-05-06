@@ -38,7 +38,7 @@ group("device_status_tests") {
   deps = [
     "frameworks/native/interaction/test:interaction_manager_test",
     "intention/adapters/test:intention_adapter_test",
-    "intention/common/channel:intention_channel_test",
+    "intention/common/channel:IntentionChannelTest",
     "intention/cooperate/test:device_status_unittests",
     "intention/services/test:intention_services_test",
     "services/native/test:devicestatussrv_test",
