@@ -201,8 +201,8 @@ group("unittest") {
 
   deps += [
     ":DeviceStatusAgentTest",
-    ":DragDataManagerTest",
     ":DeviceStatusServiceTest",
+    ":DragDataManagerTest",
   ]
 
   if (fusion_intention_framework) {
