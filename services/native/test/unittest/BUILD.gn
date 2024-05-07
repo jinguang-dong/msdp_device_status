@@ -214,5 +214,6 @@ group("unittest") {
         ":CoordinationSoftbusAdapterTest",
       ]
     }
+
   }
 }
