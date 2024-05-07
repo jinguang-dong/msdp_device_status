@@ -2502,7 +2502,6 @@ void DrawPixelMapModifier::Draw(Rosen::RSDrawingContext &context) const
     pixelMapNode->SetBgImage(rosenImage);
     FilterInfo filterInfo = g_drawingInfo.filterInfo;
     pixelMapNode->SetClipToBounds(true);
-    pixelMapNode->FinishRecording();
     Rosen::RSTransaction::FlushImplicitTransaction();
     FI_HILOGD("leave");
 }
