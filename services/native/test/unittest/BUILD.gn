@@ -25,13 +25,13 @@ config("module_private_config") {
     "${device_status_root_path}/interfaces/innerkits/interaction/include",
     "${device_status_service_path}/delegate_task/include",
     "${device_status_service_path}/communication/service/include",
-    "${device_status_service_path}/interaction/drag/src/include",
+    "${device_status_service_path}/interaction/drag/src",
     "${device_status_service_path}/device_manager/include",
     "${device_status_utils_path}/include",
   ]
 }
 
-ohos_unittest("test_devicestatus_service") {
+ohos_unittest("DeviceStatusServiceTest") {
   module_out_path = module_output_path
 
   sources = [ "src/devicestatus_service_test.cpp" ]
@@ -201,8 +201,8 @@ group("unittest") {
 
   deps += [
     ":DeviceStatusAgentTest",
+    ":DeviceStatusServiceTest",
     ":DragDataManagerTest",
-    ":test_devicestatus_service",
   ]
 
   if (fusion_intention_framework) {
