@@ -711,14 +711,13 @@ void JsEventTarget::CallGetCrossingSwitchStateAsyncWork(uv_work_t *work, int32_t
 void JsEventTarget::EmitCoordinationMessageEvent(uv_work_t *work, int32_t status)
 {
     CALL_INFO_TRACE;
-    std::lock_guard<std::mutex> guard(mutex_);
     CHKPV(work);
     if (work->data == nullptr) {
         JsUtil::DeletePtr<uv_work_t*>(work);
         FI_HILOGE("Emit coordination message event, check data is nullptr");
         return;
     }
-
+    std::lock_guard<std::mutex> guard(mutex_);
     sptr<JsUtil::CallbackInfo> temp(static_cast<JsUtil::CallbackInfo *>(work->data));
     JsUtil::DeletePtr<uv_work_t*>(work);
     temp->DecStrongRef(nullptr);
@@ -760,14 +759,13 @@ void JsEventTarget::EmitCoordinationMessageEvent(uv_work_t *work, int32_t status
 void JsEventTarget::EmitMouseLocationEvent(uv_work_t *work, int32_t status)
 {
     CALL_DEBUG_ENTER;
-    std::lock_guard<std::mutex> guard(mutex_);
     CHKPV(work);
     if (work->data == nullptr) {
         JsUtil::DeletePtr<uv_work_t*>(work);
         FI_HILOGE("Emit mouse location event, check data is nullptr");
         return;
     }
-
+    std::lock_guard<std::mutex> guard(mutex_);
     sptr<JsUtil::MouseCallbackInfo> temp(static_cast<JsUtil::MouseCallbackInfo *>(work->data));
     JsUtil::DeletePtr<uv_work_t*>(work);
     temp->DecStrongRef(nullptr);
