@@ -29,7 +29,6 @@
 #include "distributed_file_daemon_manager.h"
 #include "coordination_device_manager.h"
 #include "coordination_event_manager.h"
-#include "coordination_hisysevent.h"
 #include "coordination_hotarea.h"
 #include "coordination_message.h"
 #include "coordination_softbus_adapter.h"
@@ -250,25 +249,18 @@ void CoordinationSM::PrepareCoordination()
             std::bind(&CoordinationSM::UpdateLastPointerEventCallback, this, std::placeholders::_1));
         monitorId_ = MMI::InputManager::GetInstance()->AddMonitor(monitor);
         if (monitorId_ <= 0) {
-            CoordinationDFX::WritePrepare(monitorId_, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
             FI_HILOGE("Failed to add monitor, error code:%{public}d", monitorId_);
             monitorId_ = -1;
             return;
         }
     }
-    int32_t ret = DP_ADAPTER->UpdateCrossingSwitchState(true);
-    if (ret != RET_OK) {
-        CoordinationDFX::WritePrepare(monitorId_, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
-    }
+    DP_ADAPTER->UpdateCrossingSwitchState(true);
 }
 
 void CoordinationSM::UnprepareCoordination()
 {
     CALL_INFO_TRACE;
-    int32_t ret = DP_ADAPTER->UpdateCrossingSwitchState(false);
-    if (ret != RET_OK) {
-        CoordinationDFX::WriteUnprepare(OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
-    }
+    DP_ADAPTER->UpdateCrossingSwitchState(false);
     std::string localNetworkId = COORDINATION::GetLocalNetworkId();
     OnCloseCoordination(localNetworkId, true);
     RemoveMonitor();
@@ -574,18 +566,6 @@ void CoordinationSM::OnStartFinishSuccess(const std::string &remoteNetworkId, in
         SetPointerVisible();
     }
     NotifyRemoteStartSuccess(remoteNetworkId, startDeviceDhid_);
-    if (currentState_ == CoordinationState::STATE_FREE) {
-        UpdateState(CoordinationState::STATE_OUT);
-        CoordinationDFX::WriteCooperateDrag(remoteNetworkId, CoordinationState::STATE_FREE,
-            CoordinationState::STATE_OUT);
-    } else if (currentState_ == CoordinationState::STATE_IN) {
-        UpdateState(CoordinationState::STATE_FREE);
-        CoordinationDFX::WriteCooperateDrag(remoteNetworkId, CoordinationState::STATE_IN,
-            CoordinationState::STATE_FREE);
-    } else {
-        CoordinationDFX::WriteCooperateDrag(remoteNetworkId, CoordinationState::STATE_OUT);
-        FI_HILOGI("Current state is out");
-    }
 }
 
 void CoordinationSM::OnStartFinish(bool isSuccess, const std::string &remoteNetworkId, int32_t startDeviceId)
@@ -598,7 +578,6 @@ void CoordinationSM::OnStartFinish(bool isSuccess, const std::string &remoteNetw
     }
 
     if (!isSuccess) {
-        CoordinationDFX::WriteActivateResult(remoteNetworkId, isSuccess);
         FI_HILOGE("Start distributed failed, startDevice:%{public}d", startDeviceId);
         NotifyRemoteStartFail(remoteNetworkId);
     } else {
