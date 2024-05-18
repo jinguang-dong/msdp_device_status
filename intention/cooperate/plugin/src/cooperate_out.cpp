@@ -77,6 +77,7 @@ CooperateOut::Initial::Initial(CooperateOut &parent)
     AddHandler(CooperateEventType::DSOFTBUS_START_COOPERATE, &CooperateOut::Initial::OnRemoteStart, this);
     AddHandler(CooperateEventType::DSOFTBUS_STOP_COOPERATE, &CooperateOut::Initial::OnRemoteStop, this);
     AddHandler(CooperateEventType::DSOFTBUS_RELAY_COOPERATE, &CooperateOut::Initial::OnRelay, this);
+    AddHandler(CooperateEventType::SCREEN_STATUS_CHANGED, &CooperateOut::Initial::OnScreenStatusChanged, this);
 }
 
 void CooperateOut::Initial::OnDisable(Context &context, const CooperateEvent &event)
@@ -271,6 +272,11 @@ void CooperateOut::Initial::OnSoftbusSessionClosed(Context &context, const Coope
     parent_.StopCooperate(context, event);
     context.eventMgr_.OnSoftbusSessionClosed(notice);
     context.CloseDistributedFileConnection(std::string());
+}
+
+void CooperateOut::Initial::OnScreenStatusChanged(Context &context, const CooperateEvent &event)
+{
+    // Execute Stop Cooperate When Screen Locked or Screen Off
 }
 
 void CooperateOut::Initial::OnProgress(Context &context, const CooperateEvent &event)

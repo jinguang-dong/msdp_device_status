@@ -69,6 +69,7 @@ enum class CooperateEventType {
     DSOFTBUS_REPLY_SUBSCRIBE_MOUSE_LOCATION,
     DSOFTBUS_REPLY_UNSUBSCRIBE_MOUSE_LOCATION,
     DSOFTBUS_MOUSE_LOCATION,
+    SCREEN_STATUS_CHANGED
 };
 
 struct Rectangle {
@@ -200,6 +201,15 @@ struct DSoftbusSyncMouseLocation {
     LocationInfo mouseLocation;
 };
 
+enum class ScreenStatus {
+    SCREEN_OFF,
+    SCREEN_LOCKED
+};
+
+struct ScreenStatusChangedEvent {
+    ScreenStatus status;
+};
+
 using DSoftbusReplyUnSubscribeMouseLocation = DSoftbusReplySubscribeMouseLocation;
 using DSoftbusUnSubscribeMouseLocation = DSoftbusSubscribeMouseLocation;
 
@@ -230,7 +240,8 @@ struct CooperateEvent {
         InputHotplugEvent,
         InputPointerEvent,
         DSoftbusStartCooperate,
-        DSoftbusRelayCooperate
+        DSoftbusRelayCooperate,
+        ScreenStatusChangedEvent
     > event;
 };
 

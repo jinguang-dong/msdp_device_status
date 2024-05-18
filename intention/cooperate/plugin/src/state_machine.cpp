@@ -89,6 +89,7 @@ StateMachine::StateMachine(IContext *env)
     AddHandler(CooperateEventType::DSOFTBUS_REPLY_UNSUBSCRIBE_MOUSE_LOCATION,
         &StateMachine::OnSoftbusReplyUnSubscribeMouseLocation);
     AddHandler(CooperateEventType::DSOFTBUS_MOUSE_LOCATION, &StateMachine::OnSoftbusMouseLocation);
+    AddHandler(CooperateEventType::SCREEN_STATUS_CHANGED, &StateMachine::OnScreenStatusChanged);
 }
 
 void StateMachine::OnEvent(Context &context, const CooperateEvent &event)
@@ -282,6 +283,14 @@ void StateMachine::OnSoftbusSessionClosed(Context &context, const CooperateEvent
     CALL_INFO_TRACE;
     DSoftbusSessionClosed notice = std::get<DSoftbusSessionClosed>(event.event);
     context.eventMgr_.OnSoftbusSessionClosed(notice);
+    Transfer(context, event);
+}
+
+void StateMachine::OnScreenStatusChanged(Context &context, const CooperateEvent &event)
+{
+    CALL_INFO_TRACE;
+    ScreenStatusChangedEvent notice = std::get<ScreenStatusChangedEvent>(event.event);
+    FI_HILOGI("Screen status changed:%{public}d", static_cast<int32_t>(notice.status));
     Transfer(context, event);
 }
 
