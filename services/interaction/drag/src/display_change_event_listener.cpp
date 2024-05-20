@@ -99,6 +99,21 @@ void DisplayAbilityStatusChange::OnRemoveSystemAbility(int32_t systemAbilityId, 
 {
     FI_HILOGI("systemAbilityId:%{public}d", systemAbilityId);
 }
+
+DisplayFoldStatusListener::DisplayFoldStatusListener(IContext *context)
+    : context_(context)
+{}
+
+void DisplayFoldStatusListener::OnFoldStatusChanged(Rosen:FoldStatus foldStatus)
+{
+    FI_HILOGI("Fold status changed:%{public}d", static_cast<int32_t>(foldStatus));
+    CHKPV(context_);
+    int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
+        std::bind(&IDragManager::ProcessDragCancel, &context_->GetDragManager(), foldStatus));
+    if (ret != RET_OK) {
+        FI_HILOGE("Post async task failed");
+    }
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
