@@ -75,6 +75,7 @@ external_deps_set = [
   "access_token:libtokenid_sdk",
   "c_utils:utils",
   "graphic_2d:window_animation",
+  "graphic_2d:librender_service_client",
   "hilog:libhilog",
   "hisysevent:libhisysevent",
   "hitrace:hitrace_meter",
