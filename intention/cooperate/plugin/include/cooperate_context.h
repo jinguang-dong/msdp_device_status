@@ -24,6 +24,7 @@
 #include <mutex>
 #endif // ENABLE_PERFORMANCE_CHECK
 
+#include "common_event_adapter.h"
 #include "cooperate_events.h"
 #include "ddm_adapter.h"
 #include "dsoftbus_handler.h"
@@ -91,6 +92,7 @@ public:
     MouseLocation mouseLocation_;
     InputEventBuilder inputEventBuilder_;
     InputEventInterceptor inputEventInterceptor_;
+    CommonEventAdapter commonEventAdapter_;
 
 private:
     int32_t StartEventHandler();
