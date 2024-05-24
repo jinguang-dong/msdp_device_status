@@ -27,11 +27,16 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace Cooperate {
 
+MouseLocation(IContext *context) 
+    : context_(context)
+{
+    localNetworkId_ = context_->GetDP().GetLocalNetworkId();
+}
+
 void MouseLocation::AddListener(const RegisterEventListenerEvent &event)
 {
     CALL_INFO_TRACE;
     CHKPV(context_);
-    localNetworkId_ = context_->GetDP().GetLocalNetworkId();
     if (event.networkId == localNetworkId_) {
         FI_HILOGI("Add local mouse location listener");
         localListeners_.insert(event.pid);
@@ -50,7 +55,6 @@ void MouseLocation::RemoveListener(const UnregisterEventListenerEvent &event)
 {
     CALL_INFO_TRACE;
     CHKPV(context_);
-    localNetworkId_ = context_->GetDP().GetLocalNetworkId();
     if (event.networkId == localNetworkId_) {
         FI_HILOGI("Remove local mouse location listener");
         localListeners_.erase(event.pid);
@@ -78,6 +82,10 @@ void MouseLocation::OnClientDied(const ClientDiedEvent &event)
     for (auto it = listeners_.begin(); it != listeners_.end();) {
         it->second.erase(event.pid);
         if (it->second.empty()) {
+            DSoftbusUnSubscribeMouseLocation softbusEvent {
+                .networkId = localNetworkId_,
+                .remoteNetworkId = localNetworkId_,
+            };
             it = listeners_.erase(it);
         } else {
             ++it;
@@ -89,7 +97,6 @@ void MouseLocation::OnSubscribeMouseLocation(const DSoftbusSubscribeMouseLocatio
 {
     CALL_INFO_TRACE;
     CHKPV(context_);
-    localNetworkId_ = context_->GetDP().GetLocalNetworkId();
     remoteSubscribers_.insert(notice.networkId);
     FI_HILOGI("Add subscriber for networkId:%{public}s successfully", Utility::Anonymize(notice.networkId).c_str());
     DSoftbusReplySubscribeMouseLocation event = {
@@ -106,7 +113,6 @@ void MouseLocation::OnUnSubscribeMouseLocation(const DSoftbusUnSubscribeMouseLoc
 {
     CALL_INFO_TRACE;
     CHKPV(context_);
-    localNetworkId_ = context_->GetDP().GetLocalNetworkId();
     if (remoteSubscribers_.find(notice.networkId) == remoteSubscribers_.end()) {
         FI_HILOGE("No subscriber for networkId:%{public}s stored in remote subscriber",
             Utility::Anonymize(notice.networkId).c_str());
