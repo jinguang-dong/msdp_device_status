@@ -183,6 +183,8 @@ ohos_unittest("IntentionDeviceManagerTest") {
     "ipc:ipc_single",
     "window_manager:libdm",
     "window_manager:libwm",
+    "data_share:datashare_consumer",
+    "ability_base:zuri",
   ]
 }
 

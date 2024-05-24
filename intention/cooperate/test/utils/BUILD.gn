@@ -139,6 +139,8 @@ ohos_unittest("CooperateServerTest") {
     "ipc:ipc_single",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "data_share:datashare_consumer",
+    "ability_base:zuri",
   ]
 }
 

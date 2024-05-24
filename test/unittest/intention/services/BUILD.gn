@@ -92,6 +92,8 @@ ohos_unittest("IntentionServiceTest") {
     "input:libmmi-client",
     "window_manager:libdm",
     "window_manager:libwmutil_base",
+    "data_share:datashare_consumer",
+    "ability_base:zuri",
   ]
 }
 

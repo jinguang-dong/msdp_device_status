@@ -55,6 +55,7 @@ namespace DeviceStatus {
 namespace {
 constexpr int32_t BASELINE_DENSITY { 160 };
 constexpr int32_t DEVICE_INDEPENDENT_PIXEL { 40 };
+constexpr int32_t MAGIC_INDEPENDENT_PIXEL { 25 };
 constexpr int32_t DRAG_NUM_ONE { 1 };
 constexpr int32_t STRING_PX_LENGTH { 2 };
 constexpr int32_t EIGHT_SIZE { 8 };

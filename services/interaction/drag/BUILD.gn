@@ -49,6 +49,7 @@ ohos_shared_library("interaction_drag") {
     "src/drag_vsync_station.cpp",
     "src/event_hub.cpp",
     "src/state_change_notify.cpp",
+    "src/cursor_datashare_helper.cpp",
   ]
 
   defines = device_status_default_defines
@@ -95,6 +96,8 @@ ohos_shared_library("interaction_drag") {
     "udmf:udmf_client",
     "window_manager:libdm",
     "window_manager:libwm",
+    "data_share:datashare_consumer",
+    "ability_base:zuri",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

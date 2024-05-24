@@ -62,6 +62,8 @@ ohos_prebuilt_etc("drawing_image_Move_Drag") {
   relative_install_dir = "device_status/drag_icon"
 }
 
+
+
 group("device_status_drag_icon") {
   deps = [
     ":drawing_image_Copy_Drag",
@@ -71,5 +73,6 @@ group("device_status_drag_icon") {
     ":drawing_image_Mouse_Drag_Cursor_Circle",
     ":drawing_image_Mouse_Drag_Default",
     ":drawing_image_Move_Drag",
+    
   ]
 }

@@ -64,6 +64,8 @@ ohos_unittest("test_devicestatus_service") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "data_share:datashare_consumer",
+    "ability_base:zuri",
   ]
 }
 
@@ -125,6 +127,8 @@ ohos_unittest("DragDataManagerTest") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "window_manager:libdm",
+    "data_share:datashare_consumer",
+    "ability_base:zuri",
   ]
 }
 

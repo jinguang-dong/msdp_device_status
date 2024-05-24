@@ -151,6 +151,8 @@ ohos_unittest("DragServerTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "data_share:datashare_consumer",
+    "ability_base:zuri",
   ]
 }
 
@@ -207,6 +209,8 @@ ohos_unittest("CooperatePluginTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "data_share:datashare_consumer",
+    "ability_base:zuri",
   ]
 }
 
@@ -265,6 +269,8 @@ ohos_unittest("CooperateTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "data_share:datashare_consumer",
+    "ability_base:zuri",
   ]
 }
 
@@ -374,6 +380,8 @@ ohos_unittest("InputEventBuilderTest") {
     "input:libmmi-client",
     "window_manager:libdm",
     "window_manager:libwmutil_base",
+    "data_share:datashare_consumer",
+    "ability_base:zuri",
   ]
 }
 
@@ -436,6 +444,8 @@ ohos_unittest("InputEventInterceptorTest") {
     "input:libmmi-client",
     "window_manager:libdm",
     "window_manager:libwmutil_base",
+    "data_share:datashare_consumer",
+    "ability_base:zuri",
   ]
 }
 
