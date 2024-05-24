@@ -51,12 +51,14 @@ ohos_unittest("test_devicestatus_service") {
   external_deps = [
     "ability_base:base",
     "ability_base:want",
+    "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -64,8 +66,6 @@ ohos_unittest("test_devicestatus_service") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "data_share:datashare_consumer",
-    "ability_base:zuri",
   ]
 }
 
@@ -119,16 +119,16 @@ ohos_unittest("DragDataManagerTest") {
   ]
 
   external_deps = [
+    "ability_base:zuri",
     "cJSON:cjson",
     "c_utils:utils",
+    "data_share:datashare_consumer",
     "graphic_2d:window_animation",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
     "window_manager:libdm",
-    "data_share:datashare_consumer",
-    "ability_base:zuri",
   ]
 }
 

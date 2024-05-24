@@ -70,10 +70,12 @@ sources_set = [
 ]
 
 external_deps_set = [
+  "ability_base:zuri",
   "ability_runtime:app_manager",
   "access_token:libaccesstoken_sdk",
   "access_token:libtokenid_sdk",
   "c_utils:utils",
+  "data_share:datashare_consumer",
   "graphic_2d:window_animation",
   "hilog:libhilog",
   "hisysevent:libhisysevent",
@@ -86,8 +88,6 @@ external_deps_set = [
   "safwk:system_ability_fwk",
   "window_manager:libwm",
   "window_manager:libdm",
-  "data_share:datashare_consumer",
-  "ability_base:zuri",
 ]
 
 ohos_shared_library("devicestatus_service") {

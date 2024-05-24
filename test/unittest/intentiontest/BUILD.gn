@@ -135,10 +135,12 @@ ohos_unittest("DragServerTest") {
   ]
   external_deps = [
     "ability_base:want",
+    "ability_base:zuri",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
     "cJSON:cjson",
     "c_utils:utils",
+    "data_share:datashare_consumer",
     "device_manager:devicemanagersdk",
     "graphic_2d:libcomposer",
     "graphic_2d:librender_service_base",
@@ -151,8 +153,6 @@ ohos_unittest("DragServerTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
-    "data_share:datashare_consumer",
-    "ability_base:zuri",
   ]
 }
 
@@ -194,10 +194,12 @@ ohos_unittest("CooperatePluginTest") {
   ]
   external_deps = [
     "ability_base:want",
+    "ability_base:zuri",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
     "cJSON:cjson",
     "c_utils:utils",
+    "data_share:datashare_consumer",
     "graphic_2d:libcomposer",
     "graphic_2d:librender_service_base",
     "graphic_2d:window_animation",
@@ -209,8 +211,6 @@ ohos_unittest("CooperatePluginTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
-    "data_share:datashare_consumer",
-    "ability_base:zuri",
   ]
 }
 
@@ -254,10 +254,12 @@ ohos_unittest("CooperateTest") {
   ]
   external_deps = [
     "ability_base:want",
+    "ability_base:zuri",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
     "cJSON:cjson",
     "c_utils:utils",
+    "data_share:datashare_consumer",
     "graphic_2d:libcomposer",
     "graphic_2d:librender_service_base",
     "graphic_2d:window_animation",
@@ -269,8 +271,6 @@ ohos_unittest("CooperateTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
-    "data_share:datashare_consumer",
-    "ability_base:zuri",
   ]
 }
 
@@ -366,10 +366,12 @@ ohos_unittest("InputEventBuilderTest") {
   ]
 
   external_deps = [
+    "ability_base:zuri",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
     "cJSON:cjson",
     "c_utils:utils",
+    "data_share:datashare_consumer",
     "device_info_manager:distributed_device_profile_client",
     "device_manager:devicemanagersdk",
     "graphic_2d:libcomposer",
@@ -380,8 +382,6 @@ ohos_unittest("InputEventBuilderTest") {
     "input:libmmi-client",
     "window_manager:libdm",
     "window_manager:libwmutil_base",
-    "data_share:datashare_consumer",
-    "ability_base:zuri",
   ]
 }
 
@@ -430,10 +430,12 @@ ohos_unittest("InputEventInterceptorTest") {
   ]
 
   external_deps = [
+    "ability_base:zuri",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
     "cJSON:cjson",
     "c_utils:utils",
+    "data_share:datashare_consumer",
     "device_info_manager:distributed_device_profile_client",
     "device_manager:devicemanagersdk",
     "graphic_2d:libcomposer",
@@ -444,8 +446,6 @@ ohos_unittest("InputEventInterceptorTest") {
     "input:libmmi-client",
     "window_manager:libdm",
     "window_manager:libwmutil_base",
-    "data_share:datashare_consumer",
-    "ability_base:zuri",
   ]
 }
 
