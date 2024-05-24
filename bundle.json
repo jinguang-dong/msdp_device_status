@@ -50,6 +50,7 @@
         "ylong_runtime",
         "dfs_service",
         "qos_manager",
+        "memmgr",
         "data_share"
       ],
       "third_party": [

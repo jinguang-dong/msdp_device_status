@@ -157,6 +157,10 @@ ohos_shared_library("devicestatus_service") {
       ]
     }
   }
+  if (device_status_memmgr_enable) {
+    defines += [ "MEMMGR_ENABLE" ]
+    external_deps += [ "memmgr:memmgrclient" ]
+  }
 
   if (defined(fusion_interaction_motion_drag) &&
       fusion_interaction_motion_drag) {
@@ -222,6 +226,10 @@ ohos_static_library("devicestatus_static_service") {
         "distributed_input:libdinput_sdk",
       ]
     }
+  }
+  if (device_status_memmgr_enable) {
+    defines += [ "MEMMGR_ENABLE" ]
+    external_deps += [ "memmgr:memmgrclient" ]
   }
 
   if (defined(fusion_interaction_motion_drag) &&
