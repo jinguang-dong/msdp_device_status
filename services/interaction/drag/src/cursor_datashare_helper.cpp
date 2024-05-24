@@ -36,24 +36,24 @@ std::shared_ptr<DataShare::DataShareHelper> CursorDataShareHelper::CreateDataSha
 {
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
-        FI_HILOGE("dengsc CreateDataShareHelper GetSystemAbilityManager failed.");
+        FI_HILOGE("CreateDataShareHelper GetSystemAbilityManager failed.");
         return nullptr;
     }
 
     sptr<IRemoteObject> remote = saManager->GetSystemAbility(systemAbilityId);
     if (remote == nullptr) {
-        FI_HILOGE("dengsc CreateDataShareHelper GetSystemAbility Service failed.");
+        FI_HILOGE("CreateDataShareHelper GetSystemAbility Service failed.");
         return nullptr;
     }
 
-    FI_HILOGI("dengsc CreateDataShareHelper creator. systemAbilityId:%{public}d", systemAbilityId);
+    FI_HILOGI("CreateDataShareHelper creator. systemAbilityId:%{public}d", systemAbilityId);
     return DataShare::DataShareHelper::Creator(remote, SETTINGS_DATASHARE_URI);
 }
 
 ErrCode CursorDataShareHelper::Query(Uri& uri, const std::string& key, std::string& value)
 {
     if (dataShareHelper_ == nullptr) {
-        FI_HILOGE("dengsc CursorDataShareHelper query error, dataShareHelper_ is nullptr");
+        FI_HILOGE("CursorDataShareHelper query error, dataShareHelper_ is nullptr");
         return ERR_NO_INIT;
     }
 
@@ -62,12 +62,12 @@ ErrCode CursorDataShareHelper::Query(Uri& uri, const std::string& key, std::stri
     predicates.EqualTo(SETTINGS_DATA_COLUMN_KEYWORD, key);
     auto result = dataShareHelper_->Query(uri, predicates, columns);
     if (result == nullptr) {
-        FI_HILOGE("dengsc CursorDataShareHelper query error, result is null");
+        FI_HILOGE("CursorDataShareHelper query error, result is null");
         return ERR_INVALID_OPERATION;
     }
 
     if (result->GoToFirstRow() != DataShare::E_OK) {
-        FI_HILOGE("dengsc CursorDataShareHelper query failed,go to first row error");
+        FI_HILOGE("CursorDataShareHelper query failed,go to first row error");
         result->Close();
         return ERR_INVALID_VALUE;
     }
@@ -76,7 +76,7 @@ ErrCode CursorDataShareHelper::Query(Uri& uri, const std::string& key, std::stri
     result->GetColumnIndex(SETTINGS_DATA_COLUMN_VALUE, columnIndex);
     result->GetString(columnIndex, value);
     result->Close();
-    FI_HILOGI("dengsc CursorDataShareHelper query success,value[%{public}s]", value.c_str());
+    FI_HILOGI("CursorDataShareHelper query success,value[%{public}s]", value.c_str());
     return ERR_OK;
 }
 } // namespace DeviceStatus
