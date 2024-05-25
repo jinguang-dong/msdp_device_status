@@ -172,9 +172,11 @@ ohos_unittest("IntentionDeviceManagerTest") {
   ]
 
   external_deps = [
+    "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
     "cJSON:cjson",
     "c_utils:utils",
+    "data_share:datashare_consumer",
     "graphic_2d:librender_service_base",
     "graphic_2d:window_animation",
     "hilog:libhilog",

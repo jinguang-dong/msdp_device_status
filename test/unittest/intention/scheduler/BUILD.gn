@@ -68,8 +68,10 @@ ohos_unittest("TimerManagerTest") {
   ]
 
   external_deps = [
+    "ability_base:zuri",
     "cJSON:cjson",
     "c_utils:utils",
+    "data_share:datashare_consumer",
     "device_info_manager:distributed_device_profile_client",
     "device_manager:devicemanagersdk",
     "graphic_2d:libcomposer",

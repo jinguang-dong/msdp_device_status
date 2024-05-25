@@ -34,6 +34,8 @@
 #include "i_context.h"
 #include "i_drag_animation.h"
 
+#include "cursor_datashare_helper.h"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
@@ -69,6 +71,7 @@ public:
 
 private:
     void OnDraw(std::shared_ptr<Media::PixelMap> pixelMap) const;
+    bool IsMagicCursorMode() const;
 
 private:
     MMI::PointerStyle pointerStyle_;

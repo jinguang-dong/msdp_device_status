@@ -30,6 +30,8 @@ deps_ex = [
   "hilog:libhilog",
   "input:libmmi-client",
   "window_manager:libdm",
+  "data_share:datashare_consumer",
+  "ability_base:zuri",
 ]
 
 ###############################fuzztest#################################
