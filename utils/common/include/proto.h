@@ -70,7 +70,8 @@ enum class MessageId : int32_t {
     DRAG_NOTIFY_HIDE_ICON,
     DRAG_STYLE_LISTENER,
 
-    MAX_MESSAGE_ID
+    MAX_MESSAGE_ID,
+	ADD_SELECTED_PIXELMAP_RESULT
 };
 
 enum TokenType : int32_t {

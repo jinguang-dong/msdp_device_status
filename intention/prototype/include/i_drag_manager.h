@@ -76,6 +76,7 @@ public:
     virtual int32_t RotateDragWindow(Rosen::Rotation rotation) = 0;
     virtual int32_t EnterTextEditorArea(bool enable) = 0;
     virtual int32_t AddPrivilege(int32_t tokenId) = 0;
+    virtual int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap) = 0;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
