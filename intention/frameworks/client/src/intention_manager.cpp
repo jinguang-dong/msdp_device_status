@@ -70,7 +70,9 @@ void IntentionManager::InitMsgHandler()
         {MessageId::DRAG_NOTIFY_HIDE_ICON,
             MsgCallbackBind2(&DragClient::OnNotifyHideIcon, &drag_)},
         {MessageId::DRAG_STYLE_LISTENER,
-            MsgCallbackBind2(&DragClient::OnDragStyleChangedMessage, &drag_)}
+            MsgCallbackBind2(&DragClient::OnDragStyleChangedMessage, &drag_)},
+        {MessageId::ADD_SELECTED_PIXELMAP_RESULT,
+            MsgCallbackBind2(&DragClient::OnAddSelectedPixelMapResult, &drag_)}
     };
     CHKPV(client_);
     for (auto &[id, cb] : funs) {
@@ -418,6 +420,13 @@ int32_t IntentionManager::AddPrivilege()
 {
     CALL_DEBUG_ENTER;
     return drag_.AddPrivilege(*tunnel_);
+}
+
+int32_t IntentionManager::AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap,
+    std::function<void(bool)> callback)
+{
+    CALL_DEBUG_ENTER;
+    return drag_.AddSelectedPixelMap(*tunnel_, pixelMap, callback);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

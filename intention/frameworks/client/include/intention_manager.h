@@ -80,6 +80,7 @@ public:
     int32_t GetDragAction(DragAction &dragAction);
     int32_t GetExtraInfo(std::string &extraInfo);
     int32_t AddPrivilege();
+    int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap, std::function<void(bool)> callback);
 
 private:
     void InitClient();

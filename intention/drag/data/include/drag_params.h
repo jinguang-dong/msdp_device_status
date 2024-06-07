@@ -49,6 +49,7 @@ enum DragRequestID : uint32_t {
     ENTER_TEXT_EDITOR_AREA,
     GET_DRAG_ACTION,
     GET_EXTRA_INFO,
+    ADD_SELECTED_PIXELMAP,
 };
 
 struct StartDragParam final : public ParamBase {
@@ -211,6 +212,16 @@ struct GetExtraInfoReply final : public ParamBase {
     bool Unmarshalling(MessageParcel &parcel) override;
 
     std::string extraInfo_;
+};
+
+struct AddSelectedPixelMapParam final : public ParamBase {
+    AddSelectedPixelMapParam() = default;
+    explicit AddSelectedPixelMapParam(std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
+
+    bool Marshalling(MessageParcel &parcel) const override;
+    bool Unmarshalling(MessageParcel &parcel) override;
+
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp
