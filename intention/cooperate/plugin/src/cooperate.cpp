@@ -36,8 +36,10 @@ Cooperate::Cooperate(IContext *env)
 {
     auto [sender, receiver] = Channel<CooperateEvent>::OpenChannel();
     receiver_ = receiver;
+    receiver_.Enable();
     context_.AttachSender(sender);
     context_.Enable();
+    StartWorker();
 }
 
 Cooperate::~Cooperate()
@@ -113,7 +115,6 @@ int32_t Cooperate::UnregisterHotAreaListener(int32_t pid)
 int32_t Cooperate::Enable(int32_t tokenId, int32_t pid, int32_t userData)
 {
     CALL_DEBUG_ENTER;
-    StartWorker();
     context_.Sender().Send(CooperateEvent(
         CooperateEventType::ENABLE,
         EnableCooperateEvent {
@@ -133,7 +134,6 @@ int32_t Cooperate::Disable(int32_t pid, int32_t userData)
             .pid = pid,
             .userData = userData,
         }));
-    StopWorker();
     return RET_OK;
 }
 
