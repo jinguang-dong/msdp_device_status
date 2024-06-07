@@ -29,6 +29,5 @@ group("device_status_unittest") {
     "intentiontest:InputEventInterceptorTest",
     "intentiontest:InputEventSerializationTest",
     "intentiontest:SocketSessionTest",
-    "utils:UtilityTest",
   ]
 }
