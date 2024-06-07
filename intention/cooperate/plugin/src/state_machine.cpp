@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,10 +21,12 @@
 
 #include "cooperate_events.h"
 #include "cooperate_free.h"
+#include "cooperate_hisysevent.h"
 #include "cooperate_in.h"
 #include "cooperate_out.h"
 #include "devicestatus_define.h"
 #include "devicestatus_errors.h"
+#include "event_manager.h"
 #include "utility.h"
 
 #undef LOG_TAG
@@ -42,7 +44,14 @@ void StateMachine::AppStateObserver::OnProcessDied(const AppExecFwk::ProcessData
 {
     FI_HILOGI("\'%{public}s\' died, pid:%{public}d", processData.bundleName.c_str(), processData.pid);
     if (processData.pid == clientPid_) {
-        sender_.Send(CooperateEvent(CooperateEventType::APP_CLOSED));
+        auto ret = sender_.Send(CooperateEvent(
+            CooperateEventType::APP_CLOSED,
+            ClientDiedEvent {
+                .pid = clientPid_,
+            }));
+        if (ret != Channel<CooperateEvent>::NO_ERROR) {
+            FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
+        }
         FI_HILOGI("Report to handler");
     }
 }
@@ -75,6 +84,7 @@ StateMachine::StateMachine(IContext *env)
     AddHandler(CooperateEventType::DDM_BOARD_OFFLINE, &StateMachine::OnBoardOffline);
     AddHandler(CooperateEventType::DDP_COOPERATE_SWITCH_CHANGED, &StateMachine::OnProfileChanged);
     AddHandler(CooperateEventType::INPUT_POINTER_EVENT, &StateMachine::OnPointerEvent);
+    AddHandler(CooperateEventType::APP_CLOSED, &StateMachine::OnProcessClientDied);
     AddHandler(CooperateEventType::DSOFTBUS_SESSION_CLOSED, &StateMachine::OnSoftbusSessionClosed);
     AddHandler(CooperateEventType::DSOFTBUS_SUBSCRIBE_MOUSE_LOCATION, &StateMachine::OnSoftbusSubscribeMouseLocation);
     AddHandler(CooperateEventType::DSOFTBUS_UNSUBSCRIBE_MOUSE_LOCATION,
@@ -84,6 +94,7 @@ StateMachine::StateMachine(IContext *env)
     AddHandler(CooperateEventType::DSOFTBUS_REPLY_UNSUBSCRIBE_MOUSE_LOCATION,
         &StateMachine::OnSoftbusReplyUnSubscribeMouseLocation);
     AddHandler(CooperateEventType::DSOFTBUS_MOUSE_LOCATION, &StateMachine::OnSoftbusMouseLocation);
+    AddHandler(CooperateEventType::DSOFTBUS_START_COOPERATE, &StateMachine::OnRemoteStart);
 }
 
 void StateMachine::OnEvent(Context &context, const CooperateEvent &event)
@@ -103,6 +114,8 @@ void StateMachine::TransiteTo(Context &context, CooperateState state)
         states_[current_]->OnLeaveState(context);
         current_ = state;
         states_[current_]->OnEnterState(context);
+        auto curState = static_cast<OHOS::Msdp::DeviceStatus::CooperateState>(state);
+        CooperateDFX::WriteCooperateState(curState);
     }
 }
 
@@ -182,6 +195,11 @@ void StateMachine::StartCooperate(Context &context, const CooperateEvent &event)
 {
     CALL_INFO_TRACE;
     StartCooperateEvent startEvent = std::get<StartCooperateEvent>(event.event);
+    if (!context.ddm_.CheckSameAccountToLocal(startEvent.remoteNetworkId)) {
+        FI_HILOGE("CheckSameAccountToLocal failed");
+        startEvent.errCode->set_value(COMMON_PERMISSION_CHECK_ERROR);
+        return;
+    }
     UpdateApplicationStateObserver(startEvent.pid);
     if (!context.IsAllowCooperate()) {
         FI_HILOGI("Not allow cooperate");
@@ -199,21 +217,28 @@ void StateMachine::GetCooperateState(Context &context, const CooperateEvent &eve
     UpdateApplicationStateObserver(stateEvent.pid);
     bool switchStatus { false };
     auto udId = env_->GetDP().GetUdIdByNetworkId(stateEvent.networkId);
+    EventManager::CooperateStateNotice notice {
+        .pid = stateEvent.pid,
+        .msgId = MessageId::COORDINATION_GET_STATE,
+        .userData = stateEvent.userData,
+        .state = switchStatus,
+    };
     if (env_->GetDP().GetCrossingSwitchState(udId, switchStatus) != RET_OK) {
         FI_HILOGE("GetCrossingSwitchState for udId:%{public}s failed", Utility::Anonymize(udId).c_str());
+        notice.errCode = CoordinationErrCode::READ_DP_FAILED;
         return;
     }
-    auto session = env_->GetSocketSessionManager().FindSessionByPid(stateEvent.pid);
-    CHKPV(session);
-    NetPacket pkt(MessageId::COORDINATION_GET_STATE);
-    pkt << stateEvent.userData << switchStatus;
-    if (pkt.ChkRWError()) {
-        FI_HILOGE("Packet write data failed");
-        return;
-    }
-    if (!session->SendMsg(pkt)) {
-        FI_HILOGE("Sending failed");
-    }
+    context.eventMgr_.GetCooperateState(notice);
+}
+
+void StateMachine::OnProcessClientDied(Context &context, const CooperateEvent &event)
+{
+    CALL_INFO_TRACE;
+    ClientDiedEvent notice = std::get<ClientDiedEvent>(event.event);
+    context.eventMgr_.OnClientDied(notice);
+    context.hotArea_.OnClientDied(notice);
+    context.mouseLocation_.OnClientDied(notice);
+    Transfer(context, event);
 }
 
 void StateMachine::RegisterEventListener(Context &context, const CooperateEvent &event)
@@ -314,6 +339,23 @@ void StateMachine::OnSoftbusMouseLocation(Context &context, const CooperateEvent
     CALL_DEBUG_ENTER;
     DSoftbusSyncMouseLocation notice = std::get<DSoftbusSyncMouseLocation>(event.event);
     context.mouseLocation_.OnRemoteMouseLocation(notice);
+}
+
+void StateMachine::OnRemoteStart(Context &context, const CooperateEvent &event)
+{
+    DSoftbusStartCooperate startEvent = std::get<DSoftbusStartCooperate>(event.event);
+    if (!context.ddm_.CheckSameAccountToLocal(startEvent.originNetworkId)) {
+        FI_HILOGE("CheckSameAccountToLocal failed, unchain link");
+        CooperateEvent stopEvent(
+            CooperateEventType::STOP,
+            StopCooperateEvent{
+                .isUnchained = true
+            }
+        );
+        Transfer(context, stopEvent);
+        return;
+    }
+    Transfer(context, event);
 }
 
 void StateMachine::Transfer(Context &context, const CooperateEvent &event)
@@ -433,7 +475,7 @@ void StateMachine::AddMonitor(Context &context)
                 FI_HILOGE("Corrupted pointer event");
                 return;
             }
-            sender.Send(CooperateEvent(
+            auto ret = sender.Send(CooperateEvent(
                 CooperateEventType::INPUT_POINTER_EVENT,
                 InputPointerEvent {
                     .deviceId = pointerEvent->GetDeviceId(),
@@ -444,6 +486,9 @@ void StateMachine::AddMonitor(Context &context)
                         .y = pointerItem.GetDisplayY(),
                     }
                 }));
+            if (ret != Channel<CooperateEvent>::NO_ERROR) {
+                FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
+            }
         });
     if (monitorId_ < 0) {
         FI_HILOGE("MMI::Add Monitor fail");

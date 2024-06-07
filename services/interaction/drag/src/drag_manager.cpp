@@ -125,6 +125,8 @@ int32_t DragManager::AddListener(SessionPtr session)
     info->msgId = MessageId::DRAG_STATE_LISTENER;
     info->msgType = MessageType::NOTIFY_STATE;
     stateNotify_.AddNotifyMsg(info);
+    context_->GetSocketSessionManager().AddSessionDeletedCallback(pid,
+        std::bind(&DragManager::OnSessionLost, this, std::placeholders::_1));
     FI_HILOGI("leave");
     return RET_OK;
 }
@@ -132,7 +134,7 @@ int32_t DragManager::AddListener(SessionPtr session)
 #ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
 int32_t DragManager::RemoveListener(int32_t pid)
 {
-    FI_HILOGI("enter");
+    FI_HILOGI("Remove listener, pid:%{public}d", pid);
     CHKPR(context_, RET_ERR);
     auto session = context_->GetSocketSessionManager().FindSessionByPid(pid);
 #else
@@ -140,7 +142,6 @@ int32_t DragManager::RemoveListener(SessionPtr session)
 {
     FI_HILOGI("enter");
 #endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-    CHKPR(session, RET_ERR);
     auto info = std::make_shared<StateChangeNotify::MessageInfo>();
     info->session = session;
     info->msgType = MessageType::NOTIFY_STATE;
@@ -446,9 +447,6 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     FI_HILOGI("DragCallback, pointerAction:%{public}d", pointerAction);
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
         CHKPV(context_);
-#ifdef OHOS_DRAG_ENABLE_ANIMATION
-        dragDrawing_.NotifyDragInfo(DragEvent::DRAG_UP, pointerEvent->GetPointerId());
-#endif // OHOS_DRAG_ENABLE_ANIMATION
         int32_t ret = context_->GetDelegateTasks().PostAsyncTask(
             std::bind(&DragManager::OnDragUp, this, pointerEvent));
         if (ret != RET_OK) {
@@ -471,10 +469,8 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     int32_t displayY = pointerItem.GetDisplayY();
     FI_HILOGD("SourceType:%{public}d, pointerId:%{public}d, displayX:%{public}d, displayY:%{public}d",
         pointerEvent->GetSourceType(), pointerId, displayX, displayY);
-#ifdef OHOS_DRAG_ENABLE_ANIMATION
-    dragDrawing_.NotifyDragInfo(DragEvent::DRAG_MOVE, pointerId, displayX, displayY);
-#endif // OHOS_DRAG_ENABLE_ANIMATION
-    dragDrawing_.Draw(pointerEvent->GetTargetDisplayId(), displayX, displayY);
+    dragDrawing_.OnDragMove(pointerEvent->GetTargetDisplayId(), displayX,
+        displayY, pointerEvent->GetActionTime());
 }
 
 void DragManager::SendDragData(int32_t targetTid, const std::string &udKey)
@@ -794,8 +790,18 @@ int32_t DragManager::OnStartDrag()
     }
     auto extraData = CreateExtraData(true);
     DragData dragData = DRAG_DATA_MGR.GetDragData();
+    bool isHicarOrSuperLauncher = false;
+    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(dragData.displayId);
+    if (display != nullptr) {
+        std::string displayName = display->GetName();
+        isHicarOrSuperLauncher = ((displayName == "HiCar") || (displayName == "SuperLauncher"));
+    }
+    if (!isHicarOrSuperLauncher) {
+        auto displayId = Rosen::DisplayManager::GetInstance().GetDefaultDisplayId();
+        dragData.displayId = static_cast<int32_t>(displayId);
+    }
     dragDrawing_.SetScreenId(dragData.displayId);
-    if (Rosen::DisplayManager::GetInstance().IsFoldable()) {
+    if (Rosen::DisplayManager::GetInstance().IsFoldable() && !isHicarOrSuperLauncher) {
         Rosen::FoldDisplayMode foldMode = Rosen::DisplayManager::GetInstance().GetFoldDisplayMode();
         if (foldMode == Rosen::FoldDisplayMode::MAIN) {
             dragDrawing_.SetScreenId(FOLD_SCREEN_ID);
