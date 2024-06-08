@@ -30,10 +30,8 @@
 #include "drag_data.h"
 #include "drag_manager.h"
 #include "i_context.h"
-#ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
 #include "intention_service.h"
 #include "socket_session_manager.h"
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
 #include "stationary_callback.h"
 #include "stationary_data.h"
 #include "stream_server.h"
@@ -59,14 +57,11 @@ public:
     IDeviceManager& GetDeviceManager() override;
     ITimerManager& GetTimerManager() override;
     IDragManager& GetDragManager() override;
-
-#ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     IPluginManager& GetPluginManager() override;
     ISocketSessionManager& GetSocketSessionManager() override;
     IInputAdapter& GetInput() override;
     IDSoftbusAdapter& GetDSoftbus() override;
     IDDPAdapter& GetDP() override;
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
 
     void OnAddSystemAbility(int32_t saId, const std::string &deviceId) override;
     void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency,
@@ -130,25 +125,7 @@ private:
     void OnDeviceMgr(const epoll_event &ev);
     int32_t EnableDevMgr(int32_t nRetries);
     void DisableDevMgr();
-#ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     void EnableDSoftbus();
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#ifndef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-    int32_t OnAddHotAreaListener(int32_t pid);
-    int32_t OnRemoveHotAreaListener(int32_t pid);
-    int32_t OnRegisterCoordinationListener(int32_t pid);
-    int32_t OnUnregisterCoordinationListener(int32_t pid);
-    int32_t OnPrepareCoordination(int32_t pid, int32_t userData);
-    int32_t OnUnprepareCoordination(int32_t pid, int32_t userData);
-    int32_t OnActivateCoordination(int32_t pid, int32_t userData, const std::string &remoteNetworkId,
-        int32_t startDeviceId);
-    int32_t OnDeactivateCoordination(int32_t pid, int32_t userData, bool isUnchained);
-    int32_t OnGetCoordinationState(int32_t pid, int32_t userData, const std::string &networkId);
-    int32_t OnGetCoordinationStateSync(const std::string &udId, bool &state);
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 
 private:
     std::atomic<ServiceRunningState> state_ { ServiceRunningState::STATE_NOT_START };
@@ -162,14 +139,12 @@ private:
 #ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
     std::unique_ptr<MotionDrag> motionDrag_ { nullptr };
 #endif // OHOS_BUILD_ENABLE_MOTION_DRAG
-#ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     SocketSessionManager socketSessionMgr_;
     std::unique_ptr<IInputAdapter> input_;
     std::unique_ptr<IPluginManager> pluginMgr_;
     std::unique_ptr<IDSoftbusAdapter> dsoftbus_;
     std::unique_ptr<IDDPAdapter> ddp_;
     sptr<IntentionService> intention_;
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
 };
 } // namespace DeviceStatus
 } // namespace Msdp
