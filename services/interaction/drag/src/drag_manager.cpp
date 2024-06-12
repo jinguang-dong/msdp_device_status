@@ -38,6 +38,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
+int32_t add = 0;
 constexpr int32_t TIMEOUT_MS { 3000 };
 constexpr int32_t INTERVAL_MS { 500 };
 constexpr uint64_t FOLD_SCREEN_ID { 5 };
@@ -230,6 +231,7 @@ int32_t DragManager::StartDrag(const DragData &dragData, int32_t pid)
 int32_t DragManager::StartDrag(const DragData &dragData, SessionPtr sess)
 #endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
 {
+    add = 0;
     FI_HILOGI("enter");
     if (dragState_ == DragState::START) {
         FI_HILOGE("Drag instance already exists, no need to start drag again");
@@ -470,8 +472,52 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         pointerEvent->GetSourceType(), pointerEvent->GetPointerId(), pointerAction);
 }
 
+constexpr int32_t MAX_PIXEL_MAP_WIDTH { 600 };
+constexpr int32_t MAX_PIXEL_MAP_HEIGHT { 600 };
+constexpr int32_t INT32_BYTE { 4 };
+constexpr uint32_t DEFAULT_ICON_COLOR { 0xFF };
+
+std::shared_ptr<Media::PixelMap> CreatePixelMap(int32_t width, int32_t height)
+{
+    CALL_DEBUG_ENTER;
+    if (width <= 0 || width > MAX_PIXEL_MAP_WIDTH || height <= 0 || height > MAX_PIXEL_MAP_HEIGHT) {
+        FI_HILOGE("Invalid size, height:%{public}d, width:%{public}d", height, width);
+        return nullptr;
+    }
+    Media::InitializationOptions opts;
+    opts.size.height = height;
+    opts.size.width = width;
+    opts.pixelFormat = Media::PixelFormat::BGRA_8888;
+    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    opts.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
+
+    int32_t colorLen = width * height;
+    uint32_t* colorPixels = new (std::nothrow) uint32_t[colorLen];
+    if (colorPixels == nullptr) {
+        FI_HILOGE("colorPixels is nullptr");
+        return nullptr;
+    }
+    int32_t colorByteCount = colorLen * INT32_BYTE;
+    auto ret = memset_s(colorPixels, colorByteCount, DEFAULT_ICON_COLOR, colorByteCount);
+    if (ret != EOK) {
+        delete[] colorPixels;
+        FI_HILOGE("memset_s failed");
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(colorPixels, colorLen, opts);
+    if (pixelMap == nullptr) {
+        delete[] colorPixels;
+        FI_HILOGE("Create pixelMap failed");
+        return nullptr;
+    }
+    delete[] colorPixels;
+    return pixelMap;
+}
+
 void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
+    add++;
+    FI_HILOGD("add:%{public}d", add);
     CHKPV(pointerEvent);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
@@ -482,6 +528,14 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         pointerEvent->GetSourceType(), pointerId, displayX, displayY);
     dragDrawing_.OnDragMove(pointerEvent->GetTargetDisplayId(), displayX,
         displayY, pointerEvent->GetActionTime());
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap1 = CreatePixelMap(70, 70);
+    if (add == 200 || add == 800) {
+        AddSelectedPixelMap(pixelMap1);
+    } else if (add == 400 || add == 1000) {
+        AddSelectedPixelMap(pixelMap1);
+    } else if (add == 600 || add == 1200) {
+        AddSelectedPixelMap(pixelMap1);
+    }
 }
 
 void DragManager::SendDragData(int32_t targetTid, const std::string &udKey)
@@ -1298,6 +1352,49 @@ int32_t DragManager::RotateDragWindow(Rosen::Rotation rotation)
     if (ret != RET_OK) {
         FI_HILOGE("Post async task failed, ret:%{public}d", ret);
         return ret;
+    }
+    FI_HILOGD("leave");
+    return RET_OK;
+}
+
+int32_t DragManager::NotifyAddSelectedPixelMapResult(bool result)
+{
+    FI_HILOGD("enter");
+    NetPacket pkt(MessageId::ADD_SELECTED_PIXELMAP_RESULT);
+    pkt << result;
+    if (pkt.ChkRWError()) {
+        FI_HILOGE("Failed to packet write data");
+        return RET_ERR;
+    }
+    CHKPR(dragOutSession_, RET_ERR);
+    if (!dragOutSession_->SendMsg(pkt)) {
+        FI_HILOGE("Failed to send message");
+        return MSG_SEND_FAIL;
+    }
+    FI_HILOGD("leave");
+    return RET_OK;
+}
+
+int32_t DragManager::AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
+{
+    FI_HILOGD("enter");
+    if (dragState_ != DragState::START) {
+        FI_HILOGE("Drag not running");
+        if (NotifyAddSelectedPixelMapResult(false) != RET_OK) {
+            FI_HILOGE("Notify addSelectedPixelMap result failed");
+        }
+        return RET_ERR;
+    }
+    if (dragDrawing_.AddSelectedPixelMap(pixelMap) != RET_OK) {
+        FI_HILOGE("Add select pixelmap fail");
+        if (NotifyAddSelectedPixelMapResult(false) != RET_OK) {
+            FI_HILOGE("Notify addSelectedPixelMap result failed");
+        }
+        return RET_ERR;
+    }
+    DRAG_DATA_MGR.UpdateShadowInfos(pixelMap);
+    if (NotifyAddSelectedPixelMapResult(true) != RET_OK) {
+        FI_HILOGW("Notify addSelectedPixelMap result failed");
     }
     FI_HILOGD("leave");
     return RET_OK;
