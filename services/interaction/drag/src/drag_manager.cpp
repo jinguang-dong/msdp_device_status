@@ -528,13 +528,15 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         pointerEvent->GetSourceType(), pointerId, displayX, displayY);
     dragDrawing_.OnDragMove(pointerEvent->GetTargetDisplayId(), displayX,
         displayY, pointerEvent->GetActionTime());
-    std::shared_ptr<OHOS::Media::PixelMap> pixelMap1 = CreatePixelMap(70, 70);
+    // std::shared_ptr<OHOS::Media::PixelMap> pixelMap1 = CreatePixelMap(70, 70);
+    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap2 = dragData.shadowInfos.front().pixelMap;
     if (add == 200 || add == 800) {
-        AddSelectedPixelMap(pixelMap1);
+        AddSelectedPixelMap(pixelMap2);
     } else if (add == 400 || add == 1000) {
-        AddSelectedPixelMap(pixelMap1);
+        AddSelectedPixelMap(pixelMap2);
     } else if (add == 600 || add == 1200) {
-        AddSelectedPixelMap(pixelMap1);
+        AddSelectedPixelMap(pixelMap2);
     }
 }
 
