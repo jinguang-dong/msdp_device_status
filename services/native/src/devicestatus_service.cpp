@@ -32,12 +32,10 @@
 
 #include "devicestatus_common.h"
 #include "devicestatus_hisysevent.h"
-#ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
 #include "ddp_adapter.h"
 #include "dsoftbus_adapter.h"
 #include "input_adapter.h"
 #include "plugin_manager.h"
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
 #ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
 #include "motion_drag.h"
 #endif // OHOS_BUILD_ENABLE_MOTION_DRAG
@@ -65,12 +63,10 @@ const bool REGISTER_RESULT =
 DeviceStatusService::DeviceStatusService()
     : SystemAbility(MSDP_DEVICESTATUS_SERVICE_ID, true)
 {
-#ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     input_ = std::make_unique<InputAdapter>();
     pluginMgr_ = std::make_unique<PluginManager>(this);
     dsoftbus_ = std::make_unique<DSoftbusAdapter>();
     ddp_ = std::make_unique<DDPAdapter>();
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
 }
 
 DeviceStatusService::~DeviceStatusService()
@@ -108,13 +104,9 @@ void DeviceStatusService::OnStart()
 #ifdef MEMMGR_ENABLE
     AddSystemAbilityListener(MEMORY_MANAGER_SA_ID);
 #endif
-#ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     EnableDSoftbus();
     intention_ = sptr<IntentionService>::MakeSptr(this);
     if (!Publish(intention_)) {
-#else
-    if (!Publish(this)) {
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
         FI_HILOGE("On start register to system ability manager failed");
         return;
     }
@@ -165,7 +157,6 @@ IDragManager& DeviceStatusService::GetDragManager()
     return dragMgr_;
 }
 
-#ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
 ISocketSessionManager& DeviceStatusService::GetSocketSessionManager()
 {
     return socketSessionMgr_;
@@ -206,7 +197,6 @@ void DeviceStatusService::EnableDSoftbus()
         FI_HILOGI("Enable dsoftbus successfully");
     }
 }
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
 
 int32_t DeviceStatusService::Dump(int32_t fd, const std::vector<std::u16string> &args)
 {
@@ -277,13 +267,10 @@ bool DeviceStatusService::Init()
         FI_HILOGE("Dump init failed");
         goto INIT_FAIL;
     }
-#if defined(OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK)
     if (socketSessionMgr_.Init() != RET_OK) {
         FI_HILOGE("Failed to initialize socket session manager");
         goto INIT_FAIL;
     }
-#elif defined(OHOS_BUILD_ENABLE_COORDINATION)
-#endif // OHOS_BUILD_ENABLE_COORDINATION
     return true;
 
 INIT_FAIL:
@@ -605,17 +592,6 @@ int32_t DeviceStatusService::RegisterCoordinationListener(bool isCompatible)
 {
     CALL_DEBUG_ENTER;
     (void)(isCompatible);
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#ifndef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-    int32_t pid = GetCallingPid();
-    int32_t ret = delegateTasks_.PostSyncTask(
-        std::bind(&DeviceStatusService::OnRegisterCoordinationListener, this, pid));
-    if (ret != RET_OK) {
-        FI_HILOGE("On register coordination listener failed, ret:%{public}d", ret);
-        return RET_ERR;
-    }
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-#endif // OHOS_BUILD_ENABLE_COORDINATION
     return RET_OK;
 }
 
@@ -623,17 +599,6 @@ int32_t DeviceStatusService::UnregisterCoordinationListener(bool isCompatible)
 {
     CALL_DEBUG_ENTER;
     (void)(isCompatible);
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#ifndef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-    int32_t pid = GetCallingPid();
-    int32_t ret = delegateTasks_.PostSyncTask(
-        std::bind(&DeviceStatusService::OnUnregisterCoordinationListener, this, pid));
-    if (ret != RET_OK) {
-        FI_HILOGE("On unregister coordination listener failed, ret:%{public}d", ret);
-        return RET_ERR;
-    }
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-#endif // OHOS_BUILD_ENABLE_COORDINATION
     return RET_OK;
 }
 
@@ -641,19 +606,7 @@ int32_t DeviceStatusService::PrepareCoordination(int32_t userData, bool isCompat
 {
     CALL_DEBUG_ENTER;
     (void)(isCompatible);
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#ifndef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-    int32_t pid = GetCallingPid();
-    int32_t ret = delegateTasks_.PostSyncTask(
-        std::bind(&DeviceStatusService::OnPrepareCoordination, this, pid, userData));
-    if (ret != RET_OK) {
-        FI_HILOGE("On prepare coordination failed, ret:%{public}d", ret);
-        return ret;
-    }
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-#else
     (void)(userData);
-#endif // OHOS_BUILD_ENABLE_COORDINATION
     return RET_OK;
 }
 
@@ -661,19 +614,7 @@ int32_t DeviceStatusService::UnprepareCoordination(int32_t userData, bool isComp
 {
     CALL_DEBUG_ENTER;
     (void)(isCompatible);
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#ifndef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-    int32_t pid = GetCallingPid();
-    int32_t ret = delegateTasks_.PostSyncTask(
-        std::bind(&DeviceStatusService::OnUnprepareCoordination, this, pid, userData));
-    if (ret != RET_OK) {
-        FI_HILOGE("OnUnprepareCoordination failed, ret:%{public}d", ret);
-        return ret;
-    }
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-#else
     (void)(userData);
-#endif // OHOS_BUILD_ENABLE_COORDINATION
     return RET_OK;
 }
 
@@ -682,22 +623,9 @@ int32_t DeviceStatusService::ActivateCoordination(int32_t userData,
 {
     CALL_DEBUG_ENTER;
     (void)(isCompatible);
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#ifndef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-    int32_t pid = GetCallingPid();
-    int32_t ret = delegateTasks_.PostSyncTask(
-        std::bind(&DeviceStatusService::OnActivateCoordination,
-        this, pid, userData, remoteNetworkId, startDeviceId));
-    if (ret != RET_OK) {
-        FI_HILOGE("On activate coordination failed, ret:%{public}d", ret);
-        return ret;
-    }
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-#else
     (void)(userData);
     (void)(remoteNetworkId);
     (void)(startDeviceId);
-#endif // OHOS_BUILD_ENABLE_COORDINATION
     return RET_OK;
 }
 
@@ -706,20 +634,8 @@ int32_t DeviceStatusService::DeactivateCoordination(int32_t userData, bool isUnc
 {
     CALL_DEBUG_ENTER;
     (void)(isCompatible);
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#ifndef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-    int32_t pid = GetCallingPid();
-    int32_t ret = delegateTasks_.PostSyncTask(
-        std::bind(&DeviceStatusService::OnDeactivateCoordination, this, pid, userData, isUnchained));
-    if (ret != RET_OK) {
-        FI_HILOGE("On deactivate coordination failed, ret:%{public}d", ret);
-        return ret;
-    }
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-#else
     (void)(userData);
     (void)(isUnchained);
-#endif // OHOS_BUILD_ENABLE_COORDINATION
     return RET_OK;
 }
 
@@ -728,53 +644,24 @@ int32_t DeviceStatusService::GetCoordinationState(int32_t userData, const std::s
 {
     CALL_DEBUG_ENTER;
     (void)(isCompatible);
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#ifndef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-    int32_t pid = GetCallingPid();
-    int32_t ret = delegateTasks_.PostSyncTask(
-        std::bind(&DeviceStatusService::OnGetCoordinationState, this, pid, userData, networkId));
-    if (ret != RET_OK) {
-        FI_HILOGE("OnGetCoordinationState failed, ret:%{public}d", ret);
-        return ret;
-    }
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-#else
     (void)(userData);
     (void)(networkId);
     FI_HILOGW("Get coordination state does not support");
-#endif // OHOS_BUILD_ENABLE_COORDINATION
     return RET_OK;
 }
 
 int32_t DeviceStatusService::GetCoordinationState(const std::string &udId, bool &state)
 {
     CALL_DEBUG_ENTER;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#ifndef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-    int32_t ret = delegateTasks_.PostSyncTask(
-        std::bind(&DeviceStatusService::OnGetCoordinationStateSync, this, udId, std::ref(state)));
-    if (ret != RET_OK) {
-        FI_HILOGE("OnGetCoordinationStateSync failed, ret:%{public}d", ret);
-        return ret;
-    }
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-#else
+    (void)(state);
     (void)(udId);
-    FI_HILOGW("Get coordination state does not support");
-#endif // OHOS_BUILD_ENABLE_COORDINATION
     return RET_OK;
 }
 
 int32_t DeviceStatusService::AddDraglistener()
 {
     CALL_DEBUG_ENTER;
-#ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     int32_t session = GetCallingPid();
-#else
-    int32_t pid = GetCallingPid();
-    SessionPtr session = GetSession(GetClientFd(pid));
-    CHKPR(session, RET_ERR);
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     int32_t ret = delegateTasks_.PostSyncTask(
         std::bind(&DragManager::AddListener, &dragMgr_, session));
     if (ret != RET_OK) {
@@ -786,16 +673,7 @@ int32_t DeviceStatusService::AddDraglistener()
 int32_t DeviceStatusService::RemoveDraglistener()
 {
     CALL_DEBUG_ENTER;
-#ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     int32_t session = GetCallingPid();
-#else
-    int32_t pid = GetCallingPid();
-    SessionPtr session = GetSession(GetClientFd(pid));
-    if (session == nullptr) {
-        FI_HILOGW("Session is nullptr");
-        return RET_OK;
-    }
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     int32_t ret = delegateTasks_.PostSyncTask(
         std::bind(&DragManager::RemoveListener, &dragMgr_, session));
     if (ret != RET_OK) {
@@ -807,13 +685,7 @@ int32_t DeviceStatusService::RemoveDraglistener()
 int32_t DeviceStatusService::AddSubscriptListener()
 {
     CALL_DEBUG_ENTER;
-#ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     int32_t session = GetCallingPid();
-#else
-    int32_t pid = GetCallingPid();
-    SessionPtr session = GetSession(GetClientFd(pid));
-    CHKPR(session, RET_ERR);
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     int32_t ret = delegateTasks_.PostSyncTask(
         std::bind(&DragManager::AddSubscriptListener, &dragMgr_, session));
     if (ret != RET_OK) {
@@ -825,13 +697,7 @@ int32_t DeviceStatusService::AddSubscriptListener()
 int32_t DeviceStatusService::RemoveSubscriptListener()
 {
     CALL_DEBUG_ENTER;
-#ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     int32_t session = GetCallingPid();
-#else
-    int32_t pid = GetCallingPid();
-    SessionPtr session = GetSession(GetClientFd(pid));
-    CHKPR(session, RET_ERR);
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     int32_t ret = delegateTasks_.PostSyncTask(
         std::bind(&DragManager::RemoveSubscriptListener, &dragMgr_, session));
     if (ret != RET_OK) {
@@ -843,14 +709,7 @@ int32_t DeviceStatusService::RemoveSubscriptListener()
 int32_t DeviceStatusService::StartDrag(const DragData &dragData)
 {
     CALL_DEBUG_ENTER;
-#ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     int32_t session = GetCallingPid();
-#else
-    int32_t pid = GetCallingPid();
-    AddSessionDeletedCallback(pid, std::bind(&DragManager::OnSessionLost, &dragMgr_, std::placeholders::_1));
-    SessionPtr session = GetSession(GetClientFd(pid));
-    CHKPR(session, RET_ERR);
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
     int32_t ret = delegateTasks_.PostSyncTask(
         std::bind(&DragManager::StartDrag, &dragMgr_, std::cref(dragData), session));
     if (ret != RET_OK) {
@@ -992,180 +851,15 @@ int32_t DeviceStatusService::GetExtraInfo(std::string &extraInfo)
     return ret;
 }
 
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#ifndef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-int32_t DeviceStatusService::OnRegisterCoordinationListener(int32_t pid)
-{
-    CALL_DEBUG_ENTER;
-    SessionPtr sess = GetSession(GetClientFd(pid));
-    CHKPR(sess, RET_ERR);
-    sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
-    CHKPR(event, RET_ERR);
-    event->type = CoordinationEventManager::EventType::LISTENER;
-    event->sess = sess;
-    event->msgId = MessageId::COORDINATION_ADD_LISTENER;
-    return RET_OK;
-}
-
-int32_t DeviceStatusService::OnUnregisterCoordinationListener(int32_t pid)
-{
-    CALL_DEBUG_ENTER;
-    SessionPtr sess = GetSession(GetClientFd(pid));
-    sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
-    CHKPR(event, RET_ERR);
-    event->type = CoordinationEventManager::EventType::LISTENER;
-    event->sess = sess;
-    return RET_OK;
-}
-
-int32_t DeviceStatusService::OnPrepareCoordination(int32_t pid, int32_t userData)
-{
-    CALL_DEBUG_ENTER;
-    std::string networkId;
-    CoordinationMessage msg = CoordinationMessage::PREPARE;
-    NetPacket pkt(MessageId::COORDINATION_MESSAGE);
-    pkt << userData << networkId << static_cast<int32_t>(msg);
-    if (pkt.ChkRWError()) {
-        FI_HILOGE("Packet write data failed");
-        return RET_ERR;
-    }
-    SessionPtr sess = GetSession(GetClientFd(pid));
-    CHKPR(sess, RET_ERR);
-    if (!sess->SendMsg(pkt)) {
-        FI_HILOGE("Sending failed");
-        return MSG_SEND_FAIL;
-    }
-    return RET_OK;
-}
-
-int32_t DeviceStatusService::OnUnprepareCoordination(int32_t pid, int32_t userData)
-{
-    CALL_DEBUG_ENTER;
-    std::string networkId;
-    CoordinationMessage msg = CoordinationMessage::UNPREPARE;
-    NetPacket pkt(MessageId::COORDINATION_MESSAGE);
-    pkt << userData << networkId << static_cast<int32_t>(msg);
-    if (pkt.ChkRWError()) {
-        FI_HILOGE("Packet write data failed");
-        return RET_ERR;
-    }
-    SessionPtr sess = GetSession(GetClientFd(pid));
-    CHKPR(sess, RET_ERR);
-    if (!sess->SendMsg(pkt)) {
-        FI_HILOGE("Sending failed");
-        return MSG_SEND_FAIL;
-    }
-    return RET_OK;
-}
-
-int32_t DeviceStatusService::OnActivateCoordination(int32_t pid,
-    int32_t userData, const std::string &remoteNetworkId, int32_t startDeviceId)
-{
-    CALL_DEBUG_ENTER;
-    SessionPtr sess = GetSession(GetClientFd(pid));
-    CHKPR(sess, RET_ERR);
-    sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
-    CHKPR(event, RET_ERR);
-    event->type = CoordinationEventManager::EventType::START;
-    event->sess = sess;
-    event->msgId = MessageId::COORDINATION_MESSAGE;
-    event->userData = userData;
-    return RET_OK;
-}
-
-int32_t DeviceStatusService::OnDeactivateCoordination(int32_t pid, int32_t userData, bool isUnchained)
-{
-    CALL_DEBUG_ENTER;
-    SessionPtr sess = GetSession(GetClientFd(pid));
-    CHKPR(sess, RET_ERR);
-    sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
-    CHKPR(event, RET_ERR);
-    event->type = CoordinationEventManager::EventType::STOP;
-    event->sess = sess;
-    event->msgId = MessageId::COORDINATION_MESSAGE;
-    event->userData = userData;
-    return RET_OK;
-}
-
-int32_t DeviceStatusService::OnGetCoordinationState(
-    int32_t pid, int32_t userData, const std::string &networkId)
-{
-    CALL_DEBUG_ENTER;
-    SessionPtr sess = GetSession(GetClientFd(pid));
-    CHKPR(sess, RET_ERR);
-    sptr<CoordinationEventManager::EventInfo> event = new (std::nothrow) CoordinationEventManager::EventInfo();
-    CHKPR(event, RET_ERR);
-    event->type = CoordinationEventManager::EventType::STATE;
-    event->sess = sess;
-    event->msgId = MessageId::COORDINATION_GET_STATE;
-    event->userData = userData;
-    return RET_OK;
-}
-
-int32_t DeviceStatusService::OnGetCoordinationStateSync(const std::string &udId, bool &state)
-{
-    CALL_DEBUG_ENTER;
-    return RET_OK;
-}
-
-int32_t DeviceStatusService::OnAddHotAreaListener(int32_t pid)
-{
-    CALL_DEBUG_ENTER;
-    auto sess = GetSession(GetClientFd(pid));
-    CHKPR(sess, RET_ERR);
-    sptr<CoordinationHotArea::HotAreaInfo> event = new (std::nothrow) CoordinationHotArea::HotAreaInfo();
-    CHKPR(event, RET_ERR);
-    event->sess = sess;
-    event->msgId = MessageId::HOT_AREA_ADD_LISTENER;
-    HOT_AREA->AddHotAreaListener(event);
-    return RET_OK;
-}
-
-int32_t DeviceStatusService::OnRemoveHotAreaListener(int32_t pid)
-{
-    CALL_DEBUG_ENTER;
-    auto sess = GetSession(GetClientFd(pid));
-    CHKPR(sess, RET_ERR);
-    sptr<CoordinationHotArea::HotAreaInfo> event = new (std::nothrow) CoordinationHotArea::HotAreaInfo();
-    CHKPR(event, RET_ERR);
-    event->sess = sess;
-    HOT_AREA->RemoveHotAreaListener(event);
-    return RET_OK;
-}
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-#endif // OHOS_BUILD_ENABLE_COORDINATION
-
 int32_t DeviceStatusService::AddHotAreaListener()
 {
     CALL_DEBUG_ENTER;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#ifndef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-    int32_t pid = GetCallingPid();
-    int32_t ret = delegateTasks_.PostSyncTask(
-        std::bind(&DeviceStatusService::OnAddHotAreaListener, this, pid));
-    if (ret != RET_OK) {
-        FI_HILOGE("Failed to add hot area listener, ret:%{public}d", ret);
-        return RET_ERR;
-    }
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-#endif // OHOS_BUILD_ENABLE_COORDINATION
     return RET_OK;
 }
 
 int32_t DeviceStatusService::RemoveHotAreaListener()
 {
     CALL_DEBUG_ENTER;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#ifndef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-    int32_t pid = GetCallingPid();
-    int32_t ret = delegateTasks_.PostSyncTask(
-        std::bind(&DeviceStatusService::OnRemoveHotAreaListener, this, pid));
-    if (ret != RET_OK) {
-        FI_HILOGE("Failed to remove hot area listener, ret:%{public}d", ret);
-        return RET_ERR;
-    }
-#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
-#endif // OHOS_BUILD_ENABLE_COORDINATION
     return RET_OK;
 }
 
