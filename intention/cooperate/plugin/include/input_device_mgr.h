@@ -73,7 +73,8 @@ public:
     void OnLocalHotPlug(const InputHotplugEvent &notice);
     void AddVirtualInputDevice(const std::string &networkId);
     void RemoveVirtualInputDevice(const std::string &networkId);
-    void HandleRemoteHotPlug(const RemoteHotPlugEvent &notice);
+    void OnRemoteHotPlugIn(const RemoteHotPlugEvent &notice);
+    void OnRemoteHotUnPlug(const RemoteHotPlugEvent &notice);
 
 private:
     void OnRemoteInputDevice(const std::string &networkId, NetPacket &packet);

@@ -55,6 +55,7 @@ private:
         void OnStop(Context &context, const CooperateEvent &event);
         void OnAppClosed(Context &context, const CooperateEvent &event);
         void OnRemoteStart(Context &context, const CooperateEvent &event);
+        void OnRemoteHotPlug(Context &context, const CooperateEvent &event);
 
         CooperateFree &parent_;
     };
