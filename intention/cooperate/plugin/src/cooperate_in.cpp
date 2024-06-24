@@ -95,6 +95,7 @@ CooperateIn::Initial::Initial(CooperateIn &parent)
     AddHandler(CooperateEventType::DSOFTBUS_START_COOPERATE, &CooperateIn::Initial::OnRemoteStart, this);
     AddHandler(CooperateEventType::DSOFTBUS_STOP_COOPERATE, &CooperateIn::Initial::OnRemoteStop, this);
     AddHandler(CooperateEventType::UPDATE_COOPERATE_FLAG, &CooperateIn::Initial::OnUpdateCooperateFlag, this);
+    AddHandler(CooperateEventType::REMOTE_HOTPLUG_EVENT, &CooperateIn::Initial::OnRemoteHotPlug, this);
 }
 
 void CooperateIn::Initial::OnDisable(Context &context, const CooperateEvent &event)
@@ -274,11 +275,14 @@ void CooperateIn::Initial::OnSoftbusSessionClosed(Context &context, const Cooper
 void CooperateIn::Initial::OnRemoteHotPlug(Context &context, const CooperateEvent &event)
 {
     RemoteHotPlugEvent notice = std::get<RemoteHotPlugEvent>(event.event);
-    if (!context.IsPeer(notice.networkId)) {
-        return;
+    FI_HILOGI("Remote hot plug event:%{public}d from \'%{public}s\'", static_cast<int32_t> (notice.type),
+        Utility::Anonymize(notice.networkId).c_str());
+    if (notice.type == InputHotplugType::PLUG && context.IsPeer(notice.networkId)) {
+        context.inputDevMgr_.OnRemoteHotPlugIn(notice);
     }
-    FI_HILOGI("Remote hot plug event from \'%{public}s\'", Utility::Anonymize(notice.networkId).c_str());
-    context.inputDevMgr_.HandleRemoteHotPlug(notice);
+    if (notice.type == InputHotplugType::UNPLUG) {
+        context.inputDevMgr_.OnRemoteHotUnPlug(notice);
+    }
 }
 
 void CooperateIn::Initial::OnUpdateCooperateFlag(Context &context, const CooperateEvent &event)

@@ -132,9 +132,9 @@ void InputDeviceMgr::OnRemoteHotPlug(const std::string &networkId, NetPacket &pa
     packet >> type;
     FI_HILOGI("Hot plug type:%{public}d", type);
     InputHotplugType hotPlugType = static_cast<InputHotplugType>(type);
-    auto device = std::make_shared<Device>(INVALID_DEVICE_ID);
     int32_t deviceId { -1 };
     if (hotPlugType == InputHotplugType::PLUG) {
+        auto device = std::make_shared<Device>(INVALID_DEVICE_ID);
         if (DeserializeDevice(device, packet) != RET_OK) {
             FI_HILOGE("DeserializeDevice failed");
             return;
@@ -144,8 +144,6 @@ void InputDeviceMgr::OnRemoteHotPlug(const std::string &networkId, NetPacket &pa
     }
     if (hotPlugType == InputHotplugType::UNPLUG) {
         packet >> deviceId;
-        device->SetId(deviceId);
-        RemoveRemoteInputDevice(networkId, device);
     }
     auto ret = sender_.Send(CooperateEvent(
         CooperateEventType::REMOTE_HOTPLUG_EVENT,
@@ -181,20 +179,19 @@ void InputDeviceMgr::RemoveVirtualInputDevice(const std::string &networkId)
     }
 }
 
-void InputDeviceMgr::HandleRemoteHotPlug(const RemoteHotPlugEvent &notice)
+void InputDeviceMgr::OnRemoteHotPlugIn(const RemoteHotPlugEvent &notice)
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
-    if (notice.type == InputHotplugType::UNPLUG) {
-        if (remote2VirtualIds_.find(notice.remoteDeviceId) == remote2VirtualIds_.end()) {
-            FI_HILOGI("No virtual matches remote deviceId:%{public}d", notice.remoteDeviceId);
-            return;
-        }
-        RemoveVirtualInputDevice(notice.networkId, notice.remoteDeviceId);
-    }
-    if (notice.type == InputHotplugType::PLUG) {
-        AddVirtualInputDevice(notice.networkId, notice.remoteDeviceId);
-    }
+    AddVirtualInputDevice(notice.networkId, notice.remoteDeviceId);
+}
+
+void InputDeviceMgr::OnRemoteHotUnPlug(const RemoteHotPlugEvent &notice)
+{
+    CALL_INFO_TRACE;
+    std::lock_guard<std::mutex> guard(mutex_);
+    RemoveVirtualInputDevice(notice.networkId, notice.remoteDeviceId);
+    RemoveRemoteInputDevice(notice.networkId, std::make_shared<Device>(notice.remoteDeviceId));
 }
 
 void InputDeviceMgr::NotifyInputDeviceToRemote(const std::string &remoteNetworkId)

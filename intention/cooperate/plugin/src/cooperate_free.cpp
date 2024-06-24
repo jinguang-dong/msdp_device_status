@@ -99,6 +99,7 @@ CooperateFree::Initial::Initial(CooperateFree &parent)
     AddHandler(CooperateEventType::STOP, &CooperateFree::Initial::OnStop, this);
     AddHandler(CooperateEventType::APP_CLOSED, &CooperateFree::Initial::OnAppClosed, this);
     AddHandler(CooperateEventType::DSOFTBUS_START_COOPERATE, &CooperateFree::Initial::OnRemoteStart, this);
+    AddHandler(CooperateEventType::REMOTE_HOTPLUG_EVENT, &CooperateFree::Initial::OnRemoteHotPlug, this);
 }
 
 void CooperateFree::Initial::OnProgress(Context &context, const CooperateEvent &event)
@@ -178,6 +179,16 @@ void CooperateFree::Initial::OnRemoteStart(Context &context, const CooperateEven
     FI_HILOGI("[remote start] Cooperation with \'%{public}s\' established", Utility::Anonymize(context.Peer()).c_str());
     TransiteTo(context, CooperateState::COOPERATE_STATE_IN);
     context.OnTransitionIn();
+}
+
+void CooperateFree::Initial::OnRemoteHotPlug(Context &context, const CooperateEvent &event)
+{
+    RemoteHotPlugEvent notice = std::get<RemoteHotPlugEvent>(event.event);
+    FI_HILOGI("Remote hot plug event:%{public}d from \'%{public}s\'", static_cast<int32_t> (notice.type),
+        Utility::Anonymize(notice.networkId).c_str());
+    if (notice.type == InputHotplugType::UNPLUG) {
+        context.inputDevMgr_.OnRemoteHotUnPlug(notice);
+    }
 }
 } // namespace Cooperate
 } // namespace DeviceStatus

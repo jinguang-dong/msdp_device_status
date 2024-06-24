@@ -77,6 +77,7 @@ CooperateOut::Initial::Initial(CooperateOut &parent)
     AddHandler(CooperateEventType::DSOFTBUS_START_COOPERATE, &CooperateOut::Initial::OnRemoteStart, this);
     AddHandler(CooperateEventType::DSOFTBUS_STOP_COOPERATE, &CooperateOut::Initial::OnRemoteStop, this);
     AddHandler(CooperateEventType::DSOFTBUS_RELAY_COOPERATE, &CooperateOut::Initial::OnRelay, this);
+    AddHandler(CooperateEventType::REMOTE_HOTPLUG_EVENT, &CooperateOut::Initial::OnRemoteHotPlug, this);
 }
 
 void CooperateOut::Initial::OnDisable(Context &context, const CooperateEvent &event)
@@ -272,6 +273,16 @@ void CooperateOut::Initial::OnSoftbusSessionClosed(Context &context, const Coope
     FI_HILOGI("[dsoftbus session closed] Disconnected with \'%{public}s\'",
         Utility::Anonymize(notice.networkId).c_str());
     parent_.StopCooperate(context, event);
+}
+
+void CooperateOut::Initial::OnRemoteHotPlug(Context &context, const CooperateEvent &event)
+{
+    RemoteHotPlugEvent notice = std::get<RemoteHotPlugEvent>(event.event);
+    FI_HILOGI("Remote hot plug event:%{public}d from \'%{public}s\'", static_cast<int32_t> (notice.type),
+        Utility::Anonymize(notice.networkId).c_str());
+    if (notice.type == InputHotplugType::UNPLUG) {
+        context.inputDevMgr_.OnRemoteHotUnPlug(notice);
+    }
 }
 
 void CooperateOut::Initial::OnProgress(Context &context, const CooperateEvent &event)
