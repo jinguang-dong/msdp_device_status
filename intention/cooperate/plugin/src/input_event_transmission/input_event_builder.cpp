@@ -69,6 +69,7 @@ void InputEventBuilder::Disable()
     if (enable_) {
         enable_ = false;
         env_->GetDSoftbus().RemoveObserver(observer_);
+        env_->GetInput().SimulateInputEvent();
     }
 }
 
@@ -137,6 +138,7 @@ void InputEventBuilder::OnPointerEvent(Msdp::NetPacket &packet)
     FI_HILOGI("PointerEvent(No:%{public}d,Source:%{public}s,Action:%{public}s)",
         pointerEvent_->GetId(), pointerEvent_->DumpSourceType(), pointerEvent_->DumpPointerAction());
     if (IsActive(pointerEvent_)) {
+        
         env_->GetInput().SimulateInputEvent(pointerEvent_);
     }
     pointerEvent_->Reset();
