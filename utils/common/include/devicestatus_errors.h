@@ -82,7 +82,7 @@ enum ErrorCode : int32_t {
 };
 
 enum CustomErrCode : int32_t {
-    UNKNOWN_ERROR = -1;
+    UNKNOWN_ERROR = -1,
     SOFTBUS_BIND_FAILED = 20900002,
     SEND_PACKET_FAILED = 20900003,
     UNEXPECTED_START_CALL = 20900004,
