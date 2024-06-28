@@ -107,7 +107,7 @@ bool JsUtil::GetErrMsg(const CoordinationMsgInfo &msgInfo, std::string &msg)
 
 int32_t JsUtil::GetErrCode(const CoordinationMsgInfo &msgInfo)
 {
-    switch(msgInfo.errCode){
+    switch(msgInfo.errCode) {
         case CoordinationErrCode::SOFTBUS_BIND_FAILED: {
             return CustomErrCode::SOFTBUS_BIND_FAILED;
         }
