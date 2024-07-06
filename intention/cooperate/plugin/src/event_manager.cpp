@@ -238,7 +238,7 @@ void EventManager::NotifyCooperateMessage(const CooperateNotice &notice)
     CHKPV(session);
     NetPacket pkt(notice.msgId);
     pkt << notice.userData << notice.networkId <<
-        static_cast<int32_t>(notice.msg) << static_cast<int32_t>(notice.errCode);
+        static_cast<int32_t>(notice.msg) << notice.errCode;
     if (pkt.ChkRWError()) {
         FI_HILOGE("Packet write data failed");
         return;
