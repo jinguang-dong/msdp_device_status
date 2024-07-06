@@ -29,8 +29,6 @@ namespace {
 inline constexpr std::string_view GET_BOOLEAN { "napi_get_boolean" };
 inline constexpr std::string_view COERCE_TO_BOOL { "napi_coerce_to_bool" };
 inline constexpr std::string_view CREATE_ERROR { "napi_create_error" };
-inline constexpr uint32_t SUB_SYSTEM_ID { 203 };
-inline constexpr uint32_t MODULE_ID { 3 };
 } // namespace
 
 napi_value JsUtil::GetPrepareInfo(sptr<CallbackInfo> cb)
@@ -109,10 +107,22 @@ bool JsUtil::GetErrMsg(const CoordinationMsgInfo &msgInfo, std::string &msg)
 
 int32_t JsUtil::GetErrCode(const CoordinationMsgInfo &msgInfo)
 {
-    uint32_t errCode = ((static_cast<uint32_t> (msgInfo.msg) << 4) | (static_cast<uint32_t> (msgInfo.errCode)));
-    uint32_t dfxErrCode = ((SUB_SYSTEM_ID << 21) | (MODULE_ID << 16) | (errCode));
-    FI_HILOGI("DFX errCode:%{public}u, msg:%{public}d, erCode:%{public}d", dfxErrCode, msgInfo.msg, msgInfo.errCode);
-    return static_cast<int32_t> (dfxErrCode);
+    switch(msgInfo.errCode) {
+        case CoordinationErrCode::SOFTBUS_BIND_FAILED: {
+            return CustomErrCode::SOFTBUS_BIND_FAILED;
+        }
+        case CoordinationErrCode::SEND_PACKET_FAILED: {
+            return CustomErrCode::SEND_PACKET_FAILED;
+        }
+        case CoordinationErrCode::UNEXPECTED_START_CALL: {
+            return CustomErrCode::UNEXPECTED_START_CALL;
+        }
+        case CoordinationErrCode::WORKER_THREAD_TIMEOUT: {
+            return CustomErrCode::WORKER_THREAD_TIMEOUT;
+        }
+        default:
+            return CustomErrCode::UNKNOWN_ERROR;
+    }
 }
 
 napi_value JsUtil::GetCrossingSwitchStateResult(napi_env env, bool result)
