@@ -85,7 +85,7 @@ enum CustomErrCode : int32_t {
     OPEN_SESSION_FAILED = 20900002,
     SEND_PACKET_FAILED = 20900003,
     UNEXPECTED_START_CALL = 20900004,
-    WORKER_THREAD_TIMEOUT = 20900005;
+    WORKER_THREAD_TIMEOUT = 20900005，
 };
 } // namespace DeviceStatus
 } // namespace Msdp
