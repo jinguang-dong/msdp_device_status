@@ -118,7 +118,7 @@ bool JsUtil::GetErrMsg(const CoordinationMsgInfo &msgInfo, std::string &msg)
             break;
         }
         default:
-            msg +="Softbus bind failed";
+            msg += "Softbus bind failed";
     }
     return true;
 }
