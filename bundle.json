@@ -15,7 +15,17 @@
       "SystemCapability.Msdp.DeviceStatus.Stationary"
     ],
     "hisysevent_config": ["//base/msdp/device_status/hisysevent.yaml"],
-    "features": [],
+    "features": [
+      "fusion_intention_framework",
+      "fusion_rust_enabled",
+      "fusion_interaction_coordination",
+      "fusion_drag_enable_monitor",
+      "fusion_drag_enable_interceptor",
+      "fusion_drag_enable_animation",
+      "fusion_performance_check",
+      "device_status_sensor_enable",
+      "device_status_memmgr_enable"
+    ],
     "adapted_system_type": [ "standard" ],
     "rom": "2048KB",
     "ram": "~4096KB",
