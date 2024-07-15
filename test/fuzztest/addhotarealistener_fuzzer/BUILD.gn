@@ -47,8 +47,8 @@ ohos_fuzztest("AddHotAreaListenerFuzzTest") {
     "//third_party/cJSON",
   ]
 
-  if (defined(fusion_interaction_motion_drag) &&
-      fusion_interaction_motion_drag) {
+  if (defined(device_status_fusion_interaction_motion_drag) &&
+      device_status_fusion_interaction_motion_drag) {
     include_dirs += [ "${motion_service_path}/native/include" ]
   }
 

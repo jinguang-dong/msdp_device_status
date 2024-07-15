@@ -26,12 +26,12 @@ config("devicestatus_services_private_config") {
     "communication/service/include",
   ]
 
-  if (defined(fusion_interaction_motion_drag) &&
-      fusion_interaction_motion_drag) {
+  if (defined(device_status_fusion_interaction_motion_drag) &&
+      device_status_fusion_interaction_motion_drag) {
     include_dirs += [ "${motion_service_path}/native/include" ]
   }
 
-  if (fusion_intention_framework) {
+  if (device_status_fusion_intention_framework) {
     include_dirs += [
       "${device_status_root_path}/intention/cooperate/server/include",
       "${device_status_root_path}/intention/drag/server/include",
@@ -49,7 +49,7 @@ config("devicestatus_services_public_config") {
     "interaction/drag/include",
   ]
 
-  if (fusion_intention_framework) {
+  if (device_status_fusion_intention_framework) {
     include_dirs += [
       "${device_status_root_path}/intention/cooperate/server/include",
       "${device_status_root_path}/intention/drag/server/include",
@@ -115,7 +115,7 @@ ohos_shared_library("devicestatus_service") {
     "interaction/drag:interaction_drag",
   ]
 
-  if (fusion_intention_framework) {
+  if (device_status_fusion_intention_framework) {
     deps += [
       "${device_status_root_path}/intention/adapters/dsoftbus_adapter:intention_dsoftbus_adapter",
       "${device_status_root_path}/intention/adapters/input_adapter:intention_input_adapter",
@@ -130,7 +130,7 @@ ohos_shared_library("devicestatus_service") {
     "${device_status_root_path}/intention/services/device_manager:intention_device_manager",
   ]
 
-  if (fusion_intention_framework) {
+  if (device_status_fusion_intention_framework) {
     public_deps += [
       "${device_status_root_path}/intention/ipc/socket:intention_socket_session_manager",
       "${device_status_root_path}/intention/ipc/tunnel:intention_tunnel_server",
@@ -143,10 +143,10 @@ ohos_shared_library("devicestatus_service") {
     defines += [ "DEVICE_STATUS_SENSOR_ENABLE" ]
   }
   external_deps = external_deps_set
-  if (fusion_intention_framework) {
+  if (device_status_fusion_intention_framework) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   } else {
-    if (fusion_interaction_coordination) {
+    if (device_status_fusion_interaction_coordination) {
       external_deps += [ "device_manager:devicemanagersdk" ]
     }
   }
@@ -155,8 +155,8 @@ ohos_shared_library("devicestatus_service") {
     external_deps += [ "memmgr:memmgrclient" ]
   }
 
-  if (defined(fusion_interaction_motion_drag) &&
-      fusion_interaction_motion_drag) {
+  if (defined(device_status_fusion_interaction_motion_drag) &&
+      device_status_fusion_interaction_motion_drag) {
     external_deps += [ "motion:motion_drag" ]
   }
 
@@ -189,7 +189,7 @@ ohos_static_library("devicestatus_static_service") {
     "interaction/drag:interaction_drag",
   ]
 
-  if (fusion_intention_framework) {
+  if (device_status_fusion_intention_framework) {
     deps += [
       "${device_status_root_path}/intention/adapters/dsoftbus_adapter:intention_dsoftbus_adapter",
       "${device_status_root_path}/intention/adapters/input_adapter:intention_input_adapter",
@@ -209,7 +209,7 @@ ohos_static_library("devicestatus_static_service") {
     "${device_status_root_path}/intention/services/device_manager:intention_device_manager",
   ]
 
-  if (fusion_intention_framework) {
+  if (device_status_fusion_intention_framework) {
     public_deps += [
       "${device_status_root_path}/intention/ipc/socket:intention_socket_session_manager",
       "${device_status_root_path}/intention/ipc/tunnel:intention_tunnel_server",
@@ -218,10 +218,10 @@ ohos_static_library("devicestatus_static_service") {
   }
 
   external_deps = external_deps_set
-  if (fusion_intention_framework) {
+  if (device_status_fusion_intention_framework) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   } else {
-    if (fusion_interaction_coordination) {
+    if (device_status_fusion_interaction_coordination) {
       external_deps += [ "device_manager:devicemanagersdk" ]
     }
   }
@@ -230,8 +230,8 @@ ohos_static_library("devicestatus_static_service") {
     external_deps += [ "memmgr:memmgrclient" ]
   }
 
-  if (defined(fusion_interaction_motion_drag) &&
-      fusion_interaction_motion_drag) {
+  if (defined(device_status_fusion_interaction_motion_drag) &&
+      device_status_fusion_interaction_motion_drag) {
     external_deps += [ "motion:motion_drag" ]
   }
 
