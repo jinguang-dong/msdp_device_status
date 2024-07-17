@@ -60,17 +60,17 @@ void CooperateFree::OnLeaveState(Context &context)
 
 void CooperateFree::SetPointerVisible(Context &context)
 {
+    CHKPV(env_);
     bool hasLocalPointerDevice =  env_->GetDeviceManager().HasLocalPointerDevice();
     bool visible = !context.NeedHideCursor() && hasLocalPointerDevice;
     FI_HILOGI("Set pointer visible:%{public}s, HasLocalPointerDevice:%{public}s",
         visible ? "true" : "false", hasLocalPointerDevice ? "true" : "false");
-    CHKPV(env_);
     env_->GetInput().SetPointerVisibility(visible, PRIORITY);
 }
 
 void CooperateFree::UnchainConnections(Context &context, const StopCooperateEvent &event) const
 {
-    CALL_INFO_TRACE;
+    CALL_DEBUG_ENTER;
     if (event.isUnchained) {
         FI_HILOGI("Unchain all connections");
         context.dsoftbus_.CloseAllSessions();
@@ -152,7 +152,7 @@ void CooperateFree::Initial::OnStart(Context &context, const CooperateEvent &eve
 
 void CooperateFree::Initial::OnStop(Context &context, const CooperateEvent &event)
 {
-    CALL_INFO_TRACE;
+    CALL_DEBUG_ENTER;
     StopCooperateEvent param = std::get<StopCooperateEvent>(event.event);
     context.eventMgr_.StopCooperate(param);
     DSoftbusStopCooperateFinished notice {
@@ -185,7 +185,7 @@ void CooperateFree::Initial::OnRemoteStart(Context &context, const CooperateEven
 
 void CooperateFree::Initial::OnPointerEvent(Context &context, const CooperateEvent &event)
 {
-    CALL_INFO_TRACE;
+    CALL_DEBUG_ENTER;
     InputPointerEvent notice = std::get<InputPointerEvent>(event.event);
     if (InputEventBuilder::IsLocalEvent(notice) && context.NeedHideCursor()) {
         UpdateCooperateFlagEvent event {

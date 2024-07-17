@@ -13,33 +13,9 @@
  * limitations under the License.
  */
 
-# ifndef IF_STREAM_WRAP_H
-# define IF_STREAM_WRAP_H
+#ifndef DSOFTBUSADAPTER_FUZZER_H
+#define DSOFTBUSADAPTER_FUZZER_H
 
-#include <fstream>
-#include <sstream>
+#define FUZZ_PROJECT_NAME "dsoftbusadapter_fuzzer"
 
-namespace OHOS {
-namespace Msdp {
-namespace DeviceStatus {
-namespace {
-struct IfStreamWrap {
-    IfStreamWrap() = default;
-    ~IfStreamWrap()
-    {
-        if (ifStream.is_open()) {
-            ifStream.close();
-        }
-    }
-
-    bool IsOpen()
-    {
-        return ifStream.is_open();
-    }
-    std::ifstream ifStream;
-};
-}
-} // namespace DeviceStatus
-} // namespace Msdp
-} // namespace OHOS
-# endif //IF_STREAM_WRAP_H
+#endif // DSOFTBUSADAPTER_FUZZER_H
