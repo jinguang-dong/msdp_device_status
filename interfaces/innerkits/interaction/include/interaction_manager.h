@@ -21,8 +21,11 @@
 
 #include "nocopyable.h"
 
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #include "coordination_message.h"
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 #include "drag_data.h"
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #include "i_coordination_listener.h"
 #include "i_drag_listener.h"
 #include "i_event_listener.h"
@@ -30,6 +33,10 @@
 #include "i_start_drag_listener.h"
 #include "i_subscript_listener.h"
 #include "transaction/rs_transaction.h"
+#else
+#include "pointer_event.h"
+#include "virtual_rs_window.h"
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 
 namespace OHOS {
 namespace Msdp {
@@ -40,6 +47,7 @@ public:
     static InteractionManager *GetInstance();
     virtual ~InteractionManager() = default;
 
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     /**
      * @brief Registers a listener for screen hopping events of the mouse pointer.
      * @param listener Indicates the listener for screen hopping events of the mouse pointer.
@@ -143,7 +151,15 @@ public:
      * @since 10
      */
     int32_t StartDrag(const DragData &dragData, std::shared_ptr<IStartDragListener> listener);
-
+#else
+    /**
+     * @brief Starts dragging.
+     * @param dragData Indicates additional data used for dragging.
+     * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
+     * @since 10
+     */
+    int32_t StartDrag(const DragData &dragData);
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     /**
      * @brief Stops dragging.
      * @param result Indicates the dragging result. The value <b>0</b> means that the dragging operation is successful;
@@ -179,7 +195,7 @@ public:
      * @since 10
      */
     int32_t GetUdKey(std::string &udKey);
-
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     /**
      * @brief Registers a listener for dragging status changes.
      * @param listener Indicates the listener for dragging status changes.
@@ -215,6 +231,7 @@ public:
      * @since 10
      */
     int32_t RemoveSubscriptListener(std::shared_ptr<ISubscriptListener> listener);
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 
     /**
      * @brief Displays or hides the dragging window.
@@ -273,7 +290,7 @@ public:
      * @since 10
      */
     int32_t GetExtraInfo(std::string &extraInfo);
-
+#ifndef  OHOS_BUILD_ENABLE_ARKUI_X
     /**
      * @brief Registers a listener for screen hot area of the mouse pointer.
      * @param listener Indicates the listener for screen hot area of the mouse pointer.
@@ -281,7 +298,7 @@ public:
      * @since 11
      */
     int32_t AddHotAreaListener(std::shared_ptr<IHotAreaListener> listener);
-
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     /**
      * @brief Obtains the dragging state.
      * @param dragState Dragging state.
@@ -289,7 +306,7 @@ public:
      * @since 10
      */
     int32_t GetDragState(DragState &dragState);
-
+#ifndef  OHOS_BUILD_ENABLE_ARKUI_X
     /**
      * @brief Unregisters a listener for screen hot area of the mouse pointer.
      * @param listener Indicates the listener for screen hot area of the mouse pointer.
@@ -297,6 +314,7 @@ public:
      * @since 9
      */
     int32_t RemoveHotAreaListener(std::shared_ptr<IHotAreaListener> listener = nullptr);
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 
     /**
      * @brief Update preview style when dragging.
@@ -315,6 +333,7 @@ public:
      */
     int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation);
 
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     /**
      * @brief Rotate drag window sync.
      * @param rsTransaction Indicates utterances rotate the sync handle.
@@ -322,6 +341,7 @@ public:
      * @since 12
      */
     int32_t RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 
     /**
      * @brief Obtains data summary of the drag object.
@@ -341,6 +361,7 @@ public:
      */
     int32_t EnterTextEditorArea(bool enable);
 
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     int32_t AddPrivilege();
 
     int32_t EraseMouseIcon();
@@ -355,6 +376,40 @@ public:
      * @since 12
      */
     int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap, std::function<void(bool)> callback);
+#else
+    /**
+     * @brief convert relative pointerEvent action to PULL_MOVE or PULL_UP.
+     * @param pointerEvent the normal input event need to deal with.
+     * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
+     * @since 12
+     */
+    int32_t UpdatePointerAction(std::shared_ptr<MMI::PointerEvent> pointerEvent);
+
+    /**
+     * @brief set window.
+     * @param window drag drawing needs window.
+     * @return
+     * @since 12
+     */
+    void SetDragWindow(std::shared_ptr<OHOS::Rosen::Window> window);
+
+    /**
+     * @brief set callback to destroy window.
+     * @param cb callback function.
+     * @return
+     * @since 12
+     */
+    void RegisterDragWindow(std::function<void()> cb);
+
+    /**
+     * @brief set VSG file path.
+     * @param filePath save SVG file path.
+     * @return
+     * @since 12
+     */
+    void SetSVGFilePath(std::string &filePath);
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
+
 private:
     InteractionManager() = default;
     DISALLOW_COPY_AND_MOVE(InteractionManager);
