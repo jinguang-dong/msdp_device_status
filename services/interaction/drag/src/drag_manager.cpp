@@ -197,12 +197,16 @@ int32_t DragManager::StartDrag(const DragData &dragData, int32_t pid)
     }
     std::string packageName = std::string();
     CHKPR(context_, RET_ERR);
-    dragOutSession_ = context_->GetSocketSessionManager().FindSessionByPid(pid);
-    if (dragOutSession_ != nullptr) {
+    if (pid == -1) {
+        packageName = "Cross-device drag";
+    } else {
         context_->GetSocketSessionManager().AddSessionDeletedCallback(pid,
             [this](SocketSessionPtr session) { this->OnSessionLost(session); });
+        dragOutSession_ = context_->GetSocketSessionManager().FindSessionByPid(pid);
+        if (dragOutSession_ != nullptr) {
+            packageName = dragOutSession_->GetProgramName();
+        }
     }
-    packageName = (pid == -1) ? "Cross-device drag" : dragOutSession_->GetProgramName();
     PrintDragData(dragData, packageName);
     if (InitDataManager(dragData) != RET_OK) {
         FI_HILOGE("Failed to init data manager");
@@ -213,11 +217,9 @@ int32_t DragManager::StartDrag(const DragData &dragData, int32_t pid)
         FI_HILOGE("Failed to execute OnStartDrag");
         return RET_ERR;
     }
-#ifdef OHOS_BUILD_ENABLE_MOTION_DRAG
     if (notifyPUllUpCallback_ != nullptr) {
         notifyPUllUpCallback_(false);
     }
-#endif
     SetDragState(DragState::START);
     stateNotify_.StateChangedNotify(DragState::START);
     StateChangedNotify(DragState::START);
@@ -355,6 +357,11 @@ int32_t DragManager::GetDragState(DragState &dragState)
     }
     FI_HILOGD("leave");
     return RET_OK;
+}
+
+DragCursorStyle DragManager::GetDragStyle() const
+{
+    return DRAG_DATA_MGR.GetDragStyle();
 }
 
 int32_t DragManager::NotifyDragResult(DragResult result, DragBehavior dragBehavior)
@@ -872,12 +879,24 @@ void DragManager::RegisterStateChange(std::function<void(DragState)> callback)
     FI_HILOGI("leave");
 }
 
+void DragManager::UnregisterStateChange()
+{
+    FI_HILOGI("Unregister state-change callback");
+    stateChangedCallback_ = nullptr;
+}
+
 void DragManager::RegisterNotifyPullUp(std::function<void(bool)> callback)
 {
     FI_HILOGI("enter");
     CHKPV(callback);
     notifyPUllUpCallback_ = callback;
     FI_HILOGI("leave");
+}
+
+void DragManager::UnregisterNotifyPullUp()
+{
+    FI_HILOGI("Unregister notify-pullup callback");
+    notifyPUllUpCallback_ = nullptr;
 }
 
 void DragManager::StateChangedNotify(DragState state)
@@ -920,6 +939,11 @@ void DragManager::SetDragState(DragState state)
     if (state == DragState::START) {
         UpdateDragStyleCross();
     }
+}
+
+void DragManager::SetDragOriginDpi(float dragOriginDpi)
+{
+    DRAG_DATA_MGR.SetDragOriginDpi(dragOriginDpi);
 }
 
 DragResult DragManager::GetDragResult() const
@@ -1266,6 +1290,49 @@ int32_t DragManager::RotateDragWindow(Rosen::Rotation rotation)
     if (ret != RET_OK) {
         FI_HILOGE("Post async task failed, ret:%{public}d", ret);
         return ret;
+    }
+    FI_HILOGD("leave");
+    return RET_OK;
+}
+
+int32_t DragManager::NotifyAddSelectedPixelMapResult(bool result)
+{
+    FI_HILOGD("enter");
+    NetPacket pkt(MessageId::ADD_SELECTED_PIXELMAP_RESULT);
+    pkt << result;
+    if (pkt.ChkRWError()) {
+        FI_HILOGE("Failed to packet write data");
+        return RET_ERR;
+    }
+    CHKPR(dragOutSession_, RET_ERR);
+    if (!dragOutSession_->SendMsg(pkt)) {
+        FI_HILOGE("Failed to send message");
+        return MSG_SEND_FAIL;
+    }
+    FI_HILOGD("leave");
+    return RET_OK;
+}
+
+int32_t DragManager::AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
+{
+    FI_HILOGD("enter");
+    if (dragState_ != DragState::START) {
+        FI_HILOGE("Drag not running");
+        if (NotifyAddSelectedPixelMapResult(false) != RET_OK) {
+            FI_HILOGE("Notify addSelectedPixelMap result failed");
+        }
+        return RET_ERR;
+    }
+    if (dragDrawing_.AddSelectedPixelMap(pixelMap) != RET_OK) {
+        FI_HILOGE("Add select pixelmap fail");
+        if (NotifyAddSelectedPixelMapResult(false) != RET_OK) {
+            FI_HILOGE("Notify addSelectedPixelMap result failed");
+        }
+        return RET_ERR;
+    }
+    DRAG_DATA_MGR.UpdateShadowInfos(pixelMap);
+    if (NotifyAddSelectedPixelMapResult(true) != RET_OK) {
+        FI_HILOGW("Notify addSelectedPixelMap result failed");
     }
     FI_HILOGD("leave");
     return RET_OK;

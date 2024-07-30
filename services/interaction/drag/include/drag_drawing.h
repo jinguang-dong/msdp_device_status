@@ -70,6 +70,7 @@ public:
 
 private:
     void OnDraw(std::shared_ptr<Media::PixelMap> pixelMap) const;
+    std::shared_ptr<Media::PixelMap> DrawFromSVG() const;
 
 private:
     MMI::PointerStyle pointerStyle_;
@@ -154,6 +155,7 @@ struct FilterInfo {
     float blurBrightness { -1.0f };
     uint32_t blurColor { 0 };
     int32_t blurStyle { -1 };
+    float dragNodeGrayscale { 0.0f };
 };
 
 struct ExtraInfo {
@@ -262,6 +264,7 @@ public:
     void SetRotation(Rosen::Rotation rotation);
     float CalculateWidthScale();
     float GetMaxWidthScale(int32_t width);
+    int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
 
 private:
     int32_t CheckDragData(const DragData &dragData);
@@ -288,6 +291,7 @@ private:
     bool NeedAdjustSvgInfo();
     void SetDecodeOptions(Media::DecodeOptions &decodeOpts);
     bool ParserFilterInfo(const std::string &filterInfoStr, FilterInfo &filterInfo);
+    void ParserCornerRadiusInfo(const cJSON *cornerRadiusInfoStr, FilterInfo &filterInfo);
     void ParserBlurInfo(const cJSON *BlurInfoInfoStr, FilterInfo &filterInfo);
     void SetCustomDragBlur(const FilterInfo &filterInfo, std::shared_ptr<Rosen::RSCanvasNode> filterNode);
     void SetComponentDragBlur(const FilterInfo &filterInfo, const ExtraInfo &extraInfo,
@@ -338,6 +342,8 @@ private:
     void RotatePosition(float &displayX, float &displayY);
     void UpdateDragPosition(int32_t displayId, float displayX, float displayY);
     float AdjustDoubleValue(double doubleValue);
+    int32_t UpdatePixelMapsAngleAndAlpha();
+    int32_t UpdatePixeMapDrawingOrder();
 
 private:
     int64_t interruptNum_ { -1 };

@@ -56,6 +56,7 @@ public:
     int32_t UpdateShadowPic(const ShadowInfo &shadowInfo) override;
     int32_t GetDragData(DragData &dragData) override;
     int32_t GetDragState(DragState &dragState) override;
+    DragCursorStyle GetDragStyle() const override;
     void GetAllowDragState(bool &isAllowDrag) override;
     void DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     int32_t OnDragUp(std::shared_ptr<MMI::PointerEvent> pointerEvent);
@@ -65,12 +66,15 @@ public:
     int32_t OnGetShadowOffset(ShadowOffset &shadowOffset) override;
     void Dump(int32_t fd) const override;
     void RegisterStateChange(std::function<void(DragState)> callback) override;
+    void UnregisterStateChange() override;
     void RegisterNotifyPullUp(std::function<void(bool)> callback) override;
+    void UnregisterNotifyPullUp() override;
     void SetPointerEventFilterTime(int64_t filterTime) override;
     void MoveTo(int32_t x, int32_t y) override;
     DragResult GetDragResult() const override;
     DragState GetDragState() const override;
     void SetDragState(DragState state) override;
+    void SetDragOriginDpi(float dragOriginDpi) override;
     int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle) override;
     int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
         const PreviewAnimation &animation) override;
@@ -82,6 +86,7 @@ public:
     int32_t GetExtraInfo(std::string &extraInfo) const override;
     int32_t AddPrivilege(int32_t tokenId) override;
     int32_t EraseMouseIcon() override;
+    int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap) override;
     int32_t RotateDragWindow(Rosen::Rotation rotation) override;
     void SetDragWindowScreenId(uint64_t displayId, uint64_t screenId) override;
 #ifdef OHOS_DRAG_ENABLE_INTERCEPTOR
@@ -134,7 +139,7 @@ private:
     inline std::string GetDragStyleName(DragCursorStyle style);
     DragCursorStyle GetRealDragStyle(DragCursorStyle style);
     void GetDragBehavior(const DragDropResult &dropResult, DragBehavior &dragBehavior);
-
+    int32_t NotifyAddSelectedPixelMapResult(bool result);
 private:
     int32_t timerId_ { -1 };
     StateChangeNotify stateNotify_;

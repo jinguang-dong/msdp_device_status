@@ -54,7 +54,7 @@ ohos_unittest("EnumeratorTest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = true
+    debug = false
     blocklist = "./ipc_blocklist.txt"
   }
 
@@ -134,13 +134,14 @@ ohos_unittest("IntentionDeviceManagerTest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = true
+    debug = false
     blocklist = "./ipc_blocklist.txt"
   }
 
   module_out_path = module_output_path
 
   include_dirs = [
+    "include",
     "${device_status_interfaces_path}/innerkits/interaction/include",
     "${intention_root_path}/services/device_manager/include",
     "${device_status_utils_path}",
