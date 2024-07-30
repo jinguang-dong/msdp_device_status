@@ -80,7 +80,7 @@ int32_t DragClient::StopDrag(ITunnelClient &tunnel, const DragDropResult &dropRe
     return ret;
 }
 
-int32_t DragClient::AddDraglistener(ITunnelClient &tunnel, DragListenerPtr listener)
+int32_t DragClient::AddDraglistener(ITunnelClient &tunnel, DragListenerPtr listener, bool isJsCaller)
 {
     CALL_DEBUG_ENTER;
     CHKPR(listener, RET_ERR);
@@ -89,7 +89,7 @@ int32_t DragClient::AddDraglistener(ITunnelClient &tunnel, DragListenerPtr liste
         return RET_OK;
     }
     if (!hasRegistered_) {
-        DefaultParam param {};
+        AddDraglistenerParam param { isJsCaller };
         DefaultReply reply {};
         FI_HILOGI("Start drag listening");
 
@@ -104,7 +104,7 @@ int32_t DragClient::AddDraglistener(ITunnelClient &tunnel, DragListenerPtr liste
     return RET_OK;
 }
 
-int32_t DragClient::RemoveDraglistener(ITunnelClient &tunnel, DragListenerPtr listener)
+int32_t DragClient::RemoveDraglistener(ITunnelClient &tunnel, DragListenerPtr listener, bool isJsCaller)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
@@ -115,7 +115,7 @@ int32_t DragClient::RemoveDraglistener(ITunnelClient &tunnel, DragListenerPtr li
     }
     if (hasRegistered_ && dragListeners_.empty()) {
         hasRegistered_ = false;
-        DefaultParam param {};
+        RemoveDraglistenerParam param { isJsCaller };
         DefaultReply reply {};
         FI_HILOGI("Stop drag listening");
 
@@ -186,13 +186,13 @@ int32_t DragClient::SetDragWindowVisible(ITunnelClient &tunnel, bool visible, bo
     return ret;
 }
 
-int32_t DragClient::UpdateDragStyle(ITunnelClient &tunnel, DragCursorStyle style)
+int32_t DragClient::UpdateDragStyle(ITunnelClient &tunnel, DragCursorStyle style, int32_t eventId)
 {
     if ((style < DragCursorStyle::DEFAULT) || (style > DragCursorStyle::MOVE)) {
         FI_HILOGE("Invalid style:%{public}d", static_cast<int32_t>(style));
         return RET_ERR;
     }
-    UpdateDragStyleParam param { style };
+    UpdateDragStyleParam param { style, eventId };
     DefaultReply reply {};
 
     int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::UPDATE_DRAG_STYLE, param, reply);
@@ -329,9 +329,10 @@ int32_t DragClient::SetDragWindowScreenId(ITunnelClient &tunnel, uint64_t displa
     return ret;
 }
 
-int32_t DragClient::GetDragSummary(ITunnelClient &tunnel, std::map<std::string, int64_t> &summary)
+int32_t DragClient::GetDragSummary(ITunnelClient &tunnel, std::map<std::string, int64_t> &summary,
+    bool isJsCaller)
 {
-    DefaultParam param {};
+    GetDragSummaryParam param { isJsCaller };
     GetDragSummaryReply reply {};
 
     int32_t ret = tunnel.GetParam(Intention::DRAG, DragRequestID::GET_DRAG_SUMMARY, param, reply);
@@ -357,7 +358,7 @@ int32_t DragClient::GetDragState(ITunnelClient &tunnel, DragState &dragState)
     return RET_OK;
 }
 
-int32_t DragClient::EnterTextEditorArea(ITunnelClient &tunnel, bool enable)
+int32_t DragClient::EnableUpperCenterMode(ITunnelClient &tunnel, bool enable)
 {
     EnterTextEditorAreaParam param { enable };
     DefaultReply reply {};
@@ -419,6 +420,40 @@ int32_t DragClient::EraseMouseIcon(ITunnelClient &tunnel)
         FI_HILOGE("ITunnelClient::Control fail");
     }
     return ret;
+}
+
+int32_t DragClient::AddSelectedPixelMap(ITunnelClient &tunnel, std::shared_ptr<OHOS::Media::PixelMap> pixelMap,
+    std::function<void(bool)> callback)
+{
+    CALL_DEBUG_ENTER;
+    CHKPR(pixelMap, RET_ERR);
+    CHKPR(callback, RET_ERR);
+    std::lock_guard<std::mutex> guard(mtx_);
+    addSelectedPixelMapCallback_ = callback;
+    AddSelectedPixelMapParam param { pixelMap };
+    DefaultReply reply {};
+
+    int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::ADD_SELECTED_PIXELMAP, param, reply);
+    if (ret != RET_OK) {
+        FI_HILOGE("ITunnelClient::SetParam fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::OnAddSelectedPixelMapResult(const StreamClient &client, NetPacket &pkt)
+{
+    CALL_DEBUG_ENTER;
+    bool result = false;
+
+    pkt >> result;
+    if (pkt.ChkRWError()) {
+        FI_HILOGE("Packet read addSelectedPixelMap msg failed");
+        return RET_ERR;
+    }
+    std::lock_guard<std::mutex> guard(mtx_);
+    CHKPR(addSelectedPixelMapCallback_, RET_ERR);
+    addSelectedPixelMapCallback_(result);
+    return RET_OK;
 }
 
 int32_t DragClient::OnNotifyResult(const StreamClient &client, NetPacket &pkt)

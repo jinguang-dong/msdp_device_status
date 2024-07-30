@@ -31,11 +31,11 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-using namespace AppExecFwk;
 namespace {
 const std::string THREAD_NAME { "os_ClientEventHandler" };
 } // namespace
 
+using namespace AppExecFwk;
 Client::~Client()
 {
     CALL_DEBUG_ENTER;
@@ -104,7 +104,7 @@ bool Client::StartEventRunner()
 {
     CALL_DEBUG_ENTER;
     CHK_PID_AND_TID();
-    auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
+    auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME, AppExecFwk::ThreadMode::FFRT);
     CHKPF(runner);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
 

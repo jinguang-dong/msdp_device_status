@@ -40,6 +40,8 @@ public:
     int32_t SetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
     int32_t GetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
     int32_t Control(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
+    bool IsSystemServiceCalling(CallingContext &context);
+    bool IsSystemHAPCalling(CallingContext &context);
 
 private:
     int32_t SetDragWindowVisible(CallingContext &context, MessageParcel &data, MessageParcel &reply);
@@ -59,6 +61,9 @@ private:
     int32_t EnterTextEditorArea(CallingContext &context, MessageParcel &data, MessageParcel &reply);
     int32_t SetDragWindowScreenId(CallingContext &context, MessageParcel &data, MessageParcel &reply);
     std::string GetPackageName(Security::AccessToken::AccessTokenID tokenId);
+    int32_t AddSelectedPixelMap(CallingContext &context, MessageParcel &data, MessageParcel &reply);
+    int32_t RemoveListener(CallingContext &context, MessageParcel &data);
+    int32_t AddListener(CallingContext &context, MessageParcel &data);
 
     IContext *env_ { nullptr };
 };

@@ -56,13 +56,13 @@ public:
     int32_t GetCoordinationState(const std::string &udId, bool &state);
     int32_t RegisterEventListener(const std::string &networkId, std::shared_ptr<IEventListener> listener);
     int32_t UnregisterEventListener(const std::string &networkId, std::shared_ptr<IEventListener> listener = nullptr);
-    int32_t UpdateDragStyle(DragCursorStyle style);
+    int32_t UpdateDragStyle(DragCursorStyle style, int32_t eventId = -1);
     int32_t StartDrag(const DragData &dragData, std::shared_ptr<IStartDragListener> listener);
     int32_t StopDrag(const DragDropResult &dropResult);
     int32_t GetDragTargetPid();
     int32_t GetUdKey(std::string &udKey);
-    int32_t AddDraglistener(DragListenerPtr listener);
-    int32_t RemoveDraglistener(DragListenerPtr listener);
+    int32_t AddDraglistener(DragListenerPtr listener, bool isJsCaller = false);
+    int32_t RemoveDraglistener(DragListenerPtr listener, bool isJsCaller = false);
     int32_t AddSubscriptListener(SubscriptListenerPtr listener);
     int32_t RemoveSubscriptListener(SubscriptListenerPtr listener);
     int32_t SetDragWindowVisible(bool visible, bool isForce = false);
@@ -75,13 +75,14 @@ public:
     int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle);
     int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation);
     int32_t RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
-    int32_t GetDragSummary(std::map<std::string, int64_t> &summarys);
+    int32_t GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller = false);
     int32_t EnterTextEditorArea(bool enable);
     int32_t GetDragAction(DragAction &dragAction);
     int32_t GetExtraInfo(std::string &extraInfo);
     int32_t AddPrivilege();
     int32_t EraseMouseIcon();
     int32_t SetDragWindowScreenId(uint64_t displayId, uint64_t screenId);
+    int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap, std::function<void(bool)> callback);
 
 private:
     void InitClient();

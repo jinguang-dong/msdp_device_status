@@ -119,6 +119,7 @@ struct StopCooperateEvent {
     int32_t pid;
     int32_t userData;
     bool isUnchained;
+    std::string networkId;
 };
 
 struct GetCooperateStateEvent {
@@ -140,7 +141,7 @@ struct DumpEvent {
 struct DDMBoardOnlineEvent {
     std::string networkId;
     bool normal;
-    CoordinationErrCode errCode { CoordinationErrCode::COORDINATION_OK };
+    int32_t errCode { static_cast<int32_t>(CoordinationErrCode::COORDINATION_OK) };
 };
 
 using DDMBoardOfflineEvent = DDMBoardOnlineEvent;
@@ -173,7 +174,7 @@ struct DSoftbusStartCooperate {
     bool success;
     NormalizedCoordinate cursorPos;
     StartCooperateData extra;
-    CoordinationErrCode errCode { CoordinationErrCode::COORDINATION_OK };
+    int32_t errCode { static_cast<int32_t>(CoordinationErrCode::COORDINATION_OK) };
 };
 
 using DSoftbusStartCooperateFinished = DSoftbusStartCooperate;
@@ -267,6 +268,8 @@ struct CooperateEvent {
 inline constexpr int32_t DEFAULT_TIMEOUT { 3000 };
 inline constexpr int32_t REPEAT_ONCE { 1 };
 inline constexpr int32_t DEFAULT_COOLING_TIME { 10 };
+inline constexpr int32_t UP_WAIT_TIMEOUT { 100 };
+inline constexpr uint32_t MOTION_DRAG_PRIV { 0x1 };
 } // namespace Cooperate
 } // namespace DeviceStatus
 } // namespace Msdp

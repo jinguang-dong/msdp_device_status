@@ -50,6 +50,7 @@ constexpr int32_t MIN_BW { 80 * 1024 * 1024 };
 constexpr int32_t LATENCY { 3000 };
 constexpr int32_t SOCKET_SERVER { 0 };
 constexpr int32_t SOCKET_CLIENT { 1 };
+constexpr int32_t INVALID_SOCKET { -1 };
 }
 
 std::mutex DSoftbusAdapterImpl::mutex_;
@@ -157,17 +158,19 @@ int32_t DSoftbusAdapterImpl::OpenSession(const std::string &networkId)
 
 void DSoftbusAdapterImpl::CloseSession(const std::string &networkId)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     std::lock_guard guard(lock_);
     if (auto iter = sessions_.find(networkId); iter != sessions_.end()) {
         ::Shutdown(iter->second.socket_);
         sessions_.erase(iter);
+        FI_HILOGI("Shutdown session(%{public}d, %{public}s)", iter->second.socket_,
+            Utility::Anonymize(networkId).c_str());
     }
 }
 
 void DSoftbusAdapterImpl::CloseAllSessions()
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     std::lock_guard guard(lock_);
     CloseAllSessionsLocked();
 }
@@ -224,7 +227,7 @@ int32_t DSoftbusAdapterImpl::SendParcel(const std::string &networkId, Parcel &pa
 
 int32_t DSoftbusAdapterImpl::BroadcastPacket(NetPacket &packet)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     std::lock_guard guard(lock_);
     if (sessions_.empty()) {
         FI_HILOGE("No session connected");
@@ -254,6 +257,13 @@ int32_t DSoftbusAdapterImpl::BroadcastPacket(NetPacket &packet)
     return RET_OK;
 }
 
+bool DSoftbusAdapterImpl::HasSessionExisted(const std::string &networkId)
+{
+    CALL_DEBUG_ENTER;
+    auto iter = sessions_.find(networkId);
+    return (iter != sessions_.end() && iter->second.socket_ != INVALID_SOCKET);
+}
+
 static void OnBindLink(int32_t socket, PeerSocketInfo info)
 {
     DSoftbusAdapterImpl::GetInstance()->OnBind(socket, info);
@@ -274,11 +284,15 @@ void DSoftbusAdapterImpl::OnBind(int32_t socket, PeerSocketInfo info)
     CALL_INFO_TRACE;
     std::lock_guard guard(lock_);
     std::string networkId = info.networkId;
-    FI_HILOGD("Bind session(%{public}d, %{public}s)", socket, Utility::Anonymize(networkId).c_str());
-
+    FI_HILOGI("Bind session(%{public}d, %{public}s)", socket, Utility::Anonymize(networkId).c_str());
     if (auto iter = sessions_.find(networkId); iter != sessions_.cend()) {
-        FI_HILOGI("(%{public}d, %{public}s) has bound", iter->second.socket_, Utility::Anonymize(networkId).c_str());
-        return;
+        if (iter->second.socket_ == socket) {
+            FI_HILOGI("(%{public}d, %{public}s) has bound", iter->second.socket_,
+                Utility::Anonymize(networkId).c_str());
+            return;
+        }
+        FI_HILOGI("(%{public}d, %{public}s) need erase", iter->second.socket_, Utility::Anonymize(networkId).c_str());
+        sessions_.erase(iter);
     }
     ConfigTcpAlive(socket);
     sessions_.emplace(networkId, Session(socket));
@@ -294,7 +308,7 @@ void DSoftbusAdapterImpl::OnBind(int32_t socket, PeerSocketInfo info)
 
 void DSoftbusAdapterImpl::OnShutdown(int32_t socket, ShutdownReason reason)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     std::lock_guard guard(lock_);
     auto iter = std::find_if(sessions_.cbegin(), sessions_.cend(),
         [socket](const auto &item) {
@@ -306,7 +320,7 @@ void DSoftbusAdapterImpl::OnShutdown(int32_t socket, ShutdownReason reason)
     }
     std::string networkId = iter->first;
     sessions_.erase(iter);
-    FI_HILOGD("Shutdown session(%{public}d, %{public}s)", socket, Utility::Anonymize(networkId).c_str());
+    FI_HILOGI("Shutdown session(%{public}d, %{public}s)", socket, Utility::Anonymize(networkId).c_str());
 
     for (const auto &item : observers_) {
         std::shared_ptr<IDSoftbusObserver> observer = item.Lock();
@@ -346,7 +360,7 @@ void DSoftbusAdapterImpl::OnBytes(int32_t socket, const void *data, uint32_t dat
 
 int32_t DSoftbusAdapterImpl::InitSocket(SocketInfo info, int32_t socketType, int32_t &socket)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     socket = ::Socket(info);
     if (socket < 0) {
         FI_HILOGE("DSOFTBUS::Socket failed");
@@ -378,7 +392,7 @@ int32_t DSoftbusAdapterImpl::InitSocket(SocketInfo info, int32_t socketType, int
     if (ret != 0) {
         ::Shutdown(socket);
         socket = -1;
-        return RET_ERR;
+        return ret;
     }
     return RET_OK;
 }
@@ -401,7 +415,7 @@ int32_t DSoftbusAdapterImpl::SetupServer()
     int32_t ret = InitSocket(info, SOCKET_SERVER, socketFd_);
     if (ret != RET_OK) {
         FI_HILOGE("Failed to setup server");
-        return RET_ERR;
+        return ret;
     }
     return RET_OK;
 }

@@ -46,6 +46,7 @@ IntentionManager::~IntentionManager()
 void IntentionManager::InitClient()
 {
     CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mutex_);
     if (client_ != nullptr) {
         return;
     }
@@ -88,6 +89,9 @@ void IntentionManager::InitMsgHandler()
         }},
         {MessageId::DRAG_STYLE_LISTENER, [this](const StreamClient &client, NetPacket &pkt) {
             return this->drag_.OnDragStyleChangedMessage(client, pkt);
+        }},
+        {MessageId::ADD_SELECTED_PIXELMAP_RESULT, [this](const StreamClient &client, NetPacket &pkt) {
+            return this->drag_.OnAddSelectedPixelMapResult(client, pkt);
         }}
     };
     CHKPV(client_);
@@ -119,7 +123,6 @@ int32_t IntentionManager::RegisterCoordinationListener(
 {
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    std::lock_guard<std::mutex> guard(mutex_);
     InitClient();
     return cooperate_.RegisterListener(*tunnel_, listener, isCompatible);
 #else
@@ -135,7 +138,6 @@ int32_t IntentionManager::UnregisterCoordinationListener(
 {
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    std::lock_guard<std::mutex> guard(mutex_);
     return cooperate_.UnregisterListener(*tunnel_, listener, isCompatible);
 #else
     FI_HILOGW("Coordination does not support");
@@ -149,7 +151,6 @@ int32_t IntentionManager::PrepareCoordination(CooperateMsgInfoCallback callback,
 {
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    std::lock_guard<std::mutex> guard(mutex_);
     InitClient();
     return cooperate_.Enable(*tunnel_, callback, isCompatible);
 #else
@@ -164,7 +165,6 @@ int32_t IntentionManager::UnprepareCoordination(CooperateMsgInfoCallback callbac
 {
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    std::lock_guard<std::mutex> guard(mutex_);
     InitClient();
     return cooperate_.Disable(*tunnel_, callback, isCompatible);
 #else
@@ -180,7 +180,6 @@ int32_t IntentionManager::ActivateCoordination(const std::string &remoteNetworkI
 {
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    std::lock_guard<std::mutex> guard(mutex_);
     InitClient();
     return cooperate_.Start(*tunnel_, remoteNetworkId, startDeviceId, callback, isCompatible);
 #else
@@ -198,7 +197,6 @@ int32_t IntentionManager::DeactivateCoordination(bool isUnchained,
 {
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    std::lock_guard<std::mutex> guard(mutex_);
     InitClient();
     return cooperate_.Stop(*tunnel_, isUnchained, callback, isCompatible);
 #else
@@ -214,7 +212,6 @@ int32_t IntentionManager::GetCoordinationState(
 {
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    std::lock_guard<std::mutex> guard(mutex_);
     InitClient();
     return cooperate_.GetCooperateState(*tunnel_, networkId, callback, isCompatible);
 #else
@@ -230,7 +227,6 @@ int32_t IntentionManager::GetCoordinationState(const std::string &udId, bool &st
 {
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    std::lock_guard<std::mutex> guard(mutex_);
     InitClient();
     return cooperate_.GetCooperateState(*tunnel_, udId, state);
 #else
@@ -245,7 +241,6 @@ int32_t IntentionManager::RegisterEventListener(const std::string &networkId, st
 {
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    std::lock_guard<std::mutex> guard(mutex_);
     InitClient();
     return cooperate_.RegisterEventListener(*tunnel_, networkId, listener);
 #else
@@ -261,7 +256,6 @@ int32_t IntentionManager::UnregisterEventListener(const std::string &networkId,
 {
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    std::lock_guard<std::mutex> guard(mutex_);
     InitClient();
     return cooperate_.UnregisterEventListener(*tunnel_, networkId, listener);
 #else
@@ -272,16 +266,15 @@ int32_t IntentionManager::UnregisterEventListener(const std::string &networkId,
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
-int32_t IntentionManager::UpdateDragStyle(DragCursorStyle style)
+int32_t IntentionManager::UpdateDragStyle(DragCursorStyle style, int32_t eventId)
 {
     CALL_DEBUG_ENTER;
-    return drag_.UpdateDragStyle(*tunnel_, style);
+    return drag_.UpdateDragStyle(*tunnel_, style, eventId);
 }
 
 int32_t IntentionManager::StartDrag(const DragData &dragData, std::shared_ptr<IStartDragListener> listener)
 {
     CALL_DEBUG_ENTER;
-    std::lock_guard<std::mutex> guard(mutex_);
     InitClient();
     return drag_.StartDrag(*tunnel_, dragData, listener);
 }
@@ -304,24 +297,22 @@ int32_t IntentionManager::GetUdKey(std::string &udKey)
     return drag_.GetUdKey(*tunnel_, udKey);
 }
 
-int32_t IntentionManager::AddDraglistener(DragListenerPtr listener)
+int32_t IntentionManager::AddDraglistener(DragListenerPtr listener, bool isJsCaller)
 {
     CALL_DEBUG_ENTER;
-    std::lock_guard<std::mutex> guard(mutex_);
     InitClient();
-    return drag_.AddDraglistener(*tunnel_, listener);
+    return drag_.AddDraglistener(*tunnel_, listener, isJsCaller);
 }
 
-int32_t IntentionManager::RemoveDraglistener(DragListenerPtr listener)
+int32_t IntentionManager::RemoveDraglistener(DragListenerPtr listener, bool isJsCaller)
 {
     CALL_DEBUG_ENTER;
-    return drag_.RemoveDraglistener(*tunnel_, listener);
+    return drag_.RemoveDraglistener(*tunnel_, listener, isJsCaller);
 }
 
 int32_t IntentionManager::AddSubscriptListener(SubscriptListenerPtr listener)
 {
     CALL_DEBUG_ENTER;
-    std::lock_guard<std::mutex> guard(mutex_);
     InitClient();
     return drag_.AddSubscriptListener(*tunnel_, listener);
 }
@@ -378,7 +369,6 @@ int32_t IntentionManager::AddHotAreaListener(std::shared_ptr<IHotAreaListener> l
 {
     CALL_DEBUG_ENTER;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    std::lock_guard<std::mutex> guard(mutex_);
     InitClient();
     return cooperate_.AddHotAreaListener(*tunnel_, listener);
 #else
@@ -392,7 +382,6 @@ int32_t IntentionManager::RemoveHotAreaListener(std::shared_ptr<IHotAreaListener
 {
     CALL_DEBUG_ENTER;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    std::lock_guard<std::mutex> guard(mutex_);
     return cooperate_.RemoveHotAreaListener(*tunnel_, listener);
 #else
     FI_HILOGW("Coordination does not support");
@@ -447,16 +436,16 @@ int32_t IntentionManager::SetDragWindowScreenId(uint64_t displayId, uint64_t scr
     return drag_.SetDragWindowScreenId(*tunnel_, displayId, screenId);
 }
 
-int32_t IntentionManager::GetDragSummary(std::map<std::string, int64_t> &summarys)
+int32_t IntentionManager::GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller)
 {
     CALL_DEBUG_ENTER;
-    return drag_.GetDragSummary(*tunnel_, summarys);
+    return drag_.GetDragSummary(*tunnel_, summarys, isJsCaller);
 }
 
 int32_t IntentionManager::EnterTextEditorArea(bool enable)
 {
     CALL_DEBUG_ENTER;
-    return drag_.EnterTextEditorArea(*tunnel_, enable);
+    return drag_.EnableUpperCenterMode(*tunnel_, enable);
 }
 
 int32_t IntentionManager::AddPrivilege()
@@ -469,6 +458,13 @@ int32_t IntentionManager::EraseMouseIcon()
 {
     CALL_DEBUG_ENTER;
     return drag_.EraseMouseIcon(*tunnel_);
+}
+
+int32_t IntentionManager::AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap,
+    std::function<void(bool)> callback)
+{
+    CALL_DEBUG_ENTER;
+    return drag_.AddSelectedPixelMap(*tunnel_, pixelMap, callback);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

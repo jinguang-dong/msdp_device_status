@@ -51,6 +51,7 @@ enum DragRequestID : uint32_t {
     GET_EXTRA_INFO,
     ERASE_MOUSE_ICON,
     SET_DRAG_WINDOW_SCREEN_ID,
+    ADD_SELECTED_PIXELMAP,
 };
 
 struct StartDragParam final : public ParamBase {
@@ -92,12 +93,13 @@ struct SetDragWindowVisibleParam final : public ParamBase {
 
 struct UpdateDragStyleParam final : public ParamBase {
     UpdateDragStyleParam() = default;
-    explicit UpdateDragStyleParam(DragCursorStyle style);
+    explicit UpdateDragStyleParam(DragCursorStyle style, int32_t eventId);
 
     bool Marshalling(MessageParcel &parcel) const override;
     bool Unmarshalling(MessageParcel &parcel) override;
 
     DragCursorStyle cursorStyle_ { DragCursorStyle::DEFAULT };
+    int32_t eventId_ { -1 };
 };
 
 struct UpdateShadowPicParam final : public ParamBase {
@@ -184,6 +186,36 @@ struct SetDragWindowScreenIdParam final : public ParamBase {
     uint64_t screenId_ { 0 };
 };
 
+struct AddDraglistenerParam final : public ParamBase {
+    AddDraglistenerParam() = default;
+    AddDraglistenerParam(bool isJsCaller);
+
+    bool Marshalling(MessageParcel &parcel) const override;
+    bool Unmarshalling(MessageParcel &parcel) override;
+
+    bool isJsCaller_ { false };
+};
+
+struct RemoveDraglistenerParam final : public ParamBase {
+    RemoveDraglistenerParam() = default;
+    RemoveDraglistenerParam(bool isJsCaller);
+
+    bool Marshalling(MessageParcel &parcel) const override;
+    bool Unmarshalling(MessageParcel &parcel) override;
+
+    bool isJsCaller_ { false };
+};
+
+struct GetDragSummaryParam final : public ParamBase {
+    GetDragSummaryParam() = default;
+    GetDragSummaryParam(bool isJsCaller);
+
+    bool Marshalling(MessageParcel &parcel) const override;
+    bool Unmarshalling(MessageParcel &parcel) override;
+
+    bool isJsCaller_ { false };
+};
+
 struct GetDragSummaryReply final : public ParamBase {
     GetDragSummaryReply() = default;
     explicit GetDragSummaryReply(std::map<std::string, int64_t> &&summary);
@@ -224,6 +256,16 @@ struct GetExtraInfoReply final : public ParamBase {
     bool Unmarshalling(MessageParcel &parcel) override;
 
     std::string extraInfo_;
+};
+
+struct AddSelectedPixelMapParam final : public ParamBase {
+    AddSelectedPixelMapParam() = default;
+    explicit AddSelectedPixelMapParam(std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
+
+    bool Marshalling(MessageParcel &parcel) const override;
+    bool Unmarshalling(MessageParcel &parcel) override;
+
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp

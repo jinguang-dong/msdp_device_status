@@ -55,8 +55,11 @@ void CooperateIn::OnLeaveState(Context & context)
     CALL_INFO_TRACE;
     UpdateCooperateFlagEvent event {
         .mask = COOPERATE_FLAG_HIDE_CURSOR,
+        .flag = COOPERATE_FLAG_HIDE_CURSOR,
     };
     context.UpdateCooperateFlag(event);
+    CHKPV(env_);
+    env_->GetInput().SetPointerVisibility(false);
 }
 
 std::set<int32_t> CooperateIn::Initial::filterPointerActions_ {
@@ -142,7 +145,7 @@ void CooperateIn::Initial::OnStart(Context &context, const CooperateEvent &event
     if (context.IsLocal(startEvent.remoteNetworkId)) {
         DSoftbusStartCooperateFinished result {
             .success = false,
-            .errCode = CoordinationErrCode::UNEXPECTED_START_CALL
+            .errCode = static_cast<int32_t>(CoordinationErrCode::UNEXPECTED_START_CALL)
         };
         context.eventMgr_.StartCooperateFinish(result);
         return;
@@ -171,7 +174,7 @@ void CooperateIn::Initial::OnComeBack(Context &context, const CooperateEvent &ev
     context.OnStartCooperate(notice.extra);
     if (context.dsoftbus_.ComeBack(context.Peer(), notice) != RET_OK) {
         notice.success = false;
-        notice.errCode = CoordinationErrCode::SEND_PACKET_FAILED;
+        notice.errCode = static_cast<int32_t>(CoordinationErrCode::SEND_PACKET_FAILED);
     }
     context.eventMgr_.StartCooperateFinish(notice);
     context.inputDevMgr_.RemoveVirtualInputDevice(context.Peer());
@@ -200,7 +203,9 @@ void CooperateIn::Initial::OnStop(Context &context, const CooperateEvent &event)
     context.eventMgr_.StopCooperate(param);
     parent_.StopCooperate(context, event);
 
+    param.networkId = context.Peer();
     DSoftbusStopCooperateFinished notice {
+        .networkId = context.Peer(),
         .normal = true,
     };
     context.eventMgr_.StopCooperateFinish(notice);
@@ -600,6 +605,14 @@ void CooperateIn::StopCooperate(Context &context, const CooperateEvent &event)
     context.inputDevMgr_.RemoveVirtualInputDevice(context.Peer());
     TransiteTo(context, CooperateState::COOPERATE_STATE_FREE);
     context.OnResetCooperation();
+    SetPointerVisible(context);
+}
+
+void CooperateIn::SetPointerVisible(Context &context)
+{
+    CHKPV(env_);
+    bool hasLocalPointerDevice =  env_->GetDeviceManager().HasLocalPointerDevice();
+    env_->GetInput().SetPointerVisibility(hasLocalPointerDevice, PRIORITY);
 }
 
 void CooperateIn::UnchainConnections(Context &context, const StopCooperateEvent &event) const

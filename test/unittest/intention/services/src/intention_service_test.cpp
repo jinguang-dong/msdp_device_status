@@ -705,6 +705,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam001, TestSize.Level0
         if (dragRequestID == DragRequestID::UNKNOWN_DRAG_ACTION ||
             dragRequestID == DragRequestID::GET_UDKEY ||
             dragRequestID == DragRequestID::GET_DRAG_DATA ||
+            dragRequestID == DragRequestID::GET_DRAG_SUMMARY ||
             dragRequestID == DragRequestID::GET_DRAG_ACTION||
             dragRequestID == DragRequestID::GET_EXTRA_INFO) {
                 ret = g_intentionService->GetParam(Intention::DRAG, dragRequestID, dataParcel, replyParcel);
@@ -816,7 +817,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam007, TestSize.Level0
     MessageParcel dataParcel;
     int32_t ret = g_intentionService->GetParam(Intention::DRAG, DragRequestID::GET_DRAG_SUMMARY,
         dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(ret, RET_ERR);
 }
 
 /**
@@ -919,7 +920,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam013, TestSize.Level0
     MessageParcel dataParcel;
     MessageParcel replyParcel;
     env->dragMgr_.dragState_ = DragState::START;
-    UpdateDragStyleParam param { DragCursorStyle::COPY };
+    UpdateDragStyleParam param { DragCursorStyle::COPY, -1 };
     bool ret = param.Marshalling(dataParcel);
     EXPECT_EQ(ret, READ_OK);
     ret = g_intentionService->GetParam(g_intention, DragRequestID::UPDATE_DRAG_STYLE, dataParcel, replyParcel);

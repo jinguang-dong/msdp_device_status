@@ -29,8 +29,6 @@ namespace {
 inline constexpr std::string_view GET_BOOLEAN { "napi_get_boolean" };
 inline constexpr std::string_view COERCE_TO_BOOL { "napi_coerce_to_bool" };
 inline constexpr std::string_view CREATE_ERROR { "napi_create_error" };
-inline constexpr uint32_t SUB_SYSTEM_ID { 203 };
-inline constexpr uint32_t MODULE_ID { 3 };
 } // namespace
 
 napi_value JsUtilCooperate::GetEnableInfo(sptr<CallbackInfo> cb)
@@ -81,6 +79,7 @@ napi_value JsUtilCooperate::GetResult(napi_env env, bool result, const Coordinat
     }
     napi_value resultCode = nullptr;
     int32_t errorCode = GetErrCode(msgInfo);
+    FI_HILOGI("errorCode:%{public}d, msg:%{public}s", errorCode, errMsg.c_str());
     CHKRP(napi_create_int32(env, errorCode, &resultCode), CREATE_INT32);
     napi_value resultMessage = nullptr;
     CHKRP(napi_create_string_utf8(env, errMsg.c_str(), NAPI_AUTO_LENGTH, &resultMessage),
@@ -92,26 +91,56 @@ napi_value JsUtilCooperate::GetResult(napi_env env, bool result, const Coordinat
 
 int32_t JsUtilCooperate::GetErrCode(const CoordinationMsgInfo &msgInfo)
 {
-    uint32_t errCode = ((static_cast<uint32_t> (msgInfo.msg) << 4) | (static_cast<uint32_t> (msgInfo.errCode)));
-    uint32_t dfxErrCode = ((SUB_SYSTEM_ID << 21) | (MODULE_ID << 16) | (errCode));
-    FI_HILOGI("DFX errCode:%{public}u, msg:%{public}d, erCode:%{public}d", dfxErrCode, msgInfo.msg, msgInfo.errCode);
-    return static_cast<int32_t> (dfxErrCode);
+    switch (static_cast<CoordinationErrCode>(msgInfo.errCode)) {
+        case CoordinationErrCode::OPEN_SESSION_FAILED: {
+            return CustomErrCode::OPEN_SESSION_FAILED;
+        }
+        case CoordinationErrCode::SEND_PACKET_FAILED: {
+            return CustomErrCode::SEND_PACKET_FAILED;
+        }
+        case CoordinationErrCode::UNEXPECTED_START_CALL: {
+            return CustomErrCode::UNEXPECTED_START_CALL;
+        }
+        case CoordinationErrCode::WORKER_THREAD_TIMEOUT: {
+            return CustomErrCode::WORKER_THREAD_TIMEOUT;
+        }
+        default:
+            return msgInfo.errCode;
+    }
 }
 
 bool JsUtilCooperate::GetErrMsg(const CoordinationMsgInfo &msgInfo, std::string &msg)
 {
     auto iter = COOPERATE_MSG_MAP.find(msgInfo.msg);
     if (iter == COOPERATE_MSG_MAP.end()) {
-        FI_HILOGE("Error code:%{public}d is not founded in COOPERATE_MSG_MAP", msgInfo.msg);
+        FI_HILOGE("Error code:%{public}d is not founded in COOPERATE_MSG_MAP", static_cast<int32_t> (msgInfo.msg));
         return false;
     }
     msg = iter->second;
-    auto codeIter = COOPERATE_SPECIFIC_CODE_MAP.find(msgInfo.errCode);
-    if (codeIter == COOPERATE_SPECIFIC_CODE_MAP.end()) {
-        FI_HILOGE("Error code:%{public}d is not founded in COOPERATE_SPECIFIC_CODE_MAP", msgInfo.errCode);
-        return false;
+    switch (static_cast<CoordinationErrCode>(msgInfo.errCode)) {
+        case CoordinationErrCode::COORDINATION_OK: {
+            msg += "Everything is fine";
+            break;
+        }
+        case CoordinationErrCode::OPEN_SESSION_FAILED: {
+            msg += "Open session failed";
+            break;
+        }
+        case CoordinationErrCode::SEND_PACKET_FAILED: {
+            msg += "Send packet failed";
+            break;
+        }
+        case CoordinationErrCode::UNEXPECTED_START_CALL: {
+            msg += "Unexpected start call";
+            break;
+        }
+        case CoordinationErrCode::WORKER_THREAD_TIMEOUT: {
+            msg += "Worker thread timeout";
+            break;
+        }
+        default:
+            msg +="Softbus bind failed";
     }
-    msg += codeIter->second;
     return true;
 }
 

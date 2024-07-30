@@ -53,7 +53,7 @@ void StateMachine::AppStateObserver::OnProcessDied(const AppExecFwk::ProcessData
         if (ret != Channel<CooperateEvent>::NO_ERROR) {
             FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
         }
-        FI_HILOGI("Report to handler");
+        FI_HILOGI("\'%{public}s\' died, report to handler", processData.bundleName.c_str());
     }
 }
 
@@ -171,6 +171,9 @@ StateMachine::StateMachine(IContext *env)
         [this](Context &context, const CooperateEvent &event) {
             this->OnRemoteInputDevice(context, event);
     });
+    AddHandler(CooperateEventType::STOP, [this](Context &context, const CooperateEvent &event) {
+        this->StopCooperate(context, event);
+    });
 }
 
 void StateMachine::OnEvent(Context &context, const CooperateEvent &event)
@@ -258,6 +261,7 @@ void StateMachine::EnableCooperate(Context &context, const CooperateEvent &event
     context.commonEvent_.AddObserver(observer_);
     AddSessionObserver(context, enableEvent);
     AddMonitor(context);
+    isCooperateEnable_ = true;
     Transfer(context, event);
 }
 
@@ -270,6 +274,7 @@ void StateMachine::DisableCooperate(Context &context, const CooperateEvent &even
     context.commonEvent_.RemoveObserver(observer_);
     RemoveSessionObserver(context, disableEvent);
     RemoveMonitor(context);
+    isCooperateEnable_ = false;
     Transfer(context, event);
 }
 
@@ -292,17 +297,23 @@ void StateMachine::StartCooperate(Context &context, const CooperateEvent &event)
     Transfer(context, event);
 }
 
+void StateMachine::StopCooperate(Context &context, const CooperateEvent &event)
+{
+    CALL_DEBUG_ENTER;
+    context.CloseDistributedFileConnection(context.Peer());
+    Transfer(context, event);
+}
+
 void StateMachine::GetCooperateState(Context &context, const CooperateEvent &event)
 {
     CALL_INFO_TRACE;
     GetCooperateStateEvent stateEvent = std::get<GetCooperateStateEvent>(event.event);
     UpdateApplicationStateObserver(stateEvent.pid);
-    bool switchStatus { false };
     EventManager::CooperateStateNotice notice {
         .pid = stateEvent.pid,
         .msgId = MessageId::COORDINATION_GET_STATE,
         .userData = stateEvent.userData,
-        .state = switchStatus,
+        .state = isCooperateEnable_,
     };
     context.eventMgr_.GetCooperateState(notice);
 }
@@ -378,6 +389,7 @@ void StateMachine::OnSoftbusSessionClosed(Context &context, const CooperateEvent
     DSoftbusSessionClosed notice = std::get<DSoftbusSessionClosed>(event.event);
     context.eventMgr_.OnSoftbusSessionClosed(notice);
     context.inputDevMgr_.OnSoftbusSessionClosed(notice);
+    context.mouseLocation_.OnSoftbusSessionClosed(notice);
     context.CloseDistributedFileConnection(notice.networkId);
     Transfer(context, event);
 }
@@ -451,9 +463,10 @@ void StateMachine::OnSoftbusMouseLocation(Context &context, const CooperateEvent
 
 void StateMachine::OnRemoteStart(Context &context, const CooperateEvent &event)
 {
+    CALL_DEBUG_ENTER;
     DSoftbusStartCooperate startEvent = std::get<DSoftbusStartCooperate>(event.event);
-    if (!context.ddm_.CheckSameAccountToLocal(startEvent.originNetworkId)) {
-        FI_HILOGE("CheckSameAccountToLocal failed, unchain link");
+    if (!context.ddm_.CheckSameAccountToLocal(startEvent.originNetworkId) || isCooperateEnable_ == false) {
+        FI_HILOGE("CheckSameAccountToLocal failed, or switch is not opened, unchain");
         CooperateEvent stopEvent(
             CooperateEventType::STOP,
             StopCooperateEvent{
@@ -567,18 +580,18 @@ void StateMachine::RemoveSessionObserver(Context &context, const DisableCooperat
 
 void StateMachine::OnCommonEvent(Context &context, const std::string &commonEvent)
 {
-    CALL_INFO_TRACE;
-    FI_HILOGI("Current common event:%{public}s", commonEvent.c_str());
+    FI_HILOGD("Current common event:%{public}s", commonEvent.c_str());
     if (commonEvent == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF ||
         commonEvent == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED) {
-        FI_HILOGI("Receive common event:%{public}s, stop cooperate", commonEvent.c_str());
-        CooperateEvent stopEvent(
+        FI_HILOGD("Receive common event:%{public}s, stop cooperate", commonEvent.c_str());
+        auto ret = context.Sender().Send(CooperateEvent(
             CooperateEventType::STOP,
             StopCooperateEvent{
                 .isUnchained = false
-            }
-        );
-        Transfer(context, stopEvent);
+            }));
+        if (ret != Channel<CooperateEvent>::NO_ERROR) {
+            FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
+        }
     }
 }
 
@@ -589,18 +602,23 @@ void StateMachine::AddMonitor(Context &context)
         return;
     }
     CHKPV(env_);
-    monitorId_ = env_->GetInput().AddMonitor(
-        [sender = context.Sender(), &hotArea = context.hotArea_, &mouseLocation = context.mouseLocation_] (
+    monitorId_ = env_->GetInput().AddMonitor([&context, this] (
             std::shared_ptr<MMI::PointerEvent> pointerEvent) mutable {
-            hotArea.ProcessData(pointerEvent);
-            mouseLocation.ProcessData(pointerEvent);
+            context.hotArea_.ProcessData(pointerEvent);
+            context.mouseLocation_.ProcessData(pointerEvent);
 
             MMI::PointerEvent::PointerItem pointerItem;
             if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
                 FI_HILOGE("Corrupted pointer event");
                 return;
             }
-            auto ret = sender.Send(CooperateEvent(
+            if ((env_->GetDragManager().GetCooperatePriv() & MOTION_DRAG_PRIV) &&
+                (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
+                (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP)) {
+                FI_HILOGW("There is an up event when dragging");
+                env_->GetDragManager().SetAllowStartDrag(false);
+            }
+            auto ret = context.Sender().Send(CooperateEvent(
                 CooperateEventType::INPUT_POINTER_EVENT,
                 InputPointerEvent {
                     .deviceId = pointerEvent->GetDeviceId(),
@@ -638,6 +656,10 @@ void StateMachine::RemoveWatches(Context &context)
         FI_HILOGD("Remove watch \'%{public}s\'", Utility::Anonymize(*iter).c_str());
         onlineBoards_.erase(iter);
     }
+}
+bool StateMachine::IsCooperateEnable()
+{
+    return isCooperateEnable_;
 }
 } // namespace Cooperate
 } // namespace DeviceStatus

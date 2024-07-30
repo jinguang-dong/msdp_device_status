@@ -78,6 +78,8 @@ constexpr int32_t SHORT_DURATION { 55 };
 constexpr int32_t LONG_DURATION { 90 };
 constexpr int32_t FIRST_PIXELMAP_INDEX { 0 };
 constexpr int32_t SECOND_PIXELMAP_INDEX { 1 };
+constexpr int32_t LAST_SECOND_PIXELMAP { 2 };
+constexpr int32_t LAST_THIRD_PIXELMAP { 3 };
 constexpr size_t TOUCH_NODE_MIN_COUNT { 3 };
 constexpr size_t MOUSE_NODE_MIN_COUNT { 4 };
 constexpr float DEFAULT_SCALING { 1.0f };
@@ -242,10 +244,10 @@ int32_t DragDrawing::Init(const DragData &dragData, IContext* context)
     std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
     CHKPR(dragStyleNode, INIT_FAIL);
     FI_HILOGI("Begin to open drag drop extension library");
-    dragExtHandler_ = dlopen(DRAG_DROP_EXTENSION_SO_PATH.c_str(), RTLD_LAZY);
     if (dragExtHandler_ == nullptr) {
-        FI_HILOGE("Fail to open drag drop extension library");
+        dragExtHandler_ = dlopen(DRAG_DROP_EXTENSION_SO_PATH.c_str(), RTLD_LAZY);
     }
+    CHKPL(dragExtHandler_);
     FI_HILOGI("End to open drag drop extension library");
     OnStartDrag(dragAnimationData, shadowNode, dragStyleNode);
     if (!g_drawingInfo.multiSelectedNodes.empty()) {
@@ -453,6 +455,103 @@ int32_t DragDrawing::UpdateShadowPic(const ShadowInfo &shadowInfo)
     return RET_OK;
 }
 
+int32_t DragDrawing::UpdatePixelMapsAngleAndAlpha()
+{
+    FI_HILOGD("enter");
+    size_t mulNodesSize = g_drawingInfo.multiSelectedNodes.size();
+    if (mulNodesSize <= 0) {
+        FI_HILOGE("No pixelmap add");
+        return RET_ERR;
+    }
+    if (mulNodesSize == 1) {
+        g_drawingInfo.multiSelectedNodes.front()->SetRotation(POSITIVE_ANGLE);
+        g_drawingInfo.multiSelectedNodes.front()->SetAlpha(FIRST_PIXELMAP_ALPHA);
+    } else if (mulNodesSize == LAST_SECOND_PIXELMAP) {
+        g_drawingInfo.multiSelectedNodes.back()->SetRotation(NEGATIVE_ANGLE);
+        g_drawingInfo.multiSelectedNodes.back()->SetAlpha(SECOND_PIXELMAP_ALPHA);
+    } else {
+        g_drawingInfo.rootNode->RemoveChild(g_drawingInfo.multiSelectedNodes[mulNodesSize - LAST_THIRD_PIXELMAP]);
+        g_drawingInfo.multiSelectedNodes[mulNodesSize - LAST_SECOND_PIXELMAP ]->SetRotation(POSITIVE_ANGLE);
+        g_drawingInfo.multiSelectedNodes[mulNodesSize - LAST_SECOND_PIXELMAP ]->SetAlpha(FIRST_PIXELMAP_ALPHA);
+        g_drawingInfo.multiSelectedNodes.back()->SetRotation(NEGATIVE_ANGLE);
+        g_drawingInfo.multiSelectedNodes.back()->SetAlpha(SECOND_PIXELMAP_ALPHA);
+    }
+    FI_HILOGD("leave");
+    return RET_OK;
+}
+
+int32_t DragDrawing::UpdatePixeMapDrawingOrder()
+{
+    FI_HILOGD("enter");
+    std::shared_ptr<Rosen::RSCanvasNode> pixelMapNode = g_drawingInfo.nodes[PIXEL_MAP_INDEX];
+    std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
+    CHKPR(pixelMapNode, RET_ERR);
+    CHKPR(dragStyleNode, RET_ERR);
+    CHKPR(g_drawingInfo.parentNode, RET_ERR);
+    CHKPR(g_drawingInfo.rootNode, RET_ERR);
+    g_drawingInfo.multiSelectedNodes.emplace_back(pixelMapNode);
+    g_drawingInfo.parentNode->RemoveChild(dragStyleNode);
+    g_drawingInfo.parentNode->RemoveChild(pixelMapNode);
+
+    int32_t adjustSize = TWELVE_SIZE * GetScaling();
+    int32_t positionX = g_drawingInfo.displayX + g_drawingInfo.pixelMapX;
+    int32_t positionY = g_drawingInfo.displayY + g_drawingInfo.pixelMapY - adjustSize;
+    int32_t pixelMapWidth = g_drawingInfo.pixelMap->GetWidth();
+    int32_t pixelMapHeight = g_drawingInfo.pixelMap->GetHeight();
+    pixelMapNode->SetBounds(positionX, positionY + adjustSize, pixelMapWidth, pixelMapHeight);
+    pixelMapNode->SetFrame(positionX, positionY + adjustSize, pixelMapWidth, pixelMapHeight);
+
+    std::shared_ptr<Rosen::RSCanvasNode> addSelectedNode = Rosen::RSCanvasNode::Create();
+    CHKPR(addSelectedNode, RET_ERR);
+    g_drawingInfo.nodes[PIXEL_MAP_INDEX] = addSelectedNode;
+    g_drawingInfo.parentNode->AddChild(addSelectedNode);
+    g_drawingInfo.parentNode->AddChild(dragStyleNode);
+    g_drawingInfo.rootNode->AddChild(g_drawingInfo.multiSelectedNodes.back());
+    g_drawingInfo.rootNode->RemoveChild(g_drawingInfo.parentNode);
+    g_drawingInfo.rootNode->AddChild(g_drawingInfo.parentNode);
+
+    if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        std::shared_ptr<Rosen::RSCanvasNode> mouseIconNode = g_drawingInfo.nodes[MOUSE_ICON_INDEX];
+        CHKPR(mouseIconNode, RET_ERR);
+        g_drawingInfo.rootNode->RemoveChild(mouseIconNode);
+        g_drawingInfo.rootNode->AddChild(mouseIconNode);
+    }
+
+    if (UpdatePixelMapsAngleAndAlpha() != RET_OK) {
+        FI_HILOGE("setPixelMapsAngleAndAlpha failed");
+        return RET_ERR;
+    }
+    DrawShadow(pixelMapNode);
+    FI_HILOGD("leave");
+    return RET_OK;
+}
+
+int32_t DragDrawing::AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
+{
+    FI_HILOGD("enter");
+    CHKPR(pixelMap, RET_ERR);
+    if (!CheckNodesValid()) {
+        FI_HILOGE("Check nodes valid failed");
+        return RET_ERR;
+    }
+
+    g_drawingInfo.multiSelectedPixelMaps.emplace_back(g_drawingInfo.pixelMap);
+    g_drawingInfo.pixelMap = pixelMap;
+    if (UpdatePixeMapDrawingOrder() != RET_OK) {
+        FI_HILOGE("Update pixeMap drawing order failed");
+        return RET_ERR;
+    }
+    Draw(g_drawingInfo.displayId, g_drawingInfo.displayX, g_drawingInfo.displayY, false);
+    g_drawingInfo.currentDragNum = g_drawingInfo.multiSelectedPixelMaps.size() + 1;
+    if (UpdateDragStyle(g_drawingInfo.currentStyle) != RET_OK) {
+        FI_HILOGE("Update drag style failed");
+        return RET_ERR;
+    }
+    Rosen::RSTransaction::FlushImplicitTransaction();
+    FI_HILOGD("leave");
+    return RET_OK;
+}
+
 void DragDrawing::OnDragSuccess(IContext* context)
 {
     FI_HILOGI("enter");
@@ -608,7 +707,8 @@ void DragDrawing::NotifyDragInfo(const std::string &sourceName, const std::strin
     struct DragEventInfo dragEventInfo;
     dragEventInfo.sourcePkgName = sourceName;
     dragEventInfo.targetPkgName = targetName;
-    if (!GetSuperHubHandler()->PostTask([dragDropExtFunc, &dragEventInfo] { return dragDropExtFunc(dragEventInfo); })) {
+    if (!GetSuperHubHandler()->PostTask([dragDropExtFunc, dragEventInfo] ()
+        mutable { return dragDropExtFunc(dragEventInfo); })) {
         FI_HILOGE("notify drag info failed");
     }
 }
@@ -616,7 +716,7 @@ void DragDrawing::NotifyDragInfo(const std::string &sourceName, const std::strin
 std::shared_ptr<AppExecFwk::EventHandler> DragDrawing::GetSuperHubHandler()
 {
     if (superHubHandler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create(SUPER_HUB_THREAD_NAME);
+        auto runner = AppExecFwk::EventRunner::Create(SUPER_HUB_THREAD_NAME, AppExecFwk::ThreadMode::FFRT);
         superHubHandler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
     }
     return superHubHandler_;
@@ -778,12 +878,8 @@ void DragDrawing::OnDragStyleAnimation()
         dragStyleNode->AddModifier(drawStyleChangeModifier_);
         return;
     }
-    rsUiDirector_ = Rosen::RSUIDirector::Create();
-    CHKPV(rsUiDirector_);
-    rsUiDirector_->Init();
-    rsUiDirector_->SetRSSurfaceNode(g_drawingInfo.surfaceNode);
     if (handler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
+        auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME, AppExecFwk::ThreadMode::FFRT);
         handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
     }
     CheckStyleNodeModifier(dragStyleNode);
@@ -799,7 +895,7 @@ void DragDrawing::OnDragStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode
     CHKPV(stylePixelMap);
 #ifdef OHOS_DRAG_ENABLE_ANIMATION
     if (handler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
+        auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME, AppExecFwk::ThreadMode::FFRT);
         CHKPV(runner);
         handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
     }
@@ -874,7 +970,7 @@ void DragDrawing::OnStopDragSuccess(std::shared_ptr<Rosen::RSCanvasNode> shadowN
     auto animateCb = [this] { return this->InitVSync(END_ALPHA, END_SCALE_SUCCESS); };
 #ifdef OHOS_DRAG_ENABLE_ANIMATION
     ResetAnimationParameter();
-    auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
+    auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME, AppExecFwk::ThreadMode::FFRT);
     CHKPV(runner);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
     if (!handler_->PostTask([this] { return this->OnStopAnimationSuccess(); })) {
@@ -938,7 +1034,7 @@ void DragDrawing::OnStopDragFail(std::shared_ptr<Rosen::RSSurfaceNode> surfaceNo
     auto animateCb = [this] { return this->InitVSync(END_ALPHA, END_SCALE_FAIL); };
 #ifdef OHOS_DRAG_ENABLE_ANIMATION
     ResetAnimationParameter();
-    auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
+    auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME, AppExecFwk::ThreadMode::FFRT);
     CHKPV(runner);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
     if (!handler_->PostTask([this] { this->OnStopAnimationFail(); })) {
@@ -960,7 +1056,7 @@ int32_t DragDrawing::RunAnimation(std::function<int32_t()> cb)
 {
     FI_HILOGD("enter");
     ResetAnimationParameter();
-    auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
+    auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME, AppExecFwk::ThreadMode::FFRT);
     CHKPR(runner, RET_ERR);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
     if (!handler_->PostTask(cb)) {
@@ -1268,6 +1364,7 @@ void DragDrawing::InitCanvas(int32_t width, int32_t height)
     std::shared_ptr<Rosen::RSCanvasNode> pixelMapNode = Rosen::RSCanvasNode::Create();
     CHKPV(pixelMapNode);
     pixelMapNode->SetForegroundColor(TRANSPARENT_COLOR_ARGB);
+    pixelMapNode->SetGrayScale(g_drawingInfo.filterInfo.dragNodeGrayscale);
     g_drawingInfo.nodes.emplace_back(pixelMapNode);
     std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = Rosen::RSCanvasNode::Create();
     CHKPV(dragStyleNode);
@@ -1604,7 +1701,6 @@ void DragDrawing::SetDecodeOptions(Media::DecodeOptions &decodeOpts)
     FI_HILOGD("leave");
 }
 
-
 void DragDrawing::ParserDragShadowInfo(cJSON* filterInfoParser, FilterInfo &filterInfo)
 {
     CHKPV(filterInfoParser);
@@ -1643,7 +1739,7 @@ void DragDrawing::ParserDragShadowInfo(cJSON* filterInfoParser, FilterInfo &filt
             filterInfo.elevation = static_cast<float>(elevation->valuedouble);
         }
     } else {
-        cJSON *shadowCorner  = cJSON_GetObjectItemCaseSensitive(filterInfoParser, "shadow_corner");
+        cJSON *shadowCorner = cJSON_GetObjectItemCaseSensitive(filterInfoParser, "shadow_corner");
         if (cJSON_IsNumber(shadowCorner)) {
             filterInfo.shadowCorner = static_cast<float>(shadowCorner->valuedouble);
         }
@@ -1699,22 +1795,7 @@ bool DragDrawing::ParserFilterInfo(const std::string &filterInfoStr, FilterInfo 
     if (cJSON_IsNumber(dipScale)) {
         filterInfo.dipScale = AdjustDoubleValue(dipScale->valuedouble);
     }
-    cJSON *cornerRadius1 = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "drag_corner_radius1");
-    if (cJSON_IsNumber(cornerRadius1)) {
-        filterInfo.cornerRadius1 = static_cast<float>(cornerRadius1->valuedouble);
-    }
-    cJSON *cornerRadius2 = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "drag_corner_radius2");
-    if (cJSON_IsNumber(cornerRadius2)) {
-        filterInfo.cornerRadius2 = static_cast<float>(cornerRadius2->valuedouble);
-    }
-    cJSON *cornerRadius3 = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "drag_corner_radius3");
-    if (cJSON_IsNumber(cornerRadius3)) {
-        filterInfo.cornerRadius3 = static_cast<float>(cornerRadius3->valuedouble);
-    }
-    cJSON *cornerRadius4 = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "drag_corner_radius4");
-    if (cJSON_IsNumber(cornerRadius4)) {
-        filterInfo.cornerRadius4 = static_cast<float>(cornerRadius4->valuedouble);
-    }
+    ParserCornerRadiusInfo(filterInfoParser.json, g_drawingInfo.filterInfo);
     cJSON *dragType = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "drag_type");
     if (cJSON_IsString(dragType)) {
         filterInfo.dragType = dragType->valuestring;
@@ -1731,7 +1812,32 @@ bool DragDrawing::ParserFilterInfo(const std::string &filterInfoStr, FilterInfo 
         PrintDragShadowInfo();
     }
     ParserBlurInfo(filterInfoParser.json, g_drawingInfo.filterInfo);
+    cJSON *dragNodeGrayscale = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "drag_node_gray_scale");
+    if (cJSON_IsNumber(dragNodeGrayscale)) {
+        filterInfo.dragNodeGrayscale = static_cast<float>(dragNodeGrayscale->valuedouble);
+    }
     return true;
+}
+
+void DragDrawing::ParserCornerRadiusInfo(const cJSON *cornerRadiusInfoStr, FilterInfo &filterInfo)
+{
+    CHKPV(cornerRadiusInfoStr);
+    cJSON *cornerRadius1 = cJSON_GetObjectItemCaseSensitive(cornerRadiusInfoStr, "drag_corner_radius1");
+    if (cJSON_IsNumber(cornerRadius1)) {
+        filterInfo.cornerRadius1 = static_cast<float>(cornerRadius1->valuedouble);
+    }
+    cJSON *cornerRadius2 = cJSON_GetObjectItemCaseSensitive(cornerRadiusInfoStr, "drag_corner_radius2");
+    if (cJSON_IsNumber(cornerRadius2)) {
+        filterInfo.cornerRadius2 = static_cast<float>(cornerRadius2->valuedouble);
+    }
+    cJSON *cornerRadius3 = cJSON_GetObjectItemCaseSensitive(cornerRadiusInfoStr, "drag_corner_radius3");
+    if (cJSON_IsNumber(cornerRadius3)) {
+        filterInfo.cornerRadius3 = static_cast<float>(cornerRadius3->valuedouble);
+    }
+    cJSON *cornerRadius4 = cJSON_GetObjectItemCaseSensitive(cornerRadiusInfoStr, "drag_corner_radius4");
+    if (cJSON_IsNumber(cornerRadius4)) {
+        filterInfo.cornerRadius4 = static_cast<float>(cornerRadius4->valuedouble);
+    }
 }
 
 void DragDrawing::ParserBlurInfo(const cJSON *BlurInfoInfoStr, FilterInfo &filterInfo)
@@ -2480,11 +2586,11 @@ void DragDrawing::RotatePixelMapXY(int32_t &pixelMapX, int32_t &pixelMapY)
 void DragDrawing::ResetAnimationParameter()
 {
     FI_HILOGI("enter");
+    hasRunningScaleAnimation_ = false;
     CHKPV(handler_);
     handler_->RemoveAllEvents();
     handler_->RemoveAllFileDescriptorListeners();
     handler_ = nullptr;
-    CHKPV(receiver_);
     receiver_ = nullptr;
     ResetSuperHubHandler();
     FI_HILOGI("leave");
@@ -2771,6 +2877,19 @@ void DrawPixelMapModifier::Draw(Rosen::RSDrawingContext &context) const
 void DrawMouseIconModifier::Draw(Rosen::RSDrawingContext &context) const
 {
     FI_HILOGD("enter");
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    int32_t ret = MMI::InputManager::GetInstance()->GetPointerSnapshot(&pixelMap);
+    if (ret != RET_OK) {
+        FI_HILOGE("Get pointer snapshot failed, ret:%{public}d", ret);
+        pixelMap = DrawFromSVG();
+    }
+    CHKPV(pixelMap);
+    OnDraw(pixelMap);
+    FI_HILOGD("leave");
+}
+
+std::shared_ptr<Media::PixelMap> DrawMouseIconModifier::DrawFromSVG() const
+{
     std::string imagePath;
     if (pointerStyle_.id == MOUSE_DRAG_CURSOR_CIRCLE_STYLE) {
         imagePath = MOUSE_DRAG_CURSOR_CIRCLE_PATH;
@@ -2796,7 +2915,10 @@ void DrawMouseIconModifier::Draw(Rosen::RSDrawingContext &context) const
     opts.formatHint = "image/svg+xml";
     uint32_t errCode = 0;
     auto imageSource = Media::ImageSource::CreateImageSource(imagePath, opts, errCode);
-    CHKPV(imageSource);
+    if (imageSource == nullptr) {
+        FI_HILOGW("imageSource is null");
+        return nullptr;
+    }
     if (pointerSize < DEFAULT_MOUSE_SIZE) {
         FI_HILOGD("Invalid pointerSize:%{public}d", pointerSize);
         pointerSize = DEFAULT_MOUSE_SIZE;
@@ -2809,10 +2931,7 @@ void DrawMouseIconModifier::Draw(Rosen::RSDrawingContext &context) const
     if (pointerColor != INVALID_COLOR_VALUE) {
         decodeOpts.SVGOpts.fillColor = {.isValidColor = true, .color = pointerColor};
     }
-    std::shared_ptr<Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOpts, errCode);
-    CHKPV(pixelMap);
-    OnDraw(pixelMap);
-    FI_HILOGD("leave");
+    return imageSource->CreatePixelMap(decodeOpts, errCode);
 }
 
 void DrawMouseIconModifier::OnDraw(std::shared_ptr<Media::PixelMap> pixelMap) const

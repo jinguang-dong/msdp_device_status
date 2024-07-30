@@ -53,6 +53,23 @@ void CooperateOut::OnEnterState(Context &context)
 void CooperateOut::OnLeaveState(Context &context)
 {
     CALL_INFO_TRACE;
+    SetPointerVisible(context);
+}
+
+void CooperateOut::SetPointerVisible(Context &context)
+{
+    CHKPV(env_);
+    bool hasLocalPointerDevice =  env_->GetDeviceManager().HasLocalPointerDevice();
+    bool visible = !context.NeedHideCursor() && hasLocalPointerDevice;
+    FI_HILOGI("Set pointer visible:%{public}s, HasLocalPointerDevice:%{public}s",
+        visible ? "true" : "false", hasLocalPointerDevice ? "true" : "false");
+    env_->GetInput().SetPointerVisibility(visible, PRIORITY);
+}
+
+void CooperateOut::OnSetCooperatePriv(uint32_t priv)
+{
+    CALL_DEBUG_ENTER;
+    env_->GetDragManager().SetCooperatePriv(priv);
 }
 
 void CooperateOut::Initial::BuildChains(std::shared_ptr<Initial> self, CooperateOut &parent)
@@ -126,7 +143,7 @@ void CooperateOut::Initial::OnStart(Context &context, const CooperateEvent &even
         Utility::Anonymize(context.Peer()).c_str());
     DSoftbusStartCooperateFinished failNotice {
         .success = false,
-        .errCode = CoordinationErrCode::UNEXPECTED_START_CALL
+        .errCode = static_cast<int32_t>(CoordinationErrCode::UNEXPECTED_START_CALL)
     };
     context.eventMgr_.StartCooperateFinish(failNotice);
 }
@@ -140,7 +157,9 @@ void CooperateOut::Initial::OnStop(Context &context, const CooperateEvent &event
         Utility::Anonymize(context.Peer()).c_str(), param.isUnchained);
     parent_.StopCooperate(context, event);
 
+    param.networkId = context.Peer();
     DSoftbusStopCooperateFinished notice {
+        .networkId = context.Peer(),
         .normal = true,
     };
     context.eventMgr_.StopCooperateFinish(notice);
@@ -158,6 +177,7 @@ void CooperateOut::Initial::OnComeBack(Context &context, const CooperateEvent &e
     }
     FI_HILOGI("[come back] From \'%{public}s\'", Utility::Anonymize(notice.networkId).c_str());
     context.OnRemoteStartCooperate(notice.extra);
+    parent_.OnSetCooperatePriv(notice.extra.priv);
     DSoftbusStartCooperate startEvent {
         .networkId = notice.networkId,
     };

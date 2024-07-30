@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,9 @@
 
 #include "drag_server.h"
 
+#include "tokenid_kit.h"
+
+#include "accesstoken_kit.h"
 #include "drag_params.h"
 #include "devicestatus_define.h"
 
@@ -76,8 +79,7 @@ int32_t DragServer::AddWatch(CallingContext &context, uint32_t id, MessageParcel
     CALL_DEBUG_ENTER;
     switch (id) {
         case DragRequestID::ADD_DRAG_LISTENER: {
-            FI_HILOGI("Add drag listener, from:%{public}d", context.pid);
-            return env_->GetDragManager().AddListener(context.pid);
+            return AddListener(context, data);
         }
         case DragRequestID::ADD_SUBSCRIPT_LISTENER: {
             FI_HILOGD("Add subscript listener, from:%{public}d", context.pid);
@@ -95,8 +97,7 @@ int32_t DragServer::RemoveWatch(CallingContext &context, uint32_t id, MessagePar
     CALL_DEBUG_ENTER;
     switch (id) {
         case DragRequestID::REMOVE_DRAG_LISTENER: {
-            FI_HILOGD("Remove drag listener, from:%{public}d", context.pid);
-            return env_->GetDragManager().RemoveListener(context.pid);
+            return RemoveListener(context, data);
         }
         case DragRequestID::REMOVE_SUBSCRIPT_LISTENER: {
             FI_HILOGD("Remove subscript listener, from:%{public}d", context.pid);
@@ -131,6 +132,9 @@ int32_t DragServer::SetParam(CallingContext &context, uint32_t id, MessageParcel
         case DragRequestID::SET_DRAG_WINDOW_SCREEN_ID: {
             return SetDragWindowScreenId(context, data, reply);
         }
+        case DragRequestID::ADD_SELECTED_PIXELMAP: {
+            return AddSelectedPixelMap(context, data, reply);
+        }
         default: {
             FI_HILOGE("Unexpected request ID (%{public}u)", id);
             return RET_ERR;
@@ -151,19 +155,19 @@ int32_t DragServer::GetParam(CallingContext &context, uint32_t id, MessageParcel
             return GetUdKey(context, data, reply);
         }
         case DragRequestID::GET_SHADOW_OFFSET: {
-            FI_HILOGI("Get shadow offset, from:%{public}d", context.pid);
+            FI_HILOGD("Get shadow offset, from:%{public}d", context.pid);
             return GetShadowOffset(context, data, reply);
         }
         case DragRequestID::GET_DRAG_DATA: {
-            FI_HILOGI("Get drag data, from:%{public}d", context.pid);
+            FI_HILOGD("Get drag data, from:%{public}d", context.pid);
             return GetDragData(context, data, reply);
         }
         case DragRequestID::GET_DRAG_STATE: {
-            FI_HILOGI("Get drag state, from:%{public}d", context.pid);
+            FI_HILOGD("Get drag state, from:%{public}d", context.pid);
             return GetDragState(context, data, reply);
         }
         case DragRequestID::GET_DRAG_SUMMARY: {
-            FI_HILOGI("Get drag summary, from:%{public}d", context.pid);
+            FI_HILOGD("Get drag summary, from:%{public}d", context.pid);
             return GetDragSummary(context, data, reply);
         }
         case DragRequestID::GET_DRAG_ACTION: {
@@ -208,6 +212,38 @@ int32_t DragServer::Control(CallingContext &context, uint32_t id, MessageParcel 
     }
 }
 
+int32_t DragServer::AddListener(CallingContext &context, MessageParcel &data)
+{
+    AddDraglistenerParam param {};
+    if (!param.Unmarshalling(data)) {
+        FI_HILOGE("AddDraglistenerParam::Unmarshalling fail");
+        return RET_ERR;
+    }
+
+    if (param.isJsCaller_ && !IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
+    FI_HILOGI("Add drag listener, from:%{public}d", context.pid);
+    return env_->GetDragManager().AddListener(context.pid);
+}
+
+int32_t DragServer::RemoveListener(CallingContext &context, MessageParcel &data)
+{
+    RemoveDraglistenerParam param {};
+    if (!param.Unmarshalling(data)) {
+        FI_HILOGE("RemoveDraglistenerParam::Unmarshalling fail");
+        return RET_ERR;
+    }
+
+    if (param.isJsCaller_ && !IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
+    FI_HILOGD("Remove drag listener, from:%{public}d", context.pid);
+    return env_->GetDragManager().RemoveListener(context.pid);
+}
+
 int32_t DragServer::SetDragWindowVisible(CallingContext &context, MessageParcel &data, MessageParcel &reply)
 {
     SetDragWindowVisibleParam param {};
@@ -229,7 +265,7 @@ int32_t DragServer::UpdateDragStyle(CallingContext &context, MessageParcel &data
         return RET_ERR;
     }
     FI_HILOGI("UpdateDragStyle(%{public}d)", static_cast<int32_t>(param.cursorStyle_));
-    return env_->GetDragManager().UpdateDragStyle(param.cursorStyle_, context.pid, context.tokenId);
+    return env_->GetDragManager().UpdateDragStyle(param.cursorStyle_, context.pid, context.tokenId, param.eventId_);
 }
 
 int32_t DragServer::UpdateShadowPic(CallingContext &context, MessageParcel &data, MessageParcel &reply)
@@ -242,6 +278,17 @@ int32_t DragServer::UpdateShadowPic(CallingContext &context, MessageParcel &data
     }
     FI_HILOGD("Updata shadow pic");
     return env_->GetDragManager().UpdateShadowPic(param.shadowInfo_);
+}
+
+int32_t DragServer::AddSelectedPixelMap(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+{
+    AddSelectedPixelMapParam param {};
+
+    if (!param.Unmarshalling(data)) {
+        FI_HILOGE("AddSelectedPixelMap::Unmarshalling fail");
+        return RET_ERR;
+    }
+    return env_->GetDragManager().AddSelectedPixelMap(param.pixelMap_);
 }
 
 int32_t DragServer::UpdatePreviewStyle(CallingContext &context, MessageParcel &data, MessageParcel &reply)
@@ -375,6 +422,16 @@ int32_t DragServer::GetDragState(CallingContext &context, MessageParcel &data, M
 
 int32_t DragServer::GetDragSummary(CallingContext &context, MessageParcel &data, MessageParcel &reply)
 {
+    GetDragSummaryParam param {};
+
+    if (!param.Unmarshalling(data)) {
+        FI_HILOGE("GetDragSummary::Unmarshalling fail");
+        return RET_ERR;
+    }
+    if (param.isJsCaller_ && !IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
     std::map<std::string, int64_t> summaries;
 
     int32_t ret = env_->GetDragManager().GetDragSummary(summaries);
@@ -468,6 +525,25 @@ std::string DragServer::GetPackageName(Security::AccessToken::AccessTokenID toke
         }
     }
     return packageName;
+}
+
+bool DragServer::IsSystemServiceCalling(CallingContext &context)
+{
+    auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(context.tokenId);
+    if ((flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) ||
+        (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL)) {
+        FI_HILOGI("system service calling, flag:%{public}u", flag);
+        return true;
+    }
+    return false;
+}
+
+bool DragServer::IsSystemHAPCalling(CallingContext &context)
+{
+    if (IsSystemServiceCalling(context)) {
+        return true;
+    }
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(context.fullTokenId);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

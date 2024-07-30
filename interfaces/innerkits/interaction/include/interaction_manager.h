@@ -159,10 +159,11 @@ public:
     /**
      * @brief Updates the mouse pointer style used for dragging.
      * @param style Indicates the new mouse pointer style.
+     * @param eventId Indicates the descriptor of the event.
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 10
      */
-    int32_t UpdateDragStyle(DragCursorStyle style);
+    int32_t UpdateDragStyle(DragCursorStyle style, int32_t eventId = -1);
 
     /**
      * @brief Obtains the PID of the target window.
@@ -182,19 +183,21 @@ public:
     /**
      * @brief Registers a listener for dragging status changes.
      * @param listener Indicates the listener for dragging status changes.
+     * @param isJsCaller Indicates whether to add checking.
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 10
      */
-    int32_t AddDraglistener(std::shared_ptr<IDragListener> listener);
+    int32_t AddDraglistener(std::shared_ptr<IDragListener> listener, bool isJsCaller = false);
 
     /**
      * @brief Unregisters a listener for dragging status changes.
      * @param listener Indicates the listener for dragging status changes.
      * If no value is passed, all listeners are canceled.
+     * @param isJsCaller Indicates whether to add checking.
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 10
      */
-    int32_t RemoveDraglistener(std::shared_ptr<IDragListener> listener = nullptr);
+    int32_t RemoveDraglistener(std::shared_ptr<IDragListener> listener = nullptr, bool isJsCaller = false);
 
     /**
      * @brief Register a listener for dragging corner style changes.
@@ -323,10 +326,11 @@ public:
     /**
      * @brief Obtains data summary of the drag object.
      * @param summarys Indicates data summary of the drag object.
+     * @param isJsCaller Indicates whether to add checking.
      * @return Returns <b>0</b> if the operation is successful; returns other values if the operation fails.
      * @since 11
      */
-    int32_t GetDragSummary(std::map<std::string, int64_t> &summarys);
+    int32_t GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller = false);
 
     /**
      * @brief Specifies whether to implement 8dp movement in the text editor area.
@@ -343,6 +347,14 @@ public:
 
     int32_t SetDragWindowScreenId(uint64_t displayId, uint64_t screenId);
 
+    /**
+     * @brief Add an image to the drag list.
+     * @param pixelMap Add Selected image information.
+     * @param callback Indicates the callback used to notify addSelectedPixelMap result.
+     * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
+     * @since 12
+     */
+    int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap, std::function<void(bool)> callback);
 private:
     InteractionManager() = default;
     DISALLOW_COPY_AND_MOVE(InteractionManager);

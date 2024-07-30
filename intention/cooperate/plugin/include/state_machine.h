@@ -37,14 +37,15 @@ public:
     DISALLOW_COPY_AND_MOVE(StateMachine);
 
     void OnEvent(Context &context, const CooperateEvent &event);
+    bool IsCooperateEnable();
 
 private:
     class AppStateObserver final : public AppExecFwk::ApplicationStateObserverStub {
     public:
         AppStateObserver(Channel<CooperateEvent>::Sender sender, int32_t clientPid);
         ~AppStateObserver() = default;
-        void OnProcessDied(const AppExecFwk::ProcessData &processData) override;
         void UpdateClientPid(int32_t clientPid);
+        void OnProcessDied(const AppExecFwk::ProcessData &processData) override;
 
     private:
         Channel<CooperateEvent>::Sender sender_;
@@ -64,6 +65,7 @@ private:
     void EnableCooperate(Context &context, const CooperateEvent &event);
     void DisableCooperate(Context &context, const CooperateEvent &event);
     void StartCooperate(Context &context, const CooperateEvent &event);
+    void StopCooperate(Context &context, const CooperateEvent &event);
     void GetCooperateState(Context &context, const CooperateEvent &event);
     void RegisterEventListener(Context &context, const CooperateEvent &event);
     void UnregisterEventListener(Context &context, const CooperateEvent &event);
@@ -105,6 +107,7 @@ private:
     std::vector<std::string> clientBundleNames_;
     sptr<AppStateObserver> appStateObserver_ { nullptr };
     std::shared_ptr<ICommonEventObserver> observer_ { nullptr };
+    bool isCooperateEnable_ { false };
 };
 } // namespace Cooperate
 } // namespace DeviceStatus

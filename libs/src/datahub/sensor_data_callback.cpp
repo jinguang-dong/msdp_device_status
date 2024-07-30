@@ -52,7 +52,7 @@ void SensorDataCallback::Init()
     FI_HILOGI("SensorDataCallback is initiated");
     std::lock_guard lock(initMutex_);
     if (algorithmThread_ == nullptr) {
-        FI_HILOGI("Create algorithem thread");
+        FI_HILOGI("Create algorithm thread");
         algorithmThread_ = std::make_unique<std::thread>([this] { this->AlgorithmLoop(); });
     }
 }
@@ -95,7 +95,7 @@ bool SensorDataCallback::UnsubscribeSensorEvent(int32_t sensorTypeId, SensorCall
     auto callbackIter = algoMap_.find(sensorTypeId);
     if (callbackIter != algoMap_.end()) {
         FI_HILOGE("Erase sensorTypeId:%{public}d", sensorTypeId);
-        algoMap_.erase(sensorTypeId);
+        algoMap_.erase(callbackIter);
     }
     return true;
 }

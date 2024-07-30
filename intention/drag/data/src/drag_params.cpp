@@ -104,13 +104,14 @@ bool SetDragWindowVisibleParam::Unmarshalling(MessageParcel &parcel)
             parcel.ReadBool(isForce_));
 }
 
-UpdateDragStyleParam::UpdateDragStyleParam(DragCursorStyle style)
-    : cursorStyle_(style)
+UpdateDragStyleParam::UpdateDragStyleParam(DragCursorStyle style, int32_t eventId)
+    : cursorStyle_(style), eventId_(eventId)
 {}
 
 bool UpdateDragStyleParam::Marshalling(MessageParcel &parcel) const
 {
-    return parcel.WriteInt32(static_cast<int32_t>(cursorStyle_));
+    return (parcel.WriteInt32(static_cast<int32_t>(cursorStyle_)) &&
+            parcel.WriteInt32(eventId_));
 }
 
 bool UpdateDragStyleParam::Unmarshalling(MessageParcel &parcel)
@@ -122,7 +123,7 @@ bool UpdateDragStyleParam::Unmarshalling(MessageParcel &parcel)
         return false;
     }
     cursorStyle_ = static_cast<DragCursorStyle>(style);
-    return true;
+    return parcel.ReadInt32(eventId_);
 }
 
 UpdateShadowPicParam::UpdateShadowPicParam(const ShadowInfo &shadowInfo)
@@ -147,6 +148,21 @@ bool UpdateShadowPicParam::Unmarshalling(MessageParcel &parcel)
         parcel.ReadInt32(shadowInfo_.x) &&
         parcel.ReadInt32(shadowInfo_.y)
     );
+}
+
+AddSelectedPixelMapParam::AddSelectedPixelMapParam(std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
+    :pixelMap_(pixelMap)
+{}
+
+bool AddSelectedPixelMapParam::Marshalling(MessageParcel &parcel) const
+{
+    return ((pixelMap_ != nullptr) && pixelMap_->Marshalling(parcel));
+}
+
+bool AddSelectedPixelMapParam::Unmarshalling(MessageParcel &parcel)
+{
+    pixelMap_ = std::shared_ptr<Media::PixelMap>(Media::PixelMap::Unmarshalling(parcel));
+    return ((pixelMap_ != nullptr));
 }
 
 GetDragTargetPidReply::GetDragTargetPidReply(int32_t pid)
@@ -276,6 +292,48 @@ bool SetDragWindowScreenIdParam::Marshalling(MessageParcel &parcel) const
 bool SetDragWindowScreenIdParam::Unmarshalling(MessageParcel &parcel)
 {
     return (parcel.ReadUint64(displayId_) && parcel.ReadUint64(screenId_));
+}
+
+AddDraglistenerParam::AddDraglistenerParam(bool isJsCaller)
+    : isJsCaller_(isJsCaller)
+{}
+
+bool AddDraglistenerParam::Marshalling(MessageParcel &parcel) const
+{
+    return parcel.WriteBool(isJsCaller_);
+}
+
+bool AddDraglistenerParam::Unmarshalling(MessageParcel &parcel)
+{
+    return parcel.ReadBool(isJsCaller_);
+}
+
+RemoveDraglistenerParam::RemoveDraglistenerParam(bool isJsCaller)
+    : isJsCaller_(isJsCaller)
+{}
+
+bool RemoveDraglistenerParam::Marshalling(MessageParcel &parcel) const
+{
+    return parcel.WriteBool(isJsCaller_);
+}
+
+bool RemoveDraglistenerParam::Unmarshalling(MessageParcel &parcel)
+{
+    return parcel.ReadBool(isJsCaller_);
+}
+
+GetDragSummaryParam::GetDragSummaryParam(bool isJsCaller)
+    : isJsCaller_(isJsCaller)
+{}
+
+bool GetDragSummaryParam::Marshalling(MessageParcel &parcel) const
+{
+    return parcel.WriteBool(isJsCaller_);
+}
+
+bool GetDragSummaryParam::Unmarshalling(MessageParcel &parcel)
+{
+    return parcel.ReadBool(isJsCaller_);
 }
 
 GetDragSummaryReply::GetDragSummaryReply(std::map<std::string, int64_t> &&summary)

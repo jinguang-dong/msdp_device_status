@@ -468,6 +468,7 @@ HWTEST_F(DragServerTest, DragServerTest8, TestSize.Level0)
         if (dragRequestID == DragRequestID::UNKNOWN_DRAG_ACTION ||
             dragRequestID == DragRequestID::GET_UDKEY ||
             dragRequestID == DragRequestID::GET_SHADOW_OFFSET ||
+            dragRequestID == DragRequestID::GET_DRAG_SUMMARY ||
             dragRequestID == DragRequestID::GET_DRAG_DATA ||
             dragRequestID == DragRequestID::GET_DRAG_ACTION||
             dragRequestID == DragRequestID::GET_EXTRA_INFO) {
@@ -739,7 +740,7 @@ HWTEST_F(DragServerTest, DragServerTest20, TestSize.Level0)
     MessageParcel reply;
     MessageParcel datas;
     int32_t ret = g_dragServer->GetDragSummary(context, datas, reply);
-    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(ret, RET_ERR);
 }
 
 /**
@@ -980,7 +981,7 @@ HWTEST_F(DragServerTest, DragServerTest30, TestSize.Level0)
     MessageParcel datas;
     MessageParcel reply;
     g_dragMgr.dragState_ = DragState::START;
-    UpdateDragStyleParam param { DragCursorStyle::COPY };
+    UpdateDragStyleParam param { DragCursorStyle::COPY, -1 };
     bool ret = param.Marshalling(datas);
     EXPECT_EQ(ret, READ_OK);
     ret = g_dragServer->UpdateDragStyle(context, datas, reply);
@@ -1248,20 +1249,6 @@ HWTEST_F(DragServerTest, DragServerTest40, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     bool ret = DRAG_DATA_MGR.GetDragWindowVisible();
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: DragServerTest41
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest41, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    bool ret = DRAG_DATA_MGR.IsMotionDrag();
-    DRAG_DATA_MGR.SetMotionDrag(true);
     EXPECT_FALSE(ret);
 }
 
