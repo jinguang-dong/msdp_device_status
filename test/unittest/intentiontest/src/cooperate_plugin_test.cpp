@@ -776,13 +776,6 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest21, TestSize.Level0)
     });
     DDMBoardOnlineEvent notice = std::get<DDMBoardOnlineEvent>(event.event);
     g_context->mouseLocation_.OnSoftbusSessionClosed(notice);
-    auto pointerEvent = MMI::PointerEvent::Create();
-    MMI::PointerEvent::PointerItem pointerItem;
-    pointerEvent->SetPointerId(1);
-    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
-    MMI::PointerEvent::PointerItem curPointerItem = CreatePointerItem(1, 1, { 0, 0 }, true);
-    pointerEvent->AddPointerItem(curPointerItem);
-    g_context->mouseLocation_.ProcessData(pointerEvent);
     g_context->mouseLocation_.OnUnSubscribeMouseLocation(subscribeMouseLocation);
     bool ret = g_context->mouseLocation_.HasLocalListener();
     EXPECT_FALSE(ret);
