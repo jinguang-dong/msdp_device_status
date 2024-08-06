@@ -2775,6 +2775,150 @@ HWTEST_F(CooperatePluginTest, stateMachine_test071, TestSize.Level0)
     std::string commonEvent = "-1";
     ASSERT_NO_FATAL_FAILURE(g_stateMachine->OnCommonEvent(cooperateContext, commonEvent));
 }
+
+/**
+ * @tc.name: dsoftbusHandler_test072
+ * @tc.desc: Test cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperatePluginTest, dsoftbusHandler_test072, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::string localNetworkId = g_context->dsoftbus_.GetLocalNetworkId();
+    ASSERT_NO_FATAL_FAILURE(g_context->dsoftbus_.OnConnected(localNetworkId));
+}
+
+/**
+ * @tc.name: dsoftbusHandler_test073
+ * @tc.desc: Test cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperatePluginTest, dsoftbusHandler_test073, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    NetPacket pkt(MessageId::DSOFTBUS_START_COOPERATE);
+    std::string localNetworkId = g_context->dsoftbus_.GetLocalNetworkId();
+    ASSERT_NO_FATAL_FAILURE(g_context->dsoftbus_.OnRemoteInputDevice(localNetworkId, pkt));
+}
+
+/**
+ * @tc.name: dsoftbusHandler_test074
+ * @tc.desc: Test cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperatePluginTest, dsoftbusHandler_test074, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    NetPacket pkt(MessageId::DSOFTBUS_START_COOPERATE);
+    int32_t testData = 10;
+    pkt << testData;
+    std::string localNetworkId = g_context->dsoftbus_.GetLocalNetworkId();
+    ASSERT_NO_FATAL_FAILURE(g_context->dsoftbus_.OnRemoteInputDevice(localNetworkId, pkt));
+}
+
+/**
+ * @tc.name: dsoftbusHandler_test075
+ * @tc.desc: Test cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperatePluginTest, dsoftbusHandler_test075, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    NetPacket pkt(MessageId::DSOFTBUS_START_COOPERATE);
+    std::string localNetworkId = g_context->dsoftbus_.GetLocalNetworkId();
+    ASSERT_NO_FATAL_FAILURE(g_context->dsoftbus_.OnRemoteHotPlug(localNetworkId, pkt));
+}
+
+/**
+ * @tc.name: dsoftbusHandler_test076
+ * @tc.desc: Test cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperatePluginTest, dsoftbusHandler_test076, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    NetPacket pkt(MessageId::DSOFTBUS_START_COOPERATE);
+    std::string localNetworkId = g_context->dsoftbus_.GetLocalNetworkId();
+    ASSERT_NO_FATAL_FAILURE(g_context->dsoftbus_.OnRemoteHotPlug(localNetworkId, pkt));
+}
+
+/**
+ * @tc.name: stateMachine_test077
+ * @tc.desc: Test cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperatePluginTest, stateMachine_test077, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    cooperateContext.remoteNetworkId_ = REMOTE_NETWORKID;
+    int32_t testErrCode = 0;
+    CooperateEvent startEvent (
+        CooperateEventType::DSOFTBUS_SESSION_OPENED,
+        DDMBoardOnlineEvent {
+            .networkId = LOCAL_NETWORKID,
+            .normal = true,
+            .errCode = testErrCode,
+    });
+    g_stateMachine->isCooperateEnable_ = true;
+    g_stateMachine->current_ = CooperateState::COOPERATE_STATE_IN;
+    ASSERT_NO_FATAL_FAILURE(g_stateMachine->OnSoftbusSessionOpened(cooperateContext, startEvent));
+}
+
+/**
+ * @tc.name: stateMachine_test078
+ * @tc.desc: Test cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperatePluginTest, stateMachine_test078, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    cooperateContext.remoteNetworkId_ = REMOTE_NETWORKID;
+    CooperateEvent startEvent (
+        CooperateEventType::DSOFTBUS_INPUT_DEV_SYNC,
+        DSoftbusSyncInputDevice {
+            .networkId = LOCAL_NETWORKID,
+    });
+    g_stateMachine->isCooperateEnable_ = true;
+    g_stateMachine->current_ = CooperateState::COOPERATE_STATE_IN;
+    ASSERT_NO_FATAL_FAILURE(g_stateMachine->OnRemoteInputDevice(cooperateContext, startEvent));
+}
+
+/**
+ * @tc.name: stateMachine_test079
+ * @tc.desc: Test cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperatePluginTest, stateMachine_test079, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    cooperateContext.remoteNetworkId_ = REMOTE_NETWORKID;
+    CooperateEvent startEvent (
+        CooperateEventType::DSOFTBUS_INPUT_DEV_HOT_PLUG,
+        DSoftbusHotPlugEvent {
+            .networkId = LOCAL_NETWORKID,
+            .type = InputHotplugType::UNPLUG,
+    });
+    g_stateMachine->current_ = CooperateState::COOPERATE_STATE_IN;
+    g_stateMachine->isCooperateEnable_ = true;
+    ASSERT_NO_FATAL_FAILURE(g_stateMachine->OnRemoteHotPlug(cooperateContext, startEvent));
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
