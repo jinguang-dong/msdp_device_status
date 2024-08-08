@@ -135,7 +135,7 @@ public:
     explicit TestStartDragListener(std::function<void(const DragNotifyMsg&)> function) : function_(function) { }
     void OnDragEndMessage(const DragNotifyMsg &msg) override
     {
-        FI_HILOGD("DisplayX:%{public}d, displayY:%{public}d, targetPid:%{public}d, result:%{public}d",
+        FI_HILOGD("DisplayX:%{private}d, displayY:%{private}d, targetPid:%{public}d, result:%{public}d",
             msg.displayX, msg.displayY, msg.targetPid, static_cast<int32_t>(msg.result));
         if (function_ != nullptr) {
             function_(msg);
@@ -262,7 +262,7 @@ HWTEST_F(DragManagerTest, DragManagerTest2, TestSize.Level0)
     CALL_TEST_DEBUG;
     std::promise<bool> promiseFlag;
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result);
         promiseFlag.set_value(true);
     };
@@ -286,7 +286,7 @@ HWTEST_F(DragManagerTest, DragManagerTest3, TestSize.Level0)
     std::promise<bool> promiseFlag;
     g_shadowinfo_x = 2;
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result);
         promiseFlag.set_value(true);
     };
@@ -310,7 +310,7 @@ HWTEST_F(DragManagerTest, DragManagerTest4, TestSize.Level0)
     g_shadowinfo_x = 0;
     std::promise<bool> promiseFlag;
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result);
         promiseFlag.set_value(true);
     };
@@ -465,7 +465,7 @@ HWTEST_F(DragManagerTest, DragManagerTest14, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
@@ -499,7 +499,7 @@ HWTEST_F(DragManagerTest, DragManagerTest15, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
@@ -529,7 +529,7 @@ HWTEST_F(DragManagerTest, DragManagerTest16, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
@@ -561,7 +561,7 @@ HWTEST_F(DragManagerTest, DragManagerTest17, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
@@ -602,7 +602,7 @@ HWTEST_F(DragManagerTest, DragManagerTest18, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
@@ -636,7 +636,7 @@ HWTEST_F(DragManagerTest, DragManagerTest19, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
@@ -673,7 +673,7 @@ HWTEST_F(DragManagerTest, DragManagerTest20, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
@@ -708,7 +708,7 @@ HWTEST_F(DragManagerTest, DragManagerTest21, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
@@ -743,7 +743,7 @@ HWTEST_F(DragManagerTest, DragManagerTest22, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
@@ -778,7 +778,7 @@ HWTEST_F(DragManagerTest, DragManagerTest23, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
@@ -813,7 +813,7 @@ HWTEST_F(DragManagerTest, DragManagerTest24, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
@@ -856,7 +856,7 @@ HWTEST_F(DragManagerTest, DragManagerTest25, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
@@ -902,7 +902,7 @@ HWTEST_F(DragManagerTest, DragManagerTest26, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
@@ -941,7 +941,7 @@ HWTEST_F(DragManagerTest, DragManagerTest27, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
@@ -978,7 +978,7 @@ HWTEST_F(DragManagerTest, DragManagerTest28, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
@@ -1012,7 +1012,7 @@ HWTEST_F(DragManagerTest, DragManagerTest29, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+        FI_HILOGD("displayX:%{private}d, displayY:%{private}d, result:%{public}d, target:%{public}d",
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
