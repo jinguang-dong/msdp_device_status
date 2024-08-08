@@ -341,7 +341,7 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest011, TestSize.Level0)
     EXPECT_FALSE(pointerEvent == nullptr);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
-    FI_HILOGD("SourceType:%{public}d, pointerId:%{public}d, displayX:%{public}d, displayY:%{public}d",
+    FI_HILOGD("SourceType:%{public}d, pointerId:%{public}d, displayX:%{private}d, displayY:%{private}d",
         pointerEvent->GetSourceType(), pointerEvent->GetPointerId(),
         pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     EXPECT_LT(pointerEvent->GetTargetDisplayId(), 0);

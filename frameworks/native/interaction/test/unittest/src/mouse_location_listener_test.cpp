@@ -101,7 +101,7 @@ class EventListener : public IEventListener {
 
 void EventListener::OnMouseLocationEvent(const std::string &networkId, const Event &event)
 {
-    FI_HILOGI("NetworkId:%{public}s, DisplayX:%{public}d, displayY:%{public}d,"
+    FI_HILOGI("NetworkId:%{public}s, DisplayX:%{private}d, displayY:%{private}d,"
         "displayWidth:%{public}d, displayHeight:%{public}d", Utility::Anonymize(networkId).c_str(),
         event.displayX, event.displayY, event.displayWidth, event.displayHeight);
 }
