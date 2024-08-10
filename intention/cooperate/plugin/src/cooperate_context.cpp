@@ -255,6 +255,11 @@ void Context::UpdateCooperateFlag(const UpdateCooperateFlagEvent &event)
     flag_ = ((flag_ & ~event.mask) | (event.flag & event.mask));
 }
 
+void Context::UpdateIsInToFreeFlag(bool isInToFreeFlag)
+{
+    isInToFreeFlag_ = isInToFreeFlag;
+}
+
 bool Context::IsAllowCooperate()
 {
     FI_HILOGI("Notify observers of allow cooperate");

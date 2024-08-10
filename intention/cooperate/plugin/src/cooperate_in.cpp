@@ -47,17 +47,13 @@ void CooperateIn::OnEvent(Context &context, const CooperateEvent &event)
 void CooperateIn::OnEnterState(Context &context)
 {
     CALL_INFO_TRACE;
+    UpdateIsInToFreeFlag(false);
     env_->GetInput().SetPointerVisibility(!context.NeedHideCursor());
 }
 
 void CooperateIn::OnLeaveState(Context & context)
 {
-    CALL_INFO_TRACE;
-    UpdateCooperateFlagEvent event {
-        .mask = COOPERATE_FLAG_HIDE_CURSOR,
-        .flag = COOPERATE_FLAG_HIDE_CURSOR,
-    };
-    context.UpdateCooperateFlag(event);
+    UpdateIsInToFreeFlag(true);
     CHKPV(env_);
     env_->GetInput().SetPointerVisibility(false);
 }
