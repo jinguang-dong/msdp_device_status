@@ -28,7 +28,9 @@
 #include "devicestatus_define.h"
 #include "drag_data.h"
 #include "drag_data_manager.h"
+#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
 #include "drag_hisysevent.h"
+# endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
 #include "fi_log.h"
 #include "proto.h"
 
@@ -225,7 +227,9 @@ int32_t DragManager::StartDrag(const DragData &dragData, int32_t pid)
         return RET_ERR;
     }
     if (OnStartDrag() != RET_OK) {
+#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
         DragDFX::WriteStartDrag(dragState_, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
+#endif
         FI_HILOGE("Failed to execute OnStartDrag");
         ResetMouseDragMonitorInfo();
         return RET_ERR;
@@ -260,7 +264,9 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     }
     int32_t ret = RET_OK;
     if (OnStopDrag(dropResult.result, dropResult.hasCustomAnimation) != RET_OK) {
+#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
         DragDFX::WriteStopDrag(dragState_, dropResult, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
+#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
         FI_HILOGE("On stop drag failed");
         ret = RET_ERR;
     }
@@ -338,7 +344,9 @@ int32_t DragManager::UpdateDragStyle(DragCursorStyle style, int32_t targetPid, i
         return RET_ERR;
     }
     if ((style < DragCursorStyle::DEFAULT) || (style > DragCursorStyle::MOVE)) {
+#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
         DragDFX::WriteUpdateDragStyle(style, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
+#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
         FI_HILOGE("Invalid style:%{public}d", style);
         return RET_ERR;
     }
@@ -397,7 +405,9 @@ int32_t DragManager::NotifyDragResult(DragResult result, DragBehavior dragBehavi
     int32_t targetPid = GetDragTargetPid();
     NetPacket pkt(MessageId::DRAG_NOTIFY_RESULT);
     if ((result < DragResult::DRAG_SUCCESS) || (result > DragResult::DRAG_EXCEPTION)) {
+#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
         DragDFX::WriteNotifyDragResult(result, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
+#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
         FI_HILOGE("The invalid result:%{public}d", static_cast<int32_t>(result));
         return RET_ERR;
     }
@@ -412,7 +422,9 @@ int32_t DragManager::NotifyDragResult(DragResult result, DragBehavior dragBehavi
         FI_HILOGE("Failed to send message");
         return MSG_SEND_FAIL;
     }
+#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
     DragDFX::WriteNotifyDragResult(result, OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR);
+#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
     FI_HILOGI("leave");
     return RET_OK;
 }
@@ -918,7 +930,9 @@ int32_t DragManager::OnSetDragWindowVisible(bool visible, bool isForce)
             "can not set drag window visible:%{public}d", visible);
         return RET_OK;
     }
+#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
     DragDFX::WriteDragWindowVisible(dragState_, visible, OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR);
+#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
     DRAG_DATA_MGR.SetDragWindowVisible(visible);
     dragDrawing_.UpdateDragWindowState(visible);
     DragData dragData = DRAG_DATA_MGR.GetDragData();
@@ -1182,7 +1196,9 @@ int32_t DragManager::OnUpdateDragStyle(DragCursorStyle style)
     DragCursorStyle updateStyle = GetRealDragStyle(style);
     stateNotify_.StyleChangedNotify(updateStyle);
     if (dragDrawing_.UpdateDragStyle(updateStyle) != RET_OK) {
+#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
         DragDFX::WriteUpdateDragStyle(updateStyle, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
+#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
         return RET_ERR;
     }
     FI_HILOGD("Update dragStyle:%{public}s successfully", GetDragStyleName(updateStyle).c_str());
