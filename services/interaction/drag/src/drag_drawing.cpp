@@ -43,7 +43,9 @@
 #include "animation_curve.h"
 #include "devicestatus_define.h"
 #include "drag_data_manager.h"
+#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE  
 #include "drag_hisysevent.h"
+#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
 #include "include/util.h"
 
 #undef LOG_TAG
@@ -415,7 +417,9 @@ int32_t DragDrawing::UpdateDragStyle(DragCursorStyle style)
 {
     FI_HILOGD("style:%{public}d", style);
     if ((style < DragCursorStyle::DEFAULT) || (style > DragCursorStyle::MOVE)) {
+#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE       
         DragDFX::WriteUpdateDragStyle(style, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
+#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE 
         FI_HILOGE("Invalid style:%{public}d", style);
         return RET_ERR;
     }
@@ -2392,7 +2396,9 @@ int32_t DragDrawing::UpdateValidDragStyle(DragCursorStyle style)
     OnDragStyle(dragStyleNode, pixelMap);
     CHKPR(rsUiDirector_, RET_ERR);
     rsUiDirector_->SendMessages();
+#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE  
     DragDFX::WriteUpdateDragStyle(style, OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR);
+#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE  
     return RET_OK;
 }
 
