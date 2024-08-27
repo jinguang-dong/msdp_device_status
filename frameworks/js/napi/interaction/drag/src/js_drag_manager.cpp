@@ -19,6 +19,7 @@
 #include "interaction_manager.h"
 #include "napi_constants.h"
 #include "util_napi.h"
+#include "util_napi_error.h"
 
 #undef LOG_TAG
 #define LOG_TAG "JsDragManager"
@@ -54,7 +55,9 @@ napi_value JsDragManager::GetDataSummary(napi_env env)
     napi_value arr = nullptr;
     CHKRP(napi_create_array(env, &arr), CREATE_ARRAY);
     std::map<std::string, int64_t> summarys;
-    if (INTERACTION_MGR->GetDragSummary(summarys, true) != RET_OK) {
+    int32_t errCode = INTERACTION_MGR->GetDragSummary(summarys, true);
+    if (errCode != RET_OK) {
+        UtilNapiError::HandleExecuteResult(env, errCode, "getdatasummary");
         FI_HILOGE("Failed to GetDragSummary");
         return arr;
     }
@@ -94,7 +97,10 @@ void JsDragManager::RegisterListener(napi_env env, napi_value handle)
     listeners_.push_back(std::move(monitor));
     if (!hasRegistered_) {
         hasRegistered_ = true;
-        INTERACTION_MGR->AddDraglistener(shared_from_this(), true);
+        int32_t errCode = INTERACTION_MGR->AddDraglistener(shared_from_this(), true);
+        if (errCode != RET_OK) {
+            UtilNapiError::HandleExecuteResult(env, errCode, "on");
+        }
     }
 }
 
@@ -122,7 +128,10 @@ void JsDragManager::UnregisterListener(napi_env env, napi_value handle)
     }
     if (hasRegistered_ && listeners_.empty()) {
         hasRegistered_ = false;
-        INTERACTION_MGR->RemoveDraglistener(shared_from_this(), true);
+        int32_t errCode = INTERACTION_MGR->RemoveDraglistener(shared_from_this(), true);
+        if (errCode != RET_OK) {
+            UtilNapiError::HandleExecuteResult(env, errCode, "off");
+        }
     }
 }
 

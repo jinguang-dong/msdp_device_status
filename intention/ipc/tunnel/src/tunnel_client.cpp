@@ -61,7 +61,7 @@ int32_t TunnelClient::Enable(Intention intention, ParamBase &data, ParamBase &re
     int32_t ret = devicestatusProxy_->Enable(intention, dataParcel, replyParcel);
     if (ret != RET_OK) {
         FI_HILOGE("proxy::Enable fail");
-        return RET_ERR;
+        return ret;
     }
     if (!reply.Unmarshalling(replyParcel)) {
         FI_HILOGE("ParamBase::Unmarshalling fail");
@@ -90,7 +90,7 @@ int32_t TunnelClient::Disable(Intention intention, ParamBase &data, ParamBase &r
     int32_t ret = devicestatusProxy_->Disable(intention, dataParcel, replyParcel);
     if (ret != RET_OK) {
         FI_HILOGE("proxy::Disable fail");
-        return RET_ERR;
+        return ret;
     }
     if (!reply.Unmarshalling(replyParcel)) {
         FI_HILOGE("ParamBase::Unmarshalling fail");
@@ -148,7 +148,7 @@ int32_t TunnelClient::Stop(Intention intention, ParamBase &data, ParamBase &repl
     int32_t ret = devicestatusProxy_->Stop(intention, dataParcel, replyParcel);
     if (ret != RET_OK) {
         FI_HILOGE("proxy::Stop fail");
-        return RET_ERR;
+        return ret;
     }
     if (!reply.Unmarshalling(replyParcel)) {
         FI_HILOGE("ParamBase::Unmarshalling fail");
@@ -177,7 +177,7 @@ int32_t TunnelClient::AddWatch(Intention intention, uint32_t id, ParamBase &data
     int32_t ret = devicestatusProxy_->AddWatch(intention, id, dataParcel, replyParcel);
     if (ret != RET_OK) {
         FI_HILOGE("proxy::AddWatch fail");
-        return RET_ERR;
+        return ret;
     }
     if (!reply.Unmarshalling(replyParcel)) {
         FI_HILOGE("ParamBase::Unmarshalling fail");
@@ -206,7 +206,7 @@ int32_t TunnelClient::RemoveWatch(Intention intention, uint32_t id, ParamBase &d
     int32_t ret = devicestatusProxy_->RemoveWatch(intention, id, dataParcel, replyParcel);
     if (ret != RET_OK) {
         FI_HILOGE("proxy::RemoveWatch fail");
-        return RET_ERR;
+        return ret;
     }
     if (!reply.Unmarshalling(replyParcel)) {
         FI_HILOGE("ParamBase::Unmarshalling fail");
@@ -235,7 +235,7 @@ int32_t TunnelClient::SetParam(Intention intention, uint32_t id, ParamBase &data
     int32_t ret = devicestatusProxy_->SetParam(intention, id, dataParcel, replyParcel);
     if (ret != RET_OK) {
         FI_HILOGE("proxy::SetParam fail");
-        return RET_ERR;
+        return ret;
     }
     if (!reply.Unmarshalling(replyParcel)) {
         FI_HILOGE("ParamBase::Unmarshalling fail");
@@ -264,7 +264,7 @@ int32_t TunnelClient::GetParam(Intention intention, uint32_t id, ParamBase &data
     int32_t ret = devicestatusProxy_->GetParam(intention, id, dataParcel, replyParcel);
     if (ret != RET_OK) {
         FI_HILOGE("proxy::GetParam fail");
-        return RET_ERR;
+        return ret;
     }
     if (!reply.Unmarshalling(replyParcel)) {
         FI_HILOGE("ParamBase::Unmarshalling fail");
@@ -293,7 +293,7 @@ int32_t TunnelClient::Control(Intention intention, uint32_t id, ParamBase &data,
     int32_t ret = devicestatusProxy_->Control(intention, id, dataParcel, replyParcel);
     if (ret != RET_OK) {
         FI_HILOGE("proxy::Control fail");
-        return RET_ERR;
+        return ret;
     }
     if (!reply.Unmarshalling(replyParcel)) {
         FI_HILOGE("ParamBase::Unmarshalling fail");
