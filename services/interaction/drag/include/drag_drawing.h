@@ -200,12 +200,12 @@ struct DrawingInfo {
     int32_t displayId { -1 };
     int32_t pixelMapX { -1 };
     int32_t pixelMapY { -1 };
-    int32_t lastPixelMapX { -1 };
-    int32_t lastPixelMapY { -1 };
     int32_t displayX { -1 };
     int32_t displayY { -1 };
     float x { -1.0f };
     float y { -1.0f };
+    float currentPositionX { -1.0f };
+    float currentPositionY { -1.0f };
     int32_t mouseWidth { 0 };
     int32_t mouseHeight { 0 };
     int32_t rootNodeWidth { -1 };
@@ -323,8 +323,8 @@ private:
     void ProcessFilter();
     bool ParserExtraInfo(const std::string &extraInfoStr, ExtraInfo &extraInfo);
     static float RadiusVp2Sigma(float radiusVp, float dipScale);
-    void DoDrawMouse();
-    void UpdateMousePosition();
+    void DoDrawMouse(int32_t mousePositionX, int32_t mousePositionY);
+    void UpdateMousePosition(float mousePositionX, float mousePositionY);
     int32_t UpdateDefaultDragStyle(DragCursorStyle style);
     int32_t UpdateValidDragStyle(DragCursorStyle style);
     int32_t SetNodesLocation(int32_t positionX, int32_t positionY);
@@ -333,7 +333,8 @@ private:
     int32_t ModifyMultiPreviewStyle(const std::vector<PreviewStyle> &previewStyles);
     void MultiSelectedAnimation(int32_t positionX, int32_t positionY, int32_t adjustSize,
         bool isMultiSelectedAnimation);
-    void DoMultiSelectedAnimation(float positionX, float positionY, float adjustSize);
+    void DoMultiSelectedAnimation(float positionX, float positionY, float adjustSize,
+        bool isMultiSelectedAnimation = true);
     void InitMultiSelectedNodes();
     void ClearMultiSelectedData();
     bool ParserRadius(float &radius);
@@ -346,7 +347,7 @@ private:
     void StartStyleAnimation(float startScale, float endScale, int32_t duration);
     void UpdateAnimationProtocol(Rosen::RSAnimationTimingProtocol protocol);
     void RotateDisplayXY(int32_t &displayX, int32_t &displayY);
-    void RotatePixelMapXY(int32_t &pixelMapX, int32_t &pixelMapY);
+    void RotatePixelMapXY();
     void ResetAnimationParameter();
     void ResetAnimationFlag(bool isForce = false);
     void DoEndAnimation();
@@ -371,6 +372,9 @@ private:
     int32_t UpdatePixelMapsAngleAndAlpha();
     int32_t UpdatePixeMapDrawingOrder();
     void LoadDragDropLib();
+    template <typename T>
+    void AdjustRotateDisplayXY(T &displayX, T &displayY);
+    void DrawRotateDisplayXY(float positionX, float positionY);
 
 private:
     int64_t interruptNum_ { -1 };
@@ -415,3 +419,57 @@ private:
 } // namespace Msdp
 } // namespace OHOS
 #endif // DRAG_DRAWING_H
+template <typename T>
+void DragDrawing::AdjustRotateDisplayXY(T &displayX, T &displayY)
+{
+    FI_HILOGI("rotation:%{public}d", static_cast<int32_t>(rotation_));
+    CHKPV(g_drawingInfo.pixelMap);
+    switch (rotation_) {
+        case Rosen::Rotation::ROTATION_0: {
+            break;
+        }
+        case Rosen::Rotation::ROTATION_90: {
+            displayX -= (g_drawingInfo.pixelMap->GetWidth() - g_drawingInfo.pixelMap->GetHeight()) / TWICE_SIZE +
+                g_drawingInfo.pixelMapX - g_drawingInfo.pixelMapY;
+            displayY -= (g_drawingInfo.pixelMap->GetWidth() - g_drawingInfo.pixelMap->GetHeight()) / TWICE_SIZE +
+                g_drawingInfo.pixelMapX + g_drawingInfo.pixelMap->GetHeight() + g_drawingInfo.pixelMapY;
+            break;
+        }
+        case Rosen::Rotation::ROTATION_180: {
+            displayX -= g_drawingInfo.pixelMap->GetWidth() + (g_drawingInfo.pixelMapX * TWICE_SIZE);
+            displayY -= g_drawingInfo.pixelMap->GetHeight() + (g_drawingInfo.pixelMapY * TWICE_SIZE);
+            break;
+        }
+        case Rosen::Rotation::ROTATION_270: {
+            displayX -= (g_drawingInfo.pixelMap->GetWidth() - g_drawingInfo.pixelMap->GetHeight()) / TWICE_SIZE +
+                g_drawingInfo.pixelMapX + g_drawingInfo.pixelMap->GetHeight() + g_drawingInfo.pixelMapY;
+            displayY += (g_drawingInfo.pixelMap->GetWidth() - g_drawingInfo.pixelMap->GetHeight()) / TWICE_SIZE +
+                g_drawingInfo.pixelMapX - g_drawingInfo.pixelMapY;
+            break;
+        }
+        default: {
+            FI_HILOGE("Invalid parameter, rotation:%{public}d", static_cast<int32_t>(rotation_));
+            break;
+        }
+    }
+}
+
+void DragDrawing::DrawRotateDisplayXY(float positionX, float positionY)
+{
+    FI_HILOGI("enter");
+    float adjustSize = TWELVE_SIZE * GetScaling();
+    float parentPositionX = positionX + g_drawingInfo.pixelMapX;
+    float parentPositionY = positionY + g_drawingInfo.pixelMapY - adjustSize;
+    auto parentNode = g_drawingInfo.parentNode;
+    auto pixelMap  = g_drawingInfo.pixelMap;
+    CHKPV(parentNode);
+    CHKPV(pixelMap);
+    parentNode->SetBounds(parentPositionX, parentPositionY, pixelMap->GetWidth(),
+        pixelMap->GetHeight() + adjustSize);
+    parentNode->SetFrame(parentPositionX, parentPositionY, pixelMap->GetWidth(),
+        pixelMap->GetHeight() + adjustSize);
+    if (!g_drawingInfo.multiSelectedNodes.empty() && !g_drawingInfo.multiSelectedPixelMaps.empty()) {
+        DoMultiSelectedAnimation(parentPositionX, parentPositionY, adjustSize, false);
+    }
+    FI_HILOGI("leave");
+}
