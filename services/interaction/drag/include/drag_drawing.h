@@ -419,3 +419,57 @@ private:
 } // namespace Msdp
 } // namespace OHOS
 #endif // DRAG_DRAWING_H
+template <typename T>
+void DragDrawing::AdjustRotateDisplayXY(T &displayX, T &displayY)
+{
+    FI_HILOGI("rotation:%{public}d", static_cast<int32_t>(rotation_));
+    CHKPV(g_drawingInfo.pixelMap);
+    switch (rotation_) {
+        case Rosen::Rotation::ROTATION_0: {
+            break;
+        }
+        case Rosen::Rotation::ROTATION_90: {
+            displayX -= (g_drawingInfo.pixelMap->GetWidth() - g_drawingInfo.pixelMap->GetHeight()) / TWICE_SIZE +
+                g_drawingInfo.pixelMapX - g_drawingInfo.pixelMapY;
+            displayY -= (g_drawingInfo.pixelMap->GetWidth() - g_drawingInfo.pixelMap->GetHeight()) / TWICE_SIZE +
+                g_drawingInfo.pixelMapX + g_drawingInfo.pixelMap->GetHeight() + g_drawingInfo.pixelMapY;
+            break;
+        }
+        case Rosen::Rotation::ROTATION_180: {
+            displayX -= g_drawingInfo.pixelMap->GetWidth() + (g_drawingInfo.pixelMapX * TWICE_SIZE);
+            displayY -= g_drawingInfo.pixelMap->GetHeight() + (g_drawingInfo.pixelMapY * TWICE_SIZE);
+            break;
+        }
+        case Rosen::Rotation::ROTATION_270: {
+            displayX -= (g_drawingInfo.pixelMap->GetWidth() - g_drawingInfo.pixelMap->GetHeight()) / TWICE_SIZE +
+                g_drawingInfo.pixelMapX + g_drawingInfo.pixelMap->GetHeight() + g_drawingInfo.pixelMapY;
+            displayY += (g_drawingInfo.pixelMap->GetWidth() - g_drawingInfo.pixelMap->GetHeight()) / TWICE_SIZE +
+                g_drawingInfo.pixelMapX - g_drawingInfo.pixelMapY;
+            break;
+        }
+        default: {
+            FI_HILOGE("Invalid parameter, rotation:%{public}d", static_cast<int32_t>(rotation_));
+            break;
+        }
+    }
+}
+
+void DragDrawing::DrawRotateDisplayXY(float positionX, float positionY)
+{
+    FI_HILOGI("enter");
+    float adjustSize = TWELVE_SIZE * GetScaling();
+    float parentPositionX = positionX + g_drawingInfo.pixelMapX;
+    float parentPositionY = positionY + g_drawingInfo.pixelMapY - adjustSize;
+    auto parentNode = g_drawingInfo.parentNode;
+    auto pixelMap  = g_drawingInfo.pixelMap;
+    CHKPV(parentNode);
+    CHKPV(pixelMap);
+    parentNode->SetBounds(parentPositionX, parentPositionY, pixelMap->GetWidth(),
+        pixelMap->GetHeight() + adjustSize);
+    parentNode->SetFrame(parentPositionX, parentPositionY, pixelMap->GetWidth(),
+        pixelMap->GetHeight() + adjustSize);
+    if (!g_drawingInfo.multiSelectedNodes.empty() && !g_drawingInfo.multiSelectedPixelMaps.empty()) {
+        DoMultiSelectedAnimation(parentPositionX, parentPositionY, adjustSize, false);
+    }
+    FI_HILOGI("leave");
+}
