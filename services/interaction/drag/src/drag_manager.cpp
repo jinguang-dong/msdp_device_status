@@ -48,6 +48,7 @@ namespace DeviceStatus {
 namespace {
 constexpr int32_t TIMEOUT_MS { 3000 };
 constexpr int32_t INTERVAL_MS { 500 };
+constexpr int32_t DEFUALT_COOPERATE_PRIORITY  { 10 };
 std::atomic<int64_t> g_startFilterTime { -1 };
 const std::string DRAG_STYLE_DEFAULT {"DEFAULT"};
 const std::string DRAG_STYLE_FORBIDDEN {"FORBIDDEN"};
@@ -677,7 +678,7 @@ int32_t DragManager::OnDragUp(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         dragDrawing_.EraseMouseIcon();
         FI_HILOGI("Set the pointer cursor visible");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-        MMI::InputManager::GetInstance()->SetPointerVisible(true);
+        MMI::InputManager::GetInstance()->SetPointerVisible(true, DEFUALT_COOPERATE_PRIORITY);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     }
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -1099,7 +1100,7 @@ int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation, cons
         if (dragState_ != DragState::MOTION_DRAGGING) {
             FI_HILOGI("Set the pointer cursor visible");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-            MMI::InputManager::GetInstance()->SetPointerVisible(true);
+            MMI::InputManager::GetInstance()->SetPointerVisible(true, DEFUALT_COOPERATE_PRIORITY);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
         }
     }
@@ -1136,7 +1137,7 @@ int32_t DragManager::OnSetDragWindowVisible(bool visible, bool isForce)
     if (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE && visible) {
         FI_HILOGI("Set the pointer cursor invisible");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-        MMI::InputManager::GetInstance()->SetPointerVisible(false);
+        MMI::InputManager::GetInstance()->SetPointerVisible(false, DEFUALT_COOPERATE_PRIORITY);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     }
     if (isForce) {
