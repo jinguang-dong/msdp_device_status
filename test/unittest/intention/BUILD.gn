@@ -27,5 +27,5 @@ group("intention_test") {
     "scheduler:unittest",
     "services:unittest",
     "stationary:unittest",
-   ]
+  ]
 }
