@@ -176,11 +176,11 @@ std::shared_ptr<IDevice> DeviceManager::AddDevice(const std::string &devNode)
     struct stat statbuf;
 
     if (stat(devPath.c_str(), &statbuf) != 0) {
-        FI_HILOGD("Invalid device path:%{public}s", devPath.c_str());
+        FI_HILOGD("Invalid device path:%{private}s", devPath.c_str());
         return nullptr;
     }
     if (!S_ISCHR(statbuf.st_mode)) {
-        FI_HILOGD("Not character device:%{public}s", devPath.c_str());
+        FI_HILOGD("Not character device:%{private}s", devPath.c_str());
         return nullptr;
     }
 
@@ -199,7 +199,7 @@ std::shared_ptr<IDevice> DeviceManager::AddDevice(const std::string &devNode)
     const std::string lSysPath { SYS_INPUT_PATH + devNode };
     char rpath[PATH_MAX];
     if (realpath(lSysPath.c_str(), rpath) == nullptr) {
-        FI_HILOGD("Invalid sysPath:%{public}s", lSysPath.c_str());
+        FI_HILOGD("Invalid sysPath:%{private}s", lSysPath.c_str());
         return nullptr;
     }
 
