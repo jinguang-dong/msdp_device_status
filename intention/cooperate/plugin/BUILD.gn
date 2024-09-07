@@ -82,6 +82,7 @@ ohos_shared_library("intention_cooperate") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwmutil_base",
+    "wifi:wifi_sdk",
   ]
 
   if (device_status_hisysevent_enable) {
