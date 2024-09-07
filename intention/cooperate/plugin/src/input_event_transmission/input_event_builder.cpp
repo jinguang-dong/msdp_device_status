@@ -243,7 +243,6 @@ int32_t InputEventBuilder::SetWifiScene(unsigned int scene)
     return RET_OK;
 }
 
-
 bool InputEventBuilder::UpdatePointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     if (pointerEvent->GetSourceType() != MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
