@@ -92,7 +92,6 @@ if (!is_arkui_x) {
       "graphic_2d:libcomposer",
       "graphic_2d:librender_service_base",
       "graphic_2d:librender_service_client",
-      "window_manager:window_animation",
       "hilog:libhilog",
       "hisysevent:libhisysevent",
       "hitrace:hitrace_meter",
@@ -107,6 +106,7 @@ if (!is_arkui_x) {
       "udmf:udmf_client",
       "window_manager:libdm",
       "window_manager:libwm_lite",
+      "window_manager:window_animation",
     ]
 
     if (device_status_hisysevent_enable) {
