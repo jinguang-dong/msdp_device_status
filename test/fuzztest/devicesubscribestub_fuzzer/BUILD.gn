@@ -26,7 +26,6 @@ deps_ex = [
   "cJSON:cjson",
   "c_utils:utils",
   "graphic_2d:libcomposer",
-  "window_manager:window_animation",
   "graphic_2d:librender_service_client",
   "hisysevent:libhisysevent",
   "hitrace:hitrace_meter",
@@ -35,6 +34,7 @@ deps_ex = [
   "image_framework:image_native",
   "window_manager:libwm",
   "window_manager:libdm",
+  "window_manager:window_animation",
 ]
 
 ###############################fuzztest#################################

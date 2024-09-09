@@ -23,13 +23,13 @@ deps_ex = [
   "c_utils:utils",
   "device_manager:devicemanagersdk",
   "graphic_2d:libcomposer",
-  "window_manager:window_animation",
   "graphic_2d:librender_service_client",
   "hisysevent:libhisysevent",
   "hitrace:hitrace_meter",
   "hilog:libhilog",
   "input:libmmi-client",
   "window_manager:libdm",
+  "window_manager:window_animation",
 ]
 
 ###############################fuzztest#################################
