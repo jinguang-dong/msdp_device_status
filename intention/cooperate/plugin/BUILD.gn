@@ -76,6 +76,7 @@ ohos_shared_library("intention_cooperate") {
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",

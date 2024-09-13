@@ -55,6 +55,7 @@ ohos_source_set("intention_dsoftbus_adapter") {
     "device_manager:devicemanagersdk",
     "dsoftbus:softbus_client",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"
