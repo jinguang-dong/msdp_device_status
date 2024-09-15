@@ -20,6 +20,7 @@
 
 #include "nocopyable.h"
 
+#include "i_context.h"
 #include "i_device_mgr.h"
 
 namespace OHOS {
@@ -32,11 +33,11 @@ public:
     DISALLOW_COPY_AND_MOVE(Enumerator);
 
     void SetDeviceMgr(IDeviceMgr *devMgr);
-    void ScanDevices();
+    void ScanDevices(IContext &context);
 
 private:
-    void ScanAndAddDevices();
-    void AddDevice(const std::string &devNode) const;
+    void ScanAndAddDevices(IContext &context);
+    void AddDevice(IContext &context, const std::string &devNode) const;
 
 private:
     IDeviceMgr *devMgr_ { nullptr };
