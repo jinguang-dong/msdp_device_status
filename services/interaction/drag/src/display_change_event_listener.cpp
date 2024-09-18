@@ -79,6 +79,9 @@ void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)
     if (currentRotation == lastRotation_) {
         return;
     }
+    if (!IsSceneBoardEnabled()) {
+        currentRotation = Rosen::Rotation::ROTATION_0;
+    }
     lastRotation_ = currentRotation;
     CHKPV(context_);
     int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, currentRotation] {
