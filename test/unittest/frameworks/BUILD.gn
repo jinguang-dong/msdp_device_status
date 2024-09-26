@@ -45,6 +45,7 @@ ohos_unittest("InteractionManagerTest") {
     "access_token:libtokensetproc_shared",
     "c_utils:utils",
     "graphic_2d:librender_service_client",
+    "graphic_2d:render_service_client_src",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
@@ -72,6 +73,7 @@ ohos_unittest("InteractionDragDrawingTest") {
   external_deps = [
     "c_utils:utils",
     "graphic_2d:librender_service_client",
+    "graphic_2d:render_service_client_src",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
@@ -106,6 +108,7 @@ ohos_unittest("InteractionMouseLocationTest") {
     "c_utils:utils",
     "device_manager:devicemanagersdk",
     "graphic_2d:librender_service_client",
+    "graphic_2d:render_service_client_src",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",

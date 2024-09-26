@@ -53,6 +53,7 @@ ohos_unittest("SocketSessionTest") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
+    "graphic_2d:render_service_client_src",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
