@@ -93,6 +93,8 @@ int32_t DragClient::AddDraglistener(ITunnelClient &tunnel, DragListenerPtr liste
         DefaultReply reply {};
         FI_HILOGI("Start drag listening");
 
+
+
         int32_t ret = tunnel.AddWatch(Intention::DRAG, DragRequestID::ADD_DRAG_LISTENER, param, reply);
         if (ret != RET_OK) {
             FI_HILOGE("ITunnelClient::AddWatch fail");
