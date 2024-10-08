@@ -16,6 +16,8 @@ import("device_status.gni")
 group("devicestatus_service_group") {
   deps = []
 
+
+
   if (device_status_intention_framework) {
     deps += [ "${device_status_root_path}/intention/cooperate/plugin:intention_cooperate" ]
   }
