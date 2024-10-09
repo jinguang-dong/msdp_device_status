@@ -66,10 +66,9 @@ private:
 private:
     bool SetBufferSize(int32_t sockFd, int32_t bufSize);
     void DispatchOne();
-    void OnEpollIn(IEpollEventSource &source);
+    void OnEpollIn(int32_t fd);
     void ReleaseSession(int32_t fd);
     void ReleaseSessionByPid(int32_t pid);
-    std::shared_ptr<SocketSession> FindSession(int32_t fd) const;
     sptr<AppExecFwk::IAppMgr> GetAppMgr();
     bool AddSession(std::shared_ptr<SocketSession> session);
     void DumpSession(const std::string& title) const;
