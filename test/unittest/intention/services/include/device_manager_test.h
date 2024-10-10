@@ -16,19 +16,21 @@
 #ifndef TIMER_MANAGER_TEST_H
 #define TIMER_MANAGER_TEST_H
 
-#include <fcntl.h>
 #include <gtest/gtest.h>
 #include <memory>
 #include <string>
 
+#include <fcntl.h>
 #include "nocopyable.h"
 
+#include "cooperate_events.h"
 #include "delegate_tasks.h"
 #include "device_manager.h"
 #include "devicestatus_define.h"
 #include "devicestatus_delayed_sp_singleton.h"
 #include "drag_manager.h"
 #include "i_context.h"
+#include "i_device_observer.h"
 #include "timer_manager.h"
 
 #include "intention_service.h"
@@ -77,12 +79,16 @@ private:
     int32_t EpollCtl(int32_t fd, int32_t op, struct epoll_event &event);
     int32_t EpollWait(int32_t maxevents, int32_t timeout, struct epoll_event &events);
     void EpollClose();
-    __attribute__((no_sanitize("cfi"))) int32_t InitTimerMgr();
+    int32_t InitTimerMgr();
+    int32_t InitDevMgr();
     void OnThread();
     void OnTimeout(const epoll_event &ev);
+    void OnDeviceMgr(const epoll_event &ev);
+    int32_t EnableDevMgr(int32_t nRetries);
+    void DisableDevMgr();
     int32_t InitDelegateTasks();
     void OnDelegateTask(const struct epoll_event &ev);
-    __attribute__((no_sanitize("cfi"))) static ContextService* GetInstance();
+    static ContextService* GetInstance();
 private:
     std::atomic<ServiceRunningState> state_ { ServiceRunningState::STATE_NOT_START };
     std::thread worker_;
@@ -99,7 +105,21 @@ private:
     std::unique_ptr<IDSoftbusAdapter> dsoftbusAda_;
 };
 
-class TimerManagerTest : public testing::Test {
+class DeviceObserverTest : public IDeviceObserver {
+public:
+    DeviceObserverTest() : IDeviceObserver() {};
+    ~DeviceObserverTest() = default;
+    void OnDeviceAdded(std::shared_ptr<IDevice>) override
+    {
+        return;
+    };
+    void OnDeviceRemoved(std::shared_ptr<IDevice>) override
+    {
+        return;
+    };
+};
+
+class IntentionDeviceManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();

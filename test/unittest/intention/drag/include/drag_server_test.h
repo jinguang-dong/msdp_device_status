@@ -13,38 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef INTENTION_SERVICE_TEST_H
-#define INTENTION_SERVICE_TEST_H
+#ifndef DRAG_MANAGER_TEST_H
+#define DRAG_MANAGER_TEST_H
 
 #include <gtest/gtest.h>
-#include "nocopyable.h"
 
 #include "delegate_tasks.h"
 #include "device_manager.h"
 #include "devicestatus_define.h"
 #include "devicestatus_delayed_sp_singleton.h"
+#include "drag_client.h"
 #include "drag_manager.h"
 #include "i_context.h"
-#include "timer_manager.h"
-
-#include "intention_service.h"
 #include "socket_session_manager.h"
+#include "timer_manager.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class MockDelegateTasks : public IDelegateTasks {
-public:
-    int32_t PostSyncTask(DTaskCallback callback) override;
-    int32_t PostAsyncTask(DTaskCallback callback) override;
-};
-
 class ContextService final : public IContext {
-public:
     ContextService();
-    ~ContextService() = default;
+    ~ContextService();
     DISALLOW_COPY_AND_MOVE(ContextService);
-
+public:
     IDelegateTasks& GetDelegateTasks() override;
     IDeviceManager& GetDeviceManager() override;
     ITimerManager& GetTimerManager() override;
@@ -55,23 +46,14 @@ public:
     IInputAdapter& GetInput() override;
     IDSoftbusAdapter& GetDSoftbus() override;
     static ContextService* GetInstance();
+
 private:
-    MockDelegateTasks delegateTasks_;
-    DeviceManager devMgr_;
-    TimerManager timerMgr_;
-    DragManager dragMgr_;
-    SocketSessionManager socketSessionMgr_;
-    std::unique_ptr<IDDMAdapter> ddm_ { nullptr };
-    std::unique_ptr<IInputAdapter> input_ { nullptr };
-    std::unique_ptr<IPluginManager> pluginMgr_ { nullptr };
-    std::unique_ptr<IDSoftbusAdapter> dsoftbus_ { nullptr };
-    sptr<IntentionService> intention_ { nullptr };
+    std::unique_ptr<IDDMAdapter> ddm_;
 };
 
-class IntentionServiceTest : public testing::Test {
+class DragServerTest : public testing::Test {
 public:
     static void SetUpTestCase();
-    static void TearDownTestCase();
     void SetUp();
     void TearDown();
     static std::shared_ptr<Media::PixelMap> CreatePixelMap(int32_t width, int32_t height);
@@ -82,4 +64,4 @@ public:
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // INTENTION_SERVICE_TEST_H
+#endif // DRAG_MANAGER_TEST_H

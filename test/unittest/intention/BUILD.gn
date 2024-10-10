@@ -11,14 +11,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../../../build/test.gni")
+import("//build/test.gni")
+import("../../../device_status.gni")
 
-group("devicestatus_tests") {
+group("intention_test") {
   testonly = true
   deps = []
 
   deps += [
-    "fuzztest:device_status_fuzztest",
-    "unittest:device_status_unittest",
-  ]
+    "adapters:unittest",
+    "common:unittest",
+    "cooperate:unittest",
+    "drag:unittest",
+    "ipc:unittest",
+    "scheduler:unittest",
+    "services:unittest",
+    "stationary:unittest",
+   ]
 }
