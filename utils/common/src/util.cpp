@@ -339,6 +339,45 @@ void GetRotatePolicy(bool &isScreenRotation, std::vector<std::string> &foldRotat
     }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 }
+
+bool IsSceneBoardEnabled()
+{
+    static bool isSceneBoardEnabled = false;
+    static bool initialized = false;
+    if (!initialized) {
+        if (!InitWithConfigFile("/etc/sceneboard.config", isSceneBoardEnabled)) {
+            FI_HILOGE("Failed to init scene board judgement");
+            return false;
+        }
+        initialized = true;
+    }
+    return isSceneBoardEnabled;
+}
+
+std::ifstream& SafeGetLine(std::ifstream& configFile, std::string& line)
+{
+    std::getline(configFile, line);
+    if (!line.empty() && (line.back() == '\r')) {
+        line.pop_back();
+    }
+    return configFile;
+}
+
+bool InitWithConfigFile(const char* filePath, bool& enabled)
+{
+    char checkPath[PATH_MAX] = { 0 };
+    if (realpath(filePath, checkPath) == nullptr) {
+        FI_HILOGE("realpath failed, path:%{private}s", filePath);
+        return false;
+    }
+    std::ifstream configFile(checkPath);
+    std::string line;
+    if (configFile.is_open() && SafeGetLine(configFile, line) && line == "ENABLED") {
+        enabled = true;
+    }
+    configFile.close();
+    return true;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

@@ -16,6 +16,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <fstream>
 #include <limits>
 #include <string>
 #include <vector>
@@ -30,21 +31,21 @@ enum class BizState {
     STATE_BEGIN = 1,
     STATE_END = 2
 };
- 
+
 enum class BizStage {
     STAGE_START_DRAG = 1,
     STAGE_STOP_DRAG,
     STAGE_MOTION_DRAGGING,
 	STAGE_DRAGGING
 };
- 
+
 enum class StageRes {
     RES_IDLE = 0,
 	RES_SUCCESS,
 	RES_FAIL,
     RES_CANCEL
 };
- 
+
 enum class DragRadarErrCode {
     DRAG_SUCCESS = 0,
     FAILED_INIT_DRAWING = 61210623,
@@ -58,7 +59,7 @@ enum class DragRadarErrCode {
     REPEATE_STOP_DRAG_EXCEPTION,
     FAILED_SYNC_DATA_FROM_UDMF
 };
- 
+
 struct DragRadarInfo {
     std::string funcName;
     int32_t bizState { -1 };
@@ -154,6 +155,9 @@ bool IsValidSvgPath(const std::string &filePath);
 bool IsValidSvgFile(const std::string &filePath);
 bool IsNum(const std::string &str);
 void GetRotatePolicy(bool &isScreenRotation, std::vector<std::string> &foldRotatePolicys);
+bool IsSceneBoardEnabled();
+std::ifstream& SafeGetLine(std::ifstream& configFile, std::string& line);
+bool InitWithConfigFile(const char* filePath, bool& enabled);
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
