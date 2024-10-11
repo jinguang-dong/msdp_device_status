@@ -15,7 +15,6 @@
 
 #include "test_context.h"
 
-#include "ddm_adapter.h"
 #include "dsoftbus_adapter.h"
 #include "fi_log.h"
 #include "plugin_manager.h"
@@ -133,7 +132,6 @@ void MockPluginManager::UnloadMotionDrag()
 
 TestContext::TestContext()
 {
-    ddm_ = std::make_unique<DDMAdapter>();
     input_ = std::make_unique<MockInputAdapter>();
     pluginMgr_ = std::make_unique<MockPluginManager>(this);
     dsoftbus_ = std::make_unique<DSoftbusAdapter>();
@@ -162,11 +160,6 @@ IDragManager& TestContext::GetDragManager()
 ISocketSessionManager& TestContext::GetSocketSessionManager()
 {
     return socketSessionMgr_;
-}
-
-IDDMAdapter& TestContext::GetDDM()
-{
-    return *ddm_;
 }
 
 IPluginManager& TestContext::GetPluginManager()
