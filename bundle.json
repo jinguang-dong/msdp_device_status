@@ -61,11 +61,10 @@
         "ylong_runtime",
         "dfs_service",
         "qos_manager",
-        "memmgr",
-        "os_account",
-        "libxml2"
+        "memmgr"
       ],
       "third_party": [
+        "libxml2",
         "libuv",
         "openssl",
         "jsoncpp"
