@@ -16,7 +16,6 @@
 #define BUFF_SIZE 100
 #include "intention_service_test.h"
 
-#include "ddm_adapter.h"
 #include "drag_data_manager.h"
 #include "drag_params.h"
 #include "drag_server.h"
@@ -89,7 +88,6 @@ ContextService* ContextService::GetInstance()
 
 ContextService::ContextService()
 {
-    ddm_ = std::make_unique<DDMAdapter>();
     input_ = std::make_unique<InputAdapter>();
     pluginMgr_ = std::make_unique<PluginManager>(this);
     dsoftbus_ = std::make_unique<DSoftbusAdapter>();
@@ -118,11 +116,6 @@ IDragManager& ContextService::GetDragManager()
 ISocketSessionManager& ContextService::GetSocketSessionManager()
 {
     return socketSessionMgr_;
-}
-
-IDDMAdapter& ContextService::GetDDM()
-{
-    return *ddm_;
 }
 
 IPluginManager& ContextService::GetPluginManager()
