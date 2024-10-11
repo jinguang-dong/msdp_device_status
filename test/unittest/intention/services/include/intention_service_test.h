@@ -49,7 +49,6 @@ public:
     IDeviceManager& GetDeviceManager() override;
     ITimerManager& GetTimerManager() override;
     IDragManager& GetDragManager() override;
-    IDDMAdapter& GetDDM() override;
     IPluginManager& GetPluginManager() override;
     ISocketSessionManager& GetSocketSessionManager() override;
     IInputAdapter& GetInput() override;
@@ -61,7 +60,6 @@ private:
     TimerManager timerMgr_;
     DragManager dragMgr_;
     SocketSessionManager socketSessionMgr_;
-    std::unique_ptr<IDDMAdapter> ddm_ { nullptr };
     std::unique_ptr<IInputAdapter> input_ { nullptr };
     std::unique_ptr<IPluginManager> pluginMgr_ { nullptr };
     std::unique_ptr<IDSoftbusAdapter> dsoftbus_ { nullptr };
