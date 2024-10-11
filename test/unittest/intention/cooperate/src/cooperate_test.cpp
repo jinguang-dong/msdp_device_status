@@ -16,7 +16,6 @@
 
 #include "cooperate.h"
 #include "cooperate_params.h"
-#include "ddm_adapter.h"
 #include "input_adapter.h"
 #include "i_cooperate.h"
 #include "ipc_skeleton.h"
@@ -37,7 +36,6 @@ TimerManager g_timerMgr;
 DragManager g_dragMgr;
 ContextService *g_instance = nullptr;
 SocketSessionManager g_socketSessionMgr;
-std::unique_ptr<IDDMAdapter> g_ddm;
 std::unique_ptr<IInputAdapter> g_input;
 std::unique_ptr<IPluginManager> g_pluginMgr;
 std::unique_ptr<IDSoftbusAdapter> g_dsoftbus;
@@ -89,11 +87,6 @@ ISocketSessionManager& ContextService::GetSocketSessionManager()
     return g_socketSessionMgr;
 }
 
-IDDMAdapter& ContextService::GetDDM()
-{
-    return *g_ddm;
-}
-
 IPluginManager& ContextService::GetPluginManager()
 {
     return *g_pluginMgr;
@@ -132,7 +125,6 @@ void CooperateTest::SetUpTestCase() {}
 
 void CooperateTest::SetUp()
 {
-    g_ddm = std::make_unique<DDMAdapter>();
     g_input = std::make_unique<InputAdapter>();
     g_dsoftbus = std::make_unique<DSoftbusAdapter>();
     auto env = ContextService::GetInstance();
