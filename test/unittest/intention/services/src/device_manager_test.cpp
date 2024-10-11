@@ -16,7 +16,6 @@
 #include "device_manager_test.h"
 
 #include <unistd.h>
-#include "ddm_adapter.h"
 
 #undef LOG_TAG
 #define LOG_TAG "IntentionDeviceManagerTest"
@@ -42,7 +41,6 @@ const std::string TEST_DEV_NODE { "/dev/input/TestDeviceNode" };
 
 ContextService::ContextService()
 {
-    ddm_ = std::make_unique<DDMAdapter>();
     FI_HILOGI("OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK is on");
     OnStart();
 }
@@ -86,11 +84,6 @@ ContextService* ContextService::GetInstance()
 ISocketSessionManager& ContextService::GetSocketSessionManager()
 {
     return socketSessionMgr_;
-}
-
-IDDMAdapter& ContextService::GetDDM()
-{
-    return *ddm_;
 }
 
 IPluginManager& ContextService::GetPluginManager()
