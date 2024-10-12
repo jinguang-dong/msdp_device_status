@@ -194,8 +194,6 @@ struct DrawingInfo {
     int32_t displayId { -1 };
     int32_t pixelMapX { -1 };
     int32_t pixelMapY { -1 };
-    int32_t lastPixelMapX { -1 };
-    int32_t lastPixelMapY { -1 };
     int32_t displayX { -1 };
     int32_t displayY { -1 };
     float x { -1.0f };

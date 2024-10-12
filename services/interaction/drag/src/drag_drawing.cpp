@@ -89,6 +89,7 @@ constexpr float BEGIN_SCALE { 1.0f };
 constexpr float END_SCALE_FAIL { 1.2f };
 constexpr float END_SCALE_SUCCESS { 0.0f };
 constexpr float DEFAULT_PIVOT { 0.0f };
+constexpr float HALF_PIVOT { 0.5f };
 constexpr float START_STYLE_SCALE { 1.0f };
 constexpr float STYLE_CHANGE_SCALE { 1.1f };
 constexpr float STYLE_MAX_SCALE { 1.2f };
@@ -122,6 +123,7 @@ constexpr int32_t CURSOR_CIRCLE_MIDDLE { 2 };
 constexpr int32_t TWICE_SIZE { 2 };
 const Rosen::RSAnimationTimingCurve SPRING = Rosen::RSAnimationTimingCurve::CreateSpring(0.347f, 0.99f, 0.0f);
 constexpr int32_t HEX_FF { 0xFF };
+const std::string RENDER_THREAD_NAME { "os_dargRenderRunner" };
 constexpr float BEZIER_000 { 0.00f };
 constexpr float BEZIER_020 { 0.20f };
 constexpr float BEZIER_030 { 0.30f };
@@ -303,8 +305,15 @@ void DragDrawing::Draw(int32_t displayId, int32_t displayX, int32_t displayY, bo
         FI_HILOGE("Invalid displayId:%{public}d", displayId);
         return;
     }
+    int32_t mousePositionX = displayX;
+    int32_t mousePositionY = displayY;
     if (isNeedAdjustDisplayXY) {
         RotateDisplayXY(displayX, displayY);
+        mousePositionX = displayX;
+        mousePositionY = displayY;
+        g_drawingInfo.currentPositionX = static_cast<float>(displayX);
+        g_drawingInfo.currentPositionY = static_cast<float>(displayY);
+        AdjustRotateDisplayXY(displayX, displayY);
     }
     g_drawingInfo.displayId = displayId;
     g_drawingInfo.displayX = displayX;
@@ -321,11 +330,11 @@ void DragDrawing::Draw(int32_t displayId, int32_t displayX, int32_t displayY, bo
     CHKPV(g_drawingInfo.parentNode);
     CHKPV(g_drawingInfo.pixelMap);
     g_drawingInfo.parentNode->SetBounds(positionX, positionY, g_drawingInfo.pixelMap->GetWidth(),
-        g_drawingInfo.pixelMap->GetHeight());
+        g_drawingInfo.pixelMap->GetHeight() + adjustSize);
     g_drawingInfo.parentNode->SetFrame(positionX, positionY, g_drawingInfo.pixelMap->GetWidth(),
-        g_drawingInfo.pixelMap->GetHeight());
+        g_drawingInfo.pixelMap->GetHeight() + adjustSize);
     if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
-        DoDrawMouse();
+        DoDrawMouse(mousePositionX, mousePositionY);
     }
     if (!g_drawingInfo.multiSelectedNodes.empty() && !g_drawingInfo.multiSelectedPixelMaps.empty()) {
         MultiSelectedAnimation(positionX, positionY, adjustSize, isMultiSelectedAnimation);
@@ -340,9 +349,14 @@ void DragDrawing::UpdateDragPosition(int32_t displayId, float displayX, float di
         return;
     }
     RotatePosition(displayX, displayY);
+    g_drawingInfo.currentPositionX = displayX;
+    g_drawingInfo.currentPositionY = displayY;
     g_drawingInfo.displayId = displayId;
     g_drawingInfo.displayX = static_cast<int32_t>(displayX);
     g_drawingInfo.displayY = static_cast<int32_t>(displayY);
+    float mousePositionX = displayX;
+    float mousePositionY = displayY;
+    AdjustRotateDisplayXY(displayX, displayY);
     g_drawingInfo.x = displayX;
     g_drawingInfo.y = displayY;
     if (displayX < 0) {
@@ -359,31 +373,30 @@ void DragDrawing::UpdateDragPosition(int32_t displayId, float displayX, float di
     CHKPV(parentNode);
     CHKPV(pixelMap);
     parentNode->SetBounds(positionX, positionY, pixelMap->GetWidth(),
-        pixelMap->GetHeight());
+        pixelMap->GetHeight() + adjustSize);
     parentNode->SetFrame(positionX, positionY, pixelMap->GetWidth(),
-        pixelMap->GetHeight());
+        pixelMap->GetHeight() + adjustSize);
     if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
-        UpdateMousePosition();
+        UpdateMousePosition(mousePositionX, mousePositionY);
     }
     if (!g_drawingInfo.multiSelectedNodes.empty() && !g_drawingInfo.multiSelectedPixelMaps.empty()) {
         DoMultiSelectedAnimation(positionX, positionY, adjustSize);
     }
-    Rosen::RSTransaction::FlushImplicitTransaction();
+    if (rsUiDirector_ != nullptr) {
+        rsUiDirector_->SendMessages();
+    } else {
+        FI_HILOGE("rsUiDirector_ is nullptr");
+    }
 }
 
-void DragDrawing::DoMultiSelectedAnimation(float positionX, float positionY, float adjustSize)
+void DragDrawing::DoMultiSelectedAnimation(float positionX, float positionY, float adjustSize,
+    bool isMultiSelectedAnimation)
 {
     size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
     size_t multiSelectedPixelMapsSize = g_drawingInfo.multiSelectedPixelMaps.size();
     for (size_t i = 0; (i < multiSelectedNodesSize) && (i < multiSelectedPixelMapsSize); ++i) {
         std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
         std::shared_ptr<Media::PixelMap> multiSelectedPixelMap = g_drawingInfo.multiSelectedPixelMaps[i];
-        Rosen::RSAnimationTimingProtocol protocol;
-        if (i == FIRST_PIXELMAP_INDEX) {
-            protocol.SetDuration(SHORT_DURATION);
-        } else {
-            protocol.SetDuration(LONG_DURATION);
-        }
         auto pixelMap  = g_drawingInfo.pixelMap;
         CHKPV(pixelMap);
         CHKPV(multiSelectedNode);
@@ -391,13 +404,26 @@ void DragDrawing::DoMultiSelectedAnimation(float positionX, float positionY, flo
         float multiSelectedPositionX = positionX + (static_cast<float>(pixelMap->GetWidth()) / TWICE_SIZE) -
             (static_cast<float>(multiSelectedPixelMap->GetWidth()) / TWICE_SIZE);
         float multiSelectedPositionY = positionY + (static_cast<float>(pixelMap->GetHeight()) / TWICE_SIZE) -
-            (static_cast<float>(multiSelectedPixelMap->GetHeight()) / TWICE_SIZE);
-        Rosen::RSNode::Animate(protocol, Rosen::RSAnimationTimingCurve::EASE_IN_OUT, [&]() {
-            multiSelectedNode->SetBounds(multiSelectedPositionX, multiSelectedPositionY + adjustSize,
+            (static_cast<float>(multiSelectedPixelMap->GetHeight()) / TWICE_SIZE - adjustSize);
+        if (isMultiSelectedAnimation) {
+            Rosen::RSAnimationTimingProtocol protocol;
+            if (i == FIRST_PIXELMAP_INDEX) {
+                protocol.SetDuration(SHORT_DURATION);
+            } else {
+                protocol.SetDuration(LONG_DURATION);
+            }
+            Rosen::RSNode::Animate(protocol, Rosen::RSAnimationTimingCurve::EASE_IN_OUT, [&]() {
+                multiSelectedNode->SetBounds(multiSelectedPositionX, multiSelectedPositionY,
+                    multiSelectedPixelMap->GetWidth(), multiSelectedPixelMap->GetHeight());
+                multiSelectedNode->SetFrame(multiSelectedPositionX, multiSelectedPositionY,
+                    multiSelectedPixelMap->GetWidth(), multiSelectedPixelMap->GetHeight());
+            }, []() { FI_HILOGD("DoMultiSelectedAnimation end"); });
+        } else {
+            multiSelectedNode->SetBounds(multiSelectedPositionX, multiSelectedPositionY,
                 multiSelectedPixelMap->GetWidth(), multiSelectedPixelMap->GetHeight());
-            multiSelectedNode->SetFrame(multiSelectedPositionX, multiSelectedPositionY + adjustSize,
+            multiSelectedNode->SetFrame(multiSelectedPositionX, multiSelectedPositionY,
                 multiSelectedPixelMap->GetWidth(), multiSelectedPixelMap->GetHeight());
-        });
+        }
     }
 }
 
@@ -423,8 +449,6 @@ int32_t DragDrawing::UpdateShadowPic(const ShadowInfo &shadowInfo)
     g_drawingInfo.pixelMap = shadowInfo.pixelMap;
     g_drawingInfo.pixelMapX = shadowInfo.x;
     g_drawingInfo.pixelMapY = shadowInfo.y;
-    g_drawingInfo.lastPixelMapX = g_drawingInfo.pixelMapX;
-    g_drawingInfo.lastPixelMapY = g_drawingInfo.pixelMapY;
     if (!CheckNodesValid()) {
         FI_HILOGE("Check nodes valid failed");
         return RET_ERR;
@@ -983,7 +1007,7 @@ int32_t DragDrawing::DrawShadow(std::shared_ptr<Rosen::RSCanvasNode> shadowNode)
     FilterInfo filterInfo = g_drawingInfo.filterInfo;
     Rosen::Vector4f cornerRadiusVector = { filterInfo.cornerRadius1, filterInfo.cornerRadius2,
         filterInfo.cornerRadius3, filterInfo.cornerRadius4 };
-    shadowNode->SetCornerRadius(cornerRadiusVector * filterInfo.dipScale);
+    shadowNode->SetCornerRadius(cornerRadiusVector * filterInfo.dipScale * filterInfo.scale);
     shadowNode->SetAlpha(filterInfo.opacity);
     FI_HILOGD("leave");
     return RET_OK;
@@ -1019,6 +1043,11 @@ int32_t DragDrawing::DrawMouseIcon()
 
 void DragDrawing::FlushDragPosition(uint64_t nanoTimestamp)
 {
+    if (rsUiDirector_ != nullptr) {
+        rsUiDirector_->SetTimeStamp(nanoTimestamp, RENDER_THREAD_NAME);
+    } else {
+        FI_HILOGE("rsUiDirector_ is nullptr");
+    }
     DragMoveEvent event = dragSmoothProcessor_.SmoothMoveEvent(nanoTimestamp,
         vSyncStation_.GetVSyncPeriod());
     FI_HILOGD("Move position x:%{private}f, y:%{private}f, timestamp:%{public}" PRId64
@@ -1170,8 +1199,6 @@ void DragDrawing::InitDrawingInfo(const DragData &dragData)
             g_drawingInfo.pixelMapY = g_drawingInfo.pixelMapY * widthScale;
         }
     }
-    g_drawingInfo.lastPixelMapX = g_drawingInfo.pixelMapX;
-    g_drawingInfo.lastPixelMapY = g_drawingInfo.pixelMapY;
     g_drawingInfo.currentDragNum = dragData.dragNum;
     g_drawingInfo.sourceType = dragData.sourceType;
     g_drawingInfo.displayId = dragData.displayId;
@@ -1671,7 +1698,7 @@ void DragDrawing::PrintDragShadowInfo()
         return;
     }
     FI_HILOGI("dragType:%{public}s, shadowIsFilled:%{public}s, shadowMask:%{public}s, shadowColorStrategy :%{public}d, "
-        "shadowCorner:%{public}f, offsetX:%{public}f, offsetY:%{public}f, argb:%{public}u, elevation:%{public}f, "
+        "shadowCorner:%{public}f, offsetX:%{private}f, offsetY:%{private}f, argb:%{public}u, elevation:%{public}f, "
         "isHardwareAcceleration:%{public}s", filterInfo.dragType.c_str(),
         filterInfo.shadowIsFilled ? "true" : "false", filterInfo.shadowMask ? "true" : "false",
         filterInfo.shadowColorStrategy, filterInfo.shadowCorner, filterInfo.offsetX, filterInfo.offsetY,
@@ -1697,6 +1724,10 @@ bool DragDrawing::ParserFilterInfo(const std::string &filterInfoStr, FilterInfo 
     cJSON *dipScale = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "dip_scale");
     if (cJSON_IsNumber(dipScale)) {
         filterInfo.dipScale = AdjustDoubleValue(dipScale->valuedouble);
+    }
+    cJSON *scale = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "scale");
+    if (cJSON_IsNumber(scale)) {
+        filterInfo.scale = AdjustDoubleValue(scale->valuedouble);
     }
     ParserCornerRadiusInfo(filterInfoParser.json, g_drawingInfo.filterInfo);
     cJSON *dragType = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "drag_type");
@@ -1874,7 +1905,7 @@ void DragDrawing::RotateCanvasNode(float pivotX, float pivotY, float rotation)
             } else if (i == SECOND_PIXELMAP_INDEX) {
                 degrees = rotation + NEGATIVE_ANGLE;
             }
-            multiSelectedNode->SetPivot(pivotX, pivotY);
+            multiSelectedNode->SetPivot(HALF_PIVOT, HALF_PIVOT);
             multiSelectedNode->SetRotation(degrees);
         }
     }
@@ -1888,6 +1919,10 @@ void DragDrawing::RotateCanvasNode(float pivotX, float pivotY, float rotation)
         mouseIconNode->SetPivot(DEFAULT_PIVOT, DEFAULT_PIVOT);
         mouseIconNode->SetRotation(rotation);
     }
+    float positionX = g_drawingInfo.currentPositionX;
+    float positionY = g_drawingInfo.currentPositionY;
+    AdjustRotateDisplayXY(positionX, positionY);
+    DrawRotateDisplayXY(positionX, positionY);
     FI_HILOGD("leave");
 }
 
@@ -1990,9 +2025,9 @@ int32_t DragDrawing::SetNodesLocation(int32_t positionX, int32_t positionY)
     CHKPR(g_drawingInfo.parentNode, RET_ERR);
     CHKPR(g_drawingInfo.pixelMap, RET_ERR);
     Rosen::RSNode::Animate(protocol, SPRING, [&]() {
-        g_drawingInfo.parentNode->SetBounds(positionX, positionY, g_drawingInfo.pixelMap->GetWidth() + adjustSize,
+        g_drawingInfo.parentNode->SetBounds(positionX, positionY, g_drawingInfo.pixelMap->GetWidth(),
             g_drawingInfo.pixelMap->GetHeight() + adjustSize);
-        g_drawingInfo.parentNode->SetFrame(positionX, positionY, g_drawingInfo.pixelMap->GetWidth() + adjustSize,
+        g_drawingInfo.parentNode->SetFrame(positionX, positionY, g_drawingInfo.pixelMap->GetWidth(),
             g_drawingInfo.pixelMap->GetHeight() + adjustSize);
     });
     g_drawingInfo.startNum = START_TIME;
@@ -2009,7 +2044,7 @@ int32_t DragDrawing::EnterTextEditorArea(bool enable)
     if (enable) {
         DRAG_DATA_MGR.SetInitialPixelMapLocation({ g_drawingInfo.pixelMapX, g_drawingInfo.pixelMapY });
         needRotatePixelMapXY_ = true;
-        RotatePixelMapXY(g_drawingInfo.pixelMapX, g_drawingInfo.pixelMapY);
+        RotatePixelMapXY();
     } else {
         needRotatePixelMapXY_ = false;
         auto initialPixelMapLocation = DRAG_DATA_MGR.GetInitialPixelMapLocation();
@@ -2017,8 +2052,11 @@ int32_t DragDrawing::EnterTextEditorArea(bool enable)
         g_drawingInfo.pixelMapY = initialPixelMapLocation.second;
     }
     DRAG_DATA_MGR.SetPixelMapLocation({ g_drawingInfo.pixelMapX, g_drawingInfo.pixelMapY });
-    int32_t positionX = g_drawingInfo.displayX + g_drawingInfo.pixelMapX;
-    int32_t positionY = g_drawingInfo.displayY + g_drawingInfo.pixelMapY - TWELVE_SIZE * GetScaling();
+    float displayX = g_drawingInfo.currentPositionX;
+    float displayY = g_drawingInfo.currentPositionY;
+    AdjustRotateDisplayXY(displayX, displayY);
+    int32_t positionX = displayX + g_drawingInfo.pixelMapX;
+    int32_t positionY = displayY + g_drawingInfo.pixelMapY - TWELVE_SIZE * GetScaling();
     if (RunAnimation([this, positionX, positionY] {
         return this->SetNodesLocation(positionX, positionY);
     }) != RET_OK) {
@@ -2103,7 +2141,7 @@ int32_t DragDrawing::UpdatePreviewStyleWithAnimation(const PreviewStyle &preview
     return RET_OK;
 }
 
-void DragDrawing::UpdateMousePosition()
+void DragDrawing::UpdateMousePosition(float mousePositionX, float mousePositionY)
 {
     if (!CheckNodesValid()) {
         FI_HILOGE("Check nodes valid failed");
@@ -2116,14 +2154,14 @@ void DragDrawing::UpdateMousePosition()
     std::shared_ptr<Rosen::RSCanvasNode> mouseIconNode = g_drawingInfo.nodes[MOUSE_ICON_INDEX];
     CHKPV(mouseIconNode);
     if (pointerStyle_.id == MOUSE_DRAG_CURSOR_CIRCLE_STYLE || pointerStyle_.options == MAGIC_STYLE_OPT) {
-        float positionX = g_drawingInfo.x - (static_cast<float>(g_drawingInfo.mouseWidth) / CURSOR_CIRCLE_MIDDLE);
-        float positionY = g_drawingInfo.y - (static_cast<float>(g_drawingInfo.mouseHeight) / CURSOR_CIRCLE_MIDDLE);
+        float positionX = mousePositionX - (static_cast<float>(g_drawingInfo.mouseWidth) / CURSOR_CIRCLE_MIDDLE);
+        float positionY = mousePositionY - (static_cast<float>(g_drawingInfo.mouseHeight) / CURSOR_CIRCLE_MIDDLE);
         mouseIconNode->SetBounds(positionX, positionY, g_drawingInfo.mouseWidth, g_drawingInfo.mouseHeight);
         mouseIconNode->SetFrame(positionX, positionY, g_drawingInfo.mouseWidth, g_drawingInfo.mouseHeight);
     } else {
-        mouseIconNode->SetBounds(g_drawingInfo.x, g_drawingInfo.y,
+        mouseIconNode->SetBounds(mousePositionX, mousePositionY,
             g_drawingInfo.mouseWidth, g_drawingInfo.mouseHeight);
-        mouseIconNode->SetFrame(g_drawingInfo.x, g_drawingInfo.y,
+        mouseIconNode->SetFrame(mousePositionX, mousePositionY,
             g_drawingInfo.mouseWidth, g_drawingInfo.mouseHeight);
     }
 }
@@ -2158,7 +2196,7 @@ int32_t DragDrawing::RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransac
     return RET_OK;
 }
 
-void DragDrawing::DoDrawMouse()
+void DragDrawing::DoDrawMouse(int32_t mousePositionX, int32_t mousePositionY)
 {
     if (!CheckNodesValid()) {
         FI_HILOGE("Check nodes valid failed");
@@ -2171,14 +2209,14 @@ void DragDrawing::DoDrawMouse()
     std::shared_ptr<Rosen::RSCanvasNode> mouseIconNode = g_drawingInfo.nodes[MOUSE_ICON_INDEX];
     CHKPV(mouseIconNode);
     if (pointerStyle_.id == MOUSE_DRAG_CURSOR_CIRCLE_STYLE || pointerStyle_.options == MAGIC_STYLE_OPT) {
-        int32_t positionX = g_drawingInfo.displayX - (g_drawingInfo.mouseWidth / CURSOR_CIRCLE_MIDDLE);
-        int32_t positionY = g_drawingInfo.displayY - (g_drawingInfo.mouseHeight / CURSOR_CIRCLE_MIDDLE);
+        int32_t positionX = mousePositionX - (g_drawingInfo.mouseWidth / CURSOR_CIRCLE_MIDDLE);
+        int32_t positionY = mousePositionY - (g_drawingInfo.mouseHeight / CURSOR_CIRCLE_MIDDLE);
         mouseIconNode->SetBounds(positionX, positionY, g_drawingInfo.mouseWidth, g_drawingInfo.mouseHeight);
         mouseIconNode->SetFrame(positionX, positionY, g_drawingInfo.mouseWidth, g_drawingInfo.mouseHeight);
     } else {
-        mouseIconNode->SetBounds(g_drawingInfo.displayX, g_drawingInfo.displayY,
+        mouseIconNode->SetBounds(mousePositionX, mousePositionY,
             g_drawingInfo.mouseWidth, g_drawingInfo.mouseHeight);
-        mouseIconNode->SetFrame(g_drawingInfo.displayX, g_drawingInfo.displayY,
+        mouseIconNode->SetFrame(mousePositionX, mousePositionY,
             g_drawingInfo.mouseWidth, g_drawingInfo.mouseHeight);
     }
 }
