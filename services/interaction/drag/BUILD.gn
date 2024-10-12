@@ -60,11 +60,10 @@ ohos_shared_library("interaction_drag") {
     defines += [ "USE_ROSEN_DRAWING" ]
   }
 
-  if (defined(input_ext_feature_magiccursor) &&
-      input_ext_feature_magiccursor) {
+  if (defined(input_ext_feature_magiccursor) && input_ext_feature_magiccursor) {
     defines += [ "OHOS_BUILD_ENABLE_MAGICCURSOR" ]
   }
-  
+
   deps = [
     "${device_status_root_path}/etc/drag_icon:device_status_drag_icon",
     "${device_status_root_path}/intention/prototype:intention_prototype",
