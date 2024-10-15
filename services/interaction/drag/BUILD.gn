@@ -13,6 +13,7 @@
 
 import("//build/config/components/multimodalinput/cursor_config.gni")
 import("../../../device_status.gni")
+import("//build/config/components/multimodalinput/cursor_config.gni")
 
 config("interaction_drag_public_config") {
   include_dirs = [ "include" ]
@@ -88,6 +89,7 @@ ohos_shared_library("interaction_drag") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "libxml2:libxml2",
     "image_framework:image_native",
     "init:libbegetutil",
     "input:libmmi-client",
