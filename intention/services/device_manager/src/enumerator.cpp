@@ -19,7 +19,6 @@
 #include <sys/stat.h>
 
 #include "devicestatus_define.h"
-#include "fi_log.h"
 #include "napi_constants.h"
 #include "utility.h"
 
@@ -37,13 +36,13 @@ void Enumerator::SetDeviceMgr(IDeviceMgr *devMgr)
     devMgr_ = devMgr;
 }
 
-void Enumerator::ScanDevices()
+void Enumerator::ScanDevices(IContext &context)
 {
     CALL_DEBUG_ENTER;
-    ScanAndAddDevices();
+    ScanAndAddDevices(context);
 }
 
-void Enumerator::ScanAndAddDevices()
+void Enumerator::ScanAndAddDevices(IContext &context)
 {
     CALL_DEBUG_ENTER;
     DIR *dir = opendir(DEV_INPUT_PATH.c_str());
@@ -61,17 +60,20 @@ void Enumerator::ScanAndAddDevices()
         if (!S_ISCHR(statbuf.st_mode)) {
             continue;
         }
-        AddDevice(devNode);
+        FI_HILOGI("Add input device(%{public}s)", devPath.c_str());
+        AddDevice(context, devNode);
     }
 
     closedir(dir);
 }
 
-void Enumerator::AddDevice(const std::string &devNode) const
+void Enumerator::AddDevice(IContext &context, const std::string &devNode) const
 {
-    CALL_DEBUG_ENTER;
-    CHKPV(devMgr_);
-    devMgr_->AddDevice(devNode);
+    context.GetDelegateTasks().PostAsyncTask([this, devNode] {
+        CHKPR(devMgr_, RET_ERR);
+        devMgr_->AddDevice(devNode);
+        return RET_OK;
+    });
 }
 } // namespace DeviceStatus
 } // namespace Msdp

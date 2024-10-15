@@ -18,17 +18,14 @@
 #include <algorithm>
 #include <cstring>
 #include <regex>
+#include <thread>
 #include <unistd.h>
 
 #include <sys/epoll.h>
 #include <sys/stat.h>
 
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#include "coordination_util.h"
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 #include "device.h"
 #include "devicestatus_define.h"
-#include "fi_log.h"
 #include "napi_constants.h"
 #include "utility.h"
 
@@ -116,7 +113,10 @@ int32_t DeviceManager::OnEnable()
         ret = RET_ERR;
         goto DISABLE_MONITOR;
     }
-    enumerator_.ScanDevices();
+    std::thread([this]() {
+        CHKPV(context_);
+        enumerator_.ScanDevices(*context_);
+    }).detach();
     return RET_OK;
 
 DISABLE_MONITOR:
