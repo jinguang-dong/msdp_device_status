@@ -43,6 +43,7 @@ const std::vector<std::string> vecDeviceStatusValue {
     "VALUE_ENTER", "VALUE_EXIT"
 };
 thread_local DeviceStatusNapi *g_obj = nullptr;
+thread_local bool g_isReleased = false;
 } // namespace
 std::map<int32_t, sptr<IRemoteDevStaCallback>> DeviceStatusNapi::callbacks_;
 napi_ref DeviceStatusNapi::devicestatusValueRef_ = nullptr;
@@ -101,7 +102,8 @@ DeviceStatusNapi::~DeviceStatusNapi()
     if (devicestatusValueRef_ != nullptr) {
         napi_delete_reference(env_, devicestatusValueRef_);
     }
-    if (g_obj != nullptr) {
+    if (g_obj != nullptr && !g_isReleased) {
+        g_isReleased = true;
         delete g_obj;
         g_obj = nullptr;
     }
@@ -337,6 +339,7 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatusCallback(napi_env env, napi_ca
     if (g_obj == nullptr) {
         g_obj = new (std::nothrow) DeviceStatusNapi(env);
         CHKPP(g_obj);
+        g_isReleased = false;
         FI_HILOGD("Didn't find object, so created it");
     }
     napi_wrap(env, nullptr, reinterpret_cast<void *>(g_obj),
@@ -444,6 +447,7 @@ napi_value DeviceStatusNapi::GetDeviceStatus(napi_env env, napi_callback_info in
     if (g_obj == nullptr) {
         g_obj = new (std::nothrow) DeviceStatusNapi(env);
         CHKPP(g_obj);
+        g_isReleased = false;
         napi_wrap(env, nullptr, reinterpret_cast<void *>(g_obj),
             [](napi_env env, void *data, void *hint) {
                 (void)env;
