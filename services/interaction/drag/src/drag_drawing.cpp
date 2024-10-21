@@ -1228,7 +1228,7 @@ void DragDrawing::FlushDragPosition(uint64_t nanoTimestamp)
     FI_HILOGD("Move position x:%{private}f, y:%{private}f, timestamp:%{public}" PRId64
         "displayId:%{public}d", event.displayX, event.displayY, event.timestamp, event.displayId);
     StartTrace(HITRACE_TAG_MSDP,
-                "OnDragMove,displayX:" + std::to_string(displayX) + ",displayY:" + std::to_string(displayY));     
+                "OnDragMove,displayX:" + std::to_string(event.displayX) + ",displayY:" + std::to_string(event.displayY));     
     UpdateDragPosition(event.displayId, event.displayX, event.displayY);
     FinishTrace(HITRACE_TAG_MSDP);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
