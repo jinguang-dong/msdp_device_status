@@ -342,6 +342,7 @@ int32_t DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     int32_t sourceType = pointerEvent->GetSourceType();
     dragDrawing_.OnDragMove(pointerEvent->GetTargetDisplayId(), displayX,
         displayY, pointerEvent->GetActionTime());
+    StartTrace(HITRACE_TAG_MSDP, "OnDragMove,displayX:" + std::to_string(displayX) + ",displayY:" + std::to_string(displayY));
     FI_HILOGD("ARKUI_X SourceType:%{public}d, pointerId:%{public}d, displayX:%{private}d, displayY:%{private}d",
         sourceType, pointerId, displayX, displayY);
 
