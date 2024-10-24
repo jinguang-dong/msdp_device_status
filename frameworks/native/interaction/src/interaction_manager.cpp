@@ -113,6 +113,15 @@ int32_t InteractionManager::SetDamplingCoefficient(uint32_t direction, double co
 #endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
 }
 
+int32_t InteractionManager::SetSectionalDamplingCoefficient(uint32_t direction, std::map<int32_t, double> coefficientMap)
+{
+#ifdef OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
+    return INTER_MGR_IMPL.SetSectionalDamplingCoefficient(direction, coefficientMap);
+#else
+    return RET_OK;
+#endif // OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK
+}
+
 int32_t InteractionManager::UpdateDragStyle(DragCursorStyle style, int32_t eventId)
 {
     return INTER_MGR_IMPL.UpdateDragStyle(style, eventId);

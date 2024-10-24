@@ -57,6 +57,7 @@ public:
     int32_t RegisterEventListener(const std::string &networkId, std::shared_ptr<IEventListener> listener);
     int32_t UnregisterEventListener(const std::string &networkId, std::shared_ptr<IEventListener> listener = nullptr);
     int32_t SetDamplingCoefficient(uint32_t direction, double coefficient);
+    int32_t SetSectionalDamplingCoefficient(uint32_t direction, std::map<int32_t, double> coefficientMap);
     int32_t UpdateDragStyle(DragCursorStyle style, int32_t eventId = -1);
     int32_t StartDrag(const DragData &dragData, std::shared_ptr<IStartDragListener> listener);
     int32_t StopDrag(const DragDropResult &dropResult);

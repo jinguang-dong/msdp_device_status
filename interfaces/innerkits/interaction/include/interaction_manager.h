@@ -145,6 +145,8 @@ public:
 
     int32_t SetDamplingCoefficient(uint32_t direction, double coefficient);
 
+    int32_t SetSectionalDamplingCoefficient(uint32_t direction, std::map<int32_t, double> coefficientMap);
+
     /**
      * @brief Starts dragging.
      * @param dragData Indicates additional data used for dragging.

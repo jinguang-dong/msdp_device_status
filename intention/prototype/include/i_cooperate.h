@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <string>
+#include <map>
 
 namespace OHOS {
 namespace Msdp {
@@ -79,6 +80,8 @@ public:
     virtual int32_t UnregisterEventListener(int32_t pid, const std::string &networkId) = 0;
     virtual int32_t GetCooperateState(const std::string &udId, bool &state) = 0;
     virtual int32_t SetDamplingCoefficient(uint32_t direction, double coefficient) = 0;
+    virtual int32_t SetSectionalDamplingCoefficient(uint32_t direction,
+        const std::map<int32_t, double> coefficientMap) = 0;
     virtual void Dump(int32_t fd) = 0;
 };
 } // namespace DeviceStatus

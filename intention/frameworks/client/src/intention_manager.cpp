@@ -288,6 +288,20 @@ int32_t IntentionManager::SetDamplingCoefficient(uint32_t direction, double coef
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
+int32_t IntentionManager::SetSectionalDamplingCoefficient(uint32_t direction, std::map<int32_t, double> coefficientMap)
+{
+    CALL_INFO_TRACE;
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    InitClient();
+    return cooperate_.SetSectionalDamplingCoefficient(*tunnel_, direction, coefficientMap);
+#else
+    (void)(direction);
+    (void)(coefficientMap);
+    FI_HILOGW("Coordination does not support");
+    return ERROR_UNSUPPORT;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+}
+
 int32_t IntentionManager::UpdateDragStyle(DragCursorStyle style, int32_t eventId)
 {
     CALL_DEBUG_ENTER;

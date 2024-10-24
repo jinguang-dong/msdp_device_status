@@ -53,6 +53,7 @@ enum class CooperateEventType {
     UNREGISTER_EVENT_LISTENER,
     UPDATE_COOPERATE_FLAG,
     SET_DAMPLING_COEFFICIENT,
+    SET_SECTIONAL_DAMPLING_COEFFICIENT,
     DUMP,
     APP_CLOSED,
     DDM_BOARD_ONLINE,
@@ -238,6 +239,11 @@ struct SetDamplingCoefficientEvent {
     double coefficient;
 };
 
+struct SetSectionalDamplingCoefficientEvent {
+    uint32_t direction;
+    std::map<int32_t, double> coefficientMap;
+};
+
 struct CooperateEvent {
     CooperateEvent() : type(CooperateEventType::QUIT) {}
 
@@ -267,6 +273,7 @@ struct CooperateEvent {
         ClientDiedEvent,
         UpdateCooperateFlagEvent,
         SetDamplingCoefficientEvent,
+        SetSectionalDamplingCoefficientEvent,
         DSoftbusSyncInputDevice,
         DSoftbusHotPlugEvent
     > event;

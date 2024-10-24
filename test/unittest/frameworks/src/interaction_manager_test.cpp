@@ -1066,6 +1066,23 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDamplingCoefficient, 
 }
 
 /**
+ * @tc.name: Set
+ * @tc.desc: Set sectional dampling coefficient.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetSectionalDamplingCoefficient, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
+    constexpr double damplingCoefficient { 0.1 };
+    std::map<int32_t, double> damplingCoefficientMap = { {100, damplingCoefficient} };
+    auto ret = InteractionManager::GetInstance()->SetSectionalDamplingCoefficient(
+        COORDINATION_DAMPLING_RIGHT, damplingCoefficientMap);
+    ASSERT_EQ(ret, RET_OK);
+}
+
+/**
  * @tc.name: InteractionManagerTest_Draglistener_Mouse
  * @tc.desc: Drag listener
  * @tc.type: FUNC
