@@ -17,7 +17,9 @@
 #define COOPERATE_PARAMS_H
 
 #include <string>
+#include <map>
 
+#include "devicestatus_define.h"
 #include "intention_identity.h"
 
 namespace OHOS {
@@ -34,6 +36,7 @@ enum CooperateRequestID : uint32_t {
     REGISTER_EVENT_LISTENER,
     UNREGISTER_EVENT_LISTENER,
     SET_DAMPLING_COEFFICIENT,
+    SET_SECTIONAL_DAMPLING_COEFFICIENT,
 };
 
 struct StartCooperateParam final : public ParamBase {
@@ -89,6 +92,16 @@ struct SetDamplingCoefficientParam final : public ParamBase {
 
     uint32_t direction {};
     double coefficient { 1.0 };
+};
+
+struct SetSectionalDamplingCoefficientParam final : public ParamBase {
+    SetSectionalDamplingCoefficientParam() = default;
+    SetSectionalDamplingCoefficientParam(uint32_t direction, std::map<int32_t, double> &&coefficientMap);
+    bool Marshalling(MessageParcel &parcel) const override;
+    bool Unmarshalling(MessageParcel &parcel) override;
+
+    uint32_t direction {};
+    std::map<int32_t, double> coefficientMap_;
 };
 
 struct GetCooperateStateSyncParam final : public ParamBase {

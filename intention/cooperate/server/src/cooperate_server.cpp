@@ -197,20 +197,32 @@ int32_t CooperateServer::SetParam(CallingContext &context, uint32_t id, MessageP
         FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
         return ret;
     }
-    if (id != CooperateRequestID::SET_DAMPLING_COEFFICIENT) {
-        FI_HILOGE("Unexpected request (%{public}u)", id);
-        return RET_ERR;
-    }
-    SetDamplingCoefficientParam param {};
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("SetDamplingCoefficientParam::Unmarshalling fail");
-        return RET_ERR;
-    }
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
-    FI_HILOGI("SetDamplingCoefficient(0x%{public}x, %{public}.3f)", param.direction, param.coefficient);
-    return cooperate->SetDamplingCoefficient(param.direction, param.coefficient);
+    switch (id) {
+        case CooperateRequestID::SET_DAMPLING_COEFFICIENT: {
+            SetDamplingCoefficientParam param {};
+            if (!param.Unmarshalling(data)) {
+                FI_HILOGE("Unexpected request (%{public}u)", id);
+                return RET_ERR;
+            }
+            FI_HILOGI("SetDamplingCoefficient(0x%{public}x, %{public}.3f)", param.direction, param.coefficient);
+            return cooperate->SetDamplingCoefficient(param.direction, param.coefficient);
+        }
+        case CooperateRequestID::SET_SECTIONAL_DAMPLING_COEFFICIENT: {
+            SetSectionalDamplingCoefficientParam param {};
+            if (!param.Unmarshalling(data)) {
+                FI_HILOGE("Unexpected request (%{public}u)", id);
+                return RET_ERR;
+            }
+            return cooperate->SetSectionalDamplingCoefficient(param.direction, param.coefficientMap_);
+        }    
+        default: {
+            FI_HILOGE("Unexpected request (%{public}u)", id);
+            return RET_ERR;
+        }
+    }
 }
 
 int32_t CooperateServer::GetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)

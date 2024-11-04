@@ -14,6 +14,7 @@
  */
 
 #include "cooperate_params.h"
+#include "cooperate_data_packer.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -118,6 +119,26 @@ bool SetDamplingCoefficientParam::Unmarshalling(MessageParcel &parcel)
     return (
         parcel.ReadUint32(direction) &&
         parcel.ReadDouble(coefficient)
+    );
+}
+
+SetSectionalDamplingCoefficientParam::SetSectionalDamplingCoefficientParam(uint32_t direction,
+    std::map<int32_t, double> &&coefficientMap)
+    : direction(direction), coefficientMap_(std::move(coefficientMap)) {}
+
+bool SetSectionalDamplingCoefficientParam::Marshalling(MessageParcel &parcel) const
+{
+    return (
+        parcel.WriteUint32(direction) &&
+        (CoefficientPacker::Marshalling(coefficientMap_, parcel) == RET_OK)
+    );
+}
+
+bool SetSectionalDamplingCoefficientParam::Unmarshalling(MessageParcel &parcel)
+{
+    return (
+        parcel.ReadUint32(direction) &&
+        (CoefficientPacker::UnMarshalling(parcel, coefficientMap_) == RET_OK)
     );
 }
 

@@ -299,6 +299,20 @@ int32_t CooperateClient::SetDamplingCoefficient(ITunnelClient &tunnel, uint32_t 
     return ret;
 }
 
+int32_t CooperateClient::SetSectionalDamplingCoefficient(ITunnelClient &tunnel, uint32_t direction,
+    std::map<int32_t, double> coefficientMap)
+{
+    SetSectionalDamplingCoefficientParam param { direction, std::move(coefficientMap) };
+    DefaultReply reply;
+
+    auto ret = tunnel.SetParam(Intention::COOPERATE, CooperateRequestID::SET_SECTIONAL_DAMPLING_COEFFICIENT,
+        param, reply);
+    if (ret != RET_OK) {
+        FI_HILOGE("ITunnelClient::SetParam fail, error:%{public}d", ret);
+    }
+    return ret;
+}
+
 int32_t CooperateClient::AddHotAreaListener(ITunnelClient &tunnel, HotAreaListenerPtr listener)
 {
     CALL_DEBUG_ENTER;

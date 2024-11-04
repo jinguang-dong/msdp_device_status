@@ -281,6 +281,20 @@ int32_t Cooperate::SetDamplingCoefficient(uint32_t direction, double coefficient
     return RET_OK;
 }
 
+int32_t Cooperate::SetSectionalDamplingCoefficient(uint32_t direction, std::map<int32_t, double> coefficientMap)
+{
+    auto ret = context_.Sender().Send(CooperateEvent(
+        CooperateEventType::SET_SECTIONAL_DAMPLING_COEFFICIENT,
+        SetSectionalDamplingCoefficientEvent {
+            .direction = direction,
+            .coefficientMap = coefficientMap,
+        }));
+    if (ret != Channel<CooperateEvent>::NO_ERROR) {
+        FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
+    }
+    return RET_OK;
+}
+
 void Cooperate::Dump(int32_t fd)
 {
     CALL_DEBUG_ENTER;
@@ -313,6 +327,10 @@ void Cooperate::Loop()
                 break;
             }
             case CooperateEventType::SET_DAMPLING_COEFFICIENT: {
+                SetDamplingCoefficient(event);
+                break;
+            }
+            case CooperateEventType::SET_SECTIONAL_DAMPLING_COEFFICIENT: {
                 SetDamplingCoefficient(event);
                 break;
             }
@@ -365,6 +383,12 @@ void Cooperate::SetDamplingCoefficient(const CooperateEvent &event)
 {
     SetDamplingCoefficientEvent notice = std::get<SetDamplingCoefficientEvent>(event.event);
     context_.inputEventBuilder_.SetDamplingCoefficient(notice.direction, notice.coefficient);
+}
+
+void Cooperate::SetSectionalDamplingCoefficient(const CooperateEvent &event)
+{
+    SetSectionalDamplingCoefficientEvent notice = std::get<SetSectionalDamplingCoefficientEvent>(event.event);
+    context_.inputEventBuilder_.SetSectionalDamplingCoefficient(notice.direction, notice.coefficientMap);
 }
 
 extern "C" ICooperate* CreateInstance(IContext *env)

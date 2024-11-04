@@ -148,6 +148,67 @@ double InputEventBuilder::GetDamplingCoefficient(DamplingDirection direction) co
     return DEFAULT_DAMPLING_COEFFICIENT;
 }
 
+void InputEventBuilder::SetSectionalDamplingCoefficient(uint32_t direction, std::map<int32_t, double> coefficientMap)
+{
+    for (auto it = coefficientMap.begin(); it != coefficientMap.end(); ++it) {
+        if (it->second > MAX_DAMPLING_COEFFICENT) {
+            it->second = MAX_DAMPLING_COEFFICENT;
+        } else if (it->second < MIN_DAMPLING_COEFFICENT) {
+            it->second = MIN_DAMPLING_COEFFICENT;
+        }
+    }
+    if ((direction & COORDINATION_DAMPLING_UP) == COORDINATION_DAMPLING_UP) {
+        sectionalDamplingCoefficients_[DamplingDirection::DAMPLING_DIRECTION_UP] = coefficientMap;
+    }
+    if ((direction & COORDINATION_DAMPLING_DOWN) == COORDINATION_DAMPLING_DOWN) {
+        sectionalDamplingCoefficients_[DamplingDirection::DAMPLING_DIRECTION_DOWN] = coefficientMap;
+    }
+    if ((direction & COORDINATION_DAMPLING_LEFT) == COORDINATION_DAMPLING_LEFT) {
+        sectionalDamplingCoefficients_[DamplingDirection::DAMPLING_DIRECTION_LEFT] = coefficientMap;
+    }
+    if ((direction & COORDINATION_DAMPLING_RIGHT) == COORDINATION_DAMPLING_RIGHT) {
+        sectionalDamplingCoefficients_[DamplingDirection::DAMPLING_DIRECTION_RIGHT] = coefficientMap;
+    }
+}
+
+double InputEventBuilder::GetSectionalDamplingCoefficient(DamplingDirection direction) const
+{
+    if ((direction >= DamplingDirection::DAMPLING_DIRECTION_UP) &&
+        (direction < DamplingDirection::N_DAMPLING_DIRECTIONS)) {
+        std::map<int32_t, double> coefficientMap = sectionalDamplingCoefficients_[direction];
+        return FindLargestKeyLessThan(coefficientMap, direction);
+    }
+    return DEFAULT_DAMPLING_COEFFICIENT;
+}
+
+double InputEventBuilder::FindLargestKeyLessThan(const std::map<int32_t, double>& coefficientMap,
+    DamplingDirection direction) const
+{
+    auto it = coefficientMap.begin();
+    if ((direction == COORDINATION_DAMPLING_UP) ||
+        (direction == COORDINATION_DAMPLING_DOWN)) {
+        it = coefficientMap.lower_bound(cursorPos_.y);
+    } else if ((direction == COORDINATION_DAMPLING_LEFT) ||
+        (direction == COORDINATION_DAMPLING_RIGHT)) {
+        it = coefficientMap.lower_bound(cursorPos_.x);
+    }
+    if (it != coefficientMap.begin() && it != coefficientMap.end()) {
+        --it;
+        return it->second;
+    }
+    return DEFAULT_DAMPLING_COEFFICIENT;
+}
+
+void InputEventBuilder::SetCursorPos(const InputPointerEvent &event)
+{
+    if ((event.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
+        ((event.pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE) ||
+         (event.pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE))) {
+        cursorPos_ = event.position;
+    }
+}
+
+
 bool InputEventBuilder::OnPacket(const std::string &networkId, Msdp::NetPacket &packet)
 {
     if (networkId != remoteNetworkId_) {
@@ -275,6 +336,10 @@ bool InputEventBuilder::UpdatePointerEvent(std::shared_ptr<MMI::PointerEvent> po
         FI_HILOGE("DampPointerMotion fail");
         return false;
     }
+    if (!SectionalDampPointerMotion(pointerEvent)) {
+        FI_HILOGE("Sectional damp pointer motion fail");
+        return false;
+    }
     pointerEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_RAW_POINTER_MOVEMENT);
     int64_t time = Utility::GetSysClockTime();
     pointerEvent->SetActionTime(time);
@@ -317,6 +382,35 @@ bool InputEventBuilder::DampPointerMotion(std::shared_ptr<MMI::PointerEvent> poi
     } else {
         item.SetRawDy(static_cast<int32_t>(
             item.GetRawDy() * GetDamplingCoefficient(DamplingDirection::DAMPLING_DIRECTION_UP)));
+    }
+    pointerEvent->UpdatePointerItem(pointerEvent->GetPointerId(), item);
+    return true;
+}
+
+bool InputEventBuilder::SectionalDampPointerMotion(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
+{
+    MMI::PointerEvent::PointerItem item;
+    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), item)) {
+        FI_HILOGE("Corrupted pointer event");
+        return false;
+    }
+    // Dampling pointer movement.
+    // First transition will trigger special effect which would damp pointer movement. We want to
+    // damp pointer movement even further than that could be achieved by setting pointer speed.
+    // By scaling increment of pointer movement, we want to enlarge the range of pointer speed setting.
+    if (item.GetRawDx() >= 0) {
+        item.SetRawDx(static_cast<int32_t>(
+            item.GetRawDx() * GetSectionalDamplingCoefficient(DamplingDirection::DAMPLING_DIRECTION_RIGHT)));
+    } else {
+        item.SetRawDx(static_cast<int32_t>(
+            item.GetRawDx() * GetSectionalDamplingCoefficient(DamplingDirection::DAMPLING_DIRECTION_LEFT)));
+    }
+    if (item.GetRawDy() >= 0) {
+        item.SetRawDy(static_cast<int32_t>(
+            item.GetRawDy() * GetSectionalDamplingCoefficient(DamplingDirection::DAMPLING_DIRECTION_DOWN)));
+    } else {
+        item.SetRawDy(static_cast<int32_t>(
+            item.GetRawDy() * GetSectionalDamplingCoefficient(DamplingDirection::DAMPLING_DIRECTION_UP)));
     }
     pointerEvent->UpdatePointerItem(pointerEvent->GetPointerId(), item);
     return true;

@@ -267,6 +267,7 @@ void CooperateIn::Initial::OnPointerEvent(Context &context, const CooperateEvent
     if ((notice.sourceType != MMI::PointerEvent::SOURCE_TYPE_MOUSE) ||
         (filterPointerActions_.find(notice.pointerAction) != filterPointerActions_.end()) ||
         !InputEventBuilder::IsLocalEvent(notice)) {
+        context.inputEventBuilder_.SetCursorPos(notice);
         return;
     }
     FI_HILOGI("Stop cooperation on operation of local pointer");

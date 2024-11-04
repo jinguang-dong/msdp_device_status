@@ -80,6 +80,8 @@ public:
     void Freeze();
     void Thaw();
     void SetDamplingCoefficient(uint32_t direction, double coefficient);
+    void SetSectionalDamplingCoefficient(uint32_t direction, std::map<int32_t, double> coefficientMap);
+    void SetCursorPos(const InputPointerEvent &event);
 
     static bool IsLocalEvent(const InputPointerEvent &event);
 
@@ -94,9 +96,13 @@ private:
     bool IsActive(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void ResetPressedEvents();
     double GetDamplingCoefficient(DamplingDirection direction) const;
+    double GetSectionalDamplingCoefficient(DamplingDirection direction) const;
     bool DampPointerMotion(std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
+    bool SectionalDampPointerMotion(std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
+    double FindLargestKeyLessThan(const std::map<int32_t, double>& coefficientMap, DamplingDirection direction) const;
 
     IContext *env_ { nullptr };
+    Coordinate cursorPos_ {};
     bool enable_ { false };
     bool freezing_ { false };
     int32_t xDir_ { 0 };
@@ -106,6 +112,7 @@ private:
     int32_t pointerEventTimer_ { -1 };
     std::string remoteNetworkId_;
     std::array<double, N_DAMPLING_DIRECTIONS> damplingCoefficients_;
+    std::array<std::map<int32_t, double>, N_DAMPLING_DIRECTIONS> sectionalDamplingCoefficients_;
     std::shared_ptr<DSoftbusObserver> observer_;
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     std::shared_ptr<MMI::KeyEvent> keyEvent_;
