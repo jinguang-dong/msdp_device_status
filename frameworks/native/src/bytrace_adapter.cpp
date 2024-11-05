@@ -26,7 +26,6 @@ const std::string serviceUnsubscribe { "ServiceUnsubscribe" };
 } // namespace
 void BytraceAdapter::StartBytrace(TraceBtn traceBtn, SubscribeType isSubscribe, SubscribeObject subscribeObject)
 {
-#ifdef MSDP_HIVIEWDFX_HITRACE_ENABLE
     if (isSubscribe) {
         if (traceBtn == TRACE_START) {
             if (subscribeObject == CLIENT) {
@@ -52,7 +51,6 @@ void BytraceAdapter::StartBytrace(TraceBtn traceBtn, SubscribeType isSubscribe, 
             FinishTrace(HITRACE_TAG_MSDP);
         }
     }
-#endif // MSDP_HIVIEWDFX_HITRACE_ENABLE
 }
 } // namespace DeviceStatus
 } // namespace MSDP
