@@ -337,6 +337,8 @@ private:
         bool isMultiSelectedAnimation = true);
     void InitMultiSelectedNodes();
     void ClearMultiSelectedData();
+    int32_t SetNodesLocation(int32_t positionX, int32_t positionY);
+    int32_t CreateEventRunner(int32_t positionX, int32_t positionY);
     bool ParserRadius(float &radius);
     void OnStopAnimationSuccess();
     void OnStopAnimationFail();
