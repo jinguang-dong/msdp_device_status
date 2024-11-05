@@ -89,7 +89,7 @@ void InputEventBuilder::Disable()
         TurnOnChannelScan();
         ResetPressedEvents();
     }
-    ifif ((pointerEventTimer_ >= 0) && (env_->GetTimerManager().IsExist(pointerEventTimer_))) {
+    if ((pointerEventTimer_ >= 0) && (env_->GetTimerManager().IsExist(pointerEventTimer_))) {
         env_->GetTimerManager().RemoveTimer(pointerEventTimer_);
         pointerEventTimer_ = -1;
     }
