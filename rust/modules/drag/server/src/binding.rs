@@ -12,3 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+//! Fusion drag-IPC binding
+
+use fusion_data_rust::CDragData;
+
+/// type alias OnStartDrag
+pub type OnStartDrag = unsafe extern "C" fn (
+    dragData: *const CDragData
+) -> i32;
+
+/// struct FusionDragOperations
+#[derive(Clone)]
+#[repr(C)]
+pub struct FusionDragOperations {
+    pub on_start_drag: Option<OnStartDrag>,
+}
