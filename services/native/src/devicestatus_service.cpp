@@ -28,12 +28,14 @@
 #endif // MEMMGR_ENABLE
 #include <system_ability_definition.h>
 
+#include "concurrent_task_client.h"
 #include "ddm_adapter.h"
 #include "devicestatus_common.h"
 #include "devicestatus_hisysevent.h"
 #include "dsoftbus_adapter.h"
 #include "input_adapter.h"
 #include "plugin_manager.h"
+#include "qos.h"
 
 #undef LOG_TAG
 #define LOG_TAG "DeviceStatusService"
@@ -482,6 +484,15 @@ void DeviceStatusService::OnThread()
 {
     SetThreadName(std::string("os_ds_service"));
     uint64_t tid = GetThisThreadId();
+    std::unordered_map<std::string, std::string> payload;
+    payload["pid"] = std::to_string(getpid());
+    ConcurrentTask::ConcurrentTaskClient::GetInstance().RequestAuth(payload);
+    auto ret = QOS::SetQosForOtherThread(QOS::QosLevel::QOS_USER_INTERACTIVE, tid);
+    if (ret != 0) {
+        FI_HILOGE("Set device status thread qos failed, ret:%{public}d", ret);
+    } else {
+        FI_HILOGW("Set device status thread qos success");
+    }
     delegateTasks_.SetWorkerThreadId(tid);
     FI_HILOGD("Main worker thread start, tid:%{public}" PRId64 "", tid);
     EnableSocketSessionMgr(MAX_N_RETRIES);
