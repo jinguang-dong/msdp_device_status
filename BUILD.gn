@@ -13,8 +13,6 @@
 
 import("device_status.gni")
 
-
-
 group("devicestatus_service_group") {
   deps = []
 
