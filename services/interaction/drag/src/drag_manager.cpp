@@ -1848,7 +1848,6 @@ void DragManager::ReportStopDragUEInfo(const std::string &packageName)
 
 void DragManager::ReportDragUEInfo(struct DragRadarInfo &dragRadarInfo, const std::string &eventDescription)
 {
-#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
     HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::DRAG_UE,
         eventDescription,
@@ -1858,7 +1857,6 @@ void DragManager::ReportDragUEInfo(struct DragRadarInfo &dragRadarInfo, const st
         "HOSTNAME", dragRadarInfo.hostName,
         "LOCAL_NET_ID", dragRadarInfo.localNetId,
         "PEER_NET_ID", dragRadarInfo.peerNetId);
-#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 } // namespace DeviceStatus
