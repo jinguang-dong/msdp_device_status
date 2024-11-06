@@ -47,9 +47,7 @@
 #include "animation_curve.h"
 #include "devicestatus_define.h"
 #include "drag_data_manager.h"
-
 #include "drag_hisysevent.h"
-
 #include "include/util.h"
 
 #undef LOG_TAG
@@ -84,8 +82,6 @@ constexpr int32_t SHORT_DURATION { 55 };
 constexpr int32_t LONG_DURATION { 90 };
 constexpr int32_t FIRST_PIXELMAP_INDEX { 0 };
 constexpr int32_t SECOND_PIXELMAP_INDEX { 1 };
-
-
 constexpr size_t TOUCH_NODE_MIN_COUNT { 3 };
 constexpr size_t MOUSE_NODE_MIN_COUNT { 4 };
 constexpr float DEFAULT_SCALING { 1.0f };
@@ -468,9 +464,7 @@ int32_t DragDrawing::UpdateDragStyle(DragCursorStyle style)
     FI_HILOGD("style:%{public}d", style);
     if ((style < DragCursorStyle::DEFAULT) || (style > DragCursorStyle::MOVE)) {
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-
         DragDFX::WriteUpdateDragStyle(style, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
-
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
         FI_HILOGE("Invalid style:%{public}d", style);
         return RET_ERR;
@@ -1033,7 +1027,7 @@ int32_t DragDrawing::RunAnimation(std::function<int32_t()> cb)
 {
     FI_HILOGD("enter");
     ResetAnimationParameter();
-#ifdef IOS_PLATFORM
+#ifndef IOS_PLATFORM
     auto runner = AppExecFwk::EventRunner::Current(); // IOS animation can run main thread
 #endif // IOS_PLATFORM
     CHKPR(handler_, RET_ERR);
