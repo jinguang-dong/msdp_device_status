@@ -47,9 +47,9 @@
 #include "animation_curve.h"
 #include "devicestatus_define.h"
 #include "drag_data_manager.h"
-#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
+
 #include "drag_hisysevent.h"
-#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
+
 #include "include/util.h"
 
 #undef LOG_TAG
@@ -84,8 +84,8 @@ constexpr int32_t SHORT_DURATION { 55 };
 constexpr int32_t LONG_DURATION { 90 };
 constexpr int32_t FIRST_PIXELMAP_INDEX { 0 };
 constexpr int32_t SECOND_PIXELMAP_INDEX { 1 };
-constexpr int32_t LAST_SECOND_PIXELMAP { 2 };
-constexpr int32_t LAST_THIRD_PIXELMAP { 3 };
+
+
 constexpr size_t TOUCH_NODE_MIN_COUNT { 3 };
 constexpr size_t MOUSE_NODE_MIN_COUNT { 4 };
 constexpr float DEFAULT_SCALING { 1.0f };
@@ -132,8 +132,8 @@ constexpr int32_t TWICE_SIZE { 2 };
 constexpr int32_t NUM_ONE { 1 };
 constexpr int32_t NUM_TWO { 2 };
 constexpr int32_t NUM_FOUR { 4 };
-constexpr int32_t HEX_FF { 0xFF };
 const Rosen::RSAnimationTimingCurve SPRING = Rosen::RSAnimationTimingCurve::CreateSpring(0.347f, 0.99f, 0.0f);
+constexpr int32_t HEX_FF { 0xFF };
 const std::string RENDER_THREAD_NAME { "os_dargRenderRunner" };
 constexpr float BEZIER_000 { 0.00f };
 constexpr float BEZIER_020 { 0.20f };
@@ -468,9 +468,9 @@ int32_t DragDrawing::UpdateDragStyle(DragCursorStyle style)
     FI_HILOGD("style:%{public}d", style);
     if ((style < DragCursorStyle::DEFAULT) || (style > DragCursorStyle::MOVE)) {
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
+
         DragDFX::WriteUpdateDragStyle(style, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
-#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
+
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
         FI_HILOGE("Invalid style:%{public}d", style);
         return RET_ERR;
@@ -514,103 +514,6 @@ int32_t DragDrawing::UpdateShadowPic(const ShadowInfo &shadowInfo)
     Rosen::RSTransaction::FlushImplicitTransaction();
     CHKPR(rsUiDirector_, RET_ERR);
     rsUiDirector_->SendMessages();
-    FI_HILOGD("leave");
-    return RET_OK;
-}
-
-int32_t DragDrawing::UpdatePixelMapsAngleAndAlpha()
-{
-    FI_HILOGD("enter");
-    size_t mulNodesSize = g_drawingInfo.multiSelectedNodes.size();
-    if (mulNodesSize <= 0) {
-        FI_HILOGE("No pixelmap add");
-        return RET_ERR;
-    }
-    if (mulNodesSize == 1) {
-        g_drawingInfo.multiSelectedNodes.front()->SetRotation(POSITIVE_ANGLE);
-        g_drawingInfo.multiSelectedNodes.front()->SetAlpha(FIRST_PIXELMAP_ALPHA);
-    } else if (mulNodesSize == LAST_SECOND_PIXELMAP) {
-        g_drawingInfo.multiSelectedNodes.back()->SetRotation(NEGATIVE_ANGLE);
-        g_drawingInfo.multiSelectedNodes.back()->SetAlpha(SECOND_PIXELMAP_ALPHA);
-    } else {
-        g_drawingInfo.rootNode->RemoveChild(g_drawingInfo.multiSelectedNodes[mulNodesSize - LAST_THIRD_PIXELMAP]);
-        g_drawingInfo.multiSelectedNodes[mulNodesSize - LAST_SECOND_PIXELMAP ]->SetRotation(POSITIVE_ANGLE);
-        g_drawingInfo.multiSelectedNodes[mulNodesSize - LAST_SECOND_PIXELMAP ]->SetAlpha(FIRST_PIXELMAP_ALPHA);
-        g_drawingInfo.multiSelectedNodes.back()->SetRotation(NEGATIVE_ANGLE);
-        g_drawingInfo.multiSelectedNodes.back()->SetAlpha(SECOND_PIXELMAP_ALPHA);
-    }
-    FI_HILOGD("leave");
-    return RET_OK;
-}
-
-int32_t DragDrawing::UpdatePixeMapDrawingOrder()
-{
-    FI_HILOGD("enter");
-    std::shared_ptr<Rosen::RSCanvasNode> pixelMapNode = g_drawingInfo.nodes[PIXEL_MAP_INDEX];
-    std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
-    CHKPR(pixelMapNode, RET_ERR);
-    CHKPR(dragStyleNode, RET_ERR);
-    CHKPR(g_drawingInfo.parentNode, RET_ERR);
-    CHKPR(g_drawingInfo.rootNode, RET_ERR);
-    g_drawingInfo.multiSelectedNodes.emplace_back(pixelMapNode);
-    g_drawingInfo.parentNode->RemoveChild(dragStyleNode);
-    g_drawingInfo.parentNode->RemoveChild(pixelMapNode);
-
-    int32_t adjustSize = TWELVE_SIZE * GetScaling();
-    int32_t positionX = g_drawingInfo.displayX + g_drawingInfo.pixelMapX;
-    int32_t positionY = g_drawingInfo.displayY + g_drawingInfo.pixelMapY - adjustSize;
-    int32_t pixelMapWidth = g_drawingInfo.pixelMap->GetWidth();
-    int32_t pixelMapHeight = g_drawingInfo.pixelMap->GetHeight();
-    pixelMapNode->SetBounds(positionX, positionY + adjustSize, pixelMapWidth, pixelMapHeight);
-    pixelMapNode->SetFrame(positionX, positionY + adjustSize, pixelMapWidth, pixelMapHeight);
-
-    std::shared_ptr<Rosen::RSCanvasNode> addSelectedNode = Rosen::RSCanvasNode::Create();
-    CHKPR(addSelectedNode, RET_ERR);
-    g_drawingInfo.nodes[PIXEL_MAP_INDEX] = addSelectedNode;
-    g_drawingInfo.parentNode->AddChild(addSelectedNode);
-    g_drawingInfo.parentNode->AddChild(dragStyleNode);
-    g_drawingInfo.rootNode->AddChild(g_drawingInfo.multiSelectedNodes.back());
-    g_drawingInfo.rootNode->RemoveChild(g_drawingInfo.parentNode);
-    g_drawingInfo.rootNode->AddChild(g_drawingInfo.parentNode);
-
-    if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
-        std::shared_ptr<Rosen::RSCanvasNode> mouseIconNode = g_drawingInfo.nodes[MOUSE_ICON_INDEX];
-        CHKPR(mouseIconNode, RET_ERR);
-        g_drawingInfo.rootNode->RemoveChild(mouseIconNode);
-        g_drawingInfo.rootNode->AddChild(mouseIconNode);
-    }
-
-    if (UpdatePixelMapsAngleAndAlpha() != RET_OK) {
-        FI_HILOGE("setPixelMapsAngleAndAlpha failed");
-        return RET_ERR;
-    }
-    DrawShadow(pixelMapNode);
-    FI_HILOGD("leave");
-    return RET_OK;
-}
-
-int32_t DragDrawing::AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
-{
-    FI_HILOGD("enter");
-    CHKPR(pixelMap, RET_ERR);
-    if (!CheckNodesValid()) {
-        FI_HILOGE("Check nodes valid failed");
-        return RET_ERR;
-    }
-
-    g_drawingInfo.multiSelectedPixelMaps.emplace_back(g_drawingInfo.pixelMap);
-    g_drawingInfo.pixelMap = pixelMap;
-    if (UpdatePixeMapDrawingOrder() != RET_OK) {
-        FI_HILOGE("Update pixeMap drawing order failed");
-        return RET_ERR;
-    }
-    Draw(g_drawingInfo.displayId, g_drawingInfo.displayX, g_drawingInfo.displayY, false);
-    g_drawingInfo.currentDragNum = g_drawingInfo.multiSelectedPixelMaps.size() + 1;
-    if (UpdateDragStyle(g_drawingInfo.currentStyle) != RET_OK) {
-        FI_HILOGE("Update drag style failed");
-        return RET_ERR;
-    }
-    Rosen::RSTransaction::FlushImplicitTransaction();
     FI_HILOGD("leave");
     return RET_OK;
 }
@@ -808,14 +711,6 @@ std::shared_ptr<AppExecFwk::EventHandler> DragDrawing::GetSuperHubHandler()
     }
     return superHubHandler_;
 }
-
-void DragDrawing::ResetSuperHubHandler()
-{
-    if (superHubHandler_ != nullptr) {
-        superHubHandler_->RemoveAllEvents();
-        superHubHandler_ = nullptr;
-    }
-}
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
 float DragDrawing::AdjustDoubleValue(double doubleValue)
@@ -967,14 +862,9 @@ void DragDrawing::OnDragStyleAnimation()
         dragStyleNode->AddModifier(drawStyleChangeModifier_);
         return;
     }
-#ifndef OHOS_BUILD_ENABLE_ARKUI_X
-    if (handler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
-        handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
-    }
-#endif // OHOS_BUILD_ENABLE_ARKUI_X
     CheckStyleNodeModifier(dragStyleNode);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
+    CHKPV(handler_);
     handler_->PostTask(std::bind(&DragDrawing::ChangeStyleAnimation, this));
 #else
     ChangeStyleAnimation();
@@ -989,15 +879,11 @@ void DragDrawing::OnDragStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode
     CHKPV(dragStyleNode);
     CHKPV(stylePixelMap);
 #ifdef OHOS_DRAG_ENABLE_ANIMATION
-    if (handler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
-        CHKPV(runner);
-        handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
-    }
     if (drawSVGModifier_ != nullptr) {
         dragStyleNode->RemoveModifier(drawSVGModifier_);
         drawSVGModifier_ = nullptr;
     }
+    CHKPV(handler_);
     if (!handler_->PostTask([this] { this->OnDragStyleAnimation(); })) {
         FI_HILOGE("Drag style animation failed");
         DrawStyle(dragStyleNode, stylePixelMap);
@@ -1053,7 +939,7 @@ void DragDrawing::OnStopAnimationSuccess()
             drawDragStopModifier_->SetStyleAlpha(END_STYLE_ALPHA);
             drawDragStopModifier_->SetStyleScale(START_STYLE_SCALE);
         });
-    }, []() { FI_HILOGD("OnStopAnimationSuccess end"); });
+    },  []() { FI_HILOGD("OnStopAnimationSuccess end"); });
     DoEndAnimation();
     FI_HILOGI("leave");
 }
@@ -1065,9 +951,7 @@ void DragDrawing::OnStopDragSuccess(std::shared_ptr<Rosen::RSCanvasNode> shadowN
     auto animateCb = [this] { return this->InitVSync(END_ALPHA, END_SCALE_SUCCESS); };
 #ifdef OHOS_DRAG_ENABLE_ANIMATION
     ResetAnimationParameter();
-    auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
-    CHKPV(runner);
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
+    CHKPV(handler_);
     if (!handler_->PostTask([this] { return this->OnStopAnimationSuccess(); })) {
         FI_HILOGE("Failed to stop style animation");
         RunAnimation(animateCb);
@@ -1129,9 +1013,7 @@ void DragDrawing::OnStopDragFail(std::shared_ptr<Rosen::RSSurfaceNode> surfaceNo
     auto animateCb = [this] { return this->InitVSync(END_ALPHA, END_SCALE_FAIL); };
 #ifdef OHOS_DRAG_ENABLE_ANIMATION
     ResetAnimationParameter();
-    auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
-    CHKPV(runner);
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
+    CHKPV(handler_);
     if (!handler_->PostTask([this] { this->OnStopAnimationFail(); })) {
         FI_HILOGE("Failed to stop style animation");
         RunAnimation(animateCb);
@@ -1151,12 +1033,10 @@ int32_t DragDrawing::RunAnimation(std::function<int32_t()> cb)
 {
     FI_HILOGD("enter");
     ResetAnimationParameter();
-#ifndef IOS_PLATFORM
-    auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
-#else
+#ifdef IOS_PLATFORM
     auto runner = AppExecFwk::EventRunner::Current(); // IOS animation can run main thread
 #endif // IOS_PLATFORM
-    CHKPR(runner, RET_ERR);
+    CHKPR(handler_, RET_ERR);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
     if (!handler_->PostTask(cb)) {
         FI_HILOGE("Send vsync event failed");
@@ -1296,7 +1176,7 @@ int32_t DragDrawing::InitVSync(float endAlpha, float endScale)
     Rosen::RSNode::Animate(protocol, Rosen::RSAnimationTimingCurve::EASE_IN_OUT, [&]() {
         drawDynamicEffectModifier_->SetAlpha(endAlpha);
         drawDynamicEffectModifier_->SetScale(endScale);
-    }, []() { FI_HILOGD("InitVSync end"); });
+    },  []() { FI_HILOGD("InitVSync end"); });
     Rosen::RSTransaction::FlushImplicitTransaction();
     DoEndAnimation();
     FI_HILOGD("leave");
@@ -1439,10 +1319,12 @@ int32_t DragDrawing::InitLayer()
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     if (g_drawingInfo.isInitUiDirector) {
         g_drawingInfo.isInitUiDirector = false;
+        auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
+        handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
         rsUiDirector_ = Rosen::RSUIDirector::Create();
         CHKPR(rsUiDirector_, RET_ERR);
         rsUiDirector_->Init();
-        rsUiDirector_->SetUITaskRunner([this](const std::function<void()> &task, uint32_t delay = 0) {
+        rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay = 0) {
             CHKPV(this->handler_);
             this->handler_->PostTask(task, delay);
         });
@@ -2272,7 +2154,7 @@ int32_t DragDrawing::SetNodesLocation(int32_t positionX, int32_t positionY)
             g_drawingInfo.pixelMap->GetHeight() + adjustSize);
         g_drawingInfo.parentNode->SetFrame(positionX, positionY, g_drawingInfo.pixelMap->GetWidth(),
             g_drawingInfo.pixelMap->GetHeight() + adjustSize);
-    }, []() { FI_HILOGD("SetNodesLocation end"); });
+    },  []() { FI_HILOGD("SetNodesLocation end"); });
 #ifdef IOS_PLATFORM
     g_drawingInfo.startNum = actionTime_; // IOS animation starts time
 #else
@@ -2383,7 +2265,7 @@ int32_t DragDrawing::UpdatePreviewStyleWithAnimation(const PreviewStyle &preview
         if (ModifyMultiPreviewStyle(std::vector<PreviewStyle>(multiSelectedNodesSize, previewStyle)) != RET_OK) {
             FI_HILOGE("ModifyMultiPreviewStyle failed");
         }
-    }, []() { FI_HILOGD("UpdatePreviewStyleWithAnimation end"); });
+    },  []() { FI_HILOGD("UpdatePreviewStyleWithAnimation end"); });
     FI_HILOGD("leave");
     return RET_OK;
 }
@@ -2543,9 +2425,7 @@ int32_t DragDrawing::UpdateValidDragStyle(DragCursorStyle style)
     CHKPR(rsUiDirector_, RET_ERR);
     rsUiDirector_->SendMessages();
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
     DragDFX::WriteUpdateDragStyle(style, OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR);
-#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     return RET_OK;
 }
@@ -2629,7 +2509,7 @@ void DragDrawing::MultiSelectedAnimation(int32_t positionX, int32_t positionY, i
                     multiSelectedPixelMap->GetWidth(), multiSelectedPixelMap->GetHeight());
                 multiSelectedNode->SetFrame(multiSelectedPositionX, multiSelectedPositionY,
                     multiSelectedPixelMap->GetWidth(), multiSelectedPixelMap->GetHeight());
-            }, []() { FI_HILOGD("MultiSelectedAnimation end"); });
+            },  []() { FI_HILOGD("MultiSelectedAnimation end"); });
         } else {
             multiSelectedNode->SetBounds(multiSelectedPositionX, multiSelectedPositionY,
                 multiSelectedPixelMap->GetWidth(), multiSelectedPixelMap->GetHeight());
@@ -2808,11 +2688,7 @@ void DragDrawing::ResetAnimationParameter()
     handler_->RemoveAllEvents();
     handler_->RemoveAllFileDescriptorListeners();
 #endif // IOS_PLATFORM
-    handler_ = nullptr;
     receiver_ = nullptr;
-#ifndef OHOS_BUILD_ENABLE_ARKUI_X
-    ResetSuperHubHandler();
-#endif // OHOS_BUILD_ENABLE_ARKUI_X
     FI_HILOGI("leave");
 }
 
@@ -3049,7 +2925,7 @@ int32_t DragDrawing::DoRotateDragWindowAnimation(float rotation, float pivotX, f
         DragWindowRotateInfo_.pivotX = pivotX;
         DragWindowRotateInfo_.pivotY = pivotY;
         return RET_OK;
-    }, []() { FI_HILOGD("DoRotateDragWindowAnimation end"); });
+    },  []() { FI_HILOGD("DoRotateDragWindowAnimation end"); });
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();
     } else {
@@ -3599,6 +3475,36 @@ float DragDrawing::GetMaxWidthScale(int32_t width)
     return widthScale;
 }
 
+#ifdef OHOS_BUILD_ENABLE_ARKUI_X
+void DragDrawing::SetDragWindow(std::shared_ptr<OHOS::Rosen::Window> window)
+{
+    CALL_INFO_TRACE;
+    window_ = window;
+}
+
+void DragDrawing::AddDragDestroy(std::function<void()> cb)
+{
+    CALL_INFO_TRACE;
+    callback_ = cb;
+}
+
+void DragDrawing::SetSVGFilePath(const std::string &filePath)
+{
+    CALL_INFO_TRACE;
+    svgFilePath_ = filePath;
+}
+#endif
+
+void DragDrawing::LoadDragDropLib()
+{
+    FI_HILOGI("Begin to open drag drop extension library");
+    if (dragExtHandler_ == nullptr) {
+        dragExtHandler_ = dlopen(DRAG_DROP_EXTENSION_SO_PATH.c_str(), RTLD_LAZY);
+    }
+    CHKPL(dragExtHandler_);
+    FI_HILOGI("End to open drag drop extension library");
+}
+
 void DragDrawing::DetachToDisplay(int32_t displayId)
 {
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -3636,36 +3542,6 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
     g_drawingInfo.surfaceNode->AttachToDisplay(screenId_);
     Rosen::RSTransaction::FlushImplicitTransaction();
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-}
-
-#ifdef OHOS_BUILD_ENABLE_ARKUI_X
-void DragDrawing::SetDragWindow(std::shared_ptr<OHOS::Rosen::Window> window)
-{
-    CALL_INFO_TRACE;
-    window_ = window;
-}
-
-void DragDrawing::AddDragDestroy(std::function<void()> cb)
-{
-    CALL_INFO_TRACE;
-    callback_ = cb;
-}
-
-void DragDrawing::SetSVGFilePath(const std::string &filePath)
-{
-    CALL_INFO_TRACE;
-    svgFilePath_ = filePath;
-}
-#endif
-
-void DragDrawing::LoadDragDropLib()
-{
-    FI_HILOGI("Begin to open drag drop extension library");
-    if (dragExtHandler_ == nullptr) {
-        dragExtHandler_ = dlopen(DRAG_DROP_EXTENSION_SO_PATH.c_str(), RTLD_LAZY);
-    }
-    CHKPL(dragExtHandler_);
-    FI_HILOGI("End to open drag drop extension library");
 }
 } // namespace DeviceStatus
 } // namespace Msdp
