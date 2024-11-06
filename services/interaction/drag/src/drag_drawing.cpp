@@ -1027,11 +1027,12 @@ int32_t DragDrawing::RunAnimation(std::function<int32_t()> cb)
 {
     FI_HILOGD("enter");
     ResetAnimationParameter();
-#ifndef IOS_PLATFORM
+#ifdef IOS_PLATFORM
     auto runner = AppExecFwk::EventRunner::Current(); // IOS animation can run main thread
+    CHKPR(runner, RET_ERR);
+    handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
 #endif // IOS_PLATFORM
     CHKPR(handler_, RET_ERR);
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
     if (!handler_->PostTask(cb)) {
         FI_HILOGE("Send vsync event failed");
         return RET_ERR;
