@@ -254,7 +254,6 @@ int32_t InteractionManager::SetMouseDragMonitorState(bool state)
 {
     return INTER_MGR_IMPL.SetMouseDragMonitorState(state);
 }
-
 #else
 int32_t InteractionManager::StartDrag(const DragData &dragData)
 {
