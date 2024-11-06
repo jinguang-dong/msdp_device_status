@@ -107,6 +107,7 @@ ohos_shared_library("devicestatus_client") {
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "image_framework:image_native",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
