@@ -624,6 +624,20 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         }
         return;
     }
+    int32_t targetDisplayId = pointerEvent->GetTargetDisplayId();
+    if ((pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW) && (lastDisplayId_ != targetDisplayId)) {
+        MMI::PointerEvent::PointerItem pointerItem;
+        pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+        int32_t displayX = pointerItem.GetDisplayX();
+        int32_t displayY = pointerItem.GetDisplayY();
+        dragDrawing_.DetachToDisplay(targetDisplayId);
+        bool isNeedAdjustDisplayXY = true;
+        bool isMultiSelectedAnimation = false;
+        dragDrawing_.Draw(targetDisplayId, displayX, displayY, isNeedAdjustDisplayXY, isMultiSelectedAnimation);
+        dragDrawing_.UpdateDragWindowDisplay(targetDisplayId);
+        dragDrawing_.OnDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
+        lastDisplayId_ = targetDisplayId;
+    }
     FI_HILOGD("Unknown action, sourceType:%{public}d, pointerId:%{public}d, pointerAction:%{public}d",
         pointerEvent->GetSourceType(), pointerEvent->GetPointerId(), pointerAction);
 }

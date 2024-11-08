@@ -329,6 +329,8 @@ private:
     void UpdateMousePosition(float mousePositionX, float mousePositionY);
     int32_t UpdateDefaultDragStyle(DragCursorStyle style);
     int32_t UpdateValidDragStyle(DragCursorStyle style);
+    int32_t SetNodesLocation();
+    int32_t CreateEventRunner(int32_t positionX, int32_t positionY);
     int32_t ModifyPreviewStyle(std::shared_ptr<Rosen::RSCanvasNode> node, const PreviewStyle &previewStyle);
     int32_t ModifyMultiPreviewStyle(const std::vector<PreviewStyle> &previewStyles);
     void MultiSelectedAnimation(int32_t positionX, int32_t positionY, int32_t adjustSize,
@@ -374,6 +376,7 @@ private:
     void LoadDragDropLib();
     void ScreenRotateAdjustDisplayXY(
         Rosen::Rotation rotation, Rosen::Rotation lastRotation, float &displayX, float &displayY);
+    void UpdateDragDataForSuperHub(const DragData &dragData);
 
 private:
     int64_t interruptNum_ { -1 };
