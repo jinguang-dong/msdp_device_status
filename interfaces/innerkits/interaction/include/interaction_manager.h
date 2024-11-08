@@ -115,7 +115,7 @@ public:
      */
     int32_t GetCoordinationState(const std::string &networkId, std::function<void(bool)> callback,
         bool isCompatible = false);
-    
+
     /**
      * @brief Obtains the screen hopping status of a mouse pointer.
      * @param udId Indicates the descriptor of the input device.
@@ -387,15 +387,6 @@ public:
     int32_t SetDragWindowScreenId(uint64_t displayId, uint64_t screenId);
 
     int32_t SetMouseDragMonitorState(bool state);
-
-    /**
-     * @brief Add an image to the drag list.
-     * @param pixelMap Add Selected image information.
-     * @param callback Indicates the callback used to notify addSelectedPixelMap result.
-     * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
-     * @since 12
-     */
-    int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap, std::function<void(bool)> callback);
 #else
     /**
      * @brief convert relative pointerEvent action to PULL_MOVE or PULL_UP.

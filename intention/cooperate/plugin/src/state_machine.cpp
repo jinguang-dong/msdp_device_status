@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,9 +22,6 @@
 #include "common_event_observer.h"
 #include "cooperate_events.h"
 #include "cooperate_free.h"
-#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
-#include "cooperate_hisysevent.h"
-#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
 #include "cooperate_in.h"
 #include "cooperate_out.h"
 #include "devicestatus_define.h"
@@ -198,10 +195,6 @@ void StateMachine::TransiteTo(Context &context, CooperateState state)
         states_[current_]->OnLeaveState(context);
         current_ = state;
         states_[current_]->OnEnterState(context);
-#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
-        auto curState = static_cast<OHOS::Msdp::DeviceStatus::CooperateState>(state);
-        CooperateDFX::WriteCooperateState(curState);
-#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
     }
 }
 
@@ -476,7 +469,7 @@ void StateMachine::OnRemoteStart(Context &context, const CooperateEvent &event)
         FI_HILOGE("CheckSameAccountToLocal failed, switch is : %{public}d, unchain", isCooperateEnable_);
         CooperateEvent stopEvent(
             CooperateEventType::STOP,
-            StopCooperateEvent{
+            StopCooperateEvent {
                 .isUnchained = true
             }
         );
@@ -595,14 +588,6 @@ void StateMachine::RemoveSessionObserver(Context &context, const DisableCooperat
 void StateMachine::OnCommonEvent(Context &context, const std::string &commonEvent)
 {
     FI_HILOGD("Current common event:%{public}s", commonEvent.c_str());
-    CHKPV(env_);
-    if (commonEvent == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON ||
-        commonEvent == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) {
-        if ((screenEventTimer_ >= 0) && (env_->GetTimerManager().IsExist(screenEventTimer_))) {
-            env_->GetTimerManager().RemoveTimer(screenEventTimer_);
-            screenEventTimer_ = -1;
-        }
-    }
     if (commonEvent == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF ||
         commonEvent == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED) {
         FI_HILOGD("Receive common event:%{public}s, stop cooperate", commonEvent.c_str());
@@ -614,18 +599,6 @@ void StateMachine::OnCommonEvent(Context &context, const std::string &commonEven
         if (ret != Channel<CooperateEvent>::NO_ERROR) {
             FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
         }
-        screenEventTimer_ = env_->GetTimerManager().AddTimer(SCREEN_LOCKED_TIMEOUT, REPEAT_ONCE,
-            [sender = context.Sender(), this]() mutable {
-                auto res = sender.Send(CooperateEvent(
-                    CooperateEventType::STOP,
-                    StopCooperateEvent{
-                        .isUnchained = true
-                    }));
-                if (res != Channel<CooperateEvent>::NO_ERROR) {
-                    FI_HILOGE("Failed to send event via channel, error:%{public}d", res);
-                }
-                screenEventTimer_ = -1;
-            });
     }
 }
 

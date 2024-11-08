@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +14,7 @@
  */
 
 #include "event_manager.h"
-#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
-#include "cooperate_hisysevent.h"
-#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
+
 #include "devicestatus_define.h"
 #include "utility.h"
 
@@ -125,15 +123,6 @@ void EventManager::RemoteStartFinish(const DSoftbusStartCooperateFinished &event
                               CoordinationMessage::ACTIVATE_SUCCESS :
                               CoordinationMessage::ACTIVATE_FAIL };
     OnCooperateMessage(msg, event.networkId);
-    if (msg == CoordinationMessage::ACTIVATE_SUCCESS) {
-#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
-        CooperateDFX::WriteRemoteStart(OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR);
-#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
-    } else {
-#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
-        CooperateDFX::WriteRemoteStart(OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
-#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
-    }
 }
 
 void EventManager::OnUnchain(const StopCooperateEvent &event)
@@ -239,7 +228,6 @@ void EventManager::NotifyCooperateMessage(const CooperateNotice &notice)
         FI_HILOGD("session is null");
         return;
     }
-    CHKPV(session);
     NetPacket pkt(notice.msgId);
     pkt << notice.userData << notice.networkId << static_cast<int32_t>(notice.msg) << notice.errCode;
     if (pkt.ChkRWError()) {

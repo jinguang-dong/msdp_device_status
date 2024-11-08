@@ -63,11 +63,11 @@ public:
     int32_t AddSubscriptListener(int32_t pid) override;
     int32_t RemoveSubscriptListener(int32_t pid) override;
     int32_t StartDrag(const DragData &dragData, int32_t pid, const std::string &peerNetId = "") override;
+    int32_t StopDrag(const DragDropResult &dropResult, const std::string &packageName = "", int32_t pid = -1) override;
 #else
     int32_t StartDrag(const DragData &dragData) override;
     int32_t UpdatePointerAction(std::shared_ptr<MMI::PointerEvent> pointerEvent);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-    int32_t StopDrag(const DragDropResult &dropResult, const std::string &packageName = "", int32_t pid = -1) override;
     int32_t GetDragTargetPid() const override;
     int32_t GetUdKey(std::string &udKey) const override;
     void SendDragData(int32_t targetTid, const std::string &udKey);
@@ -119,9 +119,6 @@ public:
     int32_t GetExtraInfo(std::string &extraInfo) const override;
     int32_t AddPrivilege(int32_t tokenId) override;
     int32_t EraseMouseIcon() override;
-#ifndef OHOS_BUILD_ENABLE_ARKUI_X
-    int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap) override;
-#endif // OHOS_BUILD_ENABLE_ARKUI_X
     int32_t RotateDragWindow(Rosen::Rotation rotation) override;
     int32_t ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation) override;
     void SetDragWindowScreenId(uint64_t displayId, uint64_t screenId) override;
@@ -190,7 +187,6 @@ private:
     DragCursorStyle GetRealDragStyle(DragCursorStyle style);
     void GetDragBehavior(const DragDropResult &dropResult, DragBehavior &dragBehavior);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-    int32_t NotifyAddSelectedPixelMapResult(bool result);
     void ResetMouseDragMonitorInfo();
     void ResetMouseDragMonitorTimerId(const DragData &dragData);
     std::string GetPackageName(int32_t pid);

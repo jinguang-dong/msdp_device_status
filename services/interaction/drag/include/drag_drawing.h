@@ -285,7 +285,6 @@ public:
     void SetRotation(Rosen::Rotation rotation);
     float CalculateWidthScale();
     float GetMaxWidthScale(int32_t width);
-    int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
     void UpdateDragWindowDisplay(int32_t displayId);
     void DetachToDisplay(int32_t displayId);
     void ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation);
@@ -340,6 +339,8 @@ private:
         bool isMultiSelectedAnimation = true);
     void InitMultiSelectedNodes();
     void ClearMultiSelectedData();
+    int32_t SetNodesLocation(int32_t positionX, int32_t positionY);
+    int32_t CreateEventRunner(int32_t positionX, int32_t positionY);
     bool ParserRadius(float &radius);
     void OnStopAnimationSuccess();
     void OnStopAnimationFail();
@@ -369,12 +370,10 @@ private:
     void RotatePosition(float &displayX, float &displayY);
     void UpdateDragPosition(int32_t displayId, float displayX, float displayY);
     float AdjustDoubleValue(double doubleValue);
-    int32_t UpdatePixelMapsAngleAndAlpha();
-    int32_t UpdatePixeMapDrawingOrder();
-    void LoadDragDropLib();
     template <typename T>
     void AdjustRotateDisplayXY(T &displayX, T &displayY);
     void DrawRotateDisplayXY(float positionX, float positionY);
+    void LoadDragDropLib();
     void ScreenRotateAdjustDisplayXY(
         Rosen::Rotation rotation, Rosen::Rotation lastRotation, float &displayX, float &displayY);
     void UpdateDragDataForSuperHub(const DragData &dragData);
