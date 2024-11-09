@@ -965,14 +965,9 @@ void DragDrawing::OnDragStyleAnimation()
         dragStyleNode->AddModifier(drawStyleChangeModifier_);
         return;
     }
-#ifndef OHOS_BUILD_ENABLE_ARKUI_X
-    if (handler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
-        handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
-    }
-#endif // OHOS_BUILD_ENABLE_ARKUI_X
     CheckStyleNodeModifier(dragStyleNode);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
+    CHKPV(handler_);
     handler_->PostTask(std::bind(&DragDrawing::ChangeStyleAnimation, this));
 #else
     ChangeStyleAnimation();
@@ -987,15 +982,11 @@ void DragDrawing::OnDragStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode
     CHKPV(dragStyleNode);
     CHKPV(stylePixelMap);
 #ifdef OHOS_DRAG_ENABLE_ANIMATION
-    if (handler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
-        CHKPV(runner);
-        handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
-    }
     if (drawSVGModifier_ != nullptr) {
         dragStyleNode->RemoveModifier(drawSVGModifier_);
         drawSVGModifier_ = nullptr;
     }
+    CHKPV(handler_);
     if (!handler_->PostTask([this] { this->OnDragStyleAnimation(); })) {
         FI_HILOGE("Drag style animation failed");
         DrawStyle(dragStyleNode, stylePixelMap);
@@ -1063,9 +1054,7 @@ void DragDrawing::OnStopDragSuccess(std::shared_ptr<Rosen::RSCanvasNode> shadowN
     auto animateCb = [this] { return this->InitVSync(END_ALPHA, END_SCALE_SUCCESS); };
 #ifdef OHOS_DRAG_ENABLE_ANIMATION
     ResetAnimationParameter();
-    auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
-    CHKPV(runner);
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
+    CHKPV(handler_);
     if (!handler_->PostTask([this] { return this->OnStopAnimationSuccess(); })) {
         FI_HILOGE("Failed to stop style animation");
         RunAnimation(animateCb);
@@ -1127,9 +1116,7 @@ void DragDrawing::OnStopDragFail(std::shared_ptr<Rosen::RSSurfaceNode> surfaceNo
     auto animateCb = [this] { return this->InitVSync(END_ALPHA, END_SCALE_FAIL); };
 #ifdef OHOS_DRAG_ENABLE_ANIMATION
     ResetAnimationParameter();
-    auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
-    CHKPV(runner);
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
+    CHKPV(handler_);
     if (!handler_->PostTask([this] { this->OnStopAnimationFail(); })) {
         FI_HILOGE("Failed to stop style animation");
         RunAnimation(animateCb);
@@ -1149,13 +1136,12 @@ int32_t DragDrawing::RunAnimation(std::function<int32_t()> cb)
 {
     FI_HILOGD("enter");
     ResetAnimationParameter();
-#ifndef IOS_PLATFORM
-    auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
-#else
+#ifdef IOS_PLATFORM
     auto runner = AppExecFwk::EventRunner::Current(); // IOS animation can run main thread
-#endif // IOS_PLATFORM
     CHKPR(runner, RET_ERR);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
+#endif // IOS_PLATFORM
+    CHKPR(handler_, RET_ERR);
     if (!handler_->PostTask(cb)) {
         FI_HILOGE("Send vsync event failed");
         return RET_ERR;
@@ -1441,6 +1427,9 @@ int32_t DragDrawing::InitLayer()
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     if (g_drawingInfo.isInitUiDirector) {
         g_drawingInfo.isInitUiDirector = false;
+        auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
+        CHKPR(runner, RET_ERR);
+        handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
         rsUiDirector_ = Rosen::RSUIDirector::Create();
         CHKPR(rsUiDirector_, RET_ERR);
         rsUiDirector_->Init();
@@ -2832,7 +2821,6 @@ void DragDrawing::ResetAnimationParameter()
     handler_->RemoveAllEvents();
     handler_->RemoveAllFileDescriptorListeners();
 #endif // IOS_PLATFORM
-    handler_ = nullptr;
     receiver_ = nullptr;
     FI_HILOGI("leave");
 }

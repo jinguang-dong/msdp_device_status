@@ -30,7 +30,7 @@ namespace DeviceStatus {
 int32_t DragClient::StartDrag(ITunnelClient &tunnel,
     const DragData &dragData, std::shared_ptr<IStartDragListener> listener)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     CHKPR(listener, RET_ERR);
     if (dragData.shadowInfos.empty()) {
         FI_HILOGE("shadowInfos is empty");
@@ -69,7 +69,7 @@ int32_t DragClient::StartDrag(ITunnelClient &tunnel,
 
 int32_t DragClient::StopDrag(ITunnelClient &tunnel, const DragDropResult &dropResult)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     StopDragParam param { dropResult };
     DefaultReply reply;
 
