@@ -68,12 +68,14 @@ void SocketSessionManager::RegisterApplicationState()
     CALL_DEBUG_ENTER;
     auto appMgr = GetAppMgr();
     CHKPV(appMgr);
-    appStateObserver_ = sptr<AppStateObserver>::MakeSptr(*this);
-    auto err = appMgr->RegisterApplicationStateObserver(appStateObserver_);
+    auto appStateObserver = sptr<AppStateObserver>::MakeSptr(*this);
+    auto err = appMgr->RegisterApplicationStateObserver(appStateObserver);
     if (err != RET_OK) {
-        appStateObserver_ = nullptr;
         FI_HILOGE("IAppMgr::RegisterApplicationStateObserver fail, error:%{public}d", err);
+        return;
     }
+    std::lock_guard<std::recursive_mutex> guard(mutex_);
+    appStateObserver_ = appStateObserver;
 }
 
 void SocketSessionManager::AppStateObserver::OnProcessDied(const AppExecFwk::ProcessData &processData)
@@ -156,6 +158,7 @@ void SocketSessionManager::Dispatch(const struct epoll_event &ev)
 
 void SocketSessionManager::DispatchOne()
 {
+    std::lock_guard<std::recursive_mutex> guard(mutex_);
     struct epoll_event evs[MAX_EPOLL_EVENTS];
     std::lock_guard<std::recursive_mutex> guard(mutex_);
     int32_t cnt = epollMgr_.WaitTimeout(evs, MAX_EPOLL_EVENTS, 0);
@@ -164,7 +167,7 @@ void SocketSessionManager::DispatchOne()
         IEpollEventSource *source = reinterpret_cast<IEpollEventSource *>(evs[index].data.ptr);
         CHKPC(source);
         if ((evs[index].events & EPOLLIN) == EPOLLIN) {
-            OnEpollIn(*source);
+            OnEpollIn(source->GetFd());
         } else if ((evs[index].events & (EPOLLHUP | EPOLLERR)) != 0) {
             FI_HILOGW("Epoll hangup:%{public}s", ::strerror(errno));
             ReleaseSession(source->GetFd());
@@ -172,14 +175,14 @@ void SocketSessionManager::DispatchOne()
     }
 }
 
-void SocketSessionManager::OnEpollIn(IEpollEventSource &source)
+void SocketSessionManager::OnEpollIn(int32_t fd)
 {
     CALL_DEBUG_ENTER;
     char buf[MAX_PACKET_BUF_SIZE] {};
     ssize_t numRead {};
 
     do {
-        numRead = ::recv(source.GetFd(), buf, sizeof(buf), MSG_DONTWAIT);
+        numRead = ::recv(fd, buf, sizeof(buf), MSG_DONTWAIT);
         if (numRead > 0) {
             FI_HILOGI("%{public}zd bytes received", numRead);
         } else if (numRead < 0) {
@@ -195,7 +198,7 @@ void SocketSessionManager::OnEpollIn(IEpollEventSource &source)
             break;
         } else {
             FI_HILOGE("EOF happened");
-            ReleaseSession(source.GetFd());
+            ReleaseSession(fd);
             break;
         }
     } while (numRead == sizeof(buf));
@@ -204,7 +207,6 @@ void SocketSessionManager::OnEpollIn(IEpollEventSource &source)
 void SocketSessionManager::ReleaseSession(int32_t fd)
 {
     CALL_DEBUG_ENTER;
-    std::lock_guard<std::recursive_mutex> guard(mutex_);
     if (auto iter = sessions_.find(fd); iter != sessions_.end()) {
         auto session = iter->second;
         sessions_.erase(iter);
@@ -263,13 +265,6 @@ sptr<AppExecFwk::IAppMgr> SocketSessionManager::GetAppMgr()
     auto appMgrObj = saMgr->GetSystemAbility(APP_MGR_SERVICE_ID);
     CHKPP(appMgrObj);
     return iface_cast<AppExecFwk::IAppMgr>(appMgrObj);
-}
-
-std::shared_ptr<SocketSession> SocketSessionManager::FindSession(int32_t fd) const
-{
-    std::lock_guard<std::recursive_mutex> guard(mutex_);
-    auto iter = sessions_.find(fd);
-    return (iter != sessions_.cend() ? iter->second : nullptr);
 }
 
 void SocketSessionManager::DumpSession(const std::string &title) const

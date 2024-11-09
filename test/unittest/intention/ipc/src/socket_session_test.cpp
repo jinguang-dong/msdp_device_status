@@ -434,7 +434,6 @@ HWTEST_F(SocketSessionTest, SocketSessionTest20, TestSize.Level0)
     g_socketSessionManager->DispatchOne();
     int32_t fd { 1 };
     g_socketSessionManager->ReleaseSession(fd);
-    g_socketSessionManager->FindSession(fd);
     g_socketSessionManager->DumpSession("");
     g_socketSessionManager->RemoveSessionDeletedCallback(pid);
     int32_t sockFd { -1 };
@@ -637,7 +636,8 @@ HWTEST_F(SocketSessionTest, SocketSessionTest32, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     IEpollEventSource *epollEventSource = g_session.get();
-    ASSERT_NO_FATAL_FAILURE(g_socketSessionManager->OnEpollIn(*epollEventSource));
+    ASSERT_NE(epollEventSource, nullptr);
+    ASSERT_NO_FATAL_FAILURE(g_socketSessionManager->OnEpollIn(epollEventSource->GetFd()));
     ASSERT_NO_FATAL_FAILURE(g_socketSessionManager->DeleteCollaborationServiceByName());
 }
 } // namespace DeviceStatus
