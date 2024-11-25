@@ -48,6 +48,8 @@ public:
     int32_t Start(int32_t pid, int32_t userData, const std::string &remoteNetworkId, int32_t startDeviceId) override;
     int32_t Stop(int32_t pid, int32_t userData, bool isUnchained) override;
 
+    int32_t WithOptionsStart(int32_t pid, int32_t userData, const std::string &remoteNetworkId,
+        int32_t startDeviceId, const CooperateOptions &options) override;
     int32_t GetCooperateState(int32_t pid, int32_t userData, const std::string &networkId) override;
     int32_t GetCooperateState(const std::string &udId, bool &state) override;
     int32_t Update(uint32_t mask, uint32_t flag) override;

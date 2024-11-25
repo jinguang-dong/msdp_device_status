@@ -48,6 +48,7 @@ enum class CooperateEventType {
     DISABLE,
     START,
     STOP,
+    WITH_OPTIONS_START,
     GET_COOPERATE_STATE,
     REGISTER_EVENT_LISTENER,
     UNREGISTER_EVENT_LISTENER,
@@ -243,6 +244,23 @@ struct UpdateVirtualDeviceIdMapEvent {
     std::unordered_map<int32_t, int32_t> remote2VirtualIds;
 };
 
+struct StartWithOptionsEvent {
+    int32_t pid;
+    int32_t userData;
+    std::string remoteNetworkId;
+    int32_t startDeviceId;
+    int32_t displayX;
+    int32_t displayY;
+    uint64_t displayId;
+    std::shared_ptr<std::promise<int32_t>> errCode;
+};
+
+// struct CooperateOptions {
+//     int32_t displayX;
+//     int32_t displayY;
+//     uint64_t displayId;
+// };
+
 struct CooperateEvent {
     CooperateEvent() : type(CooperateEventType::QUIT) {}
 
@@ -274,7 +292,8 @@ struct CooperateEvent {
         SetDamplingCoefficientEvent,
         DSoftbusSyncInputDevice,
         DSoftbusHotPlugEvent,
-        UpdateVirtualDeviceIdMapEvent
+        UpdateVirtualDeviceIdMapEvent,
+        StartWithOptionsEvent
     > event;
 };
 

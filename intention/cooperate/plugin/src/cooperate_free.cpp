@@ -87,6 +87,9 @@ CooperateFree::Initial::Initial(CooperateFree &parent)
     AddHandler(CooperateEventType::STOP, [this](Context &context, const CooperateEvent &event) {
         this->OnStop(context, event);
     });
+    AddHandler(CooperateEventType::WITH_OPTIONS_START, [this](Context &context, const CooperateEvent &event) {
+        this->OnStartWithOptions(context, event);
+    });
     AddHandler(CooperateEventType::DISABLE, [this](Context &context, const CooperateEvent &event) {
         this->OnDisable(context, event);
     });
@@ -169,6 +172,46 @@ void CooperateFree::Initial::OnStop(Context &context, const CooperateEvent &even
     };
     context.eventMgr_.StopCooperateFinish(notice);
     parent_.UnchainConnections(context, param);
+}
+
+void CooperateFree::Initial::OnStartWithOptions(Context &context, const CooperateEvent &event)
+{
+    CALL_INFO_TRACE;
+    StartCooperateEvent notice = std::get<StartCooperateEvent>(event.event);
+    FI_HILOGI("[start cooperation] With \'%{public}s\'", Utility::Anonymize(notice.remoteNetworkId).c_str());
+    context.StartCooperate(notice);
+    context.eventMgr_.StartCooperate(notice);
+
+    int32_t ret = context.dsoftbus_.OpenSession(context.Peer());
+    if (ret != RET_OK) {
+        FI_HILOGE("[start cooperation] Failed to connect to \'%{public}s\'",
+            Utility::Anonymize(context.Peer()).c_str());
+        int32_t errNum = (ret == RET_ERR ? static_cast<int32_t>(CoordinationErrCode::OPEN_SESSION_FAILED) : ret);
+        DSoftbusStartCooperateFinished failNotice {
+            .success = false,
+            .errCode = errNum
+        };
+        context.eventMgr_.StartCooperateFinish(failNotice);
+        return;
+    }
+    DSoftbusStartCooperate startNotice {
+        .originNetworkId = context.Local(),
+        .success = true,
+        .cursorPos = context.NormalizedCursorPosition(),
+    };
+    context.OnStartCooperate(startNotice.extra);
+    context.dsoftbus_.StartCooperate(context.Peer(), startNotice);
+    context.inputEventInterceptor_.Enable(context);
+    context.eventMgr_.StartCooperateFinish(startNotice);
+    FI_HILOGI("[start cooperation] Cooperation with \'%{public}s\' established",
+        Utility::Anonymize(context.Peer()).c_str());
+    TransiteTo(context, CooperateState::COOPERATE_STATE_OUT);
+    context.OnTransitionOut();
+#ifdef ENABLE_PERFORMANCE_CHECK
+    std::ostringstream ss;
+    ss << "start_cooperation_with_ " << Utility::Anonymize(context.Peer()).c_str();
+    context.FinishTrace(ss.str());
+#endif // ENABLE_PERFORMANCE_CHECK
 }
 
 void CooperateFree::Initial::OnDisable(Context &context, const CooperateEvent &event)

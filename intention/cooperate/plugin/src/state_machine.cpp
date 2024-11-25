@@ -102,6 +102,9 @@ StateMachine::StateMachine(IContext *env)
     AddHandler(CooperateEventType::GET_COOPERATE_STATE, [this](Context &context, const CooperateEvent &event) {
         this->GetCooperateState(context, event);
     });
+    AddHandler(CooperateEventType::WITH_OPTIONS_START, [this](Context &context, const CooperateEvent &event) {
+        this->StartCooperateWithOptions(context, event);
+    });
     AddHandler(CooperateEventType::REGISTER_EVENT_LISTENER,
         [this](Context &context, const CooperateEvent &event) {
             this->RegisterEventListener(context, event);
@@ -309,6 +312,25 @@ void StateMachine::StopCooperate(Context &context, const CooperateEvent &event)
     CALL_DEBUG_ENTER;
     context.CloseDistributedFileConnection(context.Peer());
     context.OnStopCooperate();
+    Transfer(context, event);
+}
+
+void StateMachine::StartCooperateWithOptions(Context &context, const CooperateEvent &event)
+{
+    CALL_INFO_TRACE;
+    StartWithOptionsEvent withOptionsEvent = std::get<StartWithOptionsEvent>(event.event);
+    if (!env_->GetDDM().CheckSameAccountToLocal(withOptionsEvent.remoteNetworkId)) {
+        FI_HILOGE("CheckSameAccountToLocal failed");
+        withOptionsEvent.errCode->set_value(COMMON_PERMISSION_CHECK_ERROR);
+        return;
+    }
+    UpdateApplicationStateObserver(withOptionsEvent.pid);
+    if (!context.IsAllowCooperate()) {
+        FI_HILOGI("Not allow cooperate");
+        withOptionsEvent.errCode->set_value(COMMON_NOT_ALLOWED_DISTRIBUTED);
+        return;
+    }
+    withOptionsEvent.errCode->set_value(RET_OK);
     Transfer(context, event);
 }
 
