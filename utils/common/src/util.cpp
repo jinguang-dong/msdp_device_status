@@ -54,6 +54,7 @@ constexpr int32_t ROTATE_POLICY_FOLD_MODE { 2 };
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 const int32_t ROTATE_POLICY = OHOS::system::GetIntParameter("const.window.device.rotate_policy", 0);
 const std::string FOLD_ROTATE_POLICY = OHOS::system::GetParameter("const.window.foldabledevice.rotate_policy", "0,0");
+
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 const std::string SVG_PATH { "/system/etc/device_status/drag_icon/" };
 } // namespace
