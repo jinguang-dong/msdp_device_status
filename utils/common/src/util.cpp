@@ -46,7 +46,7 @@ constexpr size_t PROGRAM_NAME_SIZE { 256 };
 constexpr size_t BUF_CMD_SIZE { 512 };
 constexpr uint32_t BASE_YEAR { 1900 };
 constexpr uint32_t BASE_MON { 1 };
-constexpr uint32_t MS_NS { 1000000 };git
+constexpr uint32_t MS_NS { 1000000 };
 constexpr int32_t FILE_SIZE_MAX { 0x5000 };
 constexpr size_t SHORT_KEY_LENGTH { 20 };
 constexpr size_t PLAINTEXT_LENGTH { 4 };
