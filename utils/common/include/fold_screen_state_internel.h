@@ -26,41 +26,41 @@ static const std::string PHY_ROTATION_OFFSET = system::GetParameter("const.windo
 }
 class FoldScreenStateInternel {
 public:
-static bool IsSingleDisplayPocketFoldDevice()
-{
-if (!IsValidFoldType(g_foldScreenType)) {
-return false;
-}
-std::vectorstd::string foldTypes = StringSplit(g_foldScreenType, ',');
-if (foldTypes.empty()) {
-return false;
-}
-return foldTypes[0] == SINGLE_POCKET_DISPLAY;
-}
-
-static std::vector<std::string> StringSplit(const std::string& str, char delim)
-{
-    std::size_t previous = 0;
-    std::size_t current = str.find(delim);
-    std::vector<std::string> elems;
-    while (current != std::string::npos) {
-        if (current > previous) {
-            elems.push_back(str.substr(previous, current - previous));
+    static bool IsSingleDisplayPocketFoldDevice()
+    {
+        if (!IsValidFoldType(g_foldScreenType)) {
+            return false;
         }
-        previous = current + 1;
-        current = str.find(delim, previous);
+        std::vectorstd::string foldTypes = StringSplit(g_foldScreenType, ',');
+        if (foldTypes.empty()) {
+            return false;
+        }
+        return foldTypes[0] == SINGLE_POCKET_DISPLAY;
     }
-    if (previous != str.size()) {
-        elems.push_back(str.substr(previous));
+    
+    static std::vector<std::string> StringSplit(const std::string& str, char delim)
+    {
+        std::size_t previous = 0;
+        std::size_t current = str.find(delim);
+        std::vector<std::string> elems;
+        while (current != std::string::npos) {
+            if (current > previous) {
+                elems.push_back(str.substr(previous, current - previous));
+            }
+            previous = current + 1;
+            current = str.find(delim, previous);
+        }
+        if (previous != str.size()) {
+            elems.push_back(str.substr(previous));
+        }
+        return elems;
     }
-    return elems;
-}
-
-static bool IsValidFoldType(const std::string& foldTypeStr)
-{
-    std::regex reg("^([0-9],){3}[0-9]{1}$");
-    return std::regex_match(foldTypeStr, reg);
-}
+    
+    static bool IsValidFoldType(const std::string& foldTypeStr)
+    {
+        std::regex reg("^([0-9],){3}[0-9]{1}$");
+        return std::regex_match(foldTypeStr, reg);
+    }
 };
 } // Rosen
 } // OHOS
