@@ -66,6 +66,7 @@ private:
     void DisableCooperate(Context &context, const CooperateEvent &event);
     void StartCooperate(Context &context, const CooperateEvent &event);
     void StopCooperate(Context &context, const CooperateEvent &event);
+    void StartCooperateWithOptions(Context &context, const CooperateEvent &event);
     void GetCooperateState(Context &context, const CooperateEvent &event);
     void RegisterEventListener(Context &context, const CooperateEvent &event);
     void UnregisterEventListener(Context &context, const CooperateEvent &event);
