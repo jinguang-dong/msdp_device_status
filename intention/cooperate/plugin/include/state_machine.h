@@ -66,6 +66,7 @@ private:
     void DisableCooperate(Context &context, const CooperateEvent &event);
     void StartCooperate(Context &context, const CooperateEvent &event);
     void StopCooperate(Context &context, const CooperateEvent &event);
+    void StartCooperateWithOptions(Context &context, const CooperateEvent &event);
     void GetCooperateState(Context &context, const CooperateEvent &event);
     void RegisterEventListener(Context &context, const CooperateEvent &event);
     void UnregisterEventListener(Context &context, const CooperateEvent &event);
@@ -98,6 +99,7 @@ private:
     void AddMonitor(Context &context);
     void RemoveMonitor(Context &context);
     void RemoveWatches(Context &context);
+    void OnRemoteStartWithOptions(Context &context, const CooperateEvent &event);
 
     IContext *env_ { nullptr };
     std::map<CooperateEventType, std::function<void(Context&, const CooperateEvent&)>> handlers_;
