@@ -636,6 +636,9 @@ void CooperateIn::RelayConfirmation::OnResponse(Context &context, const Cooperat
     parent_.env_->GetTimerManager().RemoveTimer(timerId_);
     if (notice.normal) {
         OnNormal(context, event);
+#ifdef OHOS_BUILD_ENABLE_INTERACTION_WITH_OPTIONS
+        OnNormalWithOptions(context, event);
+#endif // OHOS_BUILD_ENABLE_INTERACTION_WITH_OPTIONS
         Proceed(context, event);
     } else {
         OnReset(context, event);
@@ -657,6 +660,27 @@ void CooperateIn::RelayConfirmation::OnNormal(Context &context, const CooperateE
     context.dsoftbus_.StartCooperate(parent_.process_.Peer(), notice);
 
     context.eventMgr_.StartCooperateFinish(notice);
+    context.inputDevMgr_.RemoveVirtualInputDevice(context.Peer());
+    TransiteTo(context, CooperateState::COOPERATE_STATE_FREE);
+    context.OnRelayCooperation(parent_.process_.Peer(), context.NormalizedCursorPosition());
+}
+
+void CooperateIn::RelayConfirmation::OnNormalWithOptions(Context &context, const CooperateEvent &event)
+{
+    FI_HILOGI("[relay cooperate] Cooperation with \'%{public}s\' established",
+        Utility::Anonymize(parent_.process_.Peer()).c_str());
+    context.inputEventBuilder_.Disable();
+
+    StartWithOptionsEvent withOptionsNotice = std::get<StartWithOptionsEvent>(event.event);
+    DSoftbusCooperateOptions notice {
+        .originNetworkId = context.Peer(),
+        .success = true,
+        .cooperateOptions = {withOptionsNotice.displayX, withOptionsNotice.displayY, withOptionsNotice.displayId},
+    };
+    context.OnStartCooperate(notice.extra);
+    context.dsoftbus_.StartCooperateWithOptions(parent_.process_.Peer(), notice);
+
+    context.eventMgr_.StartCooperateWithOptinsFinish(notice);
     context.inputDevMgr_.RemoveVirtualInputDevice(context.Peer());
     TransiteTo(context, CooperateState::COOPERATE_STATE_FREE);
     context.OnRelayCooperation(parent_.process_.Peer(), context.NormalizedCursorPosition());

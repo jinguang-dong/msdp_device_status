@@ -89,6 +89,7 @@ private:
         void OnSwitchChanged(Context &context, const CooperateEvent &event);
         void OnSoftbusSessionClosed(Context &context, const CooperateEvent &event);
         void OnRemoteStartWithOptions(Context &context, const CooperateEvent &event);
+        void OnNormalWithOptions(Context &context, const CooperateEvent &event);
 
         CooperateIn &parent_;
         int32_t timerId_ { -1 };

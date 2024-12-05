@@ -27,6 +27,7 @@ declare_args() {
   device_status_sensor_enable = true
   device_status_memmgr_enable = false
   device_status_enable_universal_drag = false
+  device_status_interaction_with_options = false
 
   # origin variables sets
   if (!is_arkui_x) {
@@ -123,4 +124,8 @@ if (is_arkui_x) {
 
 if (device_status_enable_universal_drag) {
   device_status_default_defines += [ "OHOS_BUILD_UNIVERSAL_DRAG" ]
+}
+
+if (device_status_interaction_with_options) {
+  device_status_default_defines += [ "OHOS_BUILD_ENABLE_INTERACTION_WITH_OPTIONS" ]
 }
