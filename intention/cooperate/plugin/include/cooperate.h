@@ -54,6 +54,10 @@ public:
     int32_t SetDamplingCoefficient(uint32_t direction, double coefficient) override;
     void Dump(int32_t fd) override;
 
+    void ReportStartCooperateRadarInfo(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName,
+        const std::string &packageName);
+    void ReportCooperateRadarInfo(struct CooperateRadarInfo &cooperateRadarInfo);
+
 private:
     void Loop();
     void StartWorker();

@@ -122,6 +122,7 @@ int32_t DSoftbusHandler::StartCooperate(const std::string &networkId, const DSof
         << event.cursorPos.y << event.success << event.extra.priv;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to write data packet");
+        ReportSendPacketRadarInfo(BizCooperateStage::STAGE_DSOFTBUS,CooperateRadarErrCode::FAILED_SEND_PACKET,"StartCooperate","");
         return RET_ERR;
     }
     int32_t ret = env_->GetDSoftbus().SendPacket(networkId, packet);
@@ -193,6 +194,18 @@ int32_t DSoftbusHandler::RelayCooperateFinish(const std::string &networkId, cons
 std::string DSoftbusHandler::GetLocalNetworkId()
 {
     return IDSoftbusAdapter::GetLocalNetworkId();
+}
+
+void DSoftbusHandler::ReportSendPacketRadarInfo(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName, const std::string &packageName)
+{
+    CooperateRadarInfo coopertateRadarInfo;
+    coopertateRadarInfo.funcName = funcName;
+    coopertateRadarInfo.bizState = static_cast<int32_t>(BizState::STATE_BEGIN);
+    coopertateRadarInfo.bizStage = static_cast<int32_t>(BizCooperateStage::STAGE_DSOFTBUS);
+    coopertateRadarInfo.stageRes = static_cast<int32_t>(stageRes);
+    coopertateRadarInfo.errCode = static_cast<int32_t>(errCode);
+    coopertateRadarInfo.hostName = packageName;
+    Cooperate::Cooperate::ReportCooperateRadarInfo(coopertateRadarInfo);
 }
 
 void DSoftbusHandler::OnBind(const std::string &networkId)

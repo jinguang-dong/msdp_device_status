@@ -106,7 +106,15 @@ void EventManager::StartCooperateFinish(const DSoftbusStartCooperateFinished &ev
         .errCode = event.errCode
     };
     calls_[EventType::START] = nullptr;
-    NotifyCooperateMessage(notice);
+    bool notify;
+    NotifyCooperateMessage(notice,notify);
+    if(notify)
+    {
+        ReportNotifyRadarInfo(BizCooperateStage::STAGE_NOTIFY,CooperateRadarErrCode::FAILED_NOTIFY_SUCCESS,"StartCooperateFinish","");
+    }else
+    {
+        ReportNotifyRadarInfo(BizCooperateStage::STAGE_NOTIFY,CooperateRadarErrCode::FAILED_NOTIFY,"StartCooperateFinish","");
+    }
 }
 
 void EventManager::RemoteStart(const DSoftbusStartCooperate &event)
@@ -220,7 +228,19 @@ void EventManager::OnClientDied(const ClientDiedEvent &event)
     }
 }
 
-void EventManager::NotifyCooperateMessage(const CooperateNotice &notice)
+void EventManager::ReportNotifyRadarInfo(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName, const std::string &packageName)
+{
+    CooperateRadarInfo coopertateRadarInfo;
+    coopertateRadarInfo.funcName = funcName;
+    coopertateRadarInfo.bizState = static_cast<int32_t>(BizState::STATE_BEGIN);
+    coopertateRadarInfo.bizStage = static_cast<int32_t>(BizCooperateStage::STAGE_SEND_MANAGER);
+    coopertateRadarInfo.stageRes = static_cast<int32_t>(stageRes);
+    coopertateRadarInfo.errCode = static_cast<int32_t>(errCode);
+    coopertateRadarInfo.hostName = packageName;
+    Cooperate::Cooperate::ReportCooperateRadarInfo(coopertateRadarInfo);
+}
+
+void EventManager::NotifyCooperateMessage(const CooperateNotice &notice,bool &Notif = true)
 {
     auto session = env_->GetSocketSessionManager().FindSessionByPid(notice.pid);
     if (session == nullptr) {
@@ -236,6 +256,7 @@ void EventManager::NotifyCooperateMessage(const CooperateNotice &notice)
     }
     if (!session->SendMsg(pkt)) {
         FI_HILOGE("Sending failed");
+        Notif = false;
     }
 }
 

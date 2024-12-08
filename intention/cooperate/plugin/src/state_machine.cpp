@@ -285,6 +285,7 @@ void StateMachine::StartCooperate(Context &context, const CooperateEvent &event)
     if (!env_->GetDDM().CheckSameAccountToLocal(startEvent.remoteNetworkId)) {
         FI_HILOGE("CheckSameAccountToLocal failed");
         startEvent.errCode->set_value(COMMON_PERMISSION_CHECK_ERROR);
+        ReportCheckSameAccountRadarInfo(BizCooperateStage::STAGE_CHECK_SAME_ACCOUNT,CooperateRadarErrCode::FAILED_CHECK_SAME_ACCOUNT,"StartCooperate",startEvent.remoteNetworkId);
         return;
     }
     UpdateApplicationStateObserver(startEvent.pid);
@@ -690,6 +691,17 @@ void StateMachine::RemoveWatches(Context &context)
 bool StateMachine::IsCooperateEnable()
 {
     return isCooperateEnable_;
+}
+void StateMachine::ReportCheckSameAccountRadarInfo(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName, const std::string &packageName)
+{
+    CooperateRadarInfo coopertateRadarInfo;
+    coopertateRadarInfo.funcName = funcName;
+    coopertateRadarInfo.bizState = static_cast<int32_t>(BizState::STATE_BEGIN);
+    coopertateRadarInfo.bizStage = static_cast<int32_t>(BizCooperateStage::STAGE_CHECK_SAME_ACCOUNT);
+    coopertateRadarInfo.stageRes = static_cast<int32_t>(stageRes);
+    coopertateRadarInfo.errCode = static_cast<int32_t>(errCode);
+    coopertateRadarInfo.hostName = packageName;
+    Cooperate::Cooperate::ReportCooperateRadarInfo(coopertateRadarInfo);
 }
 } // namespace Cooperate
 } // namespace DeviceStatus

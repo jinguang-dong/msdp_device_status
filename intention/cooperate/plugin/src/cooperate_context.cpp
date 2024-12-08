@@ -299,7 +299,7 @@ void Context::OnStopCooperate()
 void Context::OnTransitionOut()
 {
     CHKPV(eventHandler_);
-    FI_HILOGI("Notify observers of transition out");
+    FI_HILOGI("Notify observers  of transition out");
     for (const auto &observer : observers_) {
         eventHandler_->PostTask(
             [observer, remoteNetworkId = Peer(), cursorPos = NormalizedCursorPosition()] {

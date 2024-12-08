@@ -39,6 +39,8 @@ public:
     void Enable(Context &context);
     void Disable();
     void Update(Context &context);
+     void ReportAddInterceptorRadarInfo(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName,
+        const std::string &packageName);   
 
 private:
     void OnPointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
