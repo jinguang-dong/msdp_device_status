@@ -92,7 +92,6 @@ enum class BizCooperateStage {
     STAGE_NOTIFY
 };
  
-
 enum class CooperateRadarErrCode {
     COOPERATE_SUCCESS = 0,
     COOPERATE_FAILED = 20900005,

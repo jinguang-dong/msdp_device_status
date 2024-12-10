@@ -106,14 +106,12 @@ void EventManager::StartCooperateFinish(const DSoftbusStartCooperateFinished &ev
         .errCode = event.errCode
     };
     calls_[EventType::START] = nullptr;
-    bool notify;
-    NotifyCooperateMessage(notice,notify);
-    if(notify)
+    NotifyCooperateMessage(notice);
+    if(check_)
     {
-        ReportNotifyRadarInfo(BizCooperateStage::STAGE_NOTIFY,CooperateRadarErrCode::FAILED_NOTIFY_SUCCESS,"StartCooperateFinish","");
-    }else
-    {
-        ReportNotifyRadarInfo(BizCooperateStage::STAGE_NOTIFY,CooperateRadarErrCode::FAILED_NOTIFY,"StartCooperateFinish","");
+        ReportNotify(BizCooperateStage::STAGE_NOTIFY,CooperateRadarErrCode::FAILED_NOTIFY_SUCCESS,"StartCooperateFinish","");
+    }else{
+        ReportNotify(BizCooperateStage::STAGE_NOTIFY,CooperateRadarErrCode::FAILED_NOTIFY,"StartCooperateFinish","");
     }
 }
 
@@ -228,7 +226,8 @@ void EventManager::OnClientDied(const ClientDiedEvent &event)
     }
 }
 
-void EventManager::ReportNotifyRadarInfo(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName, const std::string &packageName)
+void EventManager::ReportNotify(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName,
+     const std::string &packageName)
 {
     CooperateRadarInfo coopertateRadarInfo;
     coopertateRadarInfo.funcName = funcName;
@@ -237,14 +236,15 @@ void EventManager::ReportNotifyRadarInfo(BizCooperateStage stageRes, CooperateRa
     coopertateRadarInfo.stageRes = static_cast<int32_t>(stageRes);
     coopertateRadarInfo.errCode = static_cast<int32_t>(errCode);
     coopertateRadarInfo.hostName = packageName;
-    Cooperate::Cooperate::ReportCooperateRadarInfo(coopertateRadarInfo);
+    Cooperate::Cooperate::ReportCooperate(coopertateRadarInfo);
 }
 
-void EventManager::NotifyCooperateMessage(const CooperateNotice &notice,bool &Notif = true)
+void EventManager::NotifyCooperateMessage(const CooperateNotice &notice)
 {
     auto session = env_->GetSocketSessionManager().FindSessionByPid(notice.pid);
     if (session == nullptr) {
         FI_HILOGD("session is null");
+        check_ = false;
         return;
     }
     CHKPV(session);
@@ -252,11 +252,14 @@ void EventManager::NotifyCooperateMessage(const CooperateNotice &notice,bool &No
     pkt << notice.userData << notice.networkId << static_cast<int32_t>(notice.msg) << notice.errCode;
     if (pkt.ChkRWError()) {
         FI_HILOGE("Packet write data failed");
+        check_ = false;
         return;
     }
     if (!session->SendMsg(pkt)) {
         FI_HILOGE("Sending failed");
-        Notif = false;
+        check_ = false;
+    }else{
+        check_ = true;
     }
 }
 

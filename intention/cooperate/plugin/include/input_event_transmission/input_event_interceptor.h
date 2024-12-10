@@ -39,7 +39,7 @@ public:
     void Enable(Context &context);
     void Disable();
     void Update(Context &context);
-     void ReportAddInterceptorRadarInfo(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName,
+     void ReportAddInterceptor(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName,
         const std::string &packageName);   
 
 private:

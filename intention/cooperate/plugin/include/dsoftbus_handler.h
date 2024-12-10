@@ -78,7 +78,7 @@ public:
     int32_t RelayCooperateFinish(const std::string &networkId, const DSoftbusRelayCooperateFinished &event);
     static std::string GetLocalNetworkId();
 
-    void ReportSendPacketRadarInfo(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName,
+    void ReportSendPacket(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName,
         const std::string &packageName);
 
 private:

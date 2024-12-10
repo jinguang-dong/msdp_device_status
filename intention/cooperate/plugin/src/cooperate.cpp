@@ -180,11 +180,13 @@ int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remot
     auto ret = context_.Sender().Send(CooperateEvent(CooperateEventType::START, event));
     if (ret != Channel<CooperateEvent>::NO_ERROR) {
         FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
-        ReportStartCooperateRadarInfo(StageRes::RES_FAIL, CooperateRadarErrCode::COOPERATE_FAILED, "StartCooperate",
+        ReportStartCooperate(StageRes::RES_FAIL, CooperateRadarErrCode::COOPERATE_FAILED, "StartCooperate",
+        remoteNetworkId);
+    }else{
+        ReportStartCooperate(StageRes::RES_SUCCESS, CooperateRadarErrCode::COOPERATE_SUCCESS, "StartCooperate",
         remoteNetworkId);
     }
-    ReportStartCooperateRadarInfo(StageRes::RES_SUCCESS, CooperateRadarErrCode::COOPERATE_SUCCESS, "StartCooperate",
-        remoteNetworkId);
+
     return errCode.get();
 }
 
@@ -298,7 +300,7 @@ void Cooperate::Dump(int32_t fd)
     }
 }
 
-void Cooperate::ReportStartCooperateRadarInfo(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName, const std::string &packageName)
+void Cooperate::ReportStartCooperate(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName, const std::string &packageName)
 {
     CooperateRadarInfo coopertateRadarInfo;
     coopertateRadarInfo.funcName = funcName;
@@ -307,12 +309,12 @@ void Cooperate::ReportStartCooperateRadarInfo(BizCooperateStage stageRes, Cooper
     coopertateRadarInfo.stageRes = static_cast<int32_t>(stageRes);
     coopertateRadarInfo.errCode = static_cast<int32_t>(errCode);
     coopertateRadarInfo.hostName = packageName;
-    ReportCooperateRadarInfo(coopertateRadarInfo);
+    ReportCooperate(coopertateRadarInfo);
 }
 
-void Cooperate::ReportCooperateRadarInfo(CooperateRadarInfo &cooperateRadarInfo)
+void Cooperate::ReportCooperate(CooperateRadarInfo cooperateRadarInfo)
 {
-     HiSysEventWrite(
+    HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::MSDP,
         DRAG_BEHAVIOR,
         HiviewDFX::HiSysEvent::EventType::BEHAVIOR,

@@ -88,17 +88,18 @@ public:
     void GetCooperateState(const CooperateStateNotice &notice);
     void OnClientDied(const ClientDiedEvent &event);
 
-    void ReportNotifyRadarInfo(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName,
+    void ReportNotify(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName,
         const std::string &packageName);
 
 private:
     void OnCooperateMessage(CoordinationMessage msg, const std::string &networkId);
-    void NotifyCooperateMessage(const CooperateNotice &notice,bool &Notif = true);
+    void NotifyCooperateMessage(const CooperateNotice &notice);
     void NotifyCooperateState(const CooperateStateNotice &notice);
 
 private:
     IContext *env_ { nullptr };
     std::list<std::shared_ptr<EventInfo>> listeners_;
+    bool check_ {true};
     std::map<EventType, std::shared_ptr<EventInfo>> calls_ {
         { EventType::ENABLE, nullptr },
         { EventType::START, nullptr },

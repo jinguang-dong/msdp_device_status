@@ -39,7 +39,7 @@ public:
     void OnEvent(Context &context, const CooperateEvent &event);
     bool IsCooperateEnable();
 
-     void ReportCheckSameAccountRadarInfo(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName,
+     void ReportCheckSameAccount(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName,
         const std::string &packageName);   
 
 private:
