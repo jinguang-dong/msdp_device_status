@@ -693,7 +693,8 @@ bool StateMachine::IsCooperateEnable()
 {
     return isCooperateEnable_;
 }
-void StateMachine::ReportCheckSameAccount(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName, const std::string &packageName)
+void StateMachine::ReportCheckSameAccount(BizCooperateStage stageRes, CooperateRadarErrCode errCode,
+  const std::string &funcName, const std::string &packageName)
 {
     CooperateRadarInfo coopertateRadarInfo;
     coopertateRadarInfo.funcName = funcName;

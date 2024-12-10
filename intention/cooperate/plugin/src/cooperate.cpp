@@ -181,10 +181,10 @@ int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remot
     if (ret != Channel<CooperateEvent>::NO_ERROR) {
         FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
         ReportStartCooperate(StageRes::RES_FAIL, CooperateRadarErrCode::COOPERATE_FAILED, "StartCooperate",
-        remoteNetworkId);
+          remoteNetworkId);
     }else{
         ReportStartCooperate(StageRes::RES_SUCCESS, CooperateRadarErrCode::COOPERATE_SUCCESS, "StartCooperate",
-        remoteNetworkId);
+          remoteNetworkId);
     }
 
     return errCode.get();
@@ -300,7 +300,8 @@ void Cooperate::Dump(int32_t fd)
     }
 }
 
-void Cooperate::ReportStartCooperate(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName, const std::string &packageName)
+void Cooperate::ReportStartCooperate(BizCooperateStage stageRes, CooperateRadarErrCode errCode,
+  const std::string &funcName, const std::string &packageName)
 {
     CooperateRadarInfo coopertateRadarInfo;
     coopertateRadarInfo.funcName = funcName;

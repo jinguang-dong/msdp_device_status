@@ -80,7 +80,8 @@ void InputEventInterceptor::Enable(Context &context)
         [this](std::shared_ptr<MMI::KeyEvent> keyEvent) { this->OnKeyEvent(keyEvent); });
     if (interceptorId_ < 0) {
         FI_HILOGE("Input::AddInterceptor fail");
-        ReportAddInterceptor(BizCooperateStage::STAGE_SERVER_EVENTMANAGER,CooperateRadarErrCode::FAILED_INPUTEVENTINTERCEPTOR_ADD,"Enable","");
+        ReportAddInterceptor(BizCooperateStage::STAGE_SERVER_EVENTMANAGER, 
+          CooperateRadarErrCode::FAILED_INPUTEVENTINTERCEPTOR_ADD, "Enable", "");
     }
     TurnOffChannelScan();
     HeartBeatSend();
@@ -129,7 +130,8 @@ void InputEventInterceptor::Update(Context &context)
     FI_HILOGI("Update peer to \'%{public}s\'", Utility::Anonymize(remoteNetworkId_).c_str());
 }
 
-void InputEventInterceptor::ReportAddInterceptor(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName, const std::string &packageName)
+void InputEventInterceptor::ReportAddInterceptor(BizCooperateStage stageRes, CooperateRadarErrCode errCode,
+  const std::string &funcName, const std::string &packageName)
 {
     CooperateRadarInfo coopertateRadarInfo;
     coopertateRadarInfo.funcName = funcName;

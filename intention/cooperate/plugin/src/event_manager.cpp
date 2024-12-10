@@ -109,9 +109,11 @@ void EventManager::StartCooperateFinish(const DSoftbusStartCooperateFinished &ev
     NotifyCooperateMessage(notice);
     if(check_)
     {
-        ReportNotify(BizCooperateStage::STAGE_NOTIFY,CooperateRadarErrCode::FAILED_NOTIFY_SUCCESS,"StartCooperateFinish","");
+        ReportNotify(BizCooperateStage::STAGE_NOTIFY, CooperateRadarErrCode::FAILED_NOTIFY_SUCCESS,
+           "StartCooperateFinish", "");
     }else{
-        ReportNotify(BizCooperateStage::STAGE_NOTIFY,CooperateRadarErrCode::FAILED_NOTIFY,"StartCooperateFinish","");
+        ReportNotify(BizCooperateStage::STAGE_NOTIFY, CooperateRadarErrCode::FAILED_NOTIFY,
+           "StartCooperateFinish", "");
     }
 }
 

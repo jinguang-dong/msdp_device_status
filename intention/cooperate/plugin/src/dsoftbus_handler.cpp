@@ -196,7 +196,8 @@ std::string DSoftbusHandler::GetLocalNetworkId()
     return IDSoftbusAdapter::GetLocalNetworkId();
 }
 
-void DSoftbusHandler::ReportSendPacket(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName, const std::string &packageName)
+void DSoftbusHandler::ReportSendPacket(BizCooperateStage stageRes, CooperateRadarErrCode errCode, 
+  const std::string &funcName, const std::string &packageName)
 {
     CooperateRadarInfo coopertateRadarInfo;
     coopertateRadarInfo.funcName = funcName;
