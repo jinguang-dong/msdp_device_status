@@ -42,6 +42,7 @@ namespace {
 constexpr size_t EXPECTED_N_SUBMATCHES { 2 };
 constexpr size_t EXPECTED_SUBMATCH { 1 };
 const std::string FINGER_PRINT { "hw_fingerprint_mouse" };
+const std::string WATCH { "WATCH" };
 } // namespace
 
 DeviceManager::HotplugHandler::HotplugHandler(DeviceManager &devMgr)
@@ -244,13 +245,13 @@ void DeviceManager::OnDeviceAdded(std::shared_ptr<IDevice> dev)
     CHKPV(dev);
     FI_HILOGI("Add device %{public}d:%{private}s", dev->GetId(), dev->GetDevPath().c_str());
     FI_HILOGI("  sysPath:       \"%{private}s\"", dev->GetSysPath().c_str());
-    FI_HILOGI("  bus:           %{public}04x", dev->GetBus());
+    FI_HILOGD("  bus:           %{public}04x", dev->GetBus());
     FI_HILOGI("  vendor:        %{public}04x", dev->GetVendor());
-    FI_HILOGI("  product:       %{public}04x", dev->GetProduct());
-    FI_HILOGI("  version:       %{public}04x", dev->GetVersion());
+    FI_HILOGD("  product:       %{public}04x", dev->GetProduct());
+    FI_HILOGD("  version:       %{public}04x", dev->GetVersion());
     FI_HILOGI("  name:          \"%{public}s\"", Utility::Anonymize(dev->GetName()).c_str());
     FI_HILOGI("  location:      \"%{public}s\"", dev->GetPhys().c_str());
-    FI_HILOGI("  unique id:     \"%{public}s\"", dev->GetUniq().c_str());
+    FI_HILOGI("  unique id:     \"%{private}s\"", dev->GetUniq().c_str());
     FI_HILOGI("  is pointer:    %{private}s, is keyboard:%{public}s",
         dev->IsPointerDevice() ? "True" : "False", dev->IsKeyboard() ? "True" : "False");
 
@@ -408,11 +409,20 @@ bool DeviceManager::AnyOf(std::function<bool(std::shared_ptr<IDevice>)> pred)
 bool DeviceManager::HasLocalPointerDevice()
 {
     return AnyOf([this](std::shared_ptr<IDevice> dev) {
-        if ((dev == nullptr) || (dev->GetName() == FINGER_PRINT)) {
+        if ((dev == nullptr) || IsSpecialPointerDevice(dev)) {
             return false;
         }
         return (dev->IsPointerDevice() && !dev->IsRemote());
     });
+}
+
+bool DeviceManager::IsSpecialPointerDevice(std::shared_ptr<IDevice> dev)
+{
+    if (dev == nullptr) {
+        return false;
+    }
+    std::string deviceName = dev->GetName();
+    return (deviceName == FINGER_PRINT || deviceName.find(WATCH) != std::string::npos);
 }
 
 bool DeviceManager::HasLocalKeyboardDevice()
@@ -444,6 +454,20 @@ std::vector<std::shared_ptr<IDevice>> DeviceManager::GetKeyboard()
         }
     }
     return keyboards;
+}
+
+std::vector<std::shared_ptr<IDevice>> DeviceManager::GetPointerDevice()
+{
+    if (!HasLocalPointerDevice()) {
+        return {};
+    }
+    std::vector<std::shared_ptr<IDevice>> pointerDevices;
+    for (const auto &dev : devices_) {
+        if (dev.second->IsPointerDevice() && !dev.second->IsRemote() && dev.second->GetName() != FINGER_PRINT) {
+            pointerDevices.push_back(dev.second);
+        }
+    }
+    return pointerDevices;
 }
 } // namespace DeviceStatus
 } // namespace Msdp
