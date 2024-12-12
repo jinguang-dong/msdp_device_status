@@ -93,6 +93,9 @@ CooperateFree::Initial::Initial(CooperateFree &parent)
     AddHandler(CooperateEventType::STOP, [this](Context &context, const CooperateEvent &event) {
         this->OnStop(context, event);
     });
+    AddHandler(CooperateEventType::DISABLE, [this](Context &context, const CooperateEvent &event) {
+        this->OnDisable(context, event);
+    });
     AddHandler(CooperateEventType::APP_CLOSED, [this](Context &context, const CooperateEvent &event) {
         this->OnAppClosed(context, event);
     });
@@ -101,6 +104,10 @@ CooperateFree::Initial::Initial(CooperateFree &parent)
     });
     AddHandler(CooperateEventType::INPUT_POINTER_EVENT, [this](Context &context, const CooperateEvent &event) {
         this->OnPointerEvent(context, event);
+    });
+    AddHandler(CooperateEventType::UPDATE_COOPERATE_FLAG,
+        [this](Context &context, const CooperateEvent &event) {
+            this->OnUpdateCooperateFlag(context, event);
     });
 }
 
@@ -170,6 +177,15 @@ void CooperateFree::Initial::OnStop(Context &context, const CooperateEvent &even
     parent_.UnchainConnections(context, param);
 }
 
+void CooperateFree::Initial::OnDisable(Context &context, const CooperateEvent &event)
+{
+    FI_HILOGI("[disable cooperation] Stop cooperation");
+    CHKPV(parent_.env_);
+    bool hasLocalPointerDevice =  parent_.env_->GetDeviceManager().HasLocalPointerDevice();
+    FI_HILOGI("HasLocalPointerDevice:%{public}s", hasLocalPointerDevice ? "true" : "false");
+    parent_.env_->GetInput().SetPointerVisibility(hasLocalPointerDevice, PRIORITY);
+}
+
 void CooperateFree::Initial::OnAppClosed(Context &context, const CooperateEvent &event)
 {
     FI_HILOGI("[app closed] Close all connections");
@@ -195,7 +211,16 @@ void CooperateFree::Initial::OnRemoteStart(Context &context, const CooperateEven
 void CooperateFree::Initial::OnPointerEvent(Context &context, const CooperateEvent &event)
 {
     CALL_DEBUG_ENTER;
+    if (context.NeedHideCursor() && context.IsCooperateWithCrossDrag()) {
+        FI_HILOGD("Hide cursor before dragData rcvd when come back");
+        return;
+    }
     InputPointerEvent notice = std::get<InputPointerEvent>(event.event);
+    CHKPV(parent_.env_);
+    if (auto dragState = parent_.env_->GetDragManager().GetDragState(); dragState == DragState::START) {
+        FI_HILOGD("Current dragState:START");
+        return;
+    }
     if (InputEventBuilder::IsLocalEvent(notice) && context.NeedHideCursor()) {
         UpdateCooperateFlagEvent event {
             .mask = COOPERATE_FLAG_HIDE_CURSOR,
@@ -203,6 +228,13 @@ void CooperateFree::Initial::OnPointerEvent(Context &context, const CooperateEve
         context.UpdateCooperateFlag(event);
         parent_.SetPointerVisible(context);
     }
+}
+
+void CooperateFree::Initial::OnUpdateCooperateFlag(Context &context, const CooperateEvent &event)
+{
+    CALL_INFO_TRACE;
+    UpdateCooperateFlagEvent notice = std::get<UpdateCooperateFlagEvent>(event.event);
+    context.UpdateCooperateFlag(notice);
 }
 } // namespace Cooperate
 } // namespace DeviceStatus
