@@ -60,13 +60,14 @@
         "udmf",
         "device_info_manager",
         "dsoftbus",
-        "motion",
         "ylong_runtime",
         "dfs_service",
         "qos_manager",
         "memmgr",
         "os_account",
-        "libxml2"
+        "libxml2",
+        "wifi",
+        "power_manager"
       ],
       "third_party": [
         "libuv",
