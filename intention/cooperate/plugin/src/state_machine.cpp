@@ -173,6 +173,9 @@ StateMachine::StateMachine(IContext *env)
     AddHandler(CooperateEventType::STOP, [this](Context &context, const CooperateEvent &event) {
         this->StopCooperate(context, event);
     });
+    AddHandler(CooperateEventType::UPDATE_VIRTUAL_DEV_ID_MAP, [this](Context &context, const CooperateEvent &event) {
+        this->UpdateVirtualDeviceIdMap(context, event);
+    });
 }
 
 void StateMachine::OnEvent(Context &context, const CooperateEvent &event)
@@ -298,6 +301,7 @@ void StateMachine::StopCooperate(Context &context, const CooperateEvent &event)
 {
     CALL_DEBUG_ENTER;
     context.CloseDistributedFileConnection(context.Peer());
+    context.OnStopCooperate();
     Transfer(context, event);
 }
 
@@ -463,7 +467,7 @@ void StateMachine::OnRemoteStart(Context &context, const CooperateEvent &event)
     CALL_DEBUG_ENTER;
     DSoftbusStartCooperate startEvent = std::get<DSoftbusStartCooperate>(event.event);
     if (!context.ddm_.CheckSameAccountToLocal(startEvent.originNetworkId) || isCooperateEnable_ == false) {
-        FI_HILOGE("CheckSameAccountToLocal failed, or switch is not opened, unchain");
+        FI_HILOGE("CheckSameAccountToLocal failed, switch is : %{public}d, unchain", isCooperateEnable_);
         CooperateEvent stopEvent(
             CooperateEventType::STOP,
             StopCooperateEvent {
@@ -474,6 +478,13 @@ void StateMachine::OnRemoteStart(Context &context, const CooperateEvent &event)
         return;
     }
     Transfer(context, event);
+}
+
+void StateMachine::UpdateVirtualDeviceIdMap(Context &context, const CooperateEvent &event)
+{
+    CALL_DEBUG_ENTER;
+    UpdateVirtualDeviceIdMapEvent notice = std::get<UpdateVirtualDeviceIdMapEvent>(event.event);
+    context.inputEventBuilder_.UpdateVirtualDeviceIdMap(notice.remote2VirtualIds);
 }
 
 void StateMachine::Transfer(Context &context, const CooperateEvent &event)
@@ -584,7 +595,7 @@ void StateMachine::OnCommonEvent(Context &context, const std::string &commonEven
         auto ret = context.Sender().Send(CooperateEvent(
             CooperateEventType::STOP,
             StopCooperateEvent{
-                .isUnchained = true
+                .isUnchained = false
             }));
         if (ret != Channel<CooperateEvent>::NO_ERROR) {
             FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
@@ -637,7 +648,7 @@ void StateMachine::AddMonitor(Context &context)
             if (ret != Channel<CooperateEvent>::NO_ERROR) {
                 FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
             }
-        });
+        }, nullptr, MMI::HANDLE_EVENT_TYPE_MOUSE);
     if (monitorId_ < 0) {
         FI_HILOGE("MMI::Add Monitor fail");
     }
