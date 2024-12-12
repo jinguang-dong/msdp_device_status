@@ -16,6 +16,8 @@
 #ifndef INPUT_EVENT_BUILDER_H
 #define INPUT_EVENT_BUILDER_H
 
+#include <shared_mutex>
+
 #include "display_manager.h"
 #include "key_event.h"
 #include "nocopyable.h"
@@ -29,6 +31,9 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+namespace {
+    constexpr int32_t MIN_MMI_VIRTUAL_DEVICE_ID { 1000 };
+}
 namespace Cooperate {
 class Context;
 
@@ -61,6 +66,14 @@ class InputEventBuilder final {
         Coordinate pos {};
     };
 
+    enum DamplingDirection : size_t {
+        DAMPLING_DIRECTION_UP = 0,
+        DAMPLING_DIRECTION_DOWN,
+        DAMPLING_DIRECTION_LEFT,
+        DAMPLING_DIRECTION_RIGHT,
+        N_DAMPLING_DIRECTIONS,
+    };
+
 public:
     InputEventBuilder(IContext *env);
     ~InputEventBuilder();
@@ -71,6 +84,8 @@ public:
     void Update(Context &context);
     void Freeze();
     void Thaw();
+    void SetDamplingCoefficient(uint32_t direction, double coefficient);
+    void UpdateVirtualDeviceIdMap(const std::unordered_map<int32_t, int32_t> &remote2VirtualIds);
 
     static bool IsLocalEvent(const InputPointerEvent &event);
 
@@ -78,9 +93,14 @@ private:
     bool OnPacket(const std::string &networkId, Msdp::NetPacket &packet);
     void OnPointerEvent(Msdp::NetPacket &packet);
     void OnKeyEvent(Msdp::NetPacket &packet);
+    void TurnOffChannelScan();
+    void TurnOnChannelScan();
+    int32_t SetWifiScene(unsigned int scene);
     bool UpdatePointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool IsActive(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void ResetPressedEvents();
+    double GetDamplingCoefficient(DamplingDirection direction) const;
+    bool DampPointerMotion(std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
 
     IContext *env_ { nullptr };
     bool enable_ { false };
@@ -88,16 +108,21 @@ private:
     int32_t xDir_ { 0 };
     int32_t movement_ { 0 };
     size_t nDropped_ { 0 };
+    bool scanState_ { true };
+    int32_t pointerEventTimer_ { -1 };
     std::string remoteNetworkId_;
+    std::array<double, N_DAMPLING_DIRECTIONS> damplingCoefficients_;
     std::shared_ptr<DSoftbusObserver> observer_;
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     std::shared_ptr<MMI::KeyEvent> keyEvent_;
+    std::shared_mutex lock_;
+    std::unordered_map<int32_t, int32_t> remote2VirtualIds_;
     void TagRemoteEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
 };
 
 inline bool InputEventBuilder::IsLocalEvent(const InputPointerEvent &event)
 {
-    return (event.deviceId >= 0);
+    return (event.deviceId >= 0 && event.deviceId < MIN_MMI_VIRTUAL_DEVICE_ID);
 }
 } // namespace Cooperate
 } // namespace DeviceStatus
