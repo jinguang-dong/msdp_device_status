@@ -1050,6 +1050,22 @@ HWTEST_F(InteractionManagerTest, AddHotAreaListener_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Set
+ * @tc.desc: Set dampling coefficient.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDamplingCoefficient, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
+    constexpr double damplingCoefficient { 0.1 };
+    auto ret = InteractionManager::GetInstance()->SetDamplingCoefficient(
+        COORDINATION_DAMPLING_RIGHT, damplingCoefficient);
+    ASSERT_EQ(ret, RET_OK);
+}
+
+/**
  * @tc.name: InteractionManagerTest_Draglistener_Mouse
  * @tc.desc: Drag listener
  * @tc.type: FUNC
@@ -1659,7 +1675,7 @@ HWTEST_F(InteractionManagerTest, MouseEventDispatch, TestSize.Level1)
             [&promiseEventFlag]{promiseEventFlag.set_value(true);});
         int32_t monitorId = TestAddMonitor(callbackPtr);
         SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
-            MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, true);
+            MMI::PointerEvent::SOURCE_TYPE_MOUSE, TOUCH_POINTER_ID, true);
         ASSERT_TRUE(futureEventFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
             std::future_status::timeout);
         SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
