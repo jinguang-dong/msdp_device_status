@@ -47,6 +47,7 @@ int32_t DragVSyncStation::RequestFrame(int32_t frameType, std::shared_ptr<DragFr
         FI_HILOGE("Init receiver failed");
         return RET_ERR;
     }
+    CHKPR(receiver_, RET_ERR);
     ret = receiver_->RequestNextVSync(frameCallback_);
     if (ret != RET_OK) {
         FI_HILOGE("Request next vSync failed");
@@ -81,9 +82,11 @@ uint64_t DragVSyncStation::GetVSyncPeriod()
         return vSyncPeriod_;
     }
     int64_t period = 0;
-    int32_t ret = receiver_->GetVSyncPeriod(period);
-    if (ret != RET_OK) {
-        FI_HILOGE("GetVSyncPeriod failed");
+    if (receiver_ != nullptr) {
+        int32_t ret = receiver_->GetVSyncPeriod(period);
+        if (ret != RET_OK) {
+            FI_HILOGE("GetVSyncPeriod failed");
+        }
     }
     vSyncPeriod_ = (period <= 0 ? 0 : static_cast<uint64_t>(period));
     return vSyncPeriod_;
