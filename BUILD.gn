@@ -40,3 +40,5 @@ group("device_status_tests") {
     deps += [ "${device_status_root_path}/rust/modules/scheduler/test:fusion_scheduler_test" ]
   }
 }
+
+
