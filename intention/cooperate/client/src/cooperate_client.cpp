@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -269,6 +269,19 @@ int32_t CooperateClient::UnregisterEventListener(ITunnelClient &tunnel,
     }
     FI_HILOGD("Unregister all Listener for networkId:%{public}s successfully", Utility::Anonymize(networkId).c_str());
     return RET_OK;
+}
+
+int32_t CooperateClient::SetDamplingCoefficient(ITunnelClient &tunnel, uint32_t direction, double coefficient)
+{
+    FI_HILOGI("SetDamplingCoefficient(0x%{public}x, %{public}lf)", direction, coefficient);
+    SetDamplingCoefficientParam param { direction, coefficient };
+    DefaultReply reply;
+
+    auto ret = tunnel.SetParam(Intention::COOPERATE, CooperateRequestID::SET_DAMPLING_COEFFICIENT, param, reply);
+    if (ret != RET_OK) {
+        FI_HILOGE("ITunnelClient::SetParam fail, error:%{public}d", ret);
+    }
+    return ret;
 }
 
 int32_t CooperateClient::AddHotAreaListener(ITunnelClient &tunnel, HotAreaListenerPtr listener)
