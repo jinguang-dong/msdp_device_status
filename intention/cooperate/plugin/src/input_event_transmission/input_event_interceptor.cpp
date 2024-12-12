@@ -18,8 +18,10 @@
 #include "cooperate_context.h"
 #include "devicestatus_define.h"
 #include "display_manager.h"
+#include "power_mgr_client.h"
 #include "input_event_transmission/input_event_serialization.h"
 #include "utility.h"
+#include "kits/c/wifi_hid2d.h"
 
 #undef LOG_TAG
 #define LOG_TAG "InputEventInterceptor"
@@ -28,6 +30,17 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace Cooperate {
+
+namespace {
+const std::string WIFI_INTERFACE_NAME { "chba0" };
+const int32_t RESTORE_SCENE { 0 };
+const int32_t FORBIDDEN_SCENE { 1 };
+const int32_t UPPER_SCENE_FPS { 0 };
+const int32_t UPPER_SCENE_BW { 0 };
+const int32_t INTERVAL_MS { 2000 };
+const int32_t REPEAT_MAX { 10000 };
+}
+
 std::set<int32_t> InputEventInterceptor::filterKeys_ {
     MMI::KeyEvent::KEYCODE_BACK,
     MMI::KeyEvent::KEYCODE_POWER,
@@ -61,15 +74,44 @@ void InputEventInterceptor::Enable(Context &context)
     if (interceptorId_ < 0) {
         FI_HILOGE("Input::AddInterceptor fail");
     }
+    TurnOffChannelScan();
+    HeartBeatSend();
+}
+ 
+void InputEventInterceptor::HeartBeatSend()
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(env_);
+    heartTimer_ = env_->GetTimerManager().AddTimer(INTERVAL_MS, REPEAT_MAX, [this]() {
+        NetPacket packet(MessageId::DSOFTBUS_HEART_BEAT_PACKET);
+        if (InputEventSerialization::HeartBeatMarshalling(packet) != RET_OK) {
+            FI_HILOGE("Failed to serialize packet");
+            return;
+        }
+        env_->GetDSoftbus().SendPacket(remoteNetworkId_, packet);
+    });
 }
 
 void InputEventInterceptor::Disable()
 {
     CALL_INFO_TRACE;
+    TurnOnChannelScan();
     if (interceptorId_ > 0) {
         env_->GetInput().RemoveInterceptor(interceptorId_);
         interceptorId_ = -1;
     }
+    if ((pointerEventTimer_ >= 0) && (env_->GetTimerManager().IsExist(pointerEventTimer_))) {
+        env_->GetTimerManager().RemoveTimer(pointerEventTimer_);
+        pointerEventTimer_ = -1;
+    }
+    if (heartTimer_ < 0) {
+        FI_HILOGE("Failed to add heartTimer_");
+        return;
+    }
+    if (env_->GetTimerManager().RemoveTimer(heartTimer_) != RET_OK) {
+        FI_HILOGE("Failed to RemoveTimer");
+    }
+    heartTimer_ = -1;
 }
 
 void InputEventInterceptor::Update(Context &context)
@@ -81,6 +123,14 @@ void InputEventInterceptor::Update(Context &context)
 void InputEventInterceptor::OnPointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);
+    if (scanState_) {
+        TurnOffChannelScan();
+    }
+    RefreshActivity();
+    if ((pointerEventTimer_ >= 0) && (env_->GetTimerManager().IsExist(pointerEventTimer_))) {
+        env_->GetTimerManager().RemoveTimer(pointerEventTimer_);
+        pointerEventTimer_ = -1;
+    }
     if (auto pointerAction = pointerEvent->GetPointerAction();
         filterPointers_.find(pointerAction) != filterPointers_.end()) {
         FI_HILOGI("Current pointerAction:%{public}d, skip", static_cast<int32_t>(pointerAction));
@@ -111,11 +161,16 @@ void InputEventInterceptor::OnPointerEvent(std::shared_ptr<MMI::PointerEvent> po
     FI_HILOGD("PointerEvent(No:%{public}d,Source:%{public}s,Action:%{public}s)",
         pointerEvent->GetId(), pointerEvent->DumpSourceType(), pointerEvent->DumpPointerAction());
     env_->GetDSoftbus().SendPacket(remoteNetworkId_, packet);
+    pointerEventTimer_ = env_->GetTimerManager().AddTimer(POINTER_EVENT_TIMEOUT, REPEAT_ONCE, [this]() {
+        TurnOnChannelScan();
+        pointerEventTimer_ = -1;
+    });
 }
 
 void InputEventInterceptor::OnKeyEvent(std::shared_ptr<MMI::KeyEvent> keyEvent)
 {
     CHKPV(keyEvent);
+    RefreshActivity();
     if (filterKeys_.find(keyEvent->GetKeyCode()) != filterKeys_.end()) {
         keyEvent->AddFlag(MMI::AxisEvent::EVENT_FLAG_NO_INTERCEPT);
         env_->GetInput().SimulateInputEvent(keyEvent);
@@ -131,6 +186,38 @@ void InputEventInterceptor::OnKeyEvent(std::shared_ptr<MMI::KeyEvent> keyEvent)
     FI_HILOGD("KeyEvent(No:%{public}d,Key:%{private}d,Action:%{public}d)",
         keyEvent->GetId(), keyEvent->GetKeyCode(), keyEvent->GetKeyAction());
     env_->GetDSoftbus().SendPacket(remoteNetworkId_, packet);
+}
+
+void InputEventInterceptor::TurnOffChannelScan()
+{
+    scanState_ = false;
+    if (SetWifiScene(FORBIDDEN_SCENE) != RET_OK) {
+        scanState_ = true;
+        FI_HILOGE("Forbidden scene failed");
+    }
+}
+
+void InputEventInterceptor::TurnOnChannelScan()
+{
+    scanState_ = true;
+    if (SetWifiScene(RESTORE_SCENE) != RET_OK) {
+        scanState_ = false;
+        FI_HILOGE("Restore scene failed");
+    }
+}
+
+int32_t InputEventInterceptor::SetWifiScene(unsigned int scene)
+{
+    CALL_DEBUG_ENTER;
+    Hid2dUpperScene upperScene;
+    upperScene.scene = scene;
+    upperScene.fps = UPPER_SCENE_FPS;
+    upperScene.bw = UPPER_SCENE_BW;
+    if (Hid2dSetUpperScene(WIFI_INTERFACE_NAME.c_str(), &upperScene) != RET_OK) {
+        FI_HILOGE("Set wifi scene failed");
+        return RET_ERR;
+    }
+    return RET_OK;
 }
 
 void InputEventInterceptor::ReportPointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
@@ -155,6 +242,15 @@ void InputEventInterceptor::ReportPointerEvent(std::shared_ptr<MMI::PointerEvent
     if (ret != Channel<CooperateEvent>::NO_ERROR) {
         FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
     }
+}
+
+void InputEventInterceptor::RefreshActivity()
+{
+    if (!PowerMgr::PowerMgrClient::GetInstance().RefreshActivity(
+        PowerMgr::UserActivityType::USER_ACTIVITY_TYPE_TOUCH)) {
+        FI_HILOGE("RefreshActivity Failed");
+    }
+    return;
 }
 } // namespace Cooperate
 } // namespace DeviceStatus
