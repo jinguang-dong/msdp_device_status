@@ -232,12 +232,6 @@ int32_t DragManager::StartDrag(const DragData &dragData, int32_t pid, const std:
 {
     FI_HILOGI("enter");
     ResetMouseDragMonitorTimerId(dragData);
-    if (!IsAllowStartDrag()) {
-        FI_HILOGE("Dragging is not allowed when there is an up event");
-        SetAllowStartDrag(true);
-        SetCooperatePriv(0);
-        return RET_ERR;
-    }
     if (dragState_ == DragState::START) {
         FI_HILOGE("Drag instance already exists, no need to start drag again");
         return RET_ERR;
@@ -500,6 +494,7 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     }
     FI_HILOGD("DragCallback, pointerAction:%{public}d", pointerAction);
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
+        dragDrawing_.StopVSyncStation();
         mouseDragMonitorDisplayX_ = -1;
         mouseDragMonitorDisplayY_ = -1;
         CHKPV(context_);
@@ -922,11 +917,15 @@ int32_t DragManager::OnStartDrag(const std::string &packageName)
             packageName);
         return RET_ERR;
     }
+    bool isNeedAdjustDisplayXY = true;
+    bool isMultiSelectedAnimation = false;
     if (!mouseDragMonitorState_ || !existMouseMoveDragCallback_) {
-        dragDrawing_.Draw(dragData.displayId, dragData.displayX, dragData.displayY);
+        dragDrawing_.Draw(dragData.displayId, dragData.displayX, dragData.displayY, isNeedAdjustDisplayXY,
+            isMultiSelectedAnimation);
     } else if (mouseDragMonitorState_ && existMouseMoveDragCallback_ && (mouseDragMonitorDisplayX_ != -1)
         && (mouseDragMonitorDisplayY_ != -1)) {
-        dragDrawing_.Draw(dragData.displayId, mouseDragMonitorDisplayX_, mouseDragMonitorDisplayY_);
+        dragDrawing_.Draw(dragData.displayId, mouseDragMonitorDisplayX_, mouseDragMonitorDisplayY_,
+            isNeedAdjustDisplayXY, isMultiSelectedAnimation);
     }
     FI_HILOGI("Start drag, appened extra data");
     MMI::InputManager::GetInstance()->AppendExtraData(extraData);
@@ -1065,8 +1064,13 @@ DragState DragManager::GetDragState() const
 void DragManager::GetAllowDragState(bool &isAllowDrag)
 {
     FI_HILOGD("enter");
+    if (dragState_ == DragState::MOTION_DRAGGING) {
+        FI_HILOGW("Current state is \'%{public}d\', not allow cooperate", static_cast<int32_t>(dragState_));
+        isAllowDrag = false;
+        return;
+    }
     if (dragState_ != DragState::START) {
-        FI_HILOGW("Currently state is \'%{public}d\' not in allowed dragState", static_cast<int32_t>(dragState_));
+        FI_HILOGW("Currently state is \'%{public}d\', allow cooperate", static_cast<int32_t>(dragState_));
         return;
     }
     isAllowDrag = dragDrawing_.GetAllowDragState();
@@ -1077,6 +1081,7 @@ void DragManager::SetDragState(DragState state)
 {
     FI_HILOGI("SetDragState:%{public}d to %{public}d", static_cast<int32_t>(dragState_), static_cast<int32_t>(state));
     dragState_ = state;
+    dragDrawing_.UpdateDragState(state);
     if (state == DragState::START) {
         UpdateDragStyleCross();
     }
@@ -1436,6 +1441,30 @@ int32_t DragManager::RotateDragWindow(Rosen::Rotation rotation)
     return RET_OK;
 }
 
+int32_t DragManager::ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation)
+{
+    FI_HILOGD("enter");
+    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    if (dragData.sourceType != MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        FI_HILOGD("Not need screen rotate");
+        return RET_OK;
+    }
+    auto SetDragWindowRotate = [rotation, lastRotation, this]() {
+        if ((dragState_ == DragState::START) || (dragState_ == DragState::MOTION_DRAGGING)) {
+            dragDrawing_.ScreenRotate(rotation, lastRotation);
+        }
+        return RET_OK;
+    };
+    CHKPR(context_, RET_ERR);
+    int32_t ret = context_->GetDelegateTasks().PostAsyncTask(SetDragWindowRotate);
+    if (ret != RET_OK) {
+        FI_HILOGE("Post async task failed, ret:%{public}d", ret);
+        return ret;
+    }
+    FI_HILOGD("leave");
+    return RET_OK;
+}
+
 void DragManager::SetAllowStartDrag(bool hasUpEvent)
 {
     hasUpEvent_ = hasUpEvent;
@@ -1609,30 +1638,6 @@ void DragManager::ReportDragUEInfo(struct DragRadarInfo &dragRadarInfo, const st
         "HOSTNAME", dragRadarInfo.hostName,
         "LOCAL_NET_ID", dragRadarInfo.localNetId,
         "PEER_NET_ID", dragRadarInfo.peerNetId);
-}
-
-int32_t DragManager::ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation)
-{
-    FI_HILOGD("enter");
-    DragData dragData = DRAG_DATA_MGR.GetDragData();
-    if (dragData.sourceType != MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
-        FI_HILOGD("Not need screen rotate");
-        return RET_OK;
-    }
-    auto SetDragWindowRotate = [rotation, lastRotation, this]() {
-        if ((dragState_ == DragState::START) || (dragState_ == DragState::MOTION_DRAGGING)) {
-            dragDrawing_.ScreenRotate(rotation, lastRotation);
-        }
-        return RET_OK;
-    };
-    CHKPR(context_, RET_ERR);
-    int32_t ret = context_->GetDelegateTasks().PostAsyncTask(SetDragWindowRotate);
-    if (ret != RET_OK) {
-        FI_HILOGE("Post async task failed, ret:%{public}d", ret);
-        return ret;
-    }
-    FI_HILOGD("leave");
-    return RET_OK;
 }
 } // namespace DeviceStatus
 } // namespace Msdp
