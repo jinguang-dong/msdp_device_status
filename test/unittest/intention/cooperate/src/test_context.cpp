@@ -46,27 +46,21 @@ int32_t MockInputAdapter::AddMonitor(std::function<void(std::shared_ptr<MMI::Key
     return RET_OK;
 }
 
-int32_t MockInputAdapter::AddMonitor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointerCallback,
-    std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCallback, MMI::HandleEventType eventType)
-{
-    return RET_OK;
-}
-
 void MockInputAdapter::RemoveMonitor(int32_t monitorId)
 {}
 
-int32_t MockInputAdapter::AddInterceptor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointCallback)
+int32_t MockInputAdapter::AddInterceptor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointerCb)
 {
     return RET_OK;
 }
 
-int32_t MockInputAdapter::AddInterceptor(std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCallback)
+int32_t MockInputAdapter::AddInterceptor(std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCb)
 {
     return RET_OK;
 }
 
-int32_t MockInputAdapter::AddInterceptor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointCallback,
-    std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCallback)
+int32_t MockInputAdapter::AddInterceptor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointerCb,
+    std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCb)
 {
     return RET_OK;
 }
