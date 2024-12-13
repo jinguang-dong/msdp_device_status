@@ -44,47 +44,36 @@ int32_t InputAdapter::AddMonitor(std::function<void(std::shared_ptr<MMI::KeyEven
     return monitorId;
 }
 
-int32_t InputAdapter::AddMonitor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointCallback,
-    std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCallback, MMI::HandleEventType eventType)
-{
-    auto monitor = std::make_shared<MonitorConsumer>(pointCallback, keyCallback);
-    int32_t monitorId = MMI::InputManager::GetInstance()->AddMonitor(monitor, eventType);
-    if (monitorId < 0) {
-        FI_HILOGE("AddMonitor fail");
-    }
-    return monitorId;
-}
-
 void InputAdapter::RemoveMonitor(int32_t monitorId)
 {
     MMI::InputManager::GetInstance()->RemoveMonitor(monitorId);
 }
 
-int32_t InputAdapter::AddInterceptor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointCallback)
+int32_t InputAdapter::AddInterceptor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointerCb)
 {
-    return AddInterceptor(pointCallback, nullptr);
+    return AddInterceptor(pointerCb, nullptr);
 }
 
-int32_t InputAdapter::AddInterceptor(std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCallback)
+int32_t InputAdapter::AddInterceptor(std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCb)
 {
-    return AddInterceptor(nullptr, keyCallback);
+    return AddInterceptor(nullptr, keyCb);
 }
 
-int32_t InputAdapter::AddInterceptor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointCallback,
-                                     std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCallback)
+int32_t InputAdapter::AddInterceptor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointerCb,
+                                     std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCb)
 {
     uint32_t tags { 0u };
-    if (pointCallback != nullptr) {
+    if (pointerCb != nullptr) {
         tags |= MMI::CapabilityToTags(MMI::INPUT_DEV_CAP_POINTER);
     }
-    if (keyCallback != nullptr) {
+    if (keyCb != nullptr) {
         tags |= MMI::CapabilityToTags(MMI::INPUT_DEV_CAP_KEYBOARD);
     }
     if (tags == 0u) {
         FI_HILOGE("Both interceptors are null");
         return -1;
     }
-    auto interceptor = std::make_shared<InterceptorConsumer>(pointCallback, keyCallback);
+    auto interceptor = std::make_shared<InterceptorConsumer>(pointerCb, keyCb);
     constexpr int32_t DEFAULT_PRIORITY { 499 };
     int32_t interceptorId = MMI::InputManager::GetInstance()->AddInterceptor(interceptor, DEFAULT_PRIORITY, tags);
     if (interceptorId < 0) {
