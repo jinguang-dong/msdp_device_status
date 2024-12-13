@@ -29,7 +29,7 @@ struct Coordinate {
 using NormalizedCoordinate = Coordinate;
 
 constexpr uint32_t COOPERATE_FLAG_HIDE_CURSOR { 0x1 };
-constexpr uint32_t COOPERATE_FLAG_FREEZE_CURSOR { 0x2 };
+constexpr uint32_t COOPERATE_FLAG_FREEZE_CURSOR { 0x2 }; // 在穿越到对端时，不注入事件，对本端无效
 
 struct StartCooperateData {
     uint32_t flag;
@@ -45,6 +45,7 @@ public:
     virtual bool IsAllowCooperate() = 0;
     virtual void OnStartCooperate(StartCooperateData &data) = 0;
     virtual void OnRemoteStartCooperate(RemoteStartCooperateData &data) = 0;
+    virtual void OnStopCooperate(const std::string &remoteNetworkId) = 0;
     virtual void OnTransitionOut(const std::string &remoteNetworkId, const NormalizedCoordinate &cursorPos) = 0;
     virtual void OnTransitionIn(const std::string &remoteNetworkId, const NormalizedCoordinate &cursorPos) = 0;
     virtual void OnBack(const std::string &remoteNetworkId, const NormalizedCoordinate &cursorPos) = 0;
@@ -78,6 +79,7 @@ public:
     virtual int32_t RegisterEventListener(int32_t pid, const std::string &networkId) = 0;
     virtual int32_t UnregisterEventListener(int32_t pid, const std::string &networkId) = 0;
     virtual int32_t GetCooperateState(const std::string &udId, bool &state) = 0;
+    virtual int32_t SetDamplingCoefficient(uint32_t direction, double coefficient) = 0;
     virtual void Dump(int32_t fd) = 0;
 };
 } // namespace DeviceStatus

@@ -40,6 +40,7 @@ std::recursive_mutex SocketSessionManager::mutex_;
 int32_t SocketSessionManager::Init()
 {
     CALL_INFO_TRACE;
+    std::lock_guard<std::recursive_mutex> guard(mutex_);
     return epollMgr_.Open();
 }
 

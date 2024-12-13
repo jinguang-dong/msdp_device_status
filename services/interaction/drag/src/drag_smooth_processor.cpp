@@ -30,6 +30,7 @@ namespace {
 constexpr uint64_t ONE_MS_IN_NS { 1 * 1000 * 1000 }; // 1ms
 constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD { 20 * 1000 * 1000 };  // 20ms
 constexpr uint64_t INTERPOLATION_THRESHOLD { 100 * 1000 * 1000 }; // 100ms
+constexpr size_t PREVIOUS_HISTORY_EVENT { 2 };
 }
 void DragSmoothProcessor::InsertEvent(const DragMoveEvent &event)
 {
@@ -45,6 +46,23 @@ DragMoveEvent DragSmoothProcessor::SmoothMoveEvent(uint64_t nanoTimestamp, uint6
     {
         std::lock_guard<std::mutex> lock(mtx_);
         currentEvents.swap(moveEvents_);
+    }
+    size_t historyEventSize = historyEvents_.size();
+    if (currentEvents.empty() && historyEventSize > 0) {
+        if (historyEventSize > 1) {
+            auto event = GetInterpolatedEvent(historyEvents_.at(historyEventSize - PREVIOUS_HISTORY_EVENT),
+                historyEvents_.back(), targetTimeStamp);
+            auto resampleEvent = event.has_value() ? event.value() : historyEvents_.back();
+            historyEvents_ = currentEvents;
+            historyEvents_.emplace_back(resampleEvent);
+            return resampleEvent;
+        } else {
+            DragMoveEvent event = historyEvents_.back();
+            event.timestamp = targetTimeStamp;
+            historyEvents_ = currentEvents;
+            historyEvents_.emplace_back(event);
+            return event;
+        }
     }
     DragMoveEvent latestEvent = currentEvents.back();
     auto resampleEvent = GetResampleEvent(historyEvents_, currentEvents, targetTimeStamp);

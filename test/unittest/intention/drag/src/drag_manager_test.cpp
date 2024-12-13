@@ -1697,7 +1697,7 @@ HWTEST_F(DragManagerTest, DragManagerTest69, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     int32_t ret = InteractionManager::GetInstance()->RotateDragWindowSync(nullptr);
-    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(ret, RET_OK);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -30,7 +30,7 @@ constexpr size_t MAX_INPUT_DEV_PER_DEVICE { 10 };
 
 InputDeviceMgr::InputDeviceMgr(IContext *context) : env_(context) {}
 
-void InputDeviceMgr::Enable()
+void InputDeviceMgr::Enable(Channel<CooperateEvent>::Sender sender)
 {
     CALL_INFO_TRACE;
     if (enable_) {
@@ -38,6 +38,7 @@ void InputDeviceMgr::Enable()
     }
     FI_HILOGI("Enable InputDeviceMgr");
     enable_ = true;
+    sender_ = sender;
 }
 
 void InputDeviceMgr::Disable()
@@ -122,20 +123,29 @@ void InputDeviceMgr::HandleRemoteHotPlug(const DSoftbusHotPlugEvent &notice)
 void InputDeviceMgr::NotifyInputDeviceToRemote(const std::string &remoteNetworkId)
 {
     CALL_INFO_TRACE;
-    if (!env_->GetDeviceManager().HasKeyboard()) {
-        FI_HILOGE("Local device have no keyboard, skip");
+    if (!env_->GetDeviceManager().HasKeyboard() && !env_->GetDeviceManager().HasLocalPointerDevice()) {
+        FI_HILOGE("Local device have no keyboard or pointer device, skip");
         return;
     }
     auto keyboards = env_->GetDeviceManager().GetKeyboard();
+    auto pointerDevices =  env_->GetDeviceManager().GetPointerDevice();
     NetPacket packet(MessageId::DSOFTBUS_INPUT_DEV_SYNC);
-    int32_t keyboardNum = static_cast<int32_t>(keyboards.size());
-    packet << keyboardNum;
+    FI_HILOGI("Num: keyboard:%{public}zu, pointerDevice:%{public}zu", keyboards.size(), pointerDevices.size());
+    int32_t inputDeviceNum = static_cast<int32_t>(keyboards.size() + pointerDevices.size());
+    packet << inputDeviceNum;
     for (const auto &keyboard : keyboards) {
         if (SerializeDevice(keyboard, packet) != RET_OK) {
-            FI_HILOGE("SerializeDevice failed");
+            FI_HILOGE("Serialize keyboard failed");
             return;
         }
         DispDeviceInfo(keyboard);
+    }
+    for (const auto &pointerDevice : pointerDevices) {
+        if (SerializeDevice(pointerDevice, packet) != RET_OK) {
+            FI_HILOGE("Serialize pointer device failed");
+            return;
+        }
+        DispDeviceInfo(pointerDevice);
     }
     if (int32_t ret = env_->GetDSoftbus().SendPacket(remoteNetworkId, packet); ret != RET_OK) {
         FI_HILOGE("SenPacket to networkId:%{public}s failed, ret:%{public}d",
@@ -203,6 +213,11 @@ void InputDeviceMgr::AddRemoteInputDevice(const std::string &networkId, std::sha
 void InputDeviceMgr::RemoveAllRemoteInputDevice(const std::string &networkId)
 {
     CALL_INFO_TRACE;
+    if (virtualInputDevicesAdded_.find(networkId) != virtualInputDevicesAdded_.end()) {
+        FI_HILOGI("NetworkId:%{public}s has device added as virtual one already, remove all",
+            Utility::Anonymize(networkId).c_str());
+        RemoveVirtualInputDevice(networkId);
+    }
     if (remoteDevices_.find(networkId) == remoteDevices_.end()) {
         FI_HILOGE("NetworkId:%{public}s have no device existed", Utility::Anonymize(networkId).c_str());
         return;
@@ -295,6 +310,7 @@ void InputDeviceMgr::AddVirtualInputDevice(const std::string &networkId, int32_t
     virtualInputDevicesAdded_[networkId].insert(virtualDeviceId);
     remote2VirtualIds_[remoteDeviceId] = virtualDeviceId;
     FI_HILOGI("Add virtual device success, virtualDeviceId:%{public}d", virtualDeviceId);
+    UpdateVirtualDeviceIdMap();
 }
 
 void InputDeviceMgr::RemoveVirtualInputDevice(const std::string &networkId, int32_t remoteDeviceId)
@@ -313,6 +329,7 @@ void InputDeviceMgr::RemoveVirtualInputDevice(const std::string &networkId, int3
     virtualInputDevicesAdded_[networkId].erase(virtualDeviceId);
     remote2VirtualIds_.erase(remoteDeviceId);
     FI_HILOGI("Remove virtual device success, virtualDeviceId:%{public}d", virtualDeviceId);
+    UpdateVirtualDeviceIdMap();
 }
 
 std::shared_ptr<IDevice> InputDeviceMgr::GetRemoteDeviceById(const std::string &networkId, int32_t remoteDeviceId)
@@ -329,6 +346,18 @@ std::shared_ptr<IDevice> InputDeviceMgr::GetRemoteDeviceById(const std::string &
     return nullptr;
 }
 
+void InputDeviceMgr::UpdateVirtualDeviceIdMap()
+{
+    CALL_INFO_TRACE;
+    auto ret = sender_.Send(CooperateEvent(
+        CooperateEventType::UPDATE_VIRTUAL_DEV_ID_MAP,
+        UpdateVirtualDeviceIdMapEvent {
+            remote2VirtualIds_
+        }));
+    if (ret != Channel<CooperateEvent>::NO_ERROR) {
+        FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
+    }
+}
 } // namespace Cooperate
 } // namespace DeviceStatus
 } // namespace Msdp

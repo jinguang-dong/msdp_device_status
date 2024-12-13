@@ -184,7 +184,7 @@ void Context::DisableDevMgr()
 
 int32_t Context::EnableInputDevMgr()
 {
-    inputDevMgr_.Enable();
+    inputDevMgr_.Enable(sender_);
     return RET_OK;
 }
 
@@ -220,12 +220,19 @@ void Context::EnableCooperate(const EnableCooperateEvent &event)
 
 void Context::DisableCooperate(const DisableCooperateEvent &event)
 {
+    priv_ = 0;
+}
+
+void Context::ResetPriv()
+{
+    priv_ = 0;
 }
 
 void Context::StartCooperate(const StartCooperateEvent &event)
 {
     remoteNetworkId_ = event.remoteNetworkId;
     startDeviceId_ = event.startDeviceId;
+    priv_ = 0;
 }
 
 void Context::OnPointerEvent(const InputPointerEvent &event)
@@ -241,6 +248,7 @@ void Context::RemoteStartSuccess(const DSoftbusStartCooperateFinished &event)
 {
     remoteNetworkId_ = event.originNetworkId;
     flag_ = event.extra.flag;
+    priv_ = event.extra.priv;
     SetCursorPosition(event.cursorPos);
 }
 
@@ -274,6 +282,20 @@ void Context::OnRemoteStartCooperate(RemoteStartCooperateData &data)
     std::for_each(observers_.cbegin(), observers_.cend(), [&data](const auto &observer) {
         return observer->OnRemoteStartCooperate(data);
     });
+}
+
+void Context::OnStopCooperate()
+{
+    CHKPV(eventHandler_);
+    FI_HILOGI("Notify observers of stop cooperate");
+    for (const auto &observer : observers_) {
+        eventHandler_->PostTask(
+            [observer, remoteNetworkId = Peer()] {
+                FI_HILOGI("Notify observer of stop cooperate");
+                CHKPV(observer);
+                observer->OnStopCooperate(remoteNetworkId);
+        });
+    }
 }
 
 void Context::OnTransitionOut()
@@ -349,6 +371,7 @@ void Context::CloseDistributedFileConnection(const std::string &remoteNetworkId)
 
 void Context::OnResetCooperation()
 {
+    priv_ = 0;
     CHKPV(eventHandler_);
     FI_HILOGI("Notify observers of reset cooperation");
     for (const auto &observer : observers_) {

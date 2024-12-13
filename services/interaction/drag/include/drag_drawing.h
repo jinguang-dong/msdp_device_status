@@ -17,6 +17,7 @@
 #define DRAG_DRAWING_H
 
 #include <vector>
+#include <shared_mutex>
 
 #include "display_manager.h"
 #include "event_handler.h"
@@ -244,6 +245,7 @@ public:
     int32_t StartVsync();
     void OnDragSuccess(IContext* context);
     void OnDragFail(IContext* context);
+    void StopVSyncStation();
     void OnDragMove(int32_t displayId, int32_t displayX, int32_t displayY, int64_t actionTime);
     void EraseMouseIcon();
     void DestroyDragWindow();
@@ -267,6 +269,9 @@ public:
     float CalculateWidthScale();
     float GetMaxWidthScale(int32_t width);
     void ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation);
+    void UpdateDragState(DragState dragState);
+    static std::shared_ptr<Media::PixelMap> AccessGlobalPixelMapLocked();
+    static void UpdataGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pixelmap);
 
 private:
     int32_t CheckDragData(const DragData &dragData);
@@ -316,7 +321,7 @@ private:
         bool isMultiSelectedAnimation = true);
     void InitMultiSelectedNodes();
     void ClearMultiSelectedData();
-    int32_t SetNodesLocation(int32_t positionX, int32_t positionY);
+    int32_t SetNodesLocation();
     int32_t CreateEventRunner(int32_t positionX, int32_t positionY);
     bool ParserRadius(float &radius);
     void OnStopAnimationSuccess();
@@ -341,7 +346,6 @@ private:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool isAnimated = false);
     std::shared_ptr<AppExecFwk::EventHandler> GetSuperHubHandler();
     void RotateCanvasNode(float pivotX, float pivotY, float rotation);
-    void ResetSuperHubHandler();
     void FlushDragPosition(uint64_t nanoTimestamp);
     void RotatePosition(float &displayX, float &displayY);
     void UpdateDragPosition(int32_t displayId, float displayX, float displayY);
@@ -351,6 +355,7 @@ private:
     void DrawRotateDisplayXY(float positionX, float positionY);
     void ScreenRotateAdjustDisplayXY(
         Rosen::Rotation rotation, Rosen::Rotation lastRotation, float &displayX, float &displayY);
+    void UpdateDragDataForSuperHub(const DragData &dragData);
 
 private:
     int64_t interruptNum_ { -1 };
@@ -381,6 +386,7 @@ private:
     std::shared_ptr<DragFrameCallback> frameCallback_ { nullptr };
     std::atomic_bool isRunningRotateAnimation_ { false };
     DragWindowRotationInfo DragWindowRotateInfo_;
+    DragState dragState_ { DragState::STOP };
     int32_t timerId_ { -1 };
     IContext* context_ { nullptr} ;
 };

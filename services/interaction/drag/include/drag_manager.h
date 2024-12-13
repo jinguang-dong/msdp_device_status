@@ -29,9 +29,9 @@
 #include "devicestatus_define.h"
 #include "drag_data.h"
 #include "drag_drawing.h"
+#include "id_factory.h"
 #include "event_hub.h"
 #include "i_context.h"
-#include "id_factory.h"
 #include "state_change_notify.h"
 
 namespace OHOS {
@@ -152,8 +152,8 @@ private:
     bool IsAllowStartDrag() const;
     void ResetMouseDragMonitorInfo();
     void ResetMouseDragMonitorTimerId(const DragData &dragData);
-    std::string GetPackageName(int32_t pid);
     void ReportDragWindowVisibleRadarInfo(StageRes stageRes, DragRadarErrCode errCode, const std::string &funcName);
+    std::string GetPackageName(int32_t pid);
     void ReportDragRadarInfo(struct DragRadarInfo &dragRadarInfo);
     void ReportStartDragRadarInfo(BizState bizState, StageRes stageRes, DragRadarErrCode errCode,
         const std::string &packageName, const std::string &peerNetId);
@@ -171,6 +171,7 @@ private:
     StateChangeNotify stateNotify_;
     DragState dragState_ { DragState::STOP };
     DragResult dragResult_ { DragResult::DRAG_FAIL };
+    inline static std::atomic<int32_t> pullId_ { -1 };
     int32_t keyEventMonitorId_ { -1 };
     bool hasUpEvent_ { true };
     uint32_t priv_ { 0 };
@@ -189,7 +190,6 @@ private:
     std::shared_ptr<EventHub> eventHub_ { nullptr };
     sptr<ISystemAbilityStatusChange> statusListener_ { nullptr };
     bool isControlMultiScreenVisible_ = false;
-    inline static std::atomic<int32_t> pullId_ { -1 };
     sptr<ISystemAbilityStatusChange> displayAbilityStatusChange_ { nullptr };
     sptr<ISystemAbilityStatusChange> appStateObserverStatusChange_ { nullptr };
     sptr<ISystemAbilityStatusChange> CollaborationServiceStatusChange_ { nullptr };

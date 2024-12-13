@@ -53,9 +53,11 @@ private:
     private:
         void OnStart(Context &context, const CooperateEvent &event);
         void OnStop(Context &context, const CooperateEvent &event);
+        void OnDisable(Context &context, const CooperateEvent &event);
         void OnAppClosed(Context &context, const CooperateEvent &event);
         void OnRemoteStart(Context &context, const CooperateEvent &event);
         void OnPointerEvent(Context &context, const CooperateEvent &event);
+        void OnUpdateCooperateFlag(Context &context, const CooperateEvent &event);
 
         CooperateFree &parent_;
     };
