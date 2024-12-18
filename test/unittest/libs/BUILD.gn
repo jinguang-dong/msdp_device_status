@@ -53,6 +53,7 @@ ohos_unittest("device_status_algorithm_test") {
     "c_utils:utils",
     "googletest:gtest_main",
     "graphic_2d:librender_service_client",
+    "graphic_2d:render_service_client_src",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",

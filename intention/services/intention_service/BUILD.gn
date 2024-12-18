@@ -69,6 +69,7 @@ ohos_shared_library("intention_service") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "graphic_2d:librender_service_client",
+    "graphic_2d:render_service_client_src",
     "hicollie:libhicollie",
     "hilog:libhilog",
     "image_framework:image_native",
