@@ -27,6 +27,10 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace Cooperate {
+namespace {
+const std::string COOPERTATE_BEHAVIOR {"COOPERTATE_BEHAVIOR"};
+const std::string ORG_PKG_NAME {"device_status"};
+}
 
 EventManager::EventManager(IContext *env)
     : env_(env)
@@ -110,6 +114,37 @@ void EventManager::StartCooperateFinish(const DSoftbusStartCooperateFinished &ev
     };
     calls_[EventType::START] = nullptr;
     NotifyCooperateMessage(notice);
+    if (!check_) {
+        HiSysEventWrite(
+            OHOS::HiviewDFX::HiSysEvent::Domain::MSDP,
+            COOPERTATE_BEHAVIOR,
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            "ORG_PKG", ORG_PKG_NAME,
+            "FUNC", "StartCooperateFinish",
+            "BIZ_SCENE", 1,
+            "BIZ_STATE", static_cast<int32_t>(BizState::STATE_BEGIN),
+            "BIZ_STAGE", static_cast<int32_t>(BizCooperateStage::STAGE_SERVER_EVENTMANAGER),
+            "STAGE_RES", static_cast<int32_t>(StageRes::RES_FAIL),
+            "ERROR_CODE", static_cast<int32_t>(CooperateRadarErrCode::FAILED_NOTIFY),
+            "HOST_PKG", "",
+            "LOCAL_NET_ID", "",
+            "PEER_NET_ID", "");
+    } else {
+        HiSysEventWrite(
+            OHOS::HiviewDFX::HiSysEvent::Domain::MSDP,
+            COOPERTATE_BEHAVIOR,
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            "ORG_PKG", ORG_PKG_NAME,
+            "FUNC", "StartCooperateFinish",
+            "BIZ_SCENE", 1,
+            "BIZ_STATE", static_cast<int32_t>(BizState::STATE_BEGIN),
+            "BIZ_STAGE", static_cast<int32_t>(BizCooperateStage::STAGE_SERVER_EVENTMANAGER),
+            "STAGE_RES", static_cast<int32_t>(StageRes::RES_SUCCESS),
+            "ERROR_CODE", static_cast<int32_t>(CooperateRadarErrCode::COOPERATE_SUCCESS),
+            "HOST_PKG", "",
+            "LOCAL_NET_ID", "",
+            "PEER_NET_ID", "");
+    }
 }
 
 void EventManager::RemoteStart(const DSoftbusStartCooperate &event)
@@ -237,6 +272,7 @@ void EventManager::NotifyCooperateMessage(const CooperateNotice &notice)
     auto session = env_->GetSocketSessionManager().FindSessionByPid(notice.pid);
     if (session == nullptr) {
         FI_HILOGD("session is null");
+        check_ = false;
         return;
     }
     CHKPV(session);
@@ -244,10 +280,14 @@ void EventManager::NotifyCooperateMessage(const CooperateNotice &notice)
     pkt << notice.userData << notice.networkId << static_cast<int32_t>(notice.msg) << notice.errCode;
     if (pkt.ChkRWError()) {
         FI_HILOGE("Packet write data failed");
+        check_ = false;
         return;
     }
     if (!session->SendMsg(pkt)) {
         FI_HILOGE("Sending failed");
+        check_ = false;
+    } else {
+        check_ = true;
     }
 }
 
