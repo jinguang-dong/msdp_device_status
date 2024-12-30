@@ -27,6 +27,7 @@
 #include "default_params.h"
 #include "devicestatus_define.h"
 #include "utility.h"
+#include "hisysevent.h"
 
 #undef LOG_TAG
 #define LOG_TAG "CooperateClient"
@@ -400,6 +401,20 @@ int32_t CooperateClient::OnCoordinationMessage(const StreamClient &client, NetPa
     pkt >> userData >> networkId >> nType >> errCode;
     if (pkt.ChkRWError()) {
         FI_HILOGE("Packet read coordination msg failed");
+        HiSysEventWrite(
+            OHOS::HiviewDFX::HiSysEvent::Domain::MSDP,
+            COOPERTATE_BEHAVIOR,
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            "ORG_PKG", ORG_PKG_NAME,
+            "FUNC", "OnCoordinationMessage",
+            "BIZ_SCENE", 1,
+            "BIZ_STATE", static_cast<int32_t>(BizState::STATE_END),
+            "BIZ_STAGE", static_cast<int32_t>(BizCooperateStage::STAGE_CLINT_RESULT),
+            "STAGE_RES", static_cast<int32_t>(StageRes::RES_FAIL),
+            "ERROR_CODE", static_cast<int32_t>(CooperateRadarErrCode::COOPERATE_FAILED),
+            "HOST_PKG", "com.huawei.associateassistant",
+            "LOCAL_NET_ID", "",
+            "PEER_NET_ID", "");
         return RET_ERR;
     }
 #ifdef ENABLE_PERFORMANCE_CHECK
@@ -411,6 +426,20 @@ int32_t CooperateClient::OnCoordinationMessage(const StreamClient &client, NetPa
         .errCode = errCode
     };
     OnCooperateMessageEvent(userData, networkId, msgInfo);
+    HiSysEventWrite(
+            OHOS::HiviewDFX::HiSysEvent::Domain::MSDP,
+            COOPERTATE_BEHAVIOR,
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            "ORG_PKG", ORG_PKG_NAME,
+            "FUNC", "OnCoordinationMessage",
+            "BIZ_SCENE", 1,
+            "BIZ_STATE", static_cast<int32_t>(BizState::STATE_END),
+            "BIZ_STAGE", static_cast<int32_t>(BizCooperateStage::STAGE_CLINT_RESULT),
+            "STAGE_RES", static_cast<int32_t>(StageRes::RES_SUCCESS),
+            "ERROR_CODE", static_cast<int32_t>(CooperateRadarErrCode::COOPERATE_SUCCESS),
+            "HOST_PKG", "com.huawei.associateassistant",
+            "LOCAL_NET_ID", "",
+            "PEER_NET_ID", "");
     return RET_OK;
 }
 

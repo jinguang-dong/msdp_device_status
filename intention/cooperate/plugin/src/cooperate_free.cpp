@@ -17,6 +17,8 @@
 
 #include "devicestatus_define.h"
 #include "utility.h"
+#include "util.h"
+#include "hisysevent.h"
 
 #undef LOG_TAG
 #define LOG_TAG "CooperateFree"
@@ -129,6 +131,20 @@ void CooperateFree::Initial::OnStart(Context &context, const CooperateEvent &eve
     if (ret != RET_OK) {
         FI_HILOGE("[start cooperation] Failed to connect to \'%{public}s\'",
             Utility::Anonymize(context.Peer()).c_str());
+        HiSysEventWrite(
+            OHOS::HiviewDFX::HiSysEvent::Domain::MSDP,
+            COOPERTATE_BEHAVIOR,
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            "ORG_PKG", ORG_PKG_NAME,
+            "FUNC", "OnStart",
+            "BIZ_SCENE", 1,
+            "BIZ_STATE", static_cast<int32_t>(BizState::STATE_BEGIN),
+            "BIZ_STAGE", static_cast<int32_t>(BizCooperateStage::STAGE_DSOFTBUS),
+            "STAGE_RES", static_cast<int32_t>(StageRes::RES_FAIL),
+            "ERROR_CODE", static_cast<int32_t>(CooperateRadarErrCode::DSOFE_FAIL),
+            "HOST_PKG", "",
+            "LOCAL_NET_ID", "",
+            "PEER_NET_ID", "");
         int32_t errNum = (ret == RET_ERR ? static_cast<int32_t>(CoordinationErrCode::OPEN_SESSION_FAILED) : ret);
         DSoftbusStartCooperateFinished failNotice {
             .success = false,

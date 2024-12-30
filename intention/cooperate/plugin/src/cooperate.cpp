@@ -21,6 +21,7 @@
 #endif // ENABLE_PERFORMANCE_CHECK
 
 #include "devicestatus_define.h"
+#include "cooperate_hisysevent.h"
 
 #undef LOG_TAG
 #define LOG_TAG "Cooperate"
@@ -29,6 +30,11 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace Cooperate {
+
+namespace {
+const std::string COOPERTATE_BEHAVIOR {"COOPERTATE_BEHAVIOR"};
+const std::string ORG_PKG_NAME {"device_status"};
+}
 
 Cooperate::Cooperate(IContext *env)
     : env_(env), context_(env), sm_(env)
@@ -180,6 +186,13 @@ int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remot
     auto ret = context_.Sender().Send(CooperateEvent(CooperateEventType::START, event));
     if (ret != Channel<CooperateEvent>::NO_ERROR) {
         FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
+        //BizState bizState, BizScene bizScene, BizCooperateStage cooperateStage,StageRes stageRes,
+        //CooperateRadarErrCode errCode, const std::string &funcName, const std::string &packageName
+        ReportStartCooperate(BizState::STATE_BEGIN, BizScene::SCENE_ACTIVE, BizCooperateStage::STAGE_SERVER_GET_IPC,
+            StageRes::RES_FAIL, CooperateRadarErrCode::COOPERATE_FAILED, "StartCooperate", "");
+    } else {
+        ReportStartCooperate(BizState::STATE_BEGIN, BizScene::SCENE_ACTIVE, BizCooperateStage::STAGE_SERVER_GET_IPC,
+            StageRes::RES_SUCCESS, CooperateRadarErrCode::COOPERATE_SUCCESS, "StartCooperate", "");
     }
     return errCode.get();
 }
@@ -378,6 +391,36 @@ extern "C" void DestroyInstance(ICooperate *instance)
     if (instance != nullptr) {
         delete instance;
     }
+}
+void Cooperate::ReportStartCooperate(BizState bizState, BizScene bizScene, BizCooperateStage cooperateStage,
+    StageRes stageRes, CooperateRadarErrCode errCode, const std::string &funcName, const std::string &packageName)
+{
+    CooperateRadarInfo coopertateRadarInfo;
+    coopertateRadarInfo.funcName = funcName;
+    coopertateRadarInfo.bizState = static_cast<int32_t>(bizState);
+    coopertateRadarInfo.bizStage = static_cast<int32_t>(cooperateStage);
+    coopertateRadarInfo.bizScene = static_cast<int32_t>(bizScene);
+    coopertateRadarInfo.stageRes = static_cast<int32_t>(stageRes);
+    coopertateRadarInfo.errCode = static_cast<int32_t>(errCode);
+    coopertateRadarInfo.hostName = packageName;
+    ReportCooperate(coopertateRadarInfo);
+}
+void Cooperate::ReportCooperate(CooperateRadarInfo cooperateRadarInfo)
+{
+    HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::MSDP,
+        COOPERTATE_BEHAVIOR,
+        HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "ORG_PKG", ORG_PKG_NAME,
+        "FUNC", cooperateRadarInfo.funcName,
+        "BIZ_SCENE", cooperateRadarInfo.bizScene,
+        "BIZ_STATE", cooperateRadarInfo.bizState,
+        "BIZ_STAGE", cooperateRadarInfo.bizStage,
+        "STAGE_RES", cooperateRadarInfo.stageRes,
+        "ERROR_CODE", cooperateRadarInfo.errCode,
+        "HOST_PKG", cooperateRadarInfo.hostName,
+        "LOCAL_NET_ID", cooperateRadarInfo.localNetId,
+        "PEER_NET_ID", cooperateRadarInfo.peerNetId);
 }
 } // namespace Cooperate
 } // namespace DeviceStatus

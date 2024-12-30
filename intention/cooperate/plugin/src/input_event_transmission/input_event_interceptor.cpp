@@ -79,6 +79,20 @@ void InputEventInterceptor::Enable(Context &context)
         [this](std::shared_ptr<MMI::KeyEvent> keyEvent) { this->OnKeyEvent(keyEvent); });
     if (interceptorId_ < 0) {
         FI_HILOGE("Input::AddInterceptor fail");
+        HiSysEventWrite(
+            OHOS::HiviewDFX::HiSysEvent::Domain::MSDP,
+            COOPERTATE_BEHAVIOR,
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            "ORG_PKG", ORG_PKG_NAME,
+            "FUNC", "OnStart",
+            "BIZ_SCENE", 1,
+            "BIZ_STATE", static_cast<int32_t>(BizState::STATE_END),
+            "BIZ_STAGE", static_cast<int32_t>(BizCooperateStage::STAGE_DSOFTBUS),
+            "STAGE_RES", static_cast<int32_t>(StageRes::RES_FAIL),
+            "ERROR_CODE", static_cast<int32_t>(CooperateRadarErrCode::DSOFE_FAIL),
+            "HOST_PKG", "",
+            "LOCAL_NET_ID", "",
+            "PEER_NET_ID", "");
     }
     TurnOffChannelScan();
     HeartBeatSend();
